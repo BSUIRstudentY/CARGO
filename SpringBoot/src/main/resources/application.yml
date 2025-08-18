@@ -1,4 +1,20 @@
 spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: order-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.example.demo.Entities
+
+
+
+
   datasource:
     url: jdbc:mysql://localhost:3306/CargoDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
@@ -23,3 +39,10 @@ spring:
 jwt:
   secret: your-very-secure-secret-key-32-chars-long
   expiration: 86400000
+
+
+
+
+
+
+

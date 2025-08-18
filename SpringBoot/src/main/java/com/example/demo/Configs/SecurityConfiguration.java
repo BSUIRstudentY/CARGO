@@ -35,8 +35,12 @@ public class SecurityConfiguration {
             "/api/auth/register",
             "/api/auth/login",
             "/api/products",
-            "/api/cluster"
-    }; // Расширенный белый список
+            "/api/cluster",
+            "/ws/**", // Add WebSocket endpoint to whitelist
+            "/ws-pure/**",
+            "/ws-notifications/**"
+
+    };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -58,7 +62,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Фронтенд
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

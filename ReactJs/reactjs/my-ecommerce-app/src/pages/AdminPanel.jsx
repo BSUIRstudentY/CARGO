@@ -6,6 +6,7 @@ function AdminPanel({ section = 'home' }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [orders, setOrders] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -27,6 +28,23 @@ function AdminPanel({ section = 'home' }) {
           setError('Ошибка загрузки заказов: ' + (error.response?.status === 403 ? 'Доступ запрещён (403)' : error.message));
           setLoading(false);
         });
+    } else if (section === 'catalog' && location.pathname === '/admin/catalog') {
+      setLoading(true);
+      setError(null);
+      api.get('/products')
+        .then((response) => {
+          if (response.data && response.data.content) {
+            setProducts(response.data.content);
+          } else {
+            setError('Нет данных в ответе сервера');
+          }
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching products:', error);
+          setError('Ошибка загрузки продуктов: ' + (error.response?.status === 403 ? 'Доступ запрещён (403)' : error.message));
+          setLoading(false);
+        });
     }
   }, [section, location.pathname]);
 
@@ -35,6 +53,23 @@ function AdminPanel({ section = 'home' }) {
   const handleStatistics = () => navigate('/admin/statistics');
   const handleSuppliers = () => navigate('/admin/suppliers');
   const handleCommission = () => navigate('/admin/commission');
+  const handleCatalog = () => navigate('/admin/catalog');
+
+  const handleDeleteProduct = async (productId) => {
+    if (window.confirm('Вы уверены, что хотите удалить этот продукт?')) {
+      try {
+        await api.delete(`/products/${productId}`);
+        setProducts(products.filter((p) => p.id !== productId));
+        alert('Продукт успешно удалён');
+      } catch (error) {
+        setError('Ошибка удаления продукта: ' + (error.response?.data?.message || error.message));
+      }
+    }
+  };
+
+  const handleEditProduct = (productId) => {
+    navigate(`/admin/catalog/${productId}`);
+  };
 
   const renderSection = () => {
     switch (section) {
@@ -99,6 +134,52 @@ function AdminPanel({ section = 'home' }) {
             <p>Настройка комиссий.</p>
           </div>
         );
+      case 'catalog':
+        return (
+          <div className="h-full">
+            <h2 className="text-2xl font-bold text-[var(--accent-color)] mb-4">Каталог продуктов</h2>
+            {loading && <p>Загрузка...</p>}
+            {error && <p className="text-red-500">{error}</p>}
+            <div className="h-[calc(100vh-200px)] overflow-y-auto space-y-4 p-2">
+              {products.length > 0 ? (
+                products.map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-700 hover:bg-gray-700 transition duration-200 flex justify-between items-center"
+                  >
+                    <div>
+                      <p className="text-lg font-semibold text-white">{product.name}</p>
+                      <p className="text-sm text-gray-400">Цена: ¥{product.price?.toFixed(2)}</p>
+                      <p className="text-sm text-gray-400">URL: {product.url}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEditProduct(product.id)}
+                        className="px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition duration-200"
+                      >
+                        Редактировать
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(product.id)}
+                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition duration-200"
+                      >
+                        Удалить
+                      </button>
+                      <button
+                        onClick={() => navigate(`/admin/catalog/${product.id}`)}
+                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200"
+                      >
+                        Детали
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                !loading && !error && <p className="text-gray-400">Нет продуктов.</p>
+              )}
+            </div>
+          </div>
+        );
       case 'home':
       default:
         return (
@@ -143,6 +224,12 @@ function AdminPanel({ section = 'home' }) {
           className="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white hover:bg-opacity-80 transition duration-300"
         >
           Комиссии
+        </button>
+        <button
+          onClick={handleCatalog}
+          className="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white hover:bg-opacity-80 transition duration-300"
+        >
+          Каталог
         </button>
       </div>
       <div className="mt-6">

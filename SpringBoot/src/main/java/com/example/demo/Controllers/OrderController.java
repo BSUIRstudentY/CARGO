@@ -56,16 +56,17 @@ public class OrderController {
         order.setUser(user);
         order.setOrderNumber(UUID.randomUUID().toString());
         order.setDateCreated(new Timestamp(System.currentTimeMillis()));
-        order.setStatus("PENDING"); // Новый заказ ожидает проверки
+        order.setStatus("PENDING");
         order.setTotalClientPrice((float) cart.getItems().stream()
                 .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
                 .sum());
-        order.setDeliveryAddress(request.getDeliveryAddress()); // Добавляем адрес доставки
+        order.setDeliveryAddress(request.getDeliveryAddress());
 
+        // Создание и связывание OrderItem с Order
         List<OrderItem> orderItems = cart.getItems().stream()
                 .map(cartItem -> {
                     OrderItem orderItem = new OrderItem();
-                    orderItem.setOrder(order);
+                    orderItem.setOrder(order); // Устанавливаем связь с заказом
                     orderItem.setProduct(cartItem.getProduct());
                     orderItem.setQuantity(cartItem.getQuantity());
                     orderItem.setPriceAtTime(cartItem.getProduct().getPrice());
@@ -73,10 +74,9 @@ public class OrderController {
                 })
                 .collect(Collectors.toList());
 
-        order.setItems(orderItems);
-        orderRepository.save(order);
+        order.setItems(orderItems); // Устанавливаем список элементов в заказ
+        orderRepository.save(order); // Сохранение заказа с каскадным сохранением OrderItem
 
-        // Clear the cart
         cart.getItems().clear();
         cartRepository.save(cart);
 
@@ -86,7 +86,7 @@ public class OrderController {
         orderDTO.setDateCreated(order.getDateCreated());
         orderDTO.setStatus(order.getStatus());
         orderDTO.setTotalClientPrice(order.getTotalClientPrice());
-        orderDTO.setDeliveryAddress(order.getDeliveryAddress()); // Добавляем адрес в DTO
+        orderDTO.setDeliveryAddress(order.getDeliveryAddress());
         orderDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
@@ -94,6 +94,9 @@ public class OrderController {
                     itemDTO.setProductName(item.getProduct().getName());
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPriceAtTime(item.getPriceAtTime());
+                    itemDTO.setUrl(item.getProduct().getUrl());
+                    itemDTO.setImageUrl(item.getProduct().getImageUrl());
+                    itemDTO.setDescription(item.getProduct().getDescription());
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
@@ -101,12 +104,27 @@ public class OrderController {
         return ResponseEntity.ok(orderDTO);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long id) {
+        String userEmail = getCurrentUserEmail();
+        if (userEmail == null) {
+            return ResponseEntity.status(403).body(null);
+        }
+
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Заказ с ID " + id + " не найден"));
+
+        // Проверка: пользователь должен быть админом или владельцем заказа
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        boolean isOrderOwner = userEmail.equals(order.getUser().getEmail());
+
+        if (!isAdmin && !isOrderOwner) {
+            return ResponseEntity.status(403).body(null);
+        }
+
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setId(order.getId());
         orderDTO.setOrderNumber(order.getOrderNumber());
@@ -131,7 +149,7 @@ public class OrderController {
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
-        orderDTO.setUserEmail(order.getUser().getEmail()); // Добавляем email клиента
+        orderDTO.setUserEmail(order.getUser().getEmail());
         return ResponseEntity.ok(orderDTO);
     }
 
@@ -143,10 +161,20 @@ public class OrderController {
             return ResponseEntity.status(403).body(null);
         }
 
-        List<Order> orders = orderRepository.findByUserEmail(userEmail); // Фильтрация по userEmail
+        List<Order> orders = orderRepository.findAll();
         if (status != null) {
             orders = orders.stream()
                     .filter(order -> order.getStatus().equals(status))
+                    .collect(Collectors.toList());
+        }
+
+        // Фильтрация: только заказы текущего пользователя или админа
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin) {
+            orders = orders.stream()
+                    .filter(order -> order.getUser().getEmail().equals(userEmail))
                     .collect(Collectors.toList());
         }
 
@@ -158,7 +186,7 @@ public class OrderController {
                     orderDTO.setDateCreated(order.getDateCreated());
                     orderDTO.setStatus(order.getStatus());
                     orderDTO.setTotalClientPrice(order.getTotalClientPrice());
-                    orderDTO.setDeliveryAddress(order.getDeliveryAddress()); // Добавляем адрес
+                    orderDTO.setDeliveryAddress(order.getDeliveryAddress());
                     orderDTO.setItems(order.getItems().stream()
                             .map(item -> {
                                 OrderItemDTO itemDTO = new OrderItemDTO();
@@ -169,7 +197,7 @@ public class OrderController {
                                 return itemDTO;
                             })
                             .collect(Collectors.toList()));
-                    orderDTO.setUserEmail(userEmail); // Добавляем userEmail в каждый OrderDTO
+                    orderDTO.setUserEmail(order.getUser().getEmail());
                     return orderDTO;
                 })
                 .collect(Collectors.toList());
@@ -196,7 +224,7 @@ public class OrderController {
             return ResponseEntity.badRequest().body(null);
         }
 
-        // Обновление данных
+        // Обновление данных заказа
         order.setTotalClientPrice(orderDetails.getTotalClientPrice());
         order.setSupplierCost(orderDetails.getSupplierCost());
         order.setCustomsDuty(orderDetails.getCustomsDuty());
@@ -205,80 +233,53 @@ public class OrderController {
         order.setTrackingNumber(orderDetails.getTrackingNumber());
         order.setStatus("VERIFIED");
 
-        orderRepository.save(order);
-
-        OrderDTO responseDTO = new OrderDTO();
-        responseDTO.setId(order.getId());
-        responseDTO.setOrderNumber(order.getOrderNumber());
-        responseDTO.setDateCreated(order.getDateCreated());
-        responseDTO.setStatus(order.getStatus());
-        responseDTO.setTotalClientPrice(order.getTotalClientPrice());
-        responseDTO.setDeliveryAddress(order.getDeliveryAddress());
-        responseDTO.setItems(order.getItems().stream()
-                .map(item -> {
-                    OrderItemDTO itemDTO = new OrderItemDTO();
-                    itemDTO.setProductId(item.getProduct().getId());
-                    itemDTO.setProductName(item.getProduct().getName());
-                    itemDTO.setQuantity(item.getQuantity());
-                    itemDTO.setPriceAtTime(item.getPriceAtTime());
-                    return itemDTO;
-                })
-                .collect(Collectors.toList()));
-
-        return ResponseEntity.ok(responseDTO);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}/update")
-    @Transactional
-    public ResponseEntity<OrderDTO> updateOrder(@PathVariable Long id, @RequestBody OrderDTO orderDetails) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Заказ с ID " + id + " не найден"));
-
-        // Валидация
-        if (orderDetails.getTotalClientPrice() == null || orderDetails.getTotalClientPrice() <= 0) {
-            return ResponseEntity.badRequest().body(null);
-        }
-        if (orderDetails.getDeliveryAddress() == null || orderDetails.getDeliveryAddress().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(null);
-        }
-
-        // Обновление данных заказа
-        order.setTotalClientPrice(orderDetails.getTotalClientPrice());
-        order.setSupplierCost(orderDetails.getSupplierCost());
-        order.setCustomsDuty(orderDetails.getCustomsDuty());
-        order.setShippingCost(orderDetails.getShippingCost());
-        order.setDeliveryAddress(orderDetails.getDeliveryAddress());
-        order.setTrackingNumber(orderDetails.getTrackingNumber());
-        order.setStatus(orderDetails.getStatus());
-
-        // Обновление товаров
+        // Обработка items
         if (orderDetails.getItems() != null) {
-            order.getItems().clear();
+            order.getItems().clear(); // Удаляем старые элементы
             for (OrderItemDTO itemDTO : orderDetails.getItems()) {
+                if (itemDTO.getProductId() == null) {
+                    throw new RuntimeException("Product ID cannot be null for order item");
+                }
+
+                // Загружаем существующий Product
+                Product product = productRepository.findById(itemDTO.getProductId())
+                        .orElseThrow(() -> new RuntimeException("Product with ID " + itemDTO.getProductId() + " not found"));
+
+                // Обновляем Product на основе данных из OrderItemDTO
+                if (itemDTO.getProductName() != null && !itemDTO.getProductName().equals(product.getName())) {
+                    product.setName(itemDTO.getProductName());
+                }
+                if (itemDTO.getUrl() != null && !itemDTO.getUrl().equals(product.getUrl())) {
+                    product.setUrl(itemDTO.getUrl());
+                }
+                if (itemDTO.getImageUrl() != null && !itemDTO.getImageUrl().equals(product.getImageUrl())) {
+                    product.setImageUrl(itemDTO.getImageUrl());
+                }
+                if (itemDTO.getDescription() != null && !itemDTO.getDescription().equals(product.getDescription())) {
+                    product.setDescription(itemDTO.getDescription());
+                }
+                productRepository.save(product); // Сохраняем обновлённый Product
+
+                // Создаём новый OrderItem с обновлёнными данными
                 OrderItem orderItem = new OrderItem();
                 orderItem.setOrder(order);
-                Product product = productRepository.findById(itemDTO.getProductId())
-                        .orElseThrow(() -> new RuntimeException("Продукт с ID " + itemDTO.getProductId() + " не найден"));
                 orderItem.setProduct(product);
-                orderItem.setQuantity(itemDTO.getQuantity());
-                orderItem.setPriceAtTime(itemDTO.getPriceAtTime());
+                orderItem.setQuantity(itemDTO.getQuantity() != null ? itemDTO.getQuantity() : 0);
+                orderItem.setPriceAtTime(itemDTO.getPriceAtTime() != null ? itemDTO.getPriceAtTime() : 0.0f);
+                orderItem.setSupplierPrice(itemDTO.getSupplierPrice() != null ? itemDTO.getSupplierPrice() : 0.0f);
                 order.getItems().add(orderItem);
             }
         }
 
         orderRepository.save(order);
+
         OrderDTO responseDTO = new OrderDTO();
         responseDTO.setId(order.getId());
         responseDTO.setOrderNumber(order.getOrderNumber());
         responseDTO.setDateCreated(order.getDateCreated());
         responseDTO.setStatus(order.getStatus());
         responseDTO.setTotalClientPrice(order.getTotalClientPrice());
-        responseDTO.setSupplierCost(order.getSupplierCost());
-        responseDTO.setCustomsDuty(order.getCustomsDuty());
-        responseDTO.setShippingCost(order.getShippingCost());
         responseDTO.setDeliveryAddress(order.getDeliveryAddress());
-        responseDTO.setTrackingNumber(order.getTrackingNumber());
         responseDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
@@ -289,10 +290,11 @@ public class OrderController {
                     itemDTO.setUrl(item.getProduct().getUrl());
                     itemDTO.setImageUrl(item.getProduct().getImageUrl());
                     itemDTO.setDescription(item.getProduct().getDescription());
+                    itemDTO.setSupplierPrice(item.getSupplierPrice());
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
-        responseDTO.setUserEmail(order.getUser().getEmail());
+
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -308,7 +310,7 @@ public class OrderController {
 @Data
 class CreateOrderRequest {
     private List<CartItemDTO> cartItems;
-    private String deliveryAddress; // Добавляем поле для адреса доставки
+    private String deliveryAddress;
 }
 
 @Data
@@ -336,6 +338,7 @@ class OrderItemDTO {
     private String url;
     private String imageUrl;
     private String description;
+    private Float supplierPrice;
 }
 
 @Data

@@ -3,6 +3,9 @@ import { Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/AuthProvider';
 import AdminPanel from './AdminPanel';
 import OrderCheck from './OrderCheck';
+import AdminCatalog from './AdminCatalog';
+import AdminSupportPage from './AdminSupportPage';
+import TicketChatPage from './TicketChatPage'; // Добавляем TicketChatPage
 
 function AdminLayout() {
   const { logout } = useAuth();
@@ -15,7 +18,8 @@ function AdminLayout() {
     { path: '/admin/statistics', label: 'Статистика' },
     { path: '/admin/settings', label: 'Настройки' },
     { path: '/admin/suppliers', label: 'Поставщики' },
-    { path: '/admin/commission', label: 'Комиссии' }, // Добавлен маршрут
+    { path: '/admin/commission', label: 'Комиссии' },
+    { path: '/admin/catalog', label: 'Каталог' },
   ];
 
   return (
@@ -53,11 +57,13 @@ function AdminLayout() {
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/admin/orders" element={<AdminPanel section="orders" />} />
           <Route path="/admin/orders/check/:id" element={<OrderCheck />} />
-          <Route path="/admin/support" element={<AdminPanel section="support" />} />
+          <Route path="/admin/support" element={<AdminSupportPage />} />
+          <Route path="/admin/support/ticket/:ticketId/chat" element={<TicketChatPage />} /> {/* Новый маршрут */}
           <Route path="/admin/statistics" element={<AdminPanel section="statistics" />} />
           <Route path="/admin/settings" element={<AdminPanel section="settings" />} />
           <Route path="/admin/suppliers" element={<AdminPanel section="suppliers" />} />
-          <Route path="/admin/commission" element={<AdminPanel section="commission" />} /> {/* Добавлен маршрут */}
+          <Route path="/admin/commission" element={<AdminPanel section="commission" />} />
+          <Route path="/admin/catalog/*" element={<AdminCatalog />} />
         </Routes>
       </main>
     </div>

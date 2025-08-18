@@ -6,6 +6,9 @@ import lombok.Data;
 import java.sql.Timestamp;
 
 @Entity
+@Table(indexes = {
+        @Index(name = "idx_name", columnList = "name") // Индекс на поле name
+})
 @Data
 public class Product {
 
@@ -23,8 +26,7 @@ public class Product {
 
     @Column(length = 2048)
     private String imageUrl; // фото товара
-
-
+    private String status;
     private Integer salesCount; // Добавьте, если еще нет
     private Integer cluster;    // Новое поле для кластера
 
