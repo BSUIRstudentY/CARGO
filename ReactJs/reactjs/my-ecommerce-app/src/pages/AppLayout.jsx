@@ -17,6 +17,7 @@ import FAQSection from './FAQSection';
 import SupportPage from './SupportPage';
 import TicketChatPage from './TicketChatPage';
 import Notifications from './Notifications'; // Import the new Notifications component
+import Reviews from './Reviews'; // Добавьте импорт
 
 function AppLayout() {
   const [backgroundColor, setBackgroundColor] = useState(() => localStorage.getItem('backgroundColor') || '#2F2F2F');
@@ -46,6 +47,7 @@ function AppLayout() {
     { path: '/support', label: 'Поддержка', icon: '🛠️' },
     { path: '/about', label: 'О нас', icon: 'ℹ️' },
     { path: '/contact', label: 'Контакты', icon: '📞' },
+    { path: '/reviews', label: 'Отзывы', icon: '⭐' }, // Новый пункт
   ];
 
   const toggleSidebar = () => {
@@ -163,7 +165,7 @@ function AppLayout() {
             <section id="about" className="mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-center text-[var(--accent-color)]">О нас</h2>
               <p className="text-center text-lg sm:text-xl text-gray-300">
-                ChinaShopBY — ваш надежный партнер для покупок из Китая. Мы предлагаем лучшие цены и удобный сервис.
+                ChinaShopBY - ваш надежный партнер для покупок из Китая. Мы предлагаем лучшие цены и удобный сервис.
               </p>
               {Array.from({ length: 50 }).map((_, i) => (
                 <p key={i} className="my-4">Пример текста для прокрутки {i + 1}</p>
@@ -180,6 +182,7 @@ function AppLayout() {
               </div>
             </section>
           } />
+          <Route path="/reviews" element={<Reviews />} /> {/* Новый маршрут */}
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/order-details/:orderId" element={<OrderDetails />} />
         </Routes>
