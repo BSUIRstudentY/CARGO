@@ -1,6 +1,7 @@
 package com.example.demo.Controllers;
 
 import com.example.demo.Entities.*;
+import com.example.demo.POJO.OrderStatusEvent;
 import com.example.demo.Repositories.CartRepository;
 import com.example.demo.Repositories.OrderRepository;
 import com.example.demo.Repositories.ProductRepository;
@@ -8,10 +9,12 @@ import com.example.demo.Repositories.UserRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import smile.math.matrix.Matrix;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -33,6 +36,15 @@ public class OrderController {
 
     @Autowired
     private UserRepository userRepository;
+
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+
+
+    public OrderController(KafkaTemplate<String, Object> kafkaTemplate)
+    {
+        this.kafkaTemplate = kafkaTemplate;
+    }
 
     @PostMapping
     @Transactional
@@ -232,7 +244,8 @@ public class OrderController {
         order.setDeliveryAddress(orderDetails.getDeliveryAddress());
         order.setTrackingNumber(orderDetails.getTrackingNumber());
         order.setStatus("VERIFIED");
-
+        OrderStatusEvent event = new OrderStatusEvent(order);
+        kafkaTemplate.send("order-status", event.getOrder().getUser().getEmail(), event).whenComplete(((stringObjectSendResult, throwable) -> System.out.println("hellooooooooooooooooooooooooooooooooooooooooooooo2321412321321321321")));
         // Обработка items
         if (orderDetails.getItems() != null) {
             order.getItems().clear(); // Удаляем старые элементы
