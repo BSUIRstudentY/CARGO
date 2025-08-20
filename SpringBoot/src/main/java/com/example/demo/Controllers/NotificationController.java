@@ -55,21 +55,21 @@ public class NotificationController {
         public Long relatedId;
     }
 
-    // POST: Send order status change notification
+    /*// POST: Send order status change notification
     @PostMapping("/order-status")
     public void sendOrderStatusNotification(@RequestBody OrderStatusNotificationDTO dto) {
         User user = userRepository.findByEmail(dto.email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         notificationService.sendOrderStatusChangeNotification(user, dto.orderId, dto.newStatus);
-    }
+    }*/
 
-    // POST: Send new support message notification
+    /*// POST: Send new support message notification
     @PostMapping("/support-message")
     public void sendSupportMessageNotification(@RequestBody SupportMessageNotificationDTO dto) {
         User user = userRepository.findByEmail(dto.email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         notificationService.sendNewSupportMessageNotification(user, dto.ticketId, dto.senderName);
-    }
+    }*/
 
     // POST: Send global notification
     @PostMapping("/global")

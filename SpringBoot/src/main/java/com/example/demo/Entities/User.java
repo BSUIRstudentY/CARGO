@@ -1,18 +1,23 @@
 package com.example.demo.Entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Data;
 
 @Entity
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
     private String username;
     @Id
     private String email;
     private String password;
     private String role;
+
+    public User() {};
+
 
     public String getUsername() {
         return username;

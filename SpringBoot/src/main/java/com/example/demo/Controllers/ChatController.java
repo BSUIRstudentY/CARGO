@@ -3,12 +3,15 @@ package com.example.demo.Controllers;
 import com.example.demo.Entities.ChatMessage;
 import com.example.demo.Entities.Ticket;
 import com.example.demo.Entities.User;
+import com.example.demo.POJO.SupportMessageEvent;
 import com.example.demo.Repositories.ChatMessageRepository;
 import com.example.demo.Repositories.TicketRepository;
 import com.example.demo.Repositories.UserRepository;
 import com.example.demo.Services.ChatService;
 import lombok.Data;
+import nonapi.io.github.classgraph.json.JSONUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -33,6 +36,9 @@ public class ChatController {
 
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+
 
     @Autowired
     private UserRepository userRepository;
@@ -40,9 +46,10 @@ public class ChatController {
     @Autowired
     private TicketRepository ticketRepository;
 
-    public ChatController(ChatService chatService, SimpMessagingTemplate messagingTemplate) {
+    public ChatController(ChatService chatService, SimpMessagingTemplate messagingTemplate, KafkaTemplate<String, Object> kafkaTemplate) {
         this.chatService = chatService;
         this.messagingTemplate = messagingTemplate;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
 
@@ -75,7 +82,16 @@ public class ChatController {
         message.setTicket(ticket);
 
         ChatMessage saved = chatService.saveMessage(message);
-
+        SupportMessageEvent event = new SupportMessageEvent(receiver, ticketId, sender.getUsername());
+        kafkaTemplate.send("support", event.getUser().getEmail(), event)
+                .whenComplete((result, ex) -> {
+                    if (ex == null) {
+                        System.out.println("Событие отправлено в Kafka: ticketId=" + ticketId +
+                                ", receiver=" + receiver.getEmail());
+                    } else {
+                        System.err.println("Ошибка отправки в Kafka: " + ex.getMessage());
+                    }
+                });
         // Рассылаем в topic тикета (оба участника подписаны)
         messagingTemplate.convertAndSend("/topic/ticket/" + ticketId, saved);
     }

@@ -2,8 +2,11 @@ package com.example.demo.Services;
 
 import com.example.demo.Entities.Notification;
 import com.example.demo.Entities.User;
+import com.example.demo.POJO.OrderStatusEvent;
+import com.example.demo.POJO.SupportMessageEvent;
 import com.example.demo.Repositories.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -19,39 +22,39 @@ public class NotificationService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @Async
-    public void sendOrderStatusChangeNotification(User user, Long orderId, String newStatus) {
+    @KafkaListener(topics = "order-status", groupId = "notification-group")
+    public void sendOrderStatusChangeNotification(OrderStatusEvent event) {
         Notification notification = new Notification();
-        notification.setUser(user);
-        notification.setMessage("Статус вашего заказа #" + orderId + " изменён на: " + newStatus);
+        notification.setUser(event.getOrder().getUser());
+        notification.setMessage("Ваш заказ " + event.getOrder().getOrderNumber() + " был подтверждён администрацией");
         notification.setTimestamp(LocalDateTime.now());
         notification.setRead(false);
-        notification.setRelatedId(orderId);
+        notification.setRelatedId(event.getOrder().getId());
         notification.setCategory("ORDER_UPDATE");
 
         notificationRepository.save(notification);
 
         // Изменено: Используем кастомный топик вместо convertAndSendToUser
-        messagingTemplate.convertAndSend("/topic/personal/" + user.getEmail(), notification);
+        messagingTemplate.convertAndSend("/topic/personal/" + event.getOrder().getUser().getEmail(), notification);
     }
 
-    @Async
-    public void sendNewSupportMessageNotification(User user, Long ticketId, String senderName) {
+    @KafkaListener(topics = "support", groupId = "notification-group")
+    public void sendNewSupportMessageNotification(SupportMessageEvent event) {
         Notification notification = new Notification();
-        notification.setUser(user);
-        notification.setMessage("Новое сообщение в чате поддержки по тикету #" + ticketId + " от " + senderName);
+        notification.setUser(event.getUser());
+        notification.setMessage("Новое сообщение в чате поддержки по тикету #" + event.getTicketId() + " от " + event.getSenderName());
         notification.setTimestamp(LocalDateTime.now());
         notification.setRead(false);
-        notification.setRelatedId(ticketId);
+        notification.setRelatedId(event.getTicketId());
         notification.setCategory("NEW_MESSAGE");
 
         notificationRepository.save(notification);
 
         // Изменено: Используем кастомный топик вместо convertAndSendToUser
-        messagingTemplate.convertAndSend("/topic/personal/" + user.getEmail(), notification);
+        messagingTemplate.convertAndSend("/topic/personal/" + event.getUser().getEmail(), notification);
     }
 
-    @Async
+    @KafkaListener(topics = "global", groupId = "notification-group")
     public void sendGlobalNotification(String message, String category, Long relatedId) {
         Notification notification = new Notification();
         notification.setUser(null);
