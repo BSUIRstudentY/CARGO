@@ -6,6 +6,9 @@ import com.example.demo.Repositories.CartRepository;
 import com.example.demo.Repositories.OrderRepository;
 import com.example.demo.Repositories.ProductRepository;
 import com.example.demo.Repositories.UserRepository;
+import com.example.demo.Repositories.OrderHistoryRepository;
+import com.example.demo.Repositories.NotificationRepository;
+import com.example.demo.Services.NotificationService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import smile.math.matrix.Matrix;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -37,12 +39,18 @@ public class OrderController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private OrderHistoryRepository orderHistoryRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private NotificationService notificationService;
+
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-
-
-    public OrderController(KafkaTemplate<String, Object> kafkaTemplate)
-    {
+    public OrderController(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -74,11 +82,11 @@ public class OrderController {
                 .sum());
         order.setDeliveryAddress(request.getDeliveryAddress());
 
-        // Создание и связывание OrderItem с Order
         List<OrderItem> orderItems = cart.getItems().stream()
                 .map(cartItem -> {
                     OrderItem orderItem = new OrderItem();
-                    orderItem.setOrder(order); // Устанавливаем связь с заказом
+                    orderItem.setOrder(order);
+                    orderItem.setOrderHistory(null);
                     orderItem.setProduct(cartItem.getProduct());
                     orderItem.setQuantity(cartItem.getQuantity());
                     orderItem.setPriceAtTime(cartItem.getProduct().getPrice());
@@ -86,8 +94,8 @@ public class OrderController {
                 })
                 .collect(Collectors.toList());
 
-        order.setItems(orderItems); // Устанавливаем список элементов в заказ
-        orderRepository.save(order); // Сохранение заказа с каскадным сохранением OrderItem
+        order.setItems(orderItems);
+        orderRepository.save(order);
 
         cart.getItems().clear();
         cartRepository.save(cart);
@@ -127,7 +135,6 @@ public class OrderController {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Заказ с ID " + id + " не найден"));
 
-        // Проверка: пользователь должен быть админом или владельцем заказа
         boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
                 .getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
@@ -148,6 +155,7 @@ public class OrderController {
         orderDTO.setShippingCost(order.getShippingCost());
         orderDTO.setDeliveryAddress(order.getDeliveryAddress());
         orderDTO.setTrackingNumber(order.getTrackingNumber());
+        orderDTO.setReasonRefusal(order.getReasonRefusal());
         orderDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
@@ -173,14 +181,18 @@ public class OrderController {
             return ResponseEntity.status(403).body(null);
         }
 
-        List<Order> orders = orderRepository.findAll();
-        if (status != null) {
-            orders = orders.stream()
-                    .filter(order -> order.getStatus().equals(status))
-                    .collect(Collectors.toList());
+        List<Order> orders;
+        if (status != null && !status.equals("ALL")) {
+            if (status.contains(",")) {
+                String[] statuses = status.split(",");
+                orders = orderRepository.findByStatusIn(List.of(statuses));
+            } else {
+                orders = orderRepository.findByStatus(status);
+            }
+        } else {
+            orders = orderRepository.findAll();
         }
 
-        // Фильтрация: только заказы текущего пользователя или админа
         boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
                 .getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
@@ -199,6 +211,7 @@ public class OrderController {
                     orderDTO.setStatus(order.getStatus());
                     orderDTO.setTotalClientPrice(order.getTotalClientPrice());
                     orderDTO.setDeliveryAddress(order.getDeliveryAddress());
+                    orderDTO.setReasonRefusal(order.getReasonRefusal());
                     orderDTO.setItems(order.getItems().stream()
                             .map(item -> {
                                 OrderItemDTO itemDTO = new OrderItemDTO();
@@ -224,11 +237,6 @@ public class OrderController {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Заказ с ID " + id + " не найден"));
 
-        if (!order.getStatus().equals("PENDING")) {
-            return ResponseEntity.badRequest().body(null);
-        }
-
-        // Валидация
         if (orderDetails.getTotalClientPrice() == null || orderDetails.getTotalClientPrice() <= 0) {
             return ResponseEntity.badRequest().body(null);
         }
@@ -236,29 +244,25 @@ public class OrderController {
             return ResponseEntity.badRequest().body(null);
         }
 
-        // Обновление данных заказа
         order.setTotalClientPrice(orderDetails.getTotalClientPrice());
         order.setSupplierCost(orderDetails.getSupplierCost());
         order.setCustomsDuty(orderDetails.getCustomsDuty());
         order.setShippingCost(orderDetails.getShippingCost());
         order.setDeliveryAddress(orderDetails.getDeliveryAddress());
         order.setTrackingNumber(orderDetails.getTrackingNumber());
-        order.setStatus("VERIFIED");
-        OrderStatusEvent event = new OrderStatusEvent(order);
-        kafkaTemplate.send("order-status", event.getOrder().getUser().getEmail(), event).whenComplete(((stringObjectSendResult, throwable) -> System.out.println("hellooooooooooooooooooooooooooooooooooooooooooooo2321412321321321321")));
-        // Обработка items
-        if (orderDetails.getItems() != null) {
-            order.getItems().clear(); // Удаляем старые элементы
+        order.setStatus(orderDetails.getStatus());
+        order.setReasonRefusal(orderDetails.getReasonRefusal());
+
+        if (order.getItems() != null) {
+            order.getItems().clear();
             for (OrderItemDTO itemDTO : orderDetails.getItems()) {
                 if (itemDTO.getProductId() == null) {
                     throw new RuntimeException("Product ID cannot be null for order item");
                 }
 
-                // Загружаем существующий Product
                 Product product = productRepository.findById(itemDTO.getProductId())
                         .orElseThrow(() -> new RuntimeException("Product with ID " + itemDTO.getProductId() + " not found"));
 
-                // Обновляем Product на основе данных из OrderItemDTO
                 if (itemDTO.getProductName() != null && !itemDTO.getProductName().equals(product.getName())) {
                     product.setName(itemDTO.getProductName());
                 }
@@ -271,11 +275,11 @@ public class OrderController {
                 if (itemDTO.getDescription() != null && !itemDTO.getDescription().equals(product.getDescription())) {
                     product.setDescription(itemDTO.getDescription());
                 }
-                productRepository.save(product); // Сохраняем обновлённый Product
+                productRepository.save(product);
 
-                // Создаём новый OrderItem с обновлёнными данными
                 OrderItem orderItem = new OrderItem();
                 orderItem.setOrder(order);
+                orderItem.setOrderHistory(null);
                 orderItem.setProduct(product);
                 orderItem.setQuantity(itemDTO.getQuantity() != null ? itemDTO.getQuantity() : 0);
                 orderItem.setPriceAtTime(itemDTO.getPriceAtTime() != null ? itemDTO.getPriceAtTime() : 0.0f);
@@ -284,7 +288,44 @@ public class OrderController {
             }
         }
 
-        orderRepository.save(order);
+        if (order.getStatus().equals("REFUSED") || order.getStatus().equals("RECEIVED")) {
+            OrderHistory orderHistory = new OrderHistory();
+            orderHistory.setUser(order.getUser());
+            orderHistory.setOrderNumber(order.getOrderNumber());
+            orderHistory.setDateCreated(order.getDateCreated());
+            orderHistory.setStatus(order.getStatus());
+            orderHistory.setTotalClientPrice(order.getTotalClientPrice());
+            orderHistory.setDeliveryAddress(order.getDeliveryAddress());
+            orderHistory.setReasonRefusal(order.getReasonRefusal());
+            orderHistory.setItems(order.getItems().stream()
+                    .map(item -> {
+                        OrderItem historyItem = new OrderItem();
+                        historyItem.setOrderHistory(orderHistory);
+                        historyItem.setOrder(null);
+                        historyItem.setProduct(item.getProduct());
+                        historyItem.setQuantity(item.getQuantity());
+                        historyItem.setPriceAtTime(item.getPriceAtTime());
+                        historyItem.setSupplierPrice(item.getSupplierPrice());
+                        return historyItem;
+                    })
+                    .collect(Collectors.toList()));
+            orderHistoryRepository.save(orderHistory);
+
+            // Send notification for refused order
+            if (order.getStatus().equals("REFUSED")) {
+                String refusalMessage = "Ваш заказ #" + order.getId() + " был отклонён. Причина: " + (order.getReasonRefusal() != null ? order.getReasonRefusal() : "Не указана");
+                notificationService.sendOrderStatusChangeNotification(order.getUser(), order.getId(), "REFUSED");
+            }
+
+            orderRepository.delete(order);
+        } else {
+            orderRepository.save(order);
+        }
+
+        if (order.getStatus().equals("VERIFIED")) {
+            OrderStatusEvent event = new OrderStatusEvent(order);
+            kafkaTemplate.send("order-status", event.getOrder().getUser().getEmail(), event);
+        }
 
         OrderDTO responseDTO = new OrderDTO();
         responseDTO.setId(order.getId());
@@ -293,6 +334,7 @@ public class OrderController {
         responseDTO.setStatus(order.getStatus());
         responseDTO.setTotalClientPrice(order.getTotalClientPrice());
         responseDTO.setDeliveryAddress(order.getDeliveryAddress());
+        responseDTO.setReasonRefusal(order.getReasonRefusal());
         responseDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
@@ -318,46 +360,47 @@ public class OrderController {
             return null;
         }
     }
-}
 
-@Data
-class CreateOrderRequest {
-    private List<CartItemDTO> cartItems;
-    private String deliveryAddress;
-}
+    @Data
+    static class CreateOrderRequest {
+        private List<CartItemDTO> cartItems;
+        private String deliveryAddress;
+    }
 
-@Data
-class OrderDTO {
-    private Long id;
-    private String orderNumber;
-    private Timestamp dateCreated;
-    private String status;
-    private Float totalClientPrice;
-    private Float supplierCost;
-    private Float customsDuty;
-    private Float shippingCost;
-    private String deliveryAddress;
-    private String trackingNumber;
-    private List<OrderItemDTO> items;
-    private String userEmail;
-}
+    @Data
+    static class OrderDTO {
+        private Long id;
+        private String orderNumber;
+        private Timestamp dateCreated;
+        private String status;
+        private Float totalClientPrice;
+        private Float supplierCost;
+        private Float customsDuty;
+        private Float shippingCost;
+        private String deliveryAddress;
+        private String trackingNumber;
+        private List<OrderItemDTO> items;
+        private String userEmail;
+        private String reasonRefusal;
+    }
 
-@Data
-class OrderItemDTO {
-    private String productId;
-    private String productName;
-    private Integer quantity;
-    private Float priceAtTime;
-    private String url;
-    private String imageUrl;
-    private String description;
-    private Float supplierPrice;
-}
+    @Data
+    static class OrderItemDTO {
+        private String productId;
+        private String productName;
+        private Integer quantity;
+        private Float priceAtTime;
+        private String url;
+        private String imageUrl;
+        private String description;
+        private Float supplierPrice;
+    }
 
-@Data
-class CartItemDTO {
-    private String productId;
-    private String productName;
-    private Double price;
-    private Integer quantity;
+    @Data
+    static class CartItemDTO {
+        private String productId;
+        private String productName;
+        private Double price;
+        private Integer quantity;
+    }
 }

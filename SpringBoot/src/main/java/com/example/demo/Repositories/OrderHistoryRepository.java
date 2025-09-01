@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface OrderHistoryRepository extends JpaRepository<OrderHistory, Long> {
     List<OrderHistory> findByUserEmail(String userEmail);
+
 }

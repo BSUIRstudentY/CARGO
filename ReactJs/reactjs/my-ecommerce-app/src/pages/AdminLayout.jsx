@@ -15,6 +15,7 @@ function AdminLayout() {
   const navItems = [
     { path: '/admin', label: 'Главная', icon: '🏠' },
     { path: '/admin/orders', label: 'Заказы', icon: '📋' },
+    { path: '/admin/history', label: 'История заказов', icon: '🕒' },
     { path: '/admin/support', label: 'Тех. поддержка', icon: '🛠️' },
     { path: '/admin/statistics', label: 'Статистика', icon: '📊' },
     { path: '/admin/settings', label: 'Настройки', icon: '⚙️' },
@@ -38,7 +39,6 @@ function AdminLayout() {
         backgroundRepeat: 'repeat',
         zIndex: 0,
       }}></div>
-      {/* Кнопка для открытия панели */}
       <button
         onClick={toggleSidebar}
         className="fixed top-4 left-4 z-50 bg-[var(--accent-color)] p-2 rounded-full text-white hover:bg-opacity-80 transition-colors duration-200"
@@ -58,8 +58,6 @@ function AdminLayout() {
           />
         </svg>
       </button>
-
-      {/* Боковая панель с анимацией */}
       <aside
         className={`w-64 bg-gray-800 shadow-lg fixed top-0 left-0 h-screen z-40 transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full delay-750'
@@ -102,7 +100,6 @@ function AdminLayout() {
             </nav>
           </div>
           <div className="relative">
-            {/* Анимация машины и пыли */}
             <div className={`car-animation ${isSidebarOpen ? 'active' : ''} w-24 h-12 absolute bottom-16 left-2`}>
               <img src="/car.png" alt="Cargo Truck" className="car w-full h-full object-contain filter invert brightness-200 z-50" />
               <div className="dust z-40"></div>
@@ -116,13 +113,12 @@ function AdminLayout() {
           </div>
         </div>
       </aside>
-
-      {/* Основное содержимое */}
       <main className="flex-1 p-6 relative z-10 overflow-y-auto">
         <Routes>
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/admin/orders" element={<AdminPanel section="orders" />} />
           <Route path="/admin/orders/check/:id" element={<OrderCheck />} />
+          <Route path="/admin/history" element={<AdminPanel section="history" />} />
           <Route path="/admin/support" element={<AdminSupportPage />} />
           <Route path="/admin/support/ticket/:ticketId/chat" element={<TicketChatPage />} />
           <Route path="/admin/statistics" element={<AdminPanel section="statistics" />} />

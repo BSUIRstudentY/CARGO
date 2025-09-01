@@ -1,6 +1,7 @@
 package com.example.demo.Controllers;
 
 import com.example.demo.Entities.OrderHistory;
+import com.example.demo.Entities.OrderItem;
 import com.example.demo.Repositories.OrderHistoryRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +23,32 @@ public class OrderHistoryController {
 
     @GetMapping
     @Transactional(readOnly = true)
-    public ResponseEntity<List<OrderHistoryDTO>> getOrderHistory() {
+    public ResponseEntity<List<OrderHistoryDTO>> getOrderHistory(@RequestParam(required = false) String status) {
         String userEmail = getCurrentUserEmail();
         if (userEmail == null) {
             return ResponseEntity.status(403).body(null);
         }
 
-        List<OrderHistory> orders = orderHistoryRepository.findByUserEmail(userEmail);
+        List<OrderHistory> orders;
+        if (status != null && !status.equals("ALL")) {
+            orders = orderHistoryRepository.findByUserEmail(userEmail).stream()
+                    .filter(order -> order.getStatus().equals(status))
+                    .collect(Collectors.toList());
+        } else {
+            orders = orderHistoryRepository.findByUserEmail(userEmail);
+        }
+
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        if (isAdmin && status != null && !status.equals("ALL")) {
+            orders = orderHistoryRepository.findAll().stream()
+                    .filter(order -> order.getStatus().equals(status))
+                    .collect(Collectors.toList());
+        } else if (isAdmin) {
+            orders = orderHistoryRepository.findAll();
+        }
+
         List<OrderHistoryDTO> orderDTOs = orders.stream()
                 .map(order -> {
                     OrderHistoryDTO orderDTO = new OrderHistoryDTO();
@@ -37,6 +57,8 @@ public class OrderHistoryController {
                     orderDTO.setDateCreated(order.getDateCreated());
                     orderDTO.setStatus(order.getStatus());
                     orderDTO.setTotalClientPrice(order.getTotalClientPrice());
+                    orderDTO.setDeliveryAddress(order.getDeliveryAddress());
+                    orderDTO.setReasonRefusal(order.getReasonRefusal());
                     orderDTO.setItems(order.getItems().stream()
                             .map(item -> {
                                 OrderItemDTO itemDTO = new OrderItemDTO();
@@ -44,9 +66,14 @@ public class OrderHistoryController {
                                 itemDTO.setProductName(item.getProduct().getName());
                                 itemDTO.setQuantity(item.getQuantity());
                                 itemDTO.setPriceAtTime(item.getPriceAtTime());
+                                itemDTO.setUrl(item.getProduct().getUrl());
+                                itemDTO.setImageUrl(item.getProduct().getImageUrl());
+                                itemDTO.setDescription(item.getProduct().getDescription());
+                                itemDTO.setSupplierPrice(item.getSupplierPrice());
                                 return itemDTO;
                             })
                             .collect(Collectors.toList()));
+                    orderDTO.setUserEmail(order.getUser().getEmail());
                     return orderDTO;
                 })
                 .collect(Collectors.toList());
@@ -61,16 +88,29 @@ public class OrderHistoryController {
             return null;
         }
     }
+
+    @Data
+    class OrderHistoryDTO {
+        private Long id;
+        private String orderNumber;
+        private Timestamp dateCreated;
+        private String status;
+        private Float totalClientPrice;
+        private String deliveryAddress;
+        private String reasonRefusal;
+        private List<OrderItemDTO> items;
+        private String userEmail;
+    }
+
+    @Data
+    class OrderItemDTO {
+        private String productId;
+        private String productName;
+        private Integer quantity;
+        private Float priceAtTime;
+        private String url;
+        private String imageUrl;
+        private String description;
+        private Float supplierPrice;
+    }
 }
-
-@Data
-class OrderHistoryDTO {
-    private Long id;
-    private String orderNumber;
-    private Timestamp dateCreated;
-    private String status;
-    private Float totalClientPrice;
-    private List<OrderItemDTO> items;
-}
-
-

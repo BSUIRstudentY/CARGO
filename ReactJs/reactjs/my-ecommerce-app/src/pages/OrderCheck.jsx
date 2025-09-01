@@ -10,6 +10,21 @@ function OrderCheck() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [showRefusalModal, setShowRefusalModal] = useState(false);
+  const [refusalReason, setRefusalReason] = useState('');
+  const [message, setMessage] = useState('');
+  const [showMessageModal, setShowMessageModal] = useState(false);
+
+  const basicReasons = [
+    'Неверная ссылка',
+    'Товар закончился',
+    'Не понятно какую комплектацию выбирать',
+    'Аномальный товар',
+    'Товар продается только только в составе набора/опта',
+    'Ограниченные способы оплаты у поставщика',
+    'Запрещено к пересылке',
+    'Другое',
+  ];
 
   useEffect(() => {
     fetchOrder();
@@ -34,21 +49,110 @@ function OrderCheck() {
     }
   };
 
-  const handleSave = async () => {
+  const handleConfirm = async () => {
     if (!editedOrder.deliveryAddress || !editedOrder.totalClientPrice) {
       setError('Укажите адрес доставки и общую цену');
       return;
     }
     try {
-      console.log('Sending order:', JSON.stringify(editedOrder, null, 2));
-      const response = await api.put(`/orders/${id}`, editedOrder);
-      alert('Заказ обновлён!');
+      const updatedOrder = {
+        ...editedOrder,
+        status: 'VERIFIED',
+      };
+      const response = await api.put(`/orders/${id}`, updatedOrder);
+      alert('Заказ подтверждён!');
       setOrder(response.data);
       setEditedOrder(response.data);
       navigate('/admin/orders');
     } catch (error) {
-      console.error('Error saving order:', error);
-      setError('Ошибка сохранения заказа: ' + (error.response?.data?.message || error.message));
+      console.error('Error confirming order:', error);
+      let errorMessage = 'Неизвестная ошибка';
+      if (error.response) {
+        errorMessage = error.response.data?.message || error.message;
+      } else {
+        errorMessage = error.message;
+      }
+      setError('Ошибка подтверждения заказа: ' + errorMessage);
+    }
+  };
+
+const handleRefuse = async () => {
+  if (!refusalReason) {
+    alert('Укажите причину отказа');
+    return;
+  }
+
+  if (!editedOrder.totalClientPrice || !editedOrder.deliveryAddress) {
+    alert('Заполните все обязательные поля заказа (сумма и адрес доставки)');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const updatedOrder = {
+      ...editedOrder,
+      status: 'REFUSED',
+      reasonRefusal: refusalReason,
+    };
+    const response = await api.put(`/orders/${id}`, updatedOrder);
+    if (response?.data) {
+      setOrder(response.data);
+      setEditedOrder(response.data);
+    } else {
+      throw new Error('Ответ сервера не содержит данных');
+    }
+
+    try {
+      await api.post('/notifications', {
+        userEmail: editedOrder.userEmail,
+        message: `Ваш заказ #${editedOrder.orderNumber || id} был отклонён. Причина: ${refusalReason}`,
+        relatedId: id,
+        category: 'ORDER_UPDATE',
+      });
+    } catch (notificationError) {
+      console.error('Ошибка при отправке уведомления:', notificationError);
+      alert('Заказ отклонён, но уведомление не отправлено: ' + (notificationError.response?.data?.message || notificationError.message));
+    }
+
+    alert('Заказ отклонён и перемещён в историю заказов!');
+    navigate('/admin/orders');
+  } catch (error) {
+    console.error('Ошибка при отклонении заказа:', error);
+    let errorMessage = 'Неизвестная ошибка';
+    if (error.response) {
+      errorMessage = error.response.data?.message || error.response.statusText || error.message;
+      if (error.response.status === 403) {
+        errorMessage = 'Доступ запрещён: недостаточно прав или недействительный токен';
+      }
+    } else {
+      errorMessage = error.message;
+    }
+    setError(`Ошибка отклонения заказа: ${errorMessage}`);
+  } finally {
+    setLoading(false);
+    setShowRefusalModal(false);
+    setRefusalReason('');
+  }
+};
+
+  const handleSendMessage = async () => {
+    if (!message) {
+      alert('Введите сообщение');
+      return;
+    }
+    try {
+      await api.post('/notifications', {
+        userEmail: editedOrder.userEmail,
+        message: message,
+        relatedId: id,
+        category: 'ADMIN_MESSAGE',
+      });
+      alert('Сообщение отправлено!');
+      setShowMessageModal(false);
+      setMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setError('Ошибка отправки сообщения: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -73,7 +177,7 @@ function OrderCheck() {
   };
 
   const handleItemEdit = (item) => {
-    setSelectedItem({ ...item }); // Открываем модальное окно с копией элемента
+    setSelectedItem({ ...item });
   };
 
   const handleItemSave = () => {
@@ -82,16 +186,31 @@ function OrderCheck() {
         const newItems = [...prev.items];
         const itemIndex = newItems.findIndex((item) => item.productId === selectedItem.productId);
         if (itemIndex !== -1) {
-          newItems[itemIndex] = { ...selectedItem }; // Обновляем элемент в списке
+          newItems[itemIndex] = { ...selectedItem };
         }
         return { ...prev, items: newItems };
       });
-      setSelectedItem(null); // Закрываем модальное окно
+      setSelectedItem(null);
     }
   };
 
   const handleItemCancel = () => {
-    setSelectedItem(null); // Закрываем модальное окно без сохранения
+    setSelectedItem(null);
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'REFUSED':
+        return 'text-red-500';
+      case 'PENDING':
+        return 'text-white';
+      case 'VERIFIED':
+        return 'text-green-500';
+      case 'RECEIVED':
+        return 'text-blue-500';
+      default:
+        return 'text-gray-400';
+    }
   };
 
   if (loading) return <p className="text-center text-gray-400 animate-pulse">Загрузка...</p>;
@@ -100,9 +219,13 @@ function OrderCheck() {
 
   return (
     <div className="p-6 bg-gray-800 min-h-screen text-white">
-      <h2 className="text-3xl font-bold text-[var(--accent-color)] mb-6">Проверка заказа #{editedOrder.orderNumber}</h2>
+      <h2 className="text-3xl font-bold text-[var(--accent-color)] mb-6">
+        Проверка заказа #{editedOrder.orderNumber}
+      </h2>
+      <p className={`text-lg font-semibold ${getStatusColor(editedOrder.status)} mb-4`}>
+        Статус: {editedOrder.status === 'REFUSED' ? `Отклонён (${editedOrder.reasonRefusal})` : editedOrder.status}
+      </p>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Основная информация о заказе */}
         <div className="bg-gray-700 p-6 rounded-lg shadow-lg space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300">Дата создания</label>
@@ -123,6 +246,7 @@ function OrderCheck() {
               value={editedOrder.status || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
+              disabled
             />
           </div>
           <div>
@@ -170,8 +294,6 @@ function OrderCheck() {
             />
           </div>
         </div>
-
-        {/* Сетка товаров */}
         <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
           <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-4">Товары в заказе</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -202,8 +324,6 @@ function OrderCheck() {
           </div>
         </div>
       </div>
-
-      {/* Модальное окно для редактирования товара */}
       {selectedItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-gray-700 p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -300,14 +420,105 @@ function OrderCheck() {
           </div>
         </div>
       )}
-
+      {showRefusalModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-700 p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-4">Причина отказа</h3>
+            <div className="space-y-4">
+              <select
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === 'Другое') {
+                    setRefusalReason('');
+                  } else {
+                    setRefusalReason(value);
+                  }
+                }}
+                className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
+              >
+                <option value="">Выберите базовую причину</option>
+                {basicReasons.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {reason}
+                  </option>
+                ))}
+              </select>
+              <textarea
+                value={refusalReason}
+                onChange={(e) => setRefusalReason(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
+                rows="4"
+                placeholder="Опишите причину отказа (можно добавить детали)..."
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={handleRefuse}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+                >
+                  Отказать
+                </button>
+                <button
+                  onClick={() => setShowRefusalModal(false)}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200"
+                >
+                  Отмена
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showMessageModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-700 p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-4">Отправить сообщение</h3>
+            <div className="space-y-4">
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
+                rows="4"
+                placeholder="Введите сообщение для пользователя..."
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={handleSendMessage}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200"
+                >
+                  Отправить
+                </button>
+                <button
+                  onClick={() => setShowMessageModal(false)}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200"
+                >
+                  Отмена
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="mt-6 flex justify-end gap-4">
         <button
-          onClick={handleSave}
+          onClick={handleConfirm}
           className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200"
-          disabled={!editedOrder.deliveryAddress || !editedOrder.totalClientPrice}
+          disabled={editedOrder.status !== 'PENDING'}
         >
-          Сохранить изменения
+          Подтвердить
+        </button>
+        {editedOrder.status === 'VERIFIED' && (
+          <button
+            onClick={() => setShowMessageModal(true)}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
+          >
+            Связаться
+          </button>
+        )}
+        <button
+          onClick={() => setShowRefusalModal(true)}
+          className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+        >
+          Отказать
         </button>
         <button
           onClick={() => navigate('/admin/orders')}

@@ -9,12 +9,13 @@ function AdminPanel({ section = 'home' }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('PENDING');
 
   useEffect(() => {
     if (section === 'orders' && location.pathname === '/admin/orders') {
       setLoading(true);
       setError(null);
-      api.get('/orders?status=PENDING')
+      api.get(`/orders?status=${statusFilter}`)
         .then((response) => {
           if (response.data) {
             setOrders(response.data);
@@ -26,6 +27,23 @@ function AdminPanel({ section = 'home' }) {
         .catch((error) => {
           console.error('Error fetching orders:', error);
           setError('Ошибка загрузки заказов: ' + (error.response?.status === 403 ? 'Доступ запрещён (403)' : error.message));
+          setLoading(false);
+        });
+    } else if (section === 'history' && location.pathname === '/admin/history') {
+      setLoading(true);
+      setError(null);
+      api.get('/orders?status=REFUSED,RECEIVED')
+        .then((response) => {
+          if (response.data) {
+            setOrders(response.data);
+          } else {
+            setError('Нет данных в ответе сервера');
+          }
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching order history:', error);
+          setError('Ошибка загрузки истории заказов: ' + (error.response?.status === 403 ? 'Доступ запрещён (403)' : error.message));
           setLoading(false);
         });
     } else if (section === 'catalog' && location.pathname === '/admin/catalog') {
@@ -46,14 +64,7 @@ function AdminPanel({ section = 'home' }) {
           setLoading(false);
         });
     }
-  }, [section, location.pathname]);
-
-  const handleOrders = () => navigate('/admin/orders');
-  const handleSupport = () => navigate('/admin/support');
-  const handleStatistics = () => navigate('/admin/statistics');
-  const handleSuppliers = () => navigate('/admin/suppliers');
-  const handleCommission = () => navigate('/admin/commission');
-  const handleCatalog = () => navigate('/admin/catalog');
+  }, [section, location.pathname, statusFilter]);
 
   const handleDeleteProduct = async (productId) => {
     if (window.confirm('Вы уверены, что хотите удалить этот продукт?')) {
@@ -71,12 +82,41 @@ function AdminPanel({ section = 'home' }) {
     navigate(`/admin/catalog/${productId}`);
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'REFUSED':
+        return 'text-red-500';
+      case 'PENDING':
+        return 'text-white';
+      case 'VERIFIED':
+        return 'text-green-500';
+      case 'RECEIVED':
+        return 'text-blue-500';
+      default:
+        return 'text-gray-400';
+    }
+  };
+
   const renderSection = () => {
     switch (section) {
       case 'orders':
         return (
           <div className="h-full">
             <h2 className="text-2xl font-bold text-[var(--accent-color)] mb-4">Управление заказами</h2>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300">Фильтр по статусу</label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full max-w-xs px-3 py-2 bg-gray-600 text-white rounded-lg"
+              >
+                <option value="ALL">Все</option>
+                <option value="PENDING">Ожидает подтверждения</option>
+                <option value="VERIFIED">Подтверждён</option>
+                <option value="REFUSED">Отклонён</option>
+                <option value="RECEIVED">Получен</option>
+              </select>
+            </div>
             {loading && <p>Загрузка...</p>}
             {error && <p className="text-red-500">{error}</p>}
             <div className="h-[calc(100vh-200px)] overflow-y-auto space-y-4 p-2">
@@ -88,6 +128,9 @@ function AdminPanel({ section = 'home' }) {
                   >
                     <div>
                       <p className="text-lg font-semibold text-white">#{order.orderNumber}</p>
+                      <p className={`text-sm ${getStatusColor(order.status)}`}>
+                        Статус: {order.status === 'REFUSED' ? `Отклонён (${order.reasonRefusal})` : order.status}
+                      </p>
                       <p className="text-sm text-gray-400">Клиент: {order.userEmail || 'Неизвестно'}</p>
                       <p className="text-sm text-gray-400">Сумма: ¥{order.totalClientPrice?.toFixed(2) || '0.00'}</p>
                       <p className="text-sm text-gray-400">Дата: {new Date(order.dateCreated).toLocaleDateString()}</p>
@@ -101,7 +144,43 @@ function AdminPanel({ section = 'home' }) {
                   </div>
                 ))
               ) : (
-                !loading && !error && <p className="text-gray-400">Нет не подтверждённых заказов.</p>
+                !loading && !error && <p className="text-gray-400">Нет заказов.</p>
+              )}
+            </div>
+          </div>
+        );
+      case 'history':
+        return (
+          <div className="h-full">
+            <h2 className="text-2xl font-bold text-[var(--accent-color)] mb-4">История заказов</h2>
+            {loading && <p>Загрузка...</p>}
+            {error && <p className="text-red-500">{error}</p>}
+            <div className="h-[calc(100vh-200px)] overflow-y-auto space-y-4 p-2">
+              {orders.length > 0 ? (
+                orders.map((order) => (
+                  <div
+                    key={order.id}
+                    className="bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-700 hover:bg-gray-700 transition duration-200 flex justify-between items-center"
+                  >
+                    <div>
+                      <p className="text-lg font-semibold text-white">#{order.orderNumber}</p>
+                      <p className={`text-sm ${getStatusColor(order.status)}`}>
+                        Статус: {order.status === 'REFUSED' ? `Отклонён (${order.reasonRefusal})` : order.status}
+                      </p>
+                      <p className="text-sm text-gray-400">Клиент: {order.userEmail || 'Неизвестно'}</p>
+                      <p className="text-sm text-gray-400">Сумма: ¥{order.totalClientPrice?.toFixed(2) || '0.00'}</p>
+                      <p className="text-sm text-gray-400">Дата: {new Date(order.dateCreated).toLocaleDateString()}</p>
+                    </div>
+                    <button
+                      onClick={() => navigate(`/admin/orders/check/${order.id}`)}
+                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200"
+                    >
+                      Просмотреть
+                    </button>
+                  </div>
+                ))
+              ) : (
+                !loading && !error && <p className="text-gray-400">Нет заказов в истории.</p>
               )}
             </div>
           </div>
@@ -193,49 +272,8 @@ function AdminPanel({ section = 'home' }) {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold text-[var(--accent-color)] mb-6">Панель администратора</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <button
-          onClick={handleOrders}
-          className="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white hover:bg-opacity-80 transition duration-300"
-        >
-          Заказы
-        </button>
-        <button
-          onClick={handleSupport}
-          className="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white hover:bg-opacity-80 transition duration-300"
-        >
-          Тех. поддержка
-        </button>
-        <button
-          onClick={handleStatistics}
-          className="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white hover:bg-opacity-80 transition duration-300"
-        >
-          Статистика
-        </button>
-        <button
-          onClick={handleSuppliers}
-          className="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white hover:bg-opacity-80 transition duration-300"
-        >
-          Поставщики
-        </button>
-        <button
-          onClick={handleCommission}
-          className="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white hover:bg-opacity-80 transition duration-300"
-        >
-          Комиссии
-        </button>
-        <button
-          onClick={handleCatalog}
-          className="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white hover:bg-opacity-80 transition duration-300"
-        >
-          Каталог
-        </button>
-      </div>
-      <div className="mt-6">
-        {renderSection()}
-        <Outlet />
-      </div>
+      {renderSection()}
+      <Outlet />
     </div>
   );
 }

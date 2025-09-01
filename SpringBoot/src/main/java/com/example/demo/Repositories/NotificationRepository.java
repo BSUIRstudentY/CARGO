@@ -11,6 +11,7 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long>, JpaSpecificationExecutor<Notification> {
 
+    List<Notification> findByUserEmail(String userEmail);
     List<Notification> findByUserAndIsReadFalse(User user);
 
     List<Notification> findByUserAndIsReadTrue(User user);
