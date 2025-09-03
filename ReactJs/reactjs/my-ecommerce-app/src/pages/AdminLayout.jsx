@@ -1,3 +1,4 @@
+// AdminLayout.jsx
 import React, { useState } from 'react';
 import { Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/AuthProvider';
@@ -6,6 +7,14 @@ import OrderCheck from './OrderCheck';
 import AdminCatalog from './AdminCatalog';
 import AdminSupportPage from './AdminSupportPage';
 import TicketChatPage from './TicketChatPage';
+import OrderHistoryList from './OrderHistoryList';
+import OrderHistory from './OrderHistory';
+import UpcomingPurchases from './UpcomingPurchases';
+import BatchDetail from './BatchDetail';
+import UpcomingArrivals from './UpcomingArrivals';
+import OrderProcessing from './OrderProcessing';
+
+
 
 function AdminLayout() {
   const { logout } = useAuth();
@@ -15,7 +24,9 @@ function AdminLayout() {
   const navItems = [
     { path: '/admin', label: 'Главная', icon: '🏠' },
     { path: '/admin/orders', label: 'Заказы', icon: '📋' },
-    { path: '/admin/history', label: 'История заказов', icon: '🕒' },
+    { path: '/admin/orderHistory', label: 'История заказов', icon: '🕒' },
+    { path: '/admin/upcoming-purchases', label: 'Ближайшие выкупы', icon: '🛒' },
+    { path: '/admin/upcoming-arrivals', label: 'Ближайшие прибытия', icon: '🚚' },
     { path: '/admin/support', label: 'Тех. поддержка', icon: '🛠️' },
     { path: '/admin/statistics', label: 'Статистика', icon: '📊' },
     { path: '/admin/settings', label: 'Настройки', icon: '⚙️' },
@@ -118,7 +129,6 @@ function AdminLayout() {
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/admin/orders" element={<AdminPanel section="orders" />} />
           <Route path="/admin/orders/check/:id" element={<OrderCheck />} />
-          <Route path="/admin/history" element={<AdminPanel section="history" />} />
           <Route path="/admin/support" element={<AdminSupportPage />} />
           <Route path="/admin/support/ticket/:ticketId/chat" element={<TicketChatPage />} />
           <Route path="/admin/statistics" element={<AdminPanel section="statistics" />} />
@@ -126,6 +136,15 @@ function AdminLayout() {
           <Route path="/admin/suppliers" element={<AdminPanel section="suppliers" />} />
           <Route path="/admin/commission" element={<AdminPanel section="commission" />} />
           <Route path="/admin/catalog/*" element={<AdminCatalog />} />
+          <Route path="/admin/orderHistory" element={<OrderHistoryList />} />
+          <Route path="/admin/orderHistory/:id" element={<OrderHistory />} />
+          <Route path="/admin/upcoming-purchases" element={<UpcomingPurchases />} />
+          <Route path="/admin/upcoming-purchases/:id" element={<BatchDetail />} />
+          <Route path="/admin/upcoming-arrivals" element={<UpcomingArrivals />} />
+          <Route path="/admin/upcoming-purchases" element={<UpcomingPurchases />} />
+  <Route path="/admin/upcoming-purchases/:id" element={<BatchDetail />} />
+  <Route path="/admin/upcoming-purchases/:batchId/order/:orderId" element={<OrderProcessing />} />
+  <Route path="/admin/upcoming-arrivals" element={<UpcomingArrivals />} />
         </Routes>
       </main>
     </div>

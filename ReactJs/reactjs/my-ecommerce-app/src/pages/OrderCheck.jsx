@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axiosInstance';
 
@@ -20,22 +20,18 @@ function OrderCheck() {
     'Товар закончился',
     'Не понятно какую комплектацию выбирать',
     'Аномальный товар',
-    'Товар продается только только в составе набора/опта',
+    'Товар продается только в составе набора/опта',
     'Ограниченные способы оплаты у поставщика',
     'Запрещено к пересылке',
     'Другое',
   ];
 
-  useEffect(() => {
-    fetchOrder();
-  }, [id]);
-
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await api.get(`/orders/${id}`);
-      if (response.data) {
+      if (response?.data) {
         setOrder(response.data);
         setEditedOrder(response.data);
       } else {
@@ -43,97 +39,121 @@ function OrderCheck() {
       }
     } catch (error) {
       console.error('Error fetching order:', error);
-      setError('Ошибка загрузки заказа: ' + (error.response?.status === 403 ? 'Доступ запрещён (403). Убедитесь, что вы авторизованы как ADMIN и токен валиден.' : error.message));
+      let errorMessage = 'Ошибка загрузки заказа';
+      if (error.response) {
+        if (error.response.status === 403) {
+          errorMessage = 'Доступ запрещён (403). Проверьте, что вы авторизованы как ADMIN и токен действителен.';
+        } else {
+          errorMessage = error.response.data?.message || error.message || 'Неизвестная ошибка';
+        }
+      } else {
+        errorMessage = error.message || 'Ошибка сети';
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchOrder();
+  }, [fetchOrder]);
 
   const handleConfirm = async () => {
-    if (!editedOrder.deliveryAddress || !editedOrder.totalClientPrice) {
+    if (!editedOrder?.deliveryAddress || !editedOrder?.totalClientPrice) {
       setError('Укажите адрес доставки и общую цену');
       return;
     }
+    setLoading(true);
     try {
+      console.log('Sending PUT request to /api/orders/' + id, editedOrder);
       const updatedOrder = {
         ...editedOrder,
         status: 'VERIFIED',
       };
       const response = await api.put(`/orders/${id}`, updatedOrder);
-      alert('Заказ подтверждён!');
-      setOrder(response.data);
-      setEditedOrder(response.data);
-      navigate('/admin/orders');
+      console.log('PUT response:', response);
+      if (response?.data) {
+        setOrder(response.data);
+        setEditedOrder(response.data);
+        alert('Заказ подтверждён!');
+        navigate('/admin/orders');
+      } else {
+        throw new Error('Ответ сервера не содержит данных');
+      }
     } catch (error) {
       console.error('Error confirming order:', error);
-      let errorMessage = 'Неизвестная ошибка';
+      let errorMessage = 'Ошибка подтверждения заказа';
       if (error.response) {
-        errorMessage = error.response.data?.message || error.message;
+        if (error.response.status === 403) {
+          errorMessage = 'Доступ запрещён (403). Проверьте права доступа или токен авторизации. Токен: ' + (api.defaults.headers.Authorization || 'не установлен');
+        } else {
+          errorMessage = error.response.data?.message || error.message || 'Неизвестная ошибка';
+        }
       } else {
-        errorMessage = error.message;
+        errorMessage = error.message || 'Ошибка сети';
       }
-      setError('Ошибка подтверждения заказа: ' + errorMessage);
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
-const handleRefuse = async () => {
-  if (!refusalReason) {
-    alert('Укажите причину отказа');
-    return;
-  }
-
-  if (!editedOrder.totalClientPrice || !editedOrder.deliveryAddress) {
-    alert('Заполните все обязательные поля заказа (сумма и адрес доставки)');
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const updatedOrder = {
-      ...editedOrder,
-      status: 'REFUSED',
-      reasonRefusal: refusalReason,
-    };
-    const response = await api.put(`/orders/${id}`, updatedOrder);
-    if (response?.data) {
-      setOrder(response.data);
-      setEditedOrder(response.data);
-    } else {
-      throw new Error('Ответ сервера не содержит данных');
+  const handleRefuse = async () => {
+    if (!refusalReason) {
+      alert('Укажите причину отказа');
+      return;
     }
-
+    if (!editedOrder?.totalClientPrice || !editedOrder?.deliveryAddress) {
+      alert('Заполните все обязательные поля заказа (сумма и адрес доставки)');
+      return;
+    }
+    setLoading(true);
     try {
-      await api.post('/notifications', {
-        userEmail: editedOrder.userEmail,
-        message: `Ваш заказ #${editedOrder.orderNumber || id} был отклонён. Причина: ${refusalReason}`,
-        relatedId: id,
-        category: 'ORDER_UPDATE',
-      });
-    } catch (notificationError) {
-      console.error('Ошибка при отправке уведомления:', notificationError);
-      alert('Заказ отклонён, но уведомление не отправлено: ' + (notificationError.response?.data?.message || notificationError.message));
-    }
-
-    alert('Заказ отклонён и перемещён в историю заказов!');
-    navigate('/admin/orders');
-  } catch (error) {
-    console.error('Ошибка при отклонении заказа:', error);
-    let errorMessage = 'Неизвестная ошибка';
-    if (error.response) {
-      errorMessage = error.response.data?.message || error.response.statusText || error.message;
-      if (error.response.status === 403) {
-        errorMessage = 'Доступ запрещён: недостаточно прав или недействительный токен';
+      const updatedOrder = {
+        ...editedOrder,
+        status: 'REFUSED',
+        reasonRefusal: refusalReason,
+      };
+      const response = await api.put(`/orders/${id}`, updatedOrder);
+      if (response?.data) {
+        setOrder(response.data);
+        setEditedOrder(response.data);
+        try {
+          await api.post('/notifications', {
+            userEmail: editedOrder.userEmail,
+            message: `Ваш заказ #${editedOrder.orderNumber || id} был отклонён. Причина: ${refusalReason}`,
+            relatedId: id,
+            category: 'ORDER_UPDATE',
+          });
+        } catch (notificationError) {
+          console.error('Ошибка при отправке уведомления:', notificationError);
+          alert('Заказ отклонён, но уведомление не отправлено: ' + (notificationError.response?.data?.message || notificationError.message));
+        }
+        alert('Заказ отклонён и перемещён в историю заказов!');
+        navigate('/admin/orders');
+      } else {
+        throw new Error('Ответ сервера не содержит данных');
       }
-    } else {
-      errorMessage = error.message;
+    } catch (error) {
+      console.error('Ошибка при отклонении заказа:', error);
+      let errorMessage = 'Ошибка отклонения заказа';
+      if (error.response) {
+        if (error.response.status === 403) {
+          errorMessage = 'Доступ запрещён (403). Проверьте права доступа или токен авторизации.';
+        } else {
+          errorMessage = error.response.data?.message || error.message || 'Неизвестная ошибка';
+        }
+      } else {
+        errorMessage = error.message || 'Ошибка сети';
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+      setShowRefusalModal(false);
+      setRefusalReason('');
     }
-    setError(`Ошибка отклонения заказа: ${errorMessage}`);
-  } finally {
-    setLoading(false);
-    setShowRefusalModal(false);
-    setRefusalReason('');
-  }
-};
+  };
 
   const handleSendMessage = async () => {
     if (!message) {
@@ -152,7 +172,13 @@ const handleRefuse = async () => {
       setMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
-      setError('Ошибка отправки сообщения: ' + (error.response?.data?.message || error.message));
+      let errorMessage = 'Ошибка отправки сообщения';
+      if (error.response) {
+        errorMessage = error.response.data?.message || error.message || 'Неизвестная ошибка';
+      } else {
+        errorMessage = error.message || 'Ошибка сети';
+      }
+      setError(errorMessage);
     }
   };
 
@@ -299,7 +325,7 @@ const handleRefuse = async () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {editedOrder.items.map((item, index) => (
               <div
-                key={index}
+                key={`${item.productId}-${index}`}
                 className="bg-gray-600 p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer"
                 onClick={() => handleItemEdit(item)}
               >
@@ -309,7 +335,14 @@ const handleRefuse = async () => {
                       src={item.imageUrl}
                       alt={item.productName || 'Товар'}
                       className="w-full h-full object-cover"
-                      onError={(e) => { e.target.src = 'https://via.placeholder.com/128x128?text=Нет+фото'; }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        const parent = e.target.parentNode;
+                        const fallbackDiv = document.createElement('div');
+                        fallbackDiv.className = 'w-full h-full bg-gray-500 flex items-center justify-center text-sm text-gray-300';
+                        fallbackDiv.textContent = 'Нет фото';
+                        parent.appendChild(fallbackDiv);
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-500 flex items-center justify-center text-sm text-gray-300">
@@ -517,6 +550,7 @@ const handleRefuse = async () => {
         <button
           onClick={() => setShowRefusalModal(true)}
           className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+          disabled={editedOrder.status !== 'PENDING'}
         >
           Отказать
         </button>

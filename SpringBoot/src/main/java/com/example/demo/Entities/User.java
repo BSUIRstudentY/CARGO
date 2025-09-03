@@ -2,6 +2,7 @@ package com.example.demo.Entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Data;
@@ -49,5 +50,17 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    @Column(nullable = false)
+    private Float balance = 0.0f;
+
+    // Getter and Setter for balance
+    public Float getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Float balance) {
+        this.balance = balance;
     }
 }

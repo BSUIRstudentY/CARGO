@@ -29,23 +29,6 @@ function AdminPanel({ section = 'home' }) {
           setError('Ошибка загрузки заказов: ' + (error.response?.status === 403 ? 'Доступ запрещён (403)' : error.message));
           setLoading(false);
         });
-    } else if (section === 'history' && location.pathname === '/admin/history') {
-      setLoading(true);
-      setError(null);
-      api.get('/orders?status=REFUSED,RECEIVED')
-        .then((response) => {
-          if (response.data) {
-            setOrders(response.data);
-          } else {
-            setError('Нет данных в ответе сервера');
-          }
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error('Error fetching order history:', error);
-          setError('Ошибка загрузки истории заказов: ' + (error.response?.status === 403 ? 'Доступ запрещён (403)' : error.message));
-          setLoading(false);
-        });
     } else if (section === 'catalog' && location.pathname === '/admin/catalog') {
       setLoading(true);
       setError(null);
@@ -113,8 +96,7 @@ function AdminPanel({ section = 'home' }) {
                 <option value="ALL">Все</option>
                 <option value="PENDING">Ожидает подтверждения</option>
                 <option value="VERIFIED">Подтверждён</option>
-                <option value="REFUSED">Отклонён</option>
-                <option value="RECEIVED">Получен</option>
+                
               </select>
             </div>
             {loading && <p>Загрузка...</p>}
@@ -145,42 +127,6 @@ function AdminPanel({ section = 'home' }) {
                 ))
               ) : (
                 !loading && !error && <p className="text-gray-400">Нет заказов.</p>
-              )}
-            </div>
-          </div>
-        );
-      case 'history':
-        return (
-          <div className="h-full">
-            <h2 className="text-2xl font-bold text-[var(--accent-color)] mb-4">История заказов</h2>
-            {loading && <p>Загрузка...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            <div className="h-[calc(100vh-200px)] overflow-y-auto space-y-4 p-2">
-              {orders.length > 0 ? (
-                orders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-700 hover:bg-gray-700 transition duration-200 flex justify-between items-center"
-                  >
-                    <div>
-                      <p className="text-lg font-semibold text-white">#{order.orderNumber}</p>
-                      <p className={`text-sm ${getStatusColor(order.status)}`}>
-                        Статус: {order.status === 'REFUSED' ? `Отклонён (${order.reasonRefusal})` : order.status}
-                      </p>
-                      <p className="text-sm text-gray-400">Клиент: {order.userEmail || 'Неизвестно'}</p>
-                      <p className="text-sm text-gray-400">Сумма: ¥{order.totalClientPrice?.toFixed(2) || '0.00'}</p>
-                      <p className="text-sm text-gray-400">Дата: {new Date(order.dateCreated).toLocaleDateString()}</p>
-                    </div>
-                    <button
-                      onClick={() => navigate(`/admin/orders/check/${order.id}`)}
-                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200"
-                    >
-                      Просмотреть
-                    </button>
-                  </div>
-                ))
-              ) : (
-                !loading && !error && <p className="text-gray-400">Нет заказов в истории.</p>
               )}
             </div>
           </div>
