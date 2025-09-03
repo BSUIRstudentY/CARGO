@@ -18,6 +18,7 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_email", nullable = false)
+    @JsonIgnore
     private User user;
 
     @Column(name = "order_number", nullable = false, unique = true)
@@ -27,7 +28,7 @@ public class Order {
     private Timestamp dateCreated;
 
     @Column(name = "status", nullable = false)
-    private String status; // Например, "Ожидает закупки", "Заказано в Китае"
+    private String status;
 
     @Column(name = "total_client_price", nullable = false)
     private Float totalClientPrice;
@@ -47,7 +48,21 @@ public class Order {
     @Column(name = "tracking_number", length = 100)
     private String trackingNumber;
 
+    @Column(name = "discount_applied", nullable = true)
+    private Float discountApplied; // Total discount (promocode only)
+
+    @Column(name = "user_discount_applied", nullable = true)
+    private Float userDiscountApplied; // User-specific discount (discountPercent + temporaryDiscountPercent)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "promocode_id")
+    @JsonIgnore
+    private Promocode promocode;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<OrderItem> items;
+
+    @Column(name = "insurance_cost", nullable = true)
+    private Float insuranceCost;
 }

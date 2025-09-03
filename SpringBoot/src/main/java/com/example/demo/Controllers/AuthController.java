@@ -22,8 +22,13 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
-        String token = authService.register(registerRequest.getEmail(), registerRequest.getPassword(), registerRequest.getUsername());
+        String token = authService.register(registerRequest.getEmail(), registerRequest.getPassword(), registerRequest.getUsername(), registerRequest.getReferralCode());
         return ResponseEntity.ok(new AuthResponse(token));
+    }
+
+    @GetMapping("/validate-referral")
+    public ResponseEntity<Boolean> validateReferral(@RequestParam String code) {
+        return ResponseEntity.ok(authService.existsByReferralCode(code));
     }
 }
 
@@ -53,6 +58,7 @@ class RegisterRequest {
     private String email;
     private String password;
     private String username;
+    private String referralCode;
 }
 
 @Data

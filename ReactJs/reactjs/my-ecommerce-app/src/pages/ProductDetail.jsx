@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axiosInstance';
 import { useCart } from '../components/CartContext';
+import { ShoppingCartIcon, ArrowLeftIcon, LinkIcon } from '@heroicons/react/24/solid';
+import { motion, AnimatePresence } from 'framer-motion';
+import Tilt from 'react-parallax-tilt';
+import confetti from 'canvas-confetti';
 
 function ProductDetail() {
   const { id } = useParams();
@@ -52,7 +56,13 @@ function ProductDetail() {
       return;
     }
     try {
-      await addToCart({ ...productToAdd, quantity: 1 }); // По умолчанию количество 1 для похожих товаров
+      await addToCart({ ...productToAdd, quantity: productToAdd === product ? quantity : 1 });
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#10b981', '#34d399', '#6ee7b7'],
+      });
     } catch (error) {
       if (error.response && error.response.status === 403) {
         navigate('/login');
@@ -63,191 +73,322 @@ function ProductDetail() {
   };
 
   const maskedMarketplaceLink = (url) => {
-    return url ? '🔗 Зашифрованная ссылка на маркетплейс (нажмите для открытия)' : 'Ссылка недоступна';
+    return url ? (
+      <span className="flex items-center gap-2">
+        <LinkIcon className="w-5 h-5 text-emerald-400" />
+        Зашифрованная ссылка на маркетплейс
+      </span>
+    ) : (
+      'Ссылка недоступна'
+    );
   };
 
-  if (loading) return <p className="text-center text-gray-400">Загрузка...</p>;
-  if (error) return <p className="text-center text-red-500">{error}</p>;
-  if (!product) return <p className="text-center text-gray-400">Товар не найден</p>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-white text-2xl bg-gray-700/90 p-6 rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+        >
+          Загрузка...
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-red-500 text-2xl bg-gray-700/90 p-6 rounded-lg shadow-[0_0_15px_rgba(239,68,68,0.3)]"
+        >
+          {error}
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-gray-400 text-2xl bg-gray-700/90 p-6 rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+        >
+          Товар не найден
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-4xl font-bold text-gray-100 mb-6" style={{ color: 'var(--accent-color)' }}>
-        Подробности товара: {product.name}
-      </h2>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <motion.header
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-color)] to-emerald-500">
+            Подробности товара: {product.name}
+          </h2>
+          <p className="text-lg text-gray-400 mt-2">Ознакомьтесь с деталями и добавьте товар в корзину</p>
+        </motion.header>
 
-      {/* Основной макет */}
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Изображение текущего товара */}
-        <div className="w-full lg:w-1/2">
-          {product.imageUrl ? (
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="w-full h-96 object-cover rounded-lg"
-              onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/384x384?text=Изображение+не+доступно';
-              }}
-            />
-          ) : (
-            <div className="w-full h-96 bg-gray-700 rounded-lg flex items-center justify-center">
-              <span className="text-gray-400">Изображение отсутствует</span>
-            </div>
+        {/* Error Message */}
+        <AnimatePresence>
+          {(cartError || error) && (
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.3 }}
+              className="mb-8 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500"
+            >
+              {cartError || error}
+            </motion.div>
           )}
-          <div className="mt-4 flex gap-2">
-            {[1, 2].map((i) => (
-              <div key={i} className="w-20 h-20 bg-gray-600 rounded-lg"></div>
+        </AnimatePresence>
+
+        {/* Main Layout */}
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex flex-col lg:flex-row gap-8 mb-12"
+        >
+          {/* Product Image */}
+          <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+            <motion.div
+              className="w-full lg:w-1/2 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-6 shadow-xl border border-gray-700/50 transition-transform duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.5)]"
+              whileHover={{ y: -8, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none rounded-2xl" />
+              {product.imageUrl ? (
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-full h-96 object-cover rounded-lg transform hover:scale-105 transition duration-300"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/384x384?text=Изображение+не+доступно';
+                  }}
+                />
+              ) : (
+                <div className="w-full h-96 bg-gray-700 rounded-lg flex items-center justify-center">
+                  <span className="text-gray-400">Изображение отсутствует</span>
+                </div>
+              )}
+              <div className="mt-4 flex gap-2 justify-center">
+                {[1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="w-20 h-20 bg-gray-600 rounded-lg flex items-center justify-center text-gray-400 text-xs"
+                  >
+                    Превью {i}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </Tilt>
+
+          {/* Product Information */}
+          <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+            <motion.div
+              className="w-full lg:w-1/2 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-6 shadow-xl border border-gray-700/50 transition-transform duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.5)]"
+              whileHover={{ y: -8, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none rounded-2xl" />
+              <h3 className="text-2xl font-semibold text-[var(--accent-color)] mb-4">{product.name}</h3>
+              <div className="flex justify-between mb-4">
+                <span className="text-emerald-400 font-bold text-xl">¥{product.price?.toFixed(2)}</span>
+                <span className="text-yellow-400 font-bold text-xl">BYN {(product.price * 3.5)?.toFixed(2)}</span>
+              </div>
+
+              {/* Quantity */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Количество:</label>
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-full p-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition"
+                  min="1"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleAddToCart(product)}
+                className="w-full px-6 py-3 bg-gradient-to-r from-[var(--accent-color)] to-emerald-500 text-white rounded-lg hover:bg-opacity-90 transition flex items-center justify-center gap-2 mb-2"
+                disabled={cartLoading}
+              >
+                <ShoppingCartIcon className="w-5 h-5" />
+                Добавить в корзину
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate(-1)}
+                className="w-full px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition flex items-center justify-center gap-2"
+              >
+                <ArrowLeftIcon className="w-5 h-5" />
+                Назад
+              </motion.button>
+
+              {/* Marketplace Link */}
+              <div className="mt-4">
+                <p className="text-sm text-gray-300 mb-2">Куплено на:</p>
+                <a
+                  href={product.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-400 hover:underline flex items-center gap-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    alert(`Открывается: ${product.url}`);
+                  }}
+                >
+                  {maskedMarketplaceLink(product.url)}
+                </a>
+              </div>
+            </motion.div>
+          </Tilt>
+        </motion.section>
+
+        {/* Tabs */}
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="mb-12"
+        >
+          <div className="flex border-b border-gray-600 mb-6">
+            {['details', 'history', 'reviews'].map((tab) => (
+              <motion.button
+                key={tab}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-4 py-2 text-lg font-medium ${
+                  activeTab === tab
+                    ? 'border-b-2 border-[var(--accent-color)] text-[var(--accent-color)]'
+                    : 'text-gray-400 hover:text-gray-200'
+                }`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab === 'details' ? 'Детали' : tab === 'history' ? 'История' : 'Отзывы'}
+              </motion.button>
             ))}
           </div>
-        </div>
-
-        {/* Информация о товаре */}
-        <div className="w-full lg:w-1/2 bg-gray-800 p-6 rounded-lg shadow-md text-white">
-          <h3 className="text-2xl font-semibold mb-2">{product.name}</h3>
-          <div className="flex justify-between mb-4">
-            <span className="text-green-400 font-bold">¥{product.price?.toFixed(2)}</span>
-            <span className="text-yellow-400 font-bold">BYN {(product.price * 3.5)?.toFixed(2)}</span>
-          </div>
-
-          {/* Количество */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-300">Количество:</label>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-full p-2 bg-gray-700 text-white rounded-lg"
-              min="1"
-            />
-          </div>
-
-          {/* Кнопки действий */}
-          <button
-            onClick={handleAddToCart}
-            className="w-full bg-blue-600 p-2 rounded-lg text-white hover:bg-blue-700 transition duration-300 mb-2"
-            disabled={cartLoading}
-          >
-            Добавить в корзину
-          </button>
-          <button
-            onClick={() => navigate(-1)}
-            className="w-full bg-gray-600 p-2 rounded-lg text-white hover:bg-gray-700 transition duration-300"
-          >
-            Назад
-          </button>
-
-          {/* Ссылка на маркетплейс */}
-          <div className="mt-4">
-            <p className="text-sm text-gray-300">Куплено на:</p>
-            <a
-              href={product.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 hover:underline"
-              onClick={(e) => {
-                e.preventDefault();
-                alert(`Открывается: ${product.url}`);
-              }}
+          <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+            <motion.div
+              className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-6 shadow-xl border border-gray-700/50 transition-transform duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.5)]"
+              whileHover={{ y: -8, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              {maskedMarketplaceLink(product.url)}
-            </a>
-          </div>
-        </div>
-      </div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none rounded-2xl" />
+              {activeTab === 'details' && (
+                <p className="text-gray-300">{product.description || 'Детали товара будут здесь.'}</p>
+              )}
+              {activeTab === 'history' && (
+                <div>
+                  <p className="text-gray-300 mb-2">Продано: {product.salesCount || 0} раз</p>
+                  <p className="text-gray-300 mb-2">Кластер: {product.cluster !== undefined ? product.cluster : 'Не определен'}</p>
+                  <p className="text-gray-300">Последнее обновление: {new Date(product.lastUpdated).toLocaleString('ru-RU')}</p>
+                </div>
+              )}
+              {activeTab === 'reviews' && (
+                <div>
+                  <p className="text-gray-300 mb-4">Отзывы: (макет) Здесь будут отзывы пользователей.</p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
+                  >
+                    Оставить отзыв
+                  </motion.button>
+                </div>
+              )}
+            </motion.div>
+          </Tilt>
+        </motion.section>
 
-      {/* Вкладки */}
-      <div className="mt-8">
-        <div className="flex border-b border-gray-600">
-          <button
-            className={`px-4 py-2 ${activeTab === 'details' ? 'border-b-2 border-[var(--accent-color)] text-[var(--accent-color)]' : 'text-gray-400'}`}
-            onClick={() => setActiveTab('details')}
-          >
-            Детали
-          </button>
-          <button
-            className={`px-4 py-2 ${activeTab === 'history' ? 'border-b-2 border-[var(--accent-color)] text-[var(--accent-color)]' : 'text-gray-400'}`}
-            onClick={() => setActiveTab('history')}
-          >
-            История
-          </button>
-          <button
-            className={`px-4 py-2 ${activeTab === 'reviews' ? 'border-b-2 border-[var(--accent-color)] text-[var(--accent-color)]' : 'text-gray-400'}`}
-            onClick={() => setActiveTab('reviews')}
-          >
-            Отзывы
-          </button>
-        </div>
-
-        <div className="mt-4 p-6 bg-gray-800 rounded-lg">
-          {activeTab === 'details' && (
-            <div>
-              <p className="text-gray-300">{product.description || 'Детали товара будут здесь.'}</p>
-            </div>
-          )}
-          {activeTab === 'history' && (
-            <div>
-              <p className="text-gray-300">Продано: {product.salesCount || 0} раз</p>
-              <p className="text-gray-300">Кластер: {product.cluster !== undefined ? product.cluster : 'Не определен'}</p>
-              <p className="text-gray-300">Последнее обновление: {new Date(product.lastUpdated).toLocaleString()}</p>
-            </div>
-          )}
-          {activeTab === 'reviews' && (
-            <div>
-              <p className="text-gray-300">Отзывы: (макет) Здесь будут отзывы пользователей.</p>
-              <button className="mt-2 bg-gray-600 p-2 rounded-lg text-white">Оставить отзыв</button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Похожие товары */}
-      <div className="mt-8">
-        <h3 className="text-2xl font-bold text-[var(--accent-color)] mb-4">Похожие товары</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {similarProducts.length > 0 ? (
-            similarProducts.map((similar) => (
-              <div key={similar.id} className="bg-gray-800 rounded-lg shadow-md overflow-hidden">
-                <div className="w-full h-48">
-                  {similar.imageUrl ? (
-                    <img
-                      src={similar.imageUrl}
-                      alt={similar.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/192x192?text=Изображение+не+доступно';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                      <span className="text-gray-400">Изображение отсутствует</span>
+        {/* Similar Products */}
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="mb-12"
+        >
+          <h3 className="text-2xl font-semibold text-white mb-6">Похожие товары</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {similarProducts.length > 0 ? (
+              similarProducts.map((similar, index) => (
+                <Tilt key={similar.id} tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+                  <motion.div
+                    className="bg-gradient-to-b from-gray-700 to-gray-800 rounded-lg border border-gray-600 p-4 transition-all duration-300 hover:shadow-[0_0_15px_#10b981]"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <div className="w-full h-48 overflow-hidden rounded-lg">
+                      {similar.imageUrl ? (
+                        <img
+                          src={similar.imageUrl}
+                          alt={similar.name}
+                          className="w-full h-full object-cover transform hover:scale-105 transition duration-300"
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/192x192?text=Изображение+не+доступно';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-600 flex items-center justify-center text-gray-400 text-sm">
+                          Изображение отсутствует
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                <div className="p-4 text-white">
-                  <h4 className="text-lg font-semibold mb-2">{similar.name}</h4>
-                  <button
-                    onClick={() => handleAddToCart(similar)}
-                    className="w-full bg-blue-600 p-2 rounded-lg text-white hover:bg-blue-700 transition duration-300 mb-2"
-                    disabled={cartLoading}
-                  >
-                    Добавить в корзину
-                  </button>
-                  <button
-                    onClick={() => navigate(`/product/${similar.id}`)}
-                    className="w-full bg-gray-600 p-2 rounded-lg text-white hover:bg-gray-700 transition duration-300"
-                  >
-                    Подробнее
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-center text-gray-400 col-span-full">Похожие товары не найдены</p>
-          )}
-        </div>
+                    <div className="p-4">
+                      <h4 className="text-lg font-semibold text-white mb-2">{similar.name}</h4>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleAddToCart(similar)}
+                        className="w-full px-4 py-2 bg-gradient-to-r from-[var(--accent-color)] to-emerald-500 text-white rounded-lg hover:bg-opacity-90 transition flex items-center justify-center gap-2 mb-2"
+                        disabled={cartLoading}
+                      >
+                        <ShoppingCartIcon className="w-5 h-5" />
+                        Добавить в корзину
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => navigate(`/product/${similar.id}`)}
+                        className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
+                      >
+                        Подробнее
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                </Tilt>
+              ))
+            ) : (
+              <p className="text-gray-400 text-center col-span-full text-lg">Похожие товары не найдены</p>
+            )}
+          </div>
+        </motion.section>
       </div>
-
-      {(cartError || error) && <p className="text-red-500 mt-2">{cartError || error}</p>}
     </div>
   );
 }
