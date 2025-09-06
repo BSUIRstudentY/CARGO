@@ -34,8 +34,21 @@ public class NotificationService {
 
         notificationRepository.save(notification);
 
-        // Изменено: Используем кастомный топик вместо convertAndSendToUser
         messagingTemplate.convertAndSend("/topic/personal/" + event.getOrder().getUser().getEmail(), notification);
+    }
+
+    public Notification sendOrderStatusChangeNotification(User user, Long orderId, String newStatus) {
+        Notification notification = new Notification();
+        notification.setUser(user);
+        notification.setMessage("Ваш заказ #" + orderId + " изменил статус на " + newStatus);
+        notification.setTimestamp(LocalDateTime.now());
+        notification.setRead(false);
+        notification.setRelatedId(orderId);
+        notification.setCategory("ORDER_UPDATE");
+
+        Notification savedNotification = notificationRepository.save(notification);
+        messagingTemplate.convertAndSend("/topic/personal/" + user.getEmail(), savedNotification);
+        return savedNotification;
     }
 
     @KafkaListener(topics = "support", groupId = "notification-group")
@@ -50,8 +63,21 @@ public class NotificationService {
 
         notificationRepository.save(notification);
 
-        // Изменено: Используем кастомный топик вместо convertAndSendToUser
         messagingTemplate.convertAndSend("/topic/personal/" + event.getUser().getEmail(), notification);
+    }
+
+    public Notification sendNewSupportMessageNotification(User user, Long ticketId, String senderName) {
+        Notification notification = new Notification();
+        notification.setUser(user);
+        notification.setMessage("Новое сообщение в чате поддержки по тикету #" + ticketId + " от " + senderName);
+        notification.setTimestamp(LocalDateTime.now());
+        notification.setRead(false);
+        notification.setRelatedId(ticketId);
+        notification.setCategory("NEW_MESSAGE");
+
+        Notification savedNotification = notificationRepository.save(notification);
+        messagingTemplate.convertAndSend("/topic/personal/" + user.getEmail(), savedNotification);
+        return savedNotification;
     }
 
     @KafkaListener(topics = "global", groupId = "notification-group")
@@ -67,5 +93,19 @@ public class NotificationService {
         notificationRepository.save(notification);
 
         messagingTemplate.convertAndSend("/topic/global-notifications", notification);
+    }
+
+    public Notification sendUserNotification(User user, String message, Long relatedId, String category) {
+        Notification notification = new Notification();
+        notification.setUser(user);
+        notification.setMessage(message);
+        notification.setTimestamp(LocalDateTime.now());
+        notification.setRead(false);
+        notification.setRelatedId(relatedId);
+        notification.setCategory(category);
+
+        Notification savedNotification = notificationRepository.save(notification);
+        messagingTemplate.convertAndSend("/topic/personal/" + user.getEmail(), savedNotification);
+        return savedNotification;
     }
 }

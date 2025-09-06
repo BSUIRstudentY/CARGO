@@ -5,7 +5,6 @@ import com.example.demo.POJO.OrderStatusEvent;
 import com.example.demo.Repositories.CartRepository;
 import com.example.demo.Repositories.OrderRepository;
 import com.example.demo.Repositories.ProductRepository;
-import com.example.demo.Repositories.PromocodeRepository;
 import com.example.demo.Repositories.UserRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import smile.math.matrix.Matrix;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -37,12 +37,12 @@ public class OrderController {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PromocodeRepository promocodeRepository;
-
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public OrderController(KafkaTemplate<String, Object> kafkaTemplate) {
+
+
+    public OrderController(KafkaTemplate<String, Object> kafkaTemplate)
+    {
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -51,81 +51,34 @@ public class OrderController {
     public ResponseEntity<OrderDTO> createOrder(@RequestBody CreateOrderRequest request) {
         String userEmail = getCurrentUserEmail();
         if (userEmail == null) {
-            return ResponseEntity.status(403).body(new OrderDTO("Пользователь не аутентифицирован"));
+            return ResponseEntity.status(403).body(null);
         }
 
         Cart cart = cartRepository.findById(userEmail)
                 .orElseThrow(() -> new RuntimeException("Корзина не найдена"));
 
         if (cart.getItems().isEmpty()) {
-            return ResponseEntity.badRequest().body(new OrderDTO("Корзина пуста"));
+            return ResponseEntity.badRequest().body(null);
         }
 
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
-
-        // Проверка временной скидки пользователя
-        user.verifyDiscount();
 
         Order order = new Order();
         order.setUser(user);
         order.setOrderNumber(UUID.randomUUID().toString());
         order.setDateCreated(new Timestamp(System.currentTimeMillis()));
         order.setStatus("PENDING");
-
-        // Calculate total price before discounts
-        float totalClientPrice = (float) cart.getItems().stream()
+        order.setTotalClientPrice((float) cart.getItems().stream()
                 .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
-                .sum();
-        float userDiscountAmount = 0.0f;
-        float promocodeDiscountAmount = 0.0f;
-        float insuranceCost = 0.0f;
-
-        // Apply user discount
-        float userDiscountPercent = user.getTotalDiscount();
-        if (userDiscountPercent > 0) {
-            userDiscountAmount = totalClientPrice * (userDiscountPercent / 100);
-        }
-
-        // Apply promocode discount (assumed valid from frontend)
-        Promocode promocode = null;
-        if (request.getPromocode() != null && !request.getPromocode().isEmpty()) {
-            promocode = promocodeRepository.findByCode(request.getPromocode())
-                    .orElseThrow(() -> new RuntimeException("Промокод не найден"));
-
-            // Frontend provides discountType and discountValue
-            if (request.getDiscountType().equals("PERCENTAGE")) {
-                promocodeDiscountAmount = totalClientPrice * (request.getDiscountValue() / 100);
-            } else { // FIXED
-                promocodeDiscountAmount = request.getDiscountValue();
-            }
-            promocode.setUsedCount(promocode.getUsedCount() + 1);
-            promocodeRepository.save(promocode);
-        }
-
-        // Apply insurance cost (5% of totalClientPrice if insurance is selected)
-        if (request.isInsurance()) {
-            insuranceCost = totalClientPrice * 0.05f;
-        }
-
-        // Ensure final price is not negative
-        float totalDiscountAmount = userDiscountAmount + promocodeDiscountAmount;
-        if (totalClientPrice - totalDiscountAmount + insuranceCost < 0) {
-            return ResponseEntity.badRequest().body(new OrderDTO("Скидка превышает стоимость заказа"));
-        }
-
-        // Set order details
-        order.setTotalClientPrice(totalClientPrice - totalDiscountAmount + insuranceCost);
-        order.setUserDiscountApplied(userDiscountAmount);
-        order.setDiscountApplied(promocodeDiscountAmount);
-        order.setInsuranceCost(insuranceCost);
+                .sum());
         order.setDeliveryAddress(request.getDeliveryAddress());
 
-        // Create and link OrderItems
+        // Создание и связывание OrderItem с Order
         List<OrderItem> orderItems = cart.getItems().stream()
                 .map(cartItem -> {
                     OrderItem orderItem = new OrderItem();
-                    orderItem.setOrder(order);
+                    orderItem.setOrder(order); // Устанавливаем связь с заказом
                     orderItem.setProduct(cartItem.getProduct());
                     orderItem.setQuantity(cartItem.getQuantity());
                     orderItem.setPriceAtTime(cartItem.getProduct().getPrice());
@@ -133,14 +86,12 @@ public class OrderController {
                 })
                 .collect(Collectors.toList());
 
-        order.setItems(orderItems);
-        orderRepository.save(order);
+        order.setItems(orderItems); // Устанавливаем список элементов в заказ
+        orderRepository.save(order); // Сохранение заказа с каскадным сохранением OrderItem
 
-        // Clear cart
         cart.getItems().clear();
         cartRepository.save(cart);
 
-        // Prepare response
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setId(order.getId());
         orderDTO.setOrderNumber(order.getOrderNumber());
@@ -148,10 +99,6 @@ public class OrderController {
         orderDTO.setStatus(order.getStatus());
         orderDTO.setTotalClientPrice(order.getTotalClientPrice());
         orderDTO.setDeliveryAddress(order.getDeliveryAddress());
-        orderDTO.setUserDiscountApplied(order.getUserDiscountApplied());
-        orderDTO.setDiscountApplied(order.getDiscountApplied());
-        orderDTO.setInsuranceCost(order.getInsuranceCost());
-        orderDTO.setPromocode(order.getPromocode() != null ? order.getPromocode().getCode() : null);
         orderDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
@@ -165,7 +112,6 @@ public class OrderController {
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
-        orderDTO.setUserEmail(user.getEmail());
 
         return ResponseEntity.ok(orderDTO);
     }
@@ -175,19 +121,20 @@ public class OrderController {
     public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long id) {
         String userEmail = getCurrentUserEmail();
         if (userEmail == null) {
-            return ResponseEntity.status(403).body(new OrderDTO("Пользователь не аутентифицирован"));
+            return ResponseEntity.status(403).body(null);
         }
 
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Заказ с ID " + id + " не найден"));
 
+        // Проверка: пользователь должен быть админом или владельцем заказа
         boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
                 .getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
         boolean isOrderOwner = userEmail.equals(order.getUser().getEmail());
 
         if (!isAdmin && !isOrderOwner) {
-            return ResponseEntity.status(403).body(new OrderDTO("Доступ запрещен"));
+            return ResponseEntity.status(403).body(null);
         }
 
         OrderDTO orderDTO = new OrderDTO();
@@ -201,10 +148,6 @@ public class OrderController {
         orderDTO.setShippingCost(order.getShippingCost());
         orderDTO.setDeliveryAddress(order.getDeliveryAddress());
         orderDTO.setTrackingNumber(order.getTrackingNumber());
-        orderDTO.setUserDiscountApplied(order.getUserDiscountApplied());
-        orderDTO.setDiscountApplied(order.getDiscountApplied());
-        orderDTO.setInsuranceCost(order.getInsuranceCost());
-        orderDTO.setPromocode(order.getPromocode() != null ? order.getPromocode().getCode() : null);
         orderDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
@@ -237,6 +180,7 @@ public class OrderController {
                     .collect(Collectors.toList());
         }
 
+        // Фильтрация: только заказы текущего пользователя или админа
         boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
                 .getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
@@ -255,10 +199,6 @@ public class OrderController {
                     orderDTO.setStatus(order.getStatus());
                     orderDTO.setTotalClientPrice(order.getTotalClientPrice());
                     orderDTO.setDeliveryAddress(order.getDeliveryAddress());
-                    orderDTO.setUserDiscountApplied(order.getUserDiscountApplied());
-                    orderDTO.setDiscountApplied(order.getDiscountApplied());
-                    orderDTO.setInsuranceCost(order.getInsuranceCost());
-                    orderDTO.setPromocode(order.getPromocode() != null ? order.getPromocode().getCode() : null);
                     orderDTO.setItems(order.getItems().stream()
                             .map(item -> {
                                 OrderItemDTO itemDTO = new OrderItemDTO();
@@ -285,16 +225,18 @@ public class OrderController {
                 .orElseThrow(() -> new RuntimeException("Заказ с ID " + id + " не найден"));
 
         if (!order.getStatus().equals("PENDING")) {
-            return ResponseEntity.badRequest().body(new OrderDTO("Заказ не в статусе PENDING"));
+            return ResponseEntity.badRequest().body(null);
         }
 
+        // Валидация
         if (orderDetails.getTotalClientPrice() == null || orderDetails.getTotalClientPrice() <= 0) {
-            return ResponseEntity.badRequest().body(new OrderDTO("Недопустимая итоговая цена"));
+            return ResponseEntity.badRequest().body(null);
         }
         if (orderDetails.getDeliveryAddress() == null || orderDetails.getDeliveryAddress().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(new OrderDTO("Адрес доставки обязателен"));
+            return ResponseEntity.badRequest().body(null);
         }
 
+        // Обновление данных заказа
         order.setTotalClientPrice(orderDetails.getTotalClientPrice());
         order.setSupplierCost(orderDetails.getSupplierCost());
         order.setCustomsDuty(orderDetails.getCustomsDuty());
@@ -302,24 +244,21 @@ public class OrderController {
         order.setDeliveryAddress(orderDetails.getDeliveryAddress());
         order.setTrackingNumber(orderDetails.getTrackingNumber());
         order.setStatus("VERIFIED");
-        // Preserve userDiscountApplied and discountApplied
-        order.setUserDiscountApplied(order.getUserDiscountApplied());
-        order.setDiscountApplied(order.getDiscountApplied());
-        order.setInsuranceCost(order.getInsuranceCost());
-
         OrderStatusEvent event = new OrderStatusEvent(order);
-        kafkaTemplate.send("order-status", event.getOrder().getUser().getEmail(), event);
-
+        kafkaTemplate.send("order-status", event.getOrder().getUser().getEmail(), event).whenComplete(((stringObjectSendResult, throwable) -> System.out.println("hellooooooooooooooooooooooooooooooooooooooooooooo2321412321321321321")));
+        // Обработка items
         if (orderDetails.getItems() != null) {
-            order.getItems().clear();
+            order.getItems().clear(); // Удаляем старые элементы
             for (OrderItemDTO itemDTO : orderDetails.getItems()) {
                 if (itemDTO.getProductId() == null) {
                     throw new RuntimeException("Product ID cannot be null for order item");
                 }
 
+                // Загружаем существующий Product
                 Product product = productRepository.findById(itemDTO.getProductId())
                         .orElseThrow(() -> new RuntimeException("Product with ID " + itemDTO.getProductId() + " not found"));
 
+                // Обновляем Product на основе данных из OrderItemDTO
                 if (itemDTO.getProductName() != null && !itemDTO.getProductName().equals(product.getName())) {
                     product.setName(itemDTO.getProductName());
                 }
@@ -332,8 +271,9 @@ public class OrderController {
                 if (itemDTO.getDescription() != null && !itemDTO.getDescription().equals(product.getDescription())) {
                     product.setDescription(itemDTO.getDescription());
                 }
-                productRepository.save(product);
+                productRepository.save(product); // Сохраняем обновлённый Product
 
+                // Создаём новый OrderItem с обновлёнными данными
                 OrderItem orderItem = new OrderItem();
                 orderItem.setOrder(order);
                 orderItem.setProduct(product);
@@ -353,10 +293,6 @@ public class OrderController {
         responseDTO.setStatus(order.getStatus());
         responseDTO.setTotalClientPrice(order.getTotalClientPrice());
         responseDTO.setDeliveryAddress(order.getDeliveryAddress());
-        responseDTO.setUserDiscountApplied(order.getUserDiscountApplied());
-        responseDTO.setDiscountApplied(order.getDiscountApplied());
-        responseDTO.setInsuranceCost(order.getInsuranceCost());
-        responseDTO.setPromocode(order.getPromocode() != null ? order.getPromocode().getCode() : null);
         responseDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
@@ -386,11 +322,8 @@ public class OrderController {
 
 @Data
 class CreateOrderRequest {
+    private List<CartItemDTO> cartItems;
     private String deliveryAddress;
-    private String promocode;
-    private boolean insurance;
-    private String discountType;
-    private Float discountValue;
 }
 
 @Data
@@ -405,19 +338,8 @@ class OrderDTO {
     private Float shippingCost;
     private String deliveryAddress;
     private String trackingNumber;
-    private Float userDiscountApplied;
-    private Float discountApplied;
-    private Float insuranceCost;
-    private String promocode;
     private List<OrderItemDTO> items;
     private String userEmail;
-    private String errorMessage;
-
-    public OrderDTO(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
-
-    public OrderDTO() {}
 }
 
 @Data

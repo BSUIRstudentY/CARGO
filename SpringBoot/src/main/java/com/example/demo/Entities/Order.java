@@ -24,6 +24,9 @@ public class Order {
     @Column(name = "order_number", nullable = false, unique = true)
     private String orderNumber;
 
+    @Column(name = "reasonRefusal", nullable = true)
+    private String reasonRefusal;
+
     @Column(name = "date_created", nullable = false)
     private Timestamp dateCreated;
 

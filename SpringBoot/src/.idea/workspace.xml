@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="e08534fd-dc43-4c77-abb8-59b7131896b9" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../KafkaRunner" beforeDir="false" afterPath="$PROJECT_DIR$/../../KafkaRunner" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/eslint.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/eslint.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/postcss.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/postcss.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/220.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/220.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/car.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/car.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-21.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-21.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-22.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-22.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-23.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-23.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-24.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-24.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-25.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-25.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-26.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-26.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-28.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-28.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-29.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-29.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-30.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/logos/color-30.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/vite.svg" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/public/vite.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/App.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/api/axiosInstance.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/api/axiosInstance.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/api/stompClient.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/api/stompClient.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/assets/react.svg" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/assets/react.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/AuthProvider.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/AuthProvider.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/CartContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/CartContext.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/CartModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/CartModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/LoginButton.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/LoginButton.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/LoyaltyTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/LoyaltyTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/OrderHistoryTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/OrderHistoryTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/PaymentMethodsTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/PaymentMethodsTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/PersonalDataTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/PersonalDataTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/ShipmentsTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/components/ShipmentsTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/main.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/AdminCatalog.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/AdminCatalog.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/AdminLayout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/AdminLayout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/AdminPanel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/AdminPanel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/AdminSupportPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/AdminSupportPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/AppLayout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/AppLayout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/CartPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/CartPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Catalog.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Catalog.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/DeliveryPayment.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/DeliveryPayment.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/FAQSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/FAQSection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Footer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Footer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Header.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Home.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Home.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/LoginRegister.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/LoginRegister.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/MultiTerminal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/MultiTerminal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Notifications.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Notifications.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/OrderCheck.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/OrderCheck.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/OrderDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/OrderInstructions.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/OrderInstructions.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/ProductDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/ProductDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Profile.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Profile.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Reviews.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/Reviews.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/SelfPickupCargo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/SelfPickupCargo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/SupportPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/SupportPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/TicketChatPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/pages/TicketChatPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/src/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/tailwind.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/tailwind.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../ReactJs/reactjs/my-ecommerce-app/vite.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/mvnw" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/mvnw.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Config/SecurityConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Config/WebConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Controller/Class/Email.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Controller/Class/LoginRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Controller/Class/Price.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Controller/Class/Profile.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Controller/Class/SignupRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Controller/ProductController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Controller/UserController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/DemoApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Entity/Product.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Entity/User.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Repository/ProductRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Repository/UserRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Services/ClusteringService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Services/ProductService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Services/UserDetailsImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Services/UserDetailsServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/Services/UserService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/jwt/AuthEntryPointJwt.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/jwt/AuthTokenFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/jwt/JwtResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/jwt/JwtUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/java/com/example/demo/jwt/MessageResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/main/resources/application.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Spring Boot/src/test/java/com/example/demo/DemoApplicationTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/jarRepositories.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../HELP.md" beforeDir="false" afterPath="$PROJECT_DIR$/../HELP.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../mvnw.cmd" beforeDir="false" afterPath="$PROJECT_DIR$/../mvnw.cmd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Components/LocalDateTimeArraySerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Components/LocalDateTimeArraySerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Components/MessageProducer.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Components/MessageProducer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Configs/JacksonConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Configs/JacksonConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Configs/KafkaConsumerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Configs/KafkaConsumerConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Configs/KafkaProducerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Configs/KafkaProducerConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Configs/KafkaTopicConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Configs/KafkaTopicConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Configs/SecurityConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Configs/SecurityConfiguration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Configs/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Configs/WebSocketConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/CartController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/CartController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/ChatController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/LoyaltyController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/LoyaltyController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/NotificationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/OrderController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/OrderHistoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/OrderHistoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/ProductController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/PromocodeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/PromocodeController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/QuestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/QuestController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/ReviewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/ReviewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/TicketController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/TicketController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Controllers/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/DTO/CartItemDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/DTO/CartItemDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/DTO/QuestDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/DTO/QuestDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/DTO/UserDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/DTO/UserDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/DemoApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/DemoApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Cart.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Cart.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/CartItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/CartItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/ChatMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/ChatMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/DiscountType.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/DiscountType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Notification.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Notification.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Order.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/OrderHistory.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/OrderHistory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/OrderItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/OrderItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Product.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Promocode.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Promocode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Quest.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Quest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/QuestConditionType.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/QuestConditionType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/QuestProgress.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/QuestProgress.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Review.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Review.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/RewardType.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/RewardType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Ticket.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/Ticket.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/TicketStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/TicketStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Entities/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Entities/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/POJO/OrderStatusEvent.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/POJO/OrderStatusEvent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/POJO/QuestEvent.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/POJO/QuestEvent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/POJO/SupportMessageEvent.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/POJO/SupportMessageEvent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/CartRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/CartRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/ChatMessageRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/ChatMessageRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/NotificationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/NotificationRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/OrderHistoryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/OrderHistoryRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/OrderRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/OrderRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/ProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/ProductRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/PromocodeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/PromocodeRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/QuestProgressRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/QuestProgressRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/QuestRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/QuestRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/ReviewRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/ReviewRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/TicketRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/TicketRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Repositories/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Services/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Services/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Services/ChatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Services/ChatService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Services/ClusteringService.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Services/ClusteringService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Services/CustomUserDetailsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Services/CustomUserDetailsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Services/NotificationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Services/NotificationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Services/QuestService.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Services/QuestService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Services/ReviewService.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Services/ReviewService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Services/TicketService.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Services/TicketService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/Services/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/Services/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/jwt/AuthTokenFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/jwt/AuthTokenFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/java/com/example/demo/jwt/JwtUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/java/com/example/demo/jwt/JwtUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/java/com/example/demo/DemoApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/test/java/com/example/demo/DemoApplicationTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Components/LocalDateTimeArraySerializer.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Components/LocalDateTimeArraySerializer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Configs/JacksonConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Configs/JacksonConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Configs/KafkaConsumerConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Configs/KafkaConsumerConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Configs/KafkaProducerConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Configs/KafkaProducerConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Configs/KafkaTopicConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Configs/KafkaTopicConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Configs/SecurityConfiguration.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Configs/SecurityConfiguration.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Configs/WebSocketConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Configs/WebSocketConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/AuthController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/AuthController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/AuthRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/AuthRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/AuthResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/AuthResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/CartController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/CartController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/CartItemDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/CartItemDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/CartItemRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/CartItemRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/ChatController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/ChatController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/ChatMessageDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/ChatMessageDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/CreateOrderRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/CreateOrderRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/LoyaltyController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/LoyaltyController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/NotificationController$GlobalNotificationDTO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/NotificationController$OrderStatusNotificationDTO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/NotificationController$SupportMessageNotificationDTO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/NotificationController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/NotificationController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/OrderController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/OrderController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/OrderDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/OrderDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/OrderHistoryController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/OrderHistoryDTO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/OrderItemDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/OrderItemDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/OrderResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/OrderResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/ProductController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/ProductController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/PromocodeController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/PromocodeController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/PromocodeRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/PromocodeRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/PromocodeResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/PromocodeResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/QuestController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/QuestController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/RegisterRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/RegisterRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/ReviewController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/ReviewController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/SubmitOrderRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/SubmitOrderRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/TicketController$UserIdRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/TicketController$UserIdRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/TicketController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/TicketController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/UserController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Controllers/UserController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/DTO/CartItemDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/DTO/CartItemDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/DTO/QuestDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/DTO/QuestDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/DTO/UserDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/DTO/UserDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/DemoApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/DemoApplication.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Cart.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Cart.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/CartItem.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/CartItem.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/ChatMessage.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/ChatMessage.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/DiscountType.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/DiscountType.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Notification.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Notification.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Order.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Order.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/OrderHistory.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/OrderItem.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/OrderItem.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Product.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Product.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Promocode.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Promocode.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Quest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Quest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/QuestConditionType.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/QuestConditionType.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/QuestProgress.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/QuestProgress.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Review.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Review.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/RewardType.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/RewardType.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Ticket.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/Ticket.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/TicketStatus.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/TicketStatus.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Entities/User.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/POJO/OrderStatusEvent.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/POJO/OrderStatusEvent.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/POJO/QuestEvent.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/POJO/QuestEvent.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/POJO/SupportMessageEvent.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/POJO/SupportMessageEvent.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/CartRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/CartRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/ChatMessageRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/ChatMessageRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/NotificationRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/OrderHistoryRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/OrderRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/ProductRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/ProductRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/PromocodeRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/PromocodeRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/QuestProgressRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/QuestProgressRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/QuestRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/QuestRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/ReviewRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/ReviewRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/TicketRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/TicketRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/UserRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Repositories/UserRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/AuthService.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/AuthService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/ChatService.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/ChatService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/ClusteringService.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/ClusteringService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/CustomUserDetailsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/CustomUserDetailsService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/NotificationService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/QuestService.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/QuestService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/ReviewService.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/ReviewService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/TicketService.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/TicketService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/UserService.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/Services/UserService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/jwt/AuthTokenFilter.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/jwt/AuthTokenFilter.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/com/example/demo/jwt/JwtUtil.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/com/example/demo/jwt/JwtUtil.class" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 0
+}]]></component>
+  <component name="ProjectId" id="32JV8slpYUOhEA4p8uNF6k3wILD" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "Merging main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/itmaibenben/Рабочий стол/CargoSite/SpringBoot"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e08534fd-dc43-4c77-abb8-59b7131896b9" name="Changes" comment="" />
+      <created>1757138505301</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1757138505301</updated>
+    </task>
+    <servers />
+  </component>
+</project>
