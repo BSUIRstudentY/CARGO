@@ -1,5 +1,7 @@
+
 import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api/axiosInstance';
+import { useNavigate } from 'react-router-dom';
 
 const CartContext = createContext();
 
@@ -10,6 +12,7 @@ export function CartProvider({ children }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -32,8 +35,9 @@ export function CartProvider({ children }) {
       console.error('Fetch cart error:', error.response?.data?.message || error.message);
       if (error.response?.status === 403) {
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        navigate('/login');
       }
+      setError('Не удалось загрузить корзину: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -42,6 +46,7 @@ export function CartProvider({ children }) {
   const addToCart = async (productsToAdd) => {
     if (!Array.isArray(productsToAdd) || productsToAdd.length === 0) {
       console.error('Invalid products list');
+      setError('Недопустимый список продуктов');
       return;
     }
     setLoading(true);
@@ -54,11 +59,12 @@ export function CartProvider({ children }) {
         localStorage.setItem('savedProducts', JSON.stringify([...savedProducts, ...newProducts]));
       }
     } catch (error) {
-      console.error('Add to cart error:', error.message);
+      console.error('Add to cart error:', error.response?.data?.message || error.message);
       if (error.response?.status === 403) {
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        navigate('/login');
       }
+      setError('Не удалось добавить продукты в корзину: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -67,6 +73,7 @@ export function CartProvider({ children }) {
   const addSingleToCart = async (product) => {
     if (!product || !product.id) {
       console.error('Invalid product: missing ID');
+      setError('Недопустимый продукт: отсутствует ID');
       return;
     }
     setLoading(true);
@@ -104,9 +111,10 @@ export function CartProvider({ children }) {
       console.error('Add single to cart error:', error.response?.data?.message || error.message);
       if (error.response?.status === 403) {
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        navigate('/login');
       } else if (error.response?.status === 400) {
         console.error('Bad request:', error.response?.data?.message || 'Invalid data format');
+        setError('Недопустимый формат данных: ' + (error.response?.data?.message || error.message));
       }
     } finally {
       setLoading(false);
@@ -121,7 +129,8 @@ export function CartProvider({ children }) {
       await api.delete(`/cart/remove/${productId}`);
       await fetchCart();
     } catch (error) {
-      console.error('Remove from cart error:', error.message);
+      console.error('Remove from cart error:', error.response?.data?.message || error.message);
+      setError('Не удалось удалить продукт из корзины: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -148,8 +157,8 @@ export function CartProvider({ children }) {
       }
     } catch (error) {
       console.error('Update quantity error:', error.response?.data?.message || error.message);
-      setError('Не удалось обновить количество. Проверьте доступ или наличие продукта.');
-      setCart(cart); // Откат при ошибке
+      setError('Не удалось обновить количество: ' + (error.response?.data?.message || error.message));
+      setCart(cart); // Revert on error
     } finally {
       setLoading(false);
     }
@@ -162,7 +171,8 @@ export function CartProvider({ children }) {
       localStorage.removeItem('cart');
       await api.delete('/cart/clear');
     } catch (error) {
-      console.error('Clear cart error:', error.message);
+      console.error('Clear cart error:', error.response?.data?.message || error.message);
+      setError('Не удалось очистить корзину: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -192,15 +202,16 @@ export function CartProvider({ children }) {
     } catch (error) {
       if (error.response?.status === 403) {
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        navigate('/login');
       }
       console.error('Sync cart error:', error.response?.data?.message || error.message);
+      setError('Не удалось синхронизировать корзину: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
   };
 
-  const confirmOrder = async (deliveryAddress) => {
+  const confirmOrder = async (deliveryAddress, promocode, insurance, discountType, discountValue) => {
     setLoading(true);
     try {
       if (!deliveryAddress) {
@@ -208,19 +219,32 @@ export function CartProvider({ children }) {
       }
 
       const orderData = {
-        deliveryAddress: deliveryAddress,
+        deliveryAddress,
+        promocode: promocode || null,
+        insurance,
+        discountType,
+        discountValue,
       };
 
       console.log('Sending order to /cart/submit-order:', orderData);
-      const response = await api.post('/cart/submit-order', orderData);
+      const response = await api.post('/cart/submit-order', orderData, {
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      const productIdsToUpdate = cart.map(item => item.id);
-      await api.put('/products/bulk-status', { ids: productIdsToUpdate, status: 'VERIFIED' });
+      console.log('Order submission response:', response.data); // Log for debugging
 
       await clearCart();
-      alert('Заказ успешно отправлен на проверку администратору! ' + (response.data.orderId ? `ID заказа: ${response.data.orderId}` : ''));
+      alert(`Заказ успешно отправлен на проверку администратору! ID заказа: ${response.data.orderId}\n` +
+            `Сумма: ¥${response.data.totalClientPrice.toFixed(2)}\n` +
+            `Скидка пользователя: ${response.data.userDiscountApplied > 0 ? `-¥${response.data.userDiscountApplied.toFixed(2)}` : 'Нет'}\n` +
+            `Скидка по промокоду: ${response.data.discountApplied > 0 ? `-¥${response.data.discountApplied.toFixed(2)}` : 'Нет'}\n` +
+            `Страховка: ${response.data.insuranceCost > 0 ? `¥${response.data.insuranceCost.toFixed(2)}` : 'Нет'}`);
+      navigate(`/orders/${response.data.orderId}`); // Redirect to order details
+      return response.data;
     } catch (error) {
       console.error('Error confirming order:', error.response?.data?.message || error.message);
+      setError('Ошибка при создании заказа: ' + (error.response?.data?.message || error.message));
+      throw error;
     } finally {
       setLoading(false);
     }

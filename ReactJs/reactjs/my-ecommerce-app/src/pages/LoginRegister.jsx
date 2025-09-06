@@ -1,15 +1,39 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/AuthProvider';
+import api from '../api/axiosInstance';
 
 function LoginRegister() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [referralCode, setReferralCode] = useState('');
+  const [isReferralValid, setIsReferralValid] = useState(false);
+  const [referralMessage, setReferralMessage] = useState('');
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
   const { login, register } = useAuth();
+
+  const handleApplyReferral = async () => {
+    if (!referralCode) {
+      setReferralMessage('Введите реферальный код');
+      return;
+    }
+    try {
+      const res = await api.get('/auth/validate-referral', { params: { code: referralCode } });
+      if (res.data === true) {
+        setIsReferralValid(true);
+        setReferralMessage('Реферальный код действителен!');
+      } else {
+        setIsReferralValid(false);
+        setReferralMessage('Неверный реферальный код');
+      }
+    } catch (err) {
+      setIsReferralValid(false);
+      setReferralMessage('Ошибка при проверке кода');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,11 +41,15 @@ function LoginRegister() {
       alert('Пароли не совпадают');
       return;
     }
+    if (!isLogin && referralCode && !isReferralValid) {
+      alert('Пожалуйста, примените действительный реферальный код или оставьте поле пустым');
+      return;
+    }
     try {
       if (isLogin) {
         await login(email, password);
       } else {
-        await register(username, email, password);
+        await register(username, email, password, referralCode);
       }
       // Навигация не требуется, так как App.jsx обработает маршруты
     } catch (error) {
@@ -66,14 +94,35 @@ function LoginRegister() {
             required
           />
           {!isLogin && (
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Подтвердите пароль"
-              className="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
-              required
-            />
+            <>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Подтвердите пароль"
+                className="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
+                required
+              />
+              <div className="flex">
+                <input
+                  type="text"
+                  value={referralCode}
+                  onChange={(e) => setReferralCode(e.target.value)}
+                  placeholder="Реферальный код (опционально)"
+                  className="flex-grow px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyReferral}
+                  className="ml-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300"
+                >
+                  Применить
+                </button>
+              </div>
+              {referralMessage && (
+                <p className={isReferralValid ? 'text-green-500' : 'text-red-500'}>{referralMessage}</p>
+              )}
+            </>
           )}
           <button
             type="submit"

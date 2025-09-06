@@ -82,15 +82,13 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (username, email, password, secondName, thirdName, role) => {
+  const register = async (username, email, password, referralCode) => {
     try {
       const response = await api.post('/auth/register', {
         username,
         email,
         password,
-        secondName,
-        thirdName,
-        role, // Добавлено поле role
+        referralCode,
       });
       console.log('Register response data:', response.data);
       const { token, email: userEmail, username: userName } = response.data;
@@ -98,14 +96,14 @@ export function AuthProvider({ children }) {
         console.warn('Username not found in response, using provided username');
       }
       const decoded = jwtDecode(token);
-      const userRole = decoded.role || role; // Используем роль из токена или переданную
+      const userRole = decoded.role || 'USER';
       localStorage.setItem('token', token);
       localStorage.setItem('userEmail', userEmail);
       localStorage.setItem('userName', userName || username || '');
       localStorage.setItem('userRole', userRole);
       setAuthState({ isAuthenticated: true, user: { email: userEmail, username: userName || username || '', role: userRole } });
     } catch (error) {
-      throw new Error('Registration failed');
+      throw new Error('Registration failed: ' + (error.response?.data?.message || error.message));
     }
   };
 

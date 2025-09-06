@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,8 +33,7 @@ public class SecurityConfiguration {
     private UserDetailsService userDetailsService;
 
     private static final String[] WHITE_LIST_URL = {
-            "/api/auth/register",
-            "/api/auth/login",
+            "/api/auth/**",
             "/api/products",
             "/api/cluster",
             "/ws/**", // Add WebSocket endpoint to whitelist
@@ -80,4 +80,7 @@ public class SecurityConfiguration {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
+
+
 }

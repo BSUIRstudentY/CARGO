@@ -5,11 +5,12 @@ import com.example.demo.Entities.*;
 import com.example.demo.Repositories.CartRepository;
 import com.example.demo.Repositories.OrderRepository;
 import com.example.demo.Repositories.ProductRepository;
+import com.example.demo.Repositories.PromocodeRepository;
 import com.example.demo.Repositories.UserRepository;
+import com.example.demo.Services.UserService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,10 +36,16 @@ public class CartController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PromocodeRepository promocodeRepository;
+
+    @Autowired
+    private UserService userService;
+
     @GetMapping
     @Transactional(readOnly = true)
     public ResponseEntity<List<CartItemDTO>> getCart() {
-        String userEmail = getCurrentUserEmail();
+        String userEmail = userService.getCurrentUserEmail();
         if (userEmail == null) {
             return ResponseEntity.status(403).body(null);
         }
@@ -65,7 +72,7 @@ public class CartController {
     @PostMapping("/bulk-add")
     @Transactional
     public ResponseEntity<List<CartItemDTO>> addBulkToCart(@RequestBody List<Product> products) {
-        String userEmail = getCurrentUserEmail();
+        String userEmail = userService.getCurrentUserEmail();
         if (userEmail == null) {
             return ResponseEntity.status(403).body(null);
         }
@@ -76,14 +83,12 @@ public class CartController {
             return cartRepository.save(newCart);
         });
 
-        // Сохраняем или обновляем продукты с статусом PENDING
         List<Product> savedProducts = products.stream().map(product -> {
             product.setStatus("PENDING");
             product.setLastUpdated(new Timestamp(System.currentTimeMillis()));
             return productRepository.save(product);
         }).collect(Collectors.toList());
 
-        // Добавляем в корзину только новые товары
         for (Product product : savedProducts) {
             if (!cart.getItems().stream().anyMatch(item -> item.getProduct().getId().equals(product.getId()))) {
                 CartItem cartItem = new CartItem();
@@ -112,7 +117,7 @@ public class CartController {
     @PutMapping
     @Transactional
     public ResponseEntity<?> updateCart(@RequestBody List<CartItemRequest> items) {
-        String userEmail = getCurrentUserEmail();
+        String userEmail = userService.getCurrentUserEmail();
         if (userEmail == null) {
             return ResponseEntity.status(403).body(null);
         }
@@ -156,10 +161,7 @@ public class CartController {
             existingItems.remove(request.getProductId());
         }
 
-        // Не удаляем оставшиеся элементы, только обновляем существующие
         cartRepository.save(cart);
-
-
 
         return ResponseEntity.ok().build();
     }
@@ -167,7 +169,7 @@ public class CartController {
     @DeleteMapping("/remove/{productId}")
     @Transactional
     public ResponseEntity<List<CartItemDTO>> removeFromCart(@PathVariable String productId) {
-        String userEmail = getCurrentUserEmail();
+        String userEmail = userService.getCurrentUserEmail();
         if (userEmail == null) {
             return ResponseEntity.status(403).body(null);
         }
@@ -193,7 +195,7 @@ public class CartController {
     @DeleteMapping("/clear")
     @Transactional
     public ResponseEntity<Void> clearCart() {
-        String userEmail = getCurrentUserEmail();
+        String userEmail = userService.getCurrentUserEmail();
         if (userEmail == null) {
             return ResponseEntity.status(403).build();
         }
@@ -206,41 +208,86 @@ public class CartController {
 
     @PostMapping("/submit-order")
     @Transactional
-    public ResponseEntity<?> submitOrder(@RequestBody Map<String, Object> request) {
-        String userEmail = getCurrentUserEmail();
+    public ResponseEntity<?> submitOrder(@RequestBody SubmitOrderRequest request) {
+        String userEmail = userService.getCurrentUserEmail();
         if (userEmail == null) {
-            return ResponseEntity.status(403).body(null);
+            return ResponseEntity.status(403).body(new OrderResponse("Пользователь не аутентифицирован"));
         }
 
         try {
-            // Шаг 1: Получаем корзину
+            // Step 1: Get the cart
             Cart cart = cartRepository.findById(userEmail)
                     .orElseThrow(() -> new RuntimeException("Корзина не найдена"));
             if (cart.getItems().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Корзина пуста"));
+                return ResponseEntity.badRequest().body(new OrderResponse("Корзина пуста"));
             }
 
-            // Шаг 2: Получаем адрес доставки из запроса
-            String deliveryAddress = (String) request.get("deliveryAddress");
+            // Step 2: Validate delivery address
+            String deliveryAddress = request.getDeliveryAddress();
             if (deliveryAddress == null || deliveryAddress.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Укажите адрес доставки"));
+                return ResponseEntity.badRequest().body(new OrderResponse("Укажите адрес доставки"));
             }
 
-            // Шаг 3: Создаём заказ
+            // Step 3: Get user and verify discount
             User user = userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+            user.verifyDiscount();
 
+            // Step 4: Create order
             Order order = new Order();
             order.setUser(user);
             order.setOrderNumber(UUID.randomUUID().toString());
             order.setDateCreated(new Timestamp(System.currentTimeMillis()));
             order.setStatus("PENDING");
-            order.setTotalClientPrice((float) cart.getItems().stream()
+
+            // Calculate total price before discounts
+            float totalClientPrice = (float) cart.getItems().stream()
                     .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
-                    .sum());
+                    .sum();
+            float userDiscountAmount = 0.0f;
+            float promocodeDiscountAmount = 0.0f;
+            float insuranceCost = 0.0f;
+
+            // Apply user discount
+            float userDiscountPercent = user.getTotalDiscount();
+            if (userDiscountPercent > 0) {
+                userDiscountAmount = totalClientPrice * (userDiscountPercent / 100);
+            }
+
+            // Apply promocode discount (assumed valid from frontend)
+            Promocode promocode = null;
+            if (request.getPromocode() != null && !request.getPromocode().isEmpty()) {
+                promocode = promocodeRepository.findByCode(request.getPromocode())
+                        .orElseThrow(() -> new RuntimeException("Промокод не найден"));
+                if (request.getDiscountType().equals("PERCENTAGE")) {
+                    promocodeDiscountAmount = totalClientPrice * (request.getDiscountValue() / 100);
+                } else { // FIXED
+                    promocodeDiscountAmount = request.getDiscountValue();
+                }
+                order.setPromocode(promocode);
+                promocode.setUsedCount(promocode.getUsedCount() + 1);
+                promocodeRepository.save(promocode);
+            }
+
+            // Apply insurance cost
+            if (request.isInsurance()) {
+                insuranceCost = totalClientPrice * 0.05f;
+            }
+
+            // Ensure final price is not negative
+            float totalDiscountAmount = userDiscountAmount + promocodeDiscountAmount;
+            if (totalClientPrice - totalDiscountAmount + insuranceCost < 0) {
+                return ResponseEntity.badRequest().body(new OrderResponse("Скидка превышает стоимость заказа"));
+            }
+
+            // Set order details
+            order.setTotalClientPrice(totalClientPrice - totalDiscountAmount + insuranceCost);
+            order.setUserDiscountApplied(userDiscountAmount);
+            order.setDiscountApplied(promocodeDiscountAmount);
+            order.setInsuranceCost(insuranceCost);
             order.setDeliveryAddress(deliveryAddress);
 
-            // Шаг 4: Создаём и связываем OrderItem с Order
+            // Step 5: Create and link OrderItems
             List<OrderItem> orderItems = cart.getItems().stream()
                     .map(cartItem -> {
                         OrderItem orderItem = new OrderItem();
@@ -253,11 +300,11 @@ public class CartController {
                     .collect(Collectors.toList());
 
             order.setItems(orderItems);
-            orderRepository.save(order); // Сохранение заказа с каскадным сохранением OrderItem
+            orderRepository.save(order);
 
-            // Шаг 5: Обновляем статус продуктов на VERIFIED
+            // Step 6: Update product statuses to VERIFIED
             List<Product> productsToUpdate = order.getItems().stream()
-                    .map(orderItem -> orderItem.getProduct())
+                    .map(OrderItem::getProduct)
                     .peek(product -> {
                         product.setStatus("VERIFIED");
                         product.setLastUpdated(new Timestamp(System.currentTimeMillis()));
@@ -265,21 +312,21 @@ public class CartController {
                     .collect(Collectors.toList());
             productRepository.saveAll(productsToUpdate);
 
-            // Шаг 6: Очищаем корзину
+            // Step 7: Clear the cart
             cart.getItems().clear();
             cartRepository.save(cart);
 
-            return ResponseEntity.ok(Map.of("message", "Заказ успешно обработан", "orderId", order.getId()));
+            // Step 8: Prepare response
+            OrderResponse response = new OrderResponse();
+            response.setMessage("Заказ успешно обработан");
+            response.setOrderId(order.getId());
+            response.setTotalClientPrice(order.getTotalClientPrice());
+            response.setUserDiscountApplied(order.getUserDiscountApplied());
+            response.setDiscountApplied(order.getDiscountApplied());
+            response.setInsuranceCost(order.getInsuranceCost());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Ошибка обработки заказа: " + e.getMessage()));
-        }
-    }
-
-    private String getCurrentUserEmail() {
-        try {
-            return SecurityContextHolder.getContext().getAuthentication().getName();
-        } catch (Exception e) {
-            return null;
+            return ResponseEntity.status(500).body(new OrderResponse("Ошибка обработки заказа: " + e.getMessage()));
         }
     }
 }
@@ -288,7 +335,32 @@ public class CartController {
 class CartItemRequest {
     private String productId;
     private Integer quantity;
-    private String imageUrl;    // Add this
-    private String productName; // Add this
-    private Double price;       // Add this (adjust type based on your needs)
+    private String imageUrl;
+    private String productName;
+    private Double price;
+}
+
+@Data
+class SubmitOrderRequest {
+    private String deliveryAddress;
+    private String promocode;
+    private boolean insurance;
+    private String discountType;
+    private Float discountValue;
+}
+
+@Data
+class OrderResponse {
+    private String message;
+    private Long orderId;
+    private Float totalClientPrice;
+    private Float userDiscountApplied; // Added for user-specific discount
+    private Float discountApplied; // Promocode discount only
+    private Float insuranceCost;
+
+    public OrderResponse() {}
+
+    public OrderResponse(String message) {
+        this.message = message;
+    }
 }

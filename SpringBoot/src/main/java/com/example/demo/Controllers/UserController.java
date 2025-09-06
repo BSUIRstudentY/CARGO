@@ -1,5 +1,6 @@
 package com.example.demo.Controllers;
 
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entities.User;
 import com.example.demo.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/profile")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
@@ -30,6 +31,28 @@ public class UserController {
             return null;
         }
     }
+
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser() {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (userEmail == null) {
+            return ResponseEntity.status(403).body(null);
+        }
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        user.verifyDiscount();
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setEmail(user.getEmail());
+        userDTO.setUsername(user.getUsername());
+        userDTO.setTotalDiscount(user.getTotalDiscount());
+
+        return ResponseEntity.ok(userDTO);
+    }
+
 
     // Получение профиля текущего пользователя
     @GetMapping
