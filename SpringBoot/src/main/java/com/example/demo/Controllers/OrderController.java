@@ -82,7 +82,6 @@ public class OrderController {
                     orderItem.setProduct(cartItem.getProduct());
                     orderItem.setQuantity(cartItem.getQuantity());
                     orderItem.setPriceAtTime(cartItem.getProduct().getPrice());
-                    orderItem.setPurchaseStatus("PENDING"); // Initialize purchaseStatus
                     return orderItem;
                 })
                 .collect(Collectors.toList());
@@ -203,7 +202,7 @@ public class OrderController {
                     product.setUrl(itemDTO.getUrl());
                 }
                 if (itemDTO.getImageUrl() != null && !itemDTO.getImageUrl().equals(product.getImageUrl())) {
-                    product.setUrl(itemDTO.getImageUrl());
+                    product.setImageUrl(itemDTO.getImageUrl());
                 }
                 if (itemDTO.getDescription() != null && !itemDTO.getDescription().equals(product.getDescription())) {
                     product.setDescription(itemDTO.getDescription());
@@ -218,7 +217,26 @@ public class OrderController {
                 orderItem.setPriceAtTime(itemDTO.getPriceAtTime() != null ? itemDTO.getPriceAtTime() : 0.0f);
                 orderItem.setSupplierPrice(itemDTO.getSupplierPrice() != null ? itemDTO.getSupplierPrice() : 0.0f);
                 orderItem.setPurchaseStatus(itemDTO.getPurchaseStatus() != null ? itemDTO.getPurchaseStatus() : "PENDING");
+                orderItem.setPurchaseRefusalReason(itemDTO.getPurchaseRefusalReason());
                 order.getItems().add(orderItem);
+            }
+        }
+
+        // Send notifications for NOT_PURCHASED items
+        if (order.getItems() != null) {
+            for (OrderItem item : order.getItems()) {
+                if ("NOT_PURCHASED".equals(item.getPurchaseStatus()) && item.getPurchaseRefusalReason() != null) {
+                    try {
+                        notificationService.sendOrderItemStatusChangeNotification(
+                                order.getUser(),
+                                order.getId(),
+                                item.getProduct().getName(),
+                                item.getPurchaseRefusalReason()
+                        );
+                    } catch (Exception e) {
+                        System.out.println("Failed to send item notification for " + item.getProduct().getName() + ": " + e.getMessage());
+                    }
+                }
             }
         }
 
@@ -240,7 +258,8 @@ public class OrderController {
                         historyItem.setQuantity(item.getQuantity());
                         historyItem.setPriceAtTime(item.getPriceAtTime());
                         historyItem.setSupplierPrice(item.getSupplierPrice());
-                        historyItem.setPurchaseStatus(item.getPurchaseStatus() != null ? item.getPurchaseStatus() : "PENDING");
+                        historyItem.setPurchaseStatus(item.getPurchaseStatus());
+                        historyItem.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
                         return historyItem;
                     })
                     .collect(Collectors.toList()));
@@ -312,10 +331,11 @@ public class OrderController {
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPriceAtTime(item.getPriceAtTime());
                     itemDTO.setUrl(item.getProduct().getUrl());
-                    itemDTO.setImageUrl(item.getProduct().getImageUrl());
+                    itemDTO.setImageUrl(item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
                     itemDTO.setDescription(item.getProduct().getDescription());
                     itemDTO.setSupplierPrice(item.getSupplierPrice());
-                    itemDTO.setPurchaseStatus(item.getPurchaseStatus() != null ? item.getPurchaseStatus() : "PENDING");
+                    itemDTO.setPurchaseStatus(item.getPurchaseStatus());
+                    itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
@@ -340,16 +360,17 @@ public class OrderController {
         orderDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
-                    itemDTO.setId(item.getId()); // Include item ID
+                    itemDTO.setId(item.getId());
                     itemDTO.setProductId(item.getProduct().getId().toString());
                     itemDTO.setProductName(item.getProduct().getName());
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPriceAtTime(item.getPriceAtTime());
                     itemDTO.setUrl(item.getProduct().getUrl());
-                    itemDTO.setImageUrl(item.getProduct().getImageUrl());
+                    itemDTO.setImageUrl(item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
                     itemDTO.setDescription(item.getProduct().getDescription());
                     itemDTO.setSupplierPrice(item.getSupplierPrice());
-                    itemDTO.setPurchaseStatus(item.getPurchaseStatus() != null ? item.getPurchaseStatus() : "PENDING");
+                    itemDTO.setPurchaseStatus(item.getPurchaseStatus());
+                    itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
@@ -406,7 +427,7 @@ public class OrderController {
 
     @Data
     static class OrderItemDTO {
-        private Long id; // Added to fix missing item ID
+        private Long id;
         private String productId;
         private String productName;
         private Integer quantity;
@@ -415,7 +436,8 @@ public class OrderController {
         private String imageUrl;
         private String description;
         private Float supplierPrice;
-        private String purchaseStatus; // Added to support purchase status
+        private String purchaseStatus;
+        private String purchaseRefusalReason;
     }
 
     @Data
