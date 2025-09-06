@@ -10,8 +10,12 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class NotificationService {
@@ -21,6 +25,13 @@ public class NotificationService {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    private final WebClient webClient;
+
+    @Autowired
+    public NotificationService(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8080/api").build();
+    }
 
     @KafkaListener(topics = "order-status", groupId = "notification-group")
     public void sendOrderStatusChangeNotification(OrderStatusEvent event) {
@@ -95,6 +106,24 @@ public class NotificationService {
         messagingTemplate.convertAndSend("/topic/global-notifications", notification);
     }
 
+    public void sendOrderItemStatusChangeNotification(User user, Long orderId, String productName, String refusalReason) {
+        String message = String.format("Товар '%s' в заказе #%d не выкуплен. Причина: %s", productName, orderId, refusalReason);
+        Map<String, Object> notification = new HashMap<>();
+        notification.put("userEmail", user.getEmail());
+        notification.put("message", message);
+        notification.put("relatedId", orderId);
+        notification.put("category", "ORDER_ITEM_UPDATE");
+
+        webClient.post()
+                .uri("/notifications")
+                .body(Mono.just(notification), Map.class)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .doOnSuccess(response -> System.out.println("Notification sent: " + message))
+                .doOnError(error -> System.err.println("Failed to send notification: " + error.getMessage()))
+                .subscribe();
+    }
+
     public Notification sendUserNotification(User user, String message, Long relatedId, String category) {
         Notification notification = new Notification();
         notification.setUser(user);
@@ -108,4 +137,5 @@ public class NotificationService {
         messagingTemplate.convertAndSend("/topic/personal/" + user.getEmail(), savedNotification);
         return savedNotification;
     }
+
 }

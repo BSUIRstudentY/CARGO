@@ -4,7 +4,6 @@ import com.example.demo.Entities.*;
 import com.example.demo.POJO.OrderStatusEvent;
 import com.example.demo.Repositories.*;
 import com.example.demo.Services.NotificationService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -12,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import lombok.Data;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -78,10 +78,10 @@ public class OrderController {
                 .map(cartItem -> {
                     OrderItem orderItem = new OrderItem();
                     orderItem.setOrder(order);
+                    orderItem.setOrderHistory(null);
                     orderItem.setProduct(cartItem.getProduct());
                     orderItem.setQuantity(cartItem.getQuantity());
                     orderItem.setPriceAtTime(cartItem.getProduct().getPrice());
-                    orderItem.setPurchaseStatus("PENDING");
                     return orderItem;
                 })
                 .collect(Collectors.toList());
@@ -166,10 +166,6 @@ public class OrderController {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Заказ с ID " + id + " не найден"));
 
-        if (!order.getStatus().equals("PENDING")) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Order is not in PENDING status", 400));
-        }
-
         if (orderDetails.getTotalClientPrice() == null || orderDetails.getTotalClientPrice() <= 0) {
             System.out.println("Validation failed: totalClientPrice is null or <= 0");
             return ResponseEntity.badRequest().body(new ErrorResponse("Общая цена для клиента должна быть больше 0", 400));
@@ -185,12 +181,10 @@ public class OrderController {
         order.setShippingCost(orderDetails.getShippingCost());
         order.setDeliveryAddress(orderDetails.getDeliveryAddress());
         order.setTrackingNumber(orderDetails.getTrackingNumber());
-        order.setStatus(orderDetails.getStatus() != null ? orderDetails.getStatus() : "VERIFIED");
-        order.setDiscountApplied(orderDetails.getDiscountApplied());
-        order.setUserDiscountApplied(orderDetails.getUserDiscountApplied());
-        order.setPromocode(orderDetails.getPromocode());
+        order.setStatus(orderDetails.getStatus());
+        order.setReasonRefusal(orderDetails.getReasonRefusal());
 
-        if (orderDetails.getItems() != null) {
+        if (order.getItems() != null) {
             order.getItems().clear();
             for (OrderItemDTO itemDTO : orderDetails.getItems()) {
                 if (itemDTO.getProductId() == null) {
@@ -217,12 +211,32 @@ public class OrderController {
 
                 OrderItem orderItem = new OrderItem();
                 orderItem.setOrder(order);
+                orderItem.setOrderHistory(null);
                 orderItem.setProduct(product);
                 orderItem.setQuantity(itemDTO.getQuantity() != null ? itemDTO.getQuantity() : 0);
                 orderItem.setPriceAtTime(itemDTO.getPriceAtTime() != null ? itemDTO.getPriceAtTime() : 0.0f);
                 orderItem.setSupplierPrice(itemDTO.getSupplierPrice() != null ? itemDTO.getSupplierPrice() : 0.0f);
                 orderItem.setPurchaseStatus(itemDTO.getPurchaseStatus() != null ? itemDTO.getPurchaseStatus() : "PENDING");
+                orderItem.setPurchaseRefusalReason(itemDTO.getPurchaseRefusalReason());
                 order.getItems().add(orderItem);
+            }
+        }
+
+        // Send notifications for NOT_PURCHASED items
+        if (order.getItems() != null) {
+            for (OrderItem item : order.getItems()) {
+                if ("NOT_PURCHASED".equals(item.getPurchaseStatus()) && item.getPurchaseRefusalReason() != null) {
+                    try {
+                        notificationService.sendOrderItemStatusChangeNotification(
+                                order.getUser(),
+                                order.getId(),
+                                item.getProduct().getName(),
+                                item.getPurchaseRefusalReason()
+                        );
+                    } catch (Exception e) {
+                        System.out.println("Failed to send item notification for " + item.getProduct().getName() + ": " + e.getMessage());
+                    }
+                }
             }
         }
 
@@ -244,7 +258,8 @@ public class OrderController {
                         historyItem.setQuantity(item.getQuantity());
                         historyItem.setPriceAtTime(item.getPriceAtTime());
                         historyItem.setSupplierPrice(item.getSupplierPrice());
-                        historyItem.setPurchaseStatus(item.getPurchaseStatus() != null ? item.getPurchaseStatus() : "PENDING");
+                        historyItem.setPurchaseStatus(item.getPurchaseStatus());
+                        historyItem.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
                         return historyItem;
                     })
                     .collect(Collectors.toList()));
@@ -316,10 +331,11 @@ public class OrderController {
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPriceAtTime(item.getPriceAtTime());
                     itemDTO.setUrl(item.getProduct().getUrl());
-                    itemDTO.setImageUrl(item.getProduct().getImageUrl());
+                    itemDTO.setImageUrl(item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
                     itemDTO.setDescription(item.getProduct().getDescription());
                     itemDTO.setSupplierPrice(item.getSupplierPrice());
-                    itemDTO.setPurchaseStatus(item.getPurchaseStatus() != null ? item.getPurchaseStatus() : "PENDING");
+                    itemDTO.setPurchaseStatus(item.getPurchaseStatus());
+                    itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
@@ -341,9 +357,6 @@ public class OrderController {
         orderDTO.setDeliveryAddress(order.getDeliveryAddress());
         orderDTO.setTrackingNumber(order.getTrackingNumber());
         orderDTO.setReasonRefusal(order.getReasonRefusal());
-        orderDTO.setDiscountApplied(order.getDiscountApplied());
-        orderDTO.setUserDiscountApplied(order.getUserDiscountApplied());
-        orderDTO.setPromocode(order.getPromocode());
         orderDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
@@ -353,10 +366,11 @@ public class OrderController {
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPriceAtTime(item.getPriceAtTime());
                     itemDTO.setUrl(item.getProduct().getUrl());
-                    itemDTO.setImageUrl(item.getProduct().getImageUrl());
+                    itemDTO.setImageUrl(item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
                     itemDTO.setDescription(item.getProduct().getDescription());
                     itemDTO.setSupplierPrice(item.getSupplierPrice());
-                    itemDTO.setPurchaseStatus(item.getPurchaseStatus() != null ? item.getPurchaseStatus() : "PENDING");
+                    itemDTO.setPurchaseStatus(item.getPurchaseStatus());
+                    itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
@@ -393,12 +407,9 @@ public class OrderController {
         private Float shippingCost;
         private String deliveryAddress;
         private String trackingNumber;
-        private String reasonRefusal;
-        private Float discountApplied;
-        private Float userDiscountApplied;
-        private Promocode promocode;
         private List<OrderItemDTO> items;
         private String userEmail;
+        private String reasonRefusal;
     }
 
     @Data
@@ -426,6 +437,7 @@ public class OrderController {
         private String description;
         private Float supplierPrice;
         private String purchaseStatus;
+        private String purchaseRefusalReason;
     }
 
     @Data

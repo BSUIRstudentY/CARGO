@@ -12,8 +12,10 @@ function OrderCheck() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [showRefusalModal, setShowRefusalModal] = useState(false);
   const [refusalReason, setRefusalReason] = useState('');
-  const [message, setMessage] = useState('');
   const [showMessageModal, setShowMessageModal] = useState(false);
+  const [message, setMessage] = useState('');
+  const [showItemRefusalModal, setShowItemRefusalModal] = useState(false);
+  const [itemRefusalReason, setItemRefusalReason] = useState('');
 
   const basicReasons = [
     'Неверная ссылка',
@@ -59,6 +61,12 @@ function OrderCheck() {
     fetchOrder();
   }, [fetchOrder]);
 
+  const isOrderFullyProcessed = () => {
+    return editedOrder?.items?.every(
+      (item) => item.purchaseStatus === 'PURCHASED' || item.purchaseStatus === 'NOT_PURCHASED'
+    );
+  };
+
   const handleConfirm = async () => {
     if (!editedOrder?.deliveryAddress || !editedOrder?.totalClientPrice) {
       setError('Укажите адрес доставки и общую цену');
@@ -66,13 +74,11 @@ function OrderCheck() {
     }
     setLoading(true);
     try {
-      console.log('Sending PUT request to /api/orders/' + id, editedOrder);
       const updatedOrder = {
         ...editedOrder,
         status: 'VERIFIED',
       };
       const response = await api.put(`/orders/${id}`, updatedOrder);
-      console.log('PUT response:', response);
       if (response?.data) {
         setOrder(response.data);
         setEditedOrder(response.data);
@@ -86,7 +92,7 @@ function OrderCheck() {
       let errorMessage = 'Ошибка подтверждения заказа';
       if (error.response) {
         if (error.response.status === 403) {
-          errorMessage = 'Доступ запрещён (403). Проверьте права доступа или токен авторизации. Токен: ' + (api.defaults.headers.Authorization || 'не установлен');
+          errorMessage = 'Доступ запрещён (403). Проверьте права доступа или токен авторизации.';
         } else {
           errorMessage = error.response.data?.message || error.message || 'Неизвестная ошибка';
         }
@@ -155,6 +161,82 @@ function OrderCheck() {
     }
   };
 
+  const handleItemNotPurchased = async () => {
+    if (!itemRefusalReason) {
+      alert('Укажите причину невыкупа');
+      return;
+    }
+    setLoading(true);
+    try {
+      const updatedOrder = {
+        ...editedOrder,
+        items: editedOrder.items.map((item) =>
+          item.productId === selectedItem.productId
+            ? { ...item, purchaseStatus: 'NOT_PURCHASED', purchaseRefusalReason: itemRefusalReason }
+            : item
+        ),
+      };
+      console.log('Sending updated order:', updatedOrder); // Debugging
+      const response = await api.put(`/orders/${id}`, updatedOrder);
+      if (response?.data) {
+        setOrder(response.data);
+        setEditedOrder(response.data);
+        alert('Товар помечен как невыкупленный!');
+      } else {
+        throw new Error('Ответ сервера не содержит данных');
+      }
+    } catch (error) {
+      console.error('Ошибка при обновлении статуса товара:', error);
+      let errorMessage = 'Ошибка обновления статуса товара';
+      if (error.response) {
+        errorMessage = error.response.data?.message || error.message || 'Неизвестная ошибка';
+      } else {
+        errorMessage = error.message || 'Ошибка сети';
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+      setShowItemRefusalModal(false);
+      setItemRefusalReason('');
+      setSelectedItem(null);
+    }
+  };
+
+  const handleItemPurchased = async () => {
+    setLoading(true);
+    try {
+      const updatedOrder = {
+        ...editedOrder,
+        items: editedOrder.items.map((item) =>
+          item.productId === selectedItem.productId
+            ? { ...item, purchaseStatus: 'PURCHASED', purchaseRefusalReason: null }
+            : item
+        ),
+      };
+      console.log('Sending updated order:', updatedOrder); // Debugging
+      const response = await api.put(`/orders/${id}`, updatedOrder);
+      if (response?.data) {
+        setOrder(response.data);
+        setEditedOrder(response.data);
+        alert('Товар помечен как выкупленный!');
+      } else {
+        throw new Error('Ответ сервера не содержит данных');
+      }
+    } catch (error) {
+      console.error('Ошибка при обновлении статуса товара:', error);
+      let errorMessage = 'Ошибка обновления статуса товара';
+      if (error.response) {
+        errorMessage = error.response.data?.message || error.message || 'Неизвестная ошибка';
+      } else {
+        errorMessage = error.message || 'Ошибка сети';
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+      setSelectedItem(null);
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!message) {
       alert('Введите сообщение');
@@ -190,16 +272,12 @@ function OrderCheck() {
     }));
   };
 
-  const handleItemChange = (index, e) => {
+  const handleItemChange = (e) => {
     const { name, value } = e.target;
-    setEditedOrder((prev) => {
-      const newItems = [...prev.items];
-      newItems[index] = {
-        ...newItems[index],
-        [name]: value,
-      };
-      return { ...prev, items: newItems };
-    });
+    setSelectedItem((prev) => ({
+      ...prev,
+      [name]: name === 'priceAtTime' ? parseFloat(value) || 0 : name === 'quantity' ? parseInt(value) || 1 : value,
+    }));
   };
 
   const handleItemEdit = (item) => {
@@ -248,9 +326,27 @@ function OrderCheck() {
       <h2 className="text-3xl font-bold text-[var(--accent-color)] mb-6">
         Проверка заказа #{editedOrder.orderNumber}
       </h2>
-      <p className={`text-lg font-semibold ${getStatusColor(editedOrder.status)} mb-4`}>
-        Статус: {editedOrder.status === 'REFUSED' ? `Отклонён (${editedOrder.reasonRefusal})` : editedOrder.status}
-      </p>
+      <div className="flex items-center mb-4">
+        <p className={`text-lg font-semibold ${getStatusColor(editedOrder.status)}`}>
+          Статус: {editedOrder.status === 'REFUSED' ? `Отклонён (${editedOrder.reasonRefusal})` : editedOrder.status}
+        </p>
+        {isOrderFullyProcessed() && (
+          <svg
+            className="ml-2 w-6 h-6 text-green-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        )}
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-gray-700 p-6 rounded-lg shadow-lg space-y-4">
           <div>
@@ -352,6 +448,9 @@ function OrderCheck() {
                 </div>
                 <h4 className="text-md font-medium">{item.productName || 'Без названия'}</h4>
                 <p className="text-sm text-gray-400">¥{(typeof item.priceAtTime === 'number' ? item.priceAtTime : 0).toFixed(2)} x {item.quantity}</p>
+                <p className={`text-sm ${item.purchaseStatus === 'PURCHASED' ? 'text-green-500' : item.purchaseStatus === 'NOT_PURCHASED' ? 'text-red-500' : 'text-gray-400'}`}>
+                  Статус: {item.purchaseStatus === 'NOT_PURCHASED' ? `Невыкуплен (${item.purchaseRefusalReason || 'Причина не указана'})` : item.purchaseStatus}
+                </p>
               </div>
             ))}
           </div>
@@ -368,7 +467,7 @@ function OrderCheck() {
                   type="text"
                   name="productId"
                   value={selectedItem.productId || ''}
-                  onChange={(e) => setSelectedItem({ ...selectedItem, productId: e.target.value })}
+                  onChange={handleItemChange}
                   className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg disabled:opacity-75"
                   disabled
                 />
@@ -379,7 +478,7 @@ function OrderCheck() {
                   type="text"
                   name="productName"
                   value={selectedItem.productName || ''}
-                  onChange={(e) => setSelectedItem({ ...selectedItem, productName: e.target.value })}
+                  onChange={handleItemChange}
                   className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
                 />
               </div>
@@ -389,7 +488,7 @@ function OrderCheck() {
                   type="text"
                   name="url"
                   value={selectedItem.url || ''}
-                  onChange={(e) => setSelectedItem({ ...selectedItem, url: e.target.value })}
+                  onChange={handleItemChange}
                   className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
                 />
               </div>
@@ -399,7 +498,7 @@ function OrderCheck() {
                   type="text"
                   name="imageUrl"
                   value={selectedItem.imageUrl || ''}
-                  onChange={(e) => setSelectedItem({ ...selectedItem, imageUrl: e.target.value })}
+                  onChange={handleItemChange}
                   className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
                 />
               </div>
@@ -409,7 +508,7 @@ function OrderCheck() {
                   type="number"
                   name="priceAtTime"
                   value={selectedItem.priceAtTime || ''}
-                  onChange={(e) => setSelectedItem({ ...selectedItem, priceAtTime: parseFloat(e.target.value) || 0 })}
+                  onChange={handleItemChange}
                   className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
                   step="0.01"
                 />
@@ -420,7 +519,7 @@ function OrderCheck() {
                   type="number"
                   name="quantity"
                   value={selectedItem.quantity || ''}
-                  onChange={(e) => setSelectedItem({ ...selectedItem, quantity: parseInt(e.target.value) || 1 })}
+                  onChange={handleItemChange}
                   className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
                   min="1"
                 />
@@ -431,20 +530,34 @@ function OrderCheck() {
                   type="text"
                   name="description"
                   value={selectedItem.description || ''}
-                  onChange={(e) => setSelectedItem({ ...selectedItem, description: e.target.value })}
+                  onChange={handleItemChange}
                   className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
                 />
+              </div>
+              <div className="flex justify-between gap-2">
+                <button
+                  onClick={handleItemPurchased}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200"
+                >
+                  Выкуплен
+                </button>
+                <button
+                  onClick={() => setShowItemRefusalModal(true)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+                >
+                  Не выкуплен
+                </button>
               </div>
               <div className="flex justify-end gap-2">
                 <button
                   onClick={handleItemSave}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
                 >
                   Сохранить
                 </button>
                 <button
                   onClick={handleItemCancel}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200"
                 >
                   Отмена
                 </button>
@@ -492,6 +605,54 @@ function OrderCheck() {
                 </button>
                 <button
                   onClick={() => setShowRefusalModal(false)}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200"
+                >
+                  Отмена
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showItemRefusalModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-700 p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-4">Причина невыкупа товара</h3>
+            <div className="space-y-4">
+              <select
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === 'Другое') {
+                    setItemRefusalReason('');
+                  } else {
+                    setItemRefusalReason(value);
+                  }
+                }}
+                className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
+              >
+                <option value="">Выберите базовую причину</option>
+                {basicReasons.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {reason}
+                  </option>
+                ))}
+              </select>
+              <textarea
+                value={itemRefusalReason}
+                onChange={(e) => setItemRefusalReason(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
+                rows="4"
+                placeholder="Опишите причину невыкупа (можно добавить детали)..."
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={handleItemNotPurchased}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+                >
+                  Подтвердить
+                </button>
+                <button
+                  onClick={() => setShowItemRefusalModal(false)}
                   className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200"
                 >
                   Отмена
