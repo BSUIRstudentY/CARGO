@@ -52,15 +52,19 @@ public class Order {
     private String trackingNumber;
 
     @Column(name = "discount_applied", nullable = true)
-    private Float discountApplied; // Total discount (promocode only)
+    private Float discountApplied;
 
     @Column(name = "user_discount_applied", nullable = true)
-    private Float userDiscountApplied; // User-specific discount (discountPercent + temporaryDiscountPercent)
+    private Float userDiscountApplied;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "promocode_id")
     @JsonIgnore
     private Promocode promocode;
+
+    @ManyToOne
+    @JoinColumn(name = "batch_cargo_id")
+    private BatchCargo batchCargo;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore

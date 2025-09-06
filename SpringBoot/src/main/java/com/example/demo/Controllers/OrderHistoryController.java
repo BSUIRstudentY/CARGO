@@ -81,6 +81,55 @@ public class OrderHistoryController {
         return ResponseEntity.ok(orderDTOs);
     }
 
+    @GetMapping("/{id}")
+    @Transactional(readOnly = true)
+    public ResponseEntity<OrderHistoryDTO> getOrderById(@PathVariable Long id) {
+        String userEmail = getCurrentUserEmail();
+        if (userEmail == null) {
+            return ResponseEntity.status(403).body(null);
+        }
+
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
+        OrderHistory order = orderHistoryRepository.findById(id).orElse(null);
+        if (order == null) {
+            return ResponseEntity.status(404).body(null);
+        }
+
+        // Check if the user is authorized to view this order
+        if (!isAdmin && !order.getUser().getEmail().equals(userEmail)) {
+            return ResponseEntity.status(403).body(null);
+        }
+
+        OrderHistoryDTO orderDTO = new OrderHistoryDTO();
+        orderDTO.setId(order.getId());
+        orderDTO.setOrderNumber(order.getOrderNumber());
+        orderDTO.setDateCreated(order.getDateCreated());
+        orderDTO.setStatus(order.getStatus());
+        orderDTO.setTotalClientPrice(order.getTotalClientPrice());
+        orderDTO.setDeliveryAddress(order.getDeliveryAddress());
+        orderDTO.setReasonRefusal(order.getReasonRefusal());
+        orderDTO.setItems(order.getItems().stream()
+                .map(item -> {
+                    OrderItemDTO itemDTO = new OrderItemDTO();
+                    itemDTO.setProductId(item.getProduct().getId());
+                    itemDTO.setProductName(item.getProduct().getName());
+                    itemDTO.setQuantity(item.getQuantity());
+                    itemDTO.setPriceAtTime(item.getPriceAtTime());
+                    itemDTO.setUrl(item.getProduct().getUrl());
+                    itemDTO.setImageUrl(item.getProduct().getImageUrl());
+                    itemDTO.setDescription(item.getProduct().getDescription());
+                    itemDTO.setSupplierPrice(item.getSupplierPrice());
+                    return itemDTO;
+                })
+                .collect(Collectors.toList()));
+        orderDTO.setUserEmail(order.getUser().getEmail());
+
+        return ResponseEntity.ok(orderDTO);
+    }
+
     private String getCurrentUserEmail() {
         try {
             return SecurityContextHolder.getContext().getAuthentication().getName();
