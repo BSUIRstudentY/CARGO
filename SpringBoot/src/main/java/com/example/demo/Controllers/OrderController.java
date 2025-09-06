@@ -198,7 +198,7 @@ public class OrderController {
                     return ResponseEntity.badRequest().body(new ErrorResponse("Product ID cannot be null for order item", 400));
                 }
 
-                Product product = productRepository.findById(UUID.fromString(itemDTO.getProductId()))
+                Product product = productRepository.findById(String.valueOf(UUID.fromString(itemDTO.getProductId())))
                         .orElseThrow(() -> new RuntimeException("Product with ID " + itemDTO.getProductId() + " not found"));
 
                 if (itemDTO.getProductName() != null && !itemDTO.getProductName().equals(product.getName())) {
