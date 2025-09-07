@@ -2,17 +2,13 @@ package com.example.demo.Controllers;
 
 import com.example.demo.Entities.Promocode;
 import com.example.demo.Repositories.PromocodeRepository;
-import jdk.swing.interop.SwingInterOpUtils;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/promocodes")
@@ -21,10 +17,16 @@ public class PromocodeController {
     @Autowired
     private PromocodeRepository promocodeRepository;
 
+    // New endpoint to fetch all promocodes
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Promocode>> getAllPromocodes() {
+        List<Promocode> promocodes = promocodeRepository.findAll();
+        return ResponseEntity.ok(promocodes);
+    }
+
     @PostMapping("/validate")
     public ResponseEntity<?> validatePromocode(@RequestBody PromocodeRequest promocodeRequest) {
-
-
         if (!promocodeRepository.existsByCode(promocodeRequest.getCode())) {
             System.out.println("doesnt exist");
             return ResponseEntity.badRequest().body("Промокод не существует");
@@ -47,7 +49,6 @@ public class PromocodeController {
             return ResponseEntity.badRequest().body("Промокод исчерпал лимит использований");
         }
 
-        // Возвращаем тип скидки и значение
         return ResponseEntity.ok(new PromocodeResponse(promocode.getDiscountType().toString(), promocode.getDiscountValue()));
     }
 
@@ -96,8 +97,14 @@ class PromocodeResponse {
     }
 }
 
-@Data
-class PromocodeRequest
-{
+class PromocodeRequest {
     private String code;
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
 }

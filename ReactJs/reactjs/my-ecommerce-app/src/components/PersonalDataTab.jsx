@@ -161,7 +161,8 @@ const PersonalDataTab = ({ setError }) => {
     }
     setIsLoading(true);
     try {
-      await api.put('/profile/change-password', {
+      await api.put('/profile/change-password',
+       {
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword,
       });

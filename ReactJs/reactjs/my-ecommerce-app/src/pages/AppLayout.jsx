@@ -16,8 +16,9 @@ import SelfPickupCargo from './SelfPickupCargo';
 import FAQSection from './FAQSection';
 import SupportPage from './SupportPage';
 import TicketChatPage from './TicketChatPage';
-import Notifications from './Notifications'; // Import the new Notifications component
-import Reviews from './Reviews'; // Добавьте импорт
+import Notifications from './Notifications';
+import Reviews from './Reviews';
+import CostCalculator from './CostCalculator'; // Новый импорт
 
 function AppLayout() {
   const [backgroundColor, setBackgroundColor] = useState(() => localStorage.getItem('backgroundColor') || '#2F2F2F');
@@ -38,8 +39,9 @@ function AppLayout() {
     { path: '/catalog', label: 'Каталог', icon: '📦' },
     { path: '/terminal', label: 'Терминал', icon: '💻' },
     { path: '/cart', label: 'Корзина', icon: '🛒' },
+    { path: '/calculator', label: 'Калькулятор стоимости', icon: '🧮' }, // Новый пункт
     { path: '/profile', label: 'Профиль', icon: '👤' },
-    { path: '/notifications', label: 'Уведомления', icon: '🔔' }, // Added Notifications tab
+    { path: '/notifications', label: 'Уведомления', icon: '🔔' },
     { path: '/delivery-payment', label: 'Доставка и оплата', icon: '🚚' },
     { path: '/order-instructions', label: 'Инструкции по заказу', icon: '📋' },
     { path: '/self-pickup', label: 'Самовыкуп', icon: '📦' },
@@ -47,7 +49,7 @@ function AppLayout() {
     { path: '/support', label: 'Поддержка', icon: '🛠️' },
     { path: '/about', label: 'О нас', icon: 'ℹ️' },
     { path: '/contact', label: 'Контакты', icon: '📞' },
-    { path: '/reviews', label: 'Отзывы', icon: '⭐' }, // Новый пункт
+    { path: '/reviews', label: 'Отзывы', icon: '⭐' },
   ];
 
   const toggleSidebar = () => {
@@ -153,8 +155,9 @@ function AppLayout() {
           <Route path="/catalog" element={<Catalog />} />
           <Route path="/terminal" element={<MultiTerminal />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/calculator" element={<CostCalculator />} /> {/* Новый маршрут */}
           <Route path="/profile" element={<Profile />} />
-          <Route path="/notifications" element={<Notifications />} /> {/* Added Notifications route */}
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/delivery-payment" element={<DeliveryPayment />} />
           <Route path="/order-instructions" element={<OrderInstructions />} />
           <Route path="/self-pickup" element={<SelfPickupCargo />} />
@@ -182,7 +185,7 @@ function AppLayout() {
               </div>
             </section>
           } />
-          <Route path="/reviews" element={<Reviews />} /> {/* Новый маршрут */}
+          <Route path="/reviews" element={<Reviews />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/order-details/:orderId" element={<OrderDetails />} />
         </Routes>

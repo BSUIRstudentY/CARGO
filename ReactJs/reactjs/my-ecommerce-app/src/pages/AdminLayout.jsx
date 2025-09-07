@@ -1,4 +1,4 @@
-// AdminLayout.jsx
+
 import React, { useState } from 'react';
 import { Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/AuthProvider';
@@ -13,8 +13,8 @@ import UpcomingPurchases from './UpcomingPurchases';
 import BatchDetail from './BatchDetail';
 import UpcomingArrivals from './UpcomingArrivals';
 import OrderProcessing from './OrderProcessing';
-
-
+import AdminPromocode from './AdminPromocode';
+import AdminQuest from './AdminQuest'; // New import
 
 function AdminLayout() {
   const { logout } = useAuth();
@@ -33,6 +33,8 @@ function AdminLayout() {
     { path: '/admin/suppliers', label: 'Поставщики', icon: '🚚' },
     { path: '/admin/commission', label: 'Комиссии', icon: '💰' },
     { path: '/admin/catalog', label: 'Каталог', icon: '📦' },
+    { path: '/admin/promocodes', label: 'Промокоды', icon: '🎟️' },
+    { path: '/admin/quests', label: 'Квесты', icon: '🏆' }, // New tab
   ];
 
   const toggleSidebar = () => {
@@ -45,11 +47,14 @@ function AdminLayout() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
-        backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"%3E%3Crect width="100" height="100" fill="url(%23pattern0)" /%3E%3Cdefs%3E%3Cpattern id="pattern0" patternUnits="userSpaceOnUse" width="50" height="50"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="1"/%3E%3C/pattern%3E%3C/defs%3E%3C/svg%3E')`,
-        backgroundRepeat: 'repeat',
-        zIndex: 0,
-      }}></div>
+      <div
+        className="absolute inset-0 opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"%3E%3Crect width="100" height="100" fill="url(%23pattern0)" /%3E%3Cdefs%3E%3Cpattern id="pattern0" patternUnits="userSpaceOnUse" width="50" height="50"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="1"/%3E%3C/pattern%3E%3C/defs%3E%3C/svg%3E')`,
+          backgroundRepeat: 'repeat',
+          zIndex: 0,
+        }}
+      ></div>
       <button
         onClick={toggleSidebar}
         className="fixed top-4 left-4 z-50 bg-[var(--accent-color)] p-2 rounded-full text-white hover:bg-opacity-80 transition-colors duration-200"
@@ -112,7 +117,11 @@ function AdminLayout() {
           </div>
           <div className="relative">
             <div className={`car-animation ${isSidebarOpen ? 'active' : ''} w-24 h-12 absolute bottom-16 left-2`}>
-              <img src="/car.png" alt="Cargo Truck" className="car w-full h-full object-contain filter invert brightness-200 z-50" />
+              <img
+                src="/car.png"
+                alt="Cargo Truck"
+                className="car w-full h-full object-contain filter invert brightness-200 z-50"
+              />
               <div className="dust z-40"></div>
             </div>
             <button
@@ -136,15 +145,14 @@ function AdminLayout() {
           <Route path="/admin/suppliers" element={<AdminPanel section="suppliers" />} />
           <Route path="/admin/commission" element={<AdminPanel section="commission" />} />
           <Route path="/admin/catalog/*" element={<AdminCatalog />} />
+          <Route path="/admin/promocodes" element={<AdminPromocode />} />
+          <Route path="/admin/quests" element={<AdminQuest />} />
           <Route path="/admin/orderHistory" element={<OrderHistoryList />} />
           <Route path="/admin/orderHistory/:id" element={<OrderHistory />} />
           <Route path="/admin/upcoming-purchases" element={<UpcomingPurchases />} />
           <Route path="/admin/upcoming-purchases/:id" element={<BatchDetail />} />
           <Route path="/admin/upcoming-arrivals" element={<UpcomingArrivals />} />
-          <Route path="/admin/upcoming-purchases" element={<UpcomingPurchases />} />
-  <Route path="/admin/upcoming-purchases/:id" element={<BatchDetail />} />
-  <Route path="/admin/upcoming-purchases/:batchId/order/:orderId" element={<OrderProcessing />} />
-  <Route path="/admin/upcoming-arrivals" element={<UpcomingArrivals />} />
+          <Route path="/admin/upcoming-purchases/:batchId/order/:orderId" element={<OrderProcessing />} />
         </Routes>
       </main>
     </div>

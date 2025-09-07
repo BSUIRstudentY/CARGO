@@ -13,7 +13,8 @@ public class UserDTO {
     private Float temporaryDiscountPercent;
     @JsonSerialize(using = LocalDateTimeArraySerializer.class)
     private LocalDateTime temporaryDiscountExpired;
-
+    private String referralCode;
+git
     // Getters and setters
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
@@ -23,6 +24,15 @@ public class UserDTO {
     public void setTotalDiscount(Float totalDiscount) { this.totalDiscount = totalDiscount; }
     public Float getDiscountPercent() { return discountPercent; }
     public void setDiscountPercent(Float discountPercent) { this.discountPercent = discountPercent; }
+
+    public String getReferralCode() {
+        return referralCode;
+    }
+
+    public void setReferralCode(String referralCode) {
+        this.referralCode = referralCode;
+    }
+
     public Float getTemporaryDiscountPercent() { return temporaryDiscountPercent; }
     public void setTemporaryDiscountPercent(Float temporaryDiscountPercent) { this.temporaryDiscountPercent = temporaryDiscountPercent; }
     public LocalDateTime getTemporaryDiscountExpired() { return temporaryDiscountExpired; }
