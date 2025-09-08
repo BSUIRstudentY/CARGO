@@ -21,6 +21,18 @@ public class UserDTO {
     private String avatarUrl;
     private Boolean emailVerified;
     private Boolean phoneVerified;
+    private String role;
+    private Float balance;
+    private Integer referralCount;
+    private Double moneySpent;
+
+    public Double getMoneySpent() {
+        return moneySpent;
+    }
+
+    public void setMoneySpent(Double moneySpent) {
+        this.moneySpent = moneySpent;
+    }
 
     // Getters and setters
     public String getEmail() { return email; }
@@ -32,6 +44,31 @@ public class UserDTO {
     public String getCompany() { return company; }
     public void setCompany(String company) { this.company = company; }
     public Float getTotalDiscount() { return totalDiscount; }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public Float getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Float balance) {
+        this.balance = balance;
+    }
+
+    public Integer getReferralCount() {
+        return referralCount;
+    }
+
+    public void setReferralCount(Integer referralCount) {
+        this.referralCount = referralCount;
+    }
+
     public void setTotalDiscount(Float totalDiscount) { this.totalDiscount = totalDiscount; }
     public Float getDiscountPercent() { return discountPercent; }
     public void setDiscountPercent(Float discountPercent) { this.discountPercent = discountPercent; }

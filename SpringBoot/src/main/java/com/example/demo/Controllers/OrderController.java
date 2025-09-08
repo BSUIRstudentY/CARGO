@@ -46,6 +46,61 @@ public class OrderController {
         this.kafkaTemplate = kafkaTemplate;
     }
 
+    // Новый эндпоинт для создания заказа с трек-номерами
+    @PostMapping("/orders/self-pickup")
+    @Transactional
+    public ResponseEntity<OrderDTO> createSelfPickupOrder(@RequestBody SelfPickupOrderRequest request) {
+        String userEmail = getCurrentUserEmail();
+        if (userEmail == null) {
+            return ResponseEntity.status(403).body(null);
+        }
+
+        // Валидация входных данных
+        if (request.getTrackingNumbers() == null || request.getTrackingNumbers().isEmpty()) {
+            return ResponseEntity.badRequest().body(new OrderDTO());
+        }
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        // Создание заказа
+        Order order = new Order();
+        order.setUser(user);
+        order.setOrderNumber(UUID.randomUUID().toString());
+        order.setDateCreated(new Timestamp(System.currentTimeMillis()));
+        order.setStatus("PENDING");
+        order.setTotalClientPrice(0.0f); // Пока 0, так как цены неизвестны
+        order.setDeliveryAddress(request.getDeliveryAddress());
+
+        // Создание OrderItem для каждого трек-номера
+        List<OrderItem> orderItems = request.getTrackingNumbers().stream()
+                .map(trackingNumber -> {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setOrder(order);
+                    orderItem.setTrackingNumber(trackingNumber);
+                    orderItem.setPurchaseStatus("PENDING");
+                    orderItem.setQuantity(1); // По умолчанию 1, так как товар неизвестен
+                    orderItem.setPriceAtTime(0.0f); // Цена неизвестна
+                    // Поле product временно null, так как товар неизвестен
+                    // Если нужен placeholder-продукт, можно создать его:
+                    /*
+                    Product placeholder = new Product();
+                    placeholder.setName("Placeholder for " + trackingNumber);
+                    placeholder.setPrice(0.0);
+                    productRepository.save(placeholder);
+                    orderItem.setProduct(placeholder);
+                    */
+                    return orderItem;
+                })
+                .collect(Collectors.toList());
+
+        order.setItems(orderItems);
+        orderRepository.save(order);
+
+        OrderDTO orderDTO = mapToOrderDTO(order);
+        return ResponseEntity.ok(orderDTO);
+    }
+
     @PostMapping("/orders")
     @Transactional
     public ResponseEntity<OrderDTO> createOrder(@RequestBody CreateOrderRequest request) {
@@ -166,13 +221,16 @@ public class OrderController {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Заказ с ID " + id + " не найден"));
 
-        if (orderDetails.getTotalClientPrice() == null || orderDetails.getTotalClientPrice() <= 0) {
-            System.out.println("Validation failed: totalClientPrice is null or <= 0");
-            return ResponseEntity.badRequest().body(new ErrorResponse("Общая цена для клиента должна быть больше 0", 400));
-        }
-        if (orderDetails.getDeliveryAddress() == null || orderDetails.getDeliveryAddress().trim().isEmpty()) {
-            System.out.println("Validation failed: deliveryAddress is null or empty");
-            return ResponseEntity.badRequest().body(new ErrorResponse("Адрес доставки обязателен", 400));
+        // Validation for regular orders
+        if (orderDetails.getTotalClientPrice() != null && orderDetails.getTotalClientPrice() > 0) {
+            if (orderDetails.getTotalClientPrice() < 0) {
+                System.out.println("Validation failed: totalClientPrice is negative");
+                return ResponseEntity.badRequest().body(new ErrorResponse("Общая цена для клиента должна быть больше 0", 400));
+            }
+            if (orderDetails.getDeliveryAddress() == null || orderDetails.getDeliveryAddress().trim().isEmpty()) {
+                System.out.println("Validation failed: deliveryAddress is null or empty");
+                return ResponseEntity.badRequest().body(new ErrorResponse("Адрес доставки обязателен", 400));
+            }
         }
 
         order.setTotalClientPrice(orderDetails.getTotalClientPrice());
@@ -187,37 +245,23 @@ public class OrderController {
         if (order.getItems() != null) {
             order.getItems().clear();
             for (OrderItemDTO itemDTO : orderDetails.getItems()) {
-                if (itemDTO.getProductId() == null) {
-                    System.out.println("Validation failed: productId is null for item " + itemDTO);
-                    return ResponseEntity.badRequest().body(new ErrorResponse("Product ID cannot be null for order item", 400));
-                }
-
-                Product product = productRepository.findById(String.valueOf(UUID.fromString(itemDTO.getProductId())))
-                        .orElseThrow(() -> new RuntimeException("Product with ID " + itemDTO.getProductId() + " not found"));
-
-                if (itemDTO.getProductName() != null && !itemDTO.getProductName().equals(product.getName())) {
-                    product.setName(itemDTO.getProductName());
-                }
-                if (itemDTO.getUrl() != null && !itemDTO.getUrl().equals(product.getUrl())) {
-                    product.setUrl(itemDTO.getUrl());
-                }
-                if (itemDTO.getImageUrl() != null && !itemDTO.getImageUrl().equals(product.getImageUrl())) {
-                    product.setImageUrl(itemDTO.getImageUrl());
-                }
-                if (itemDTO.getDescription() != null && !itemDTO.getDescription().equals(product.getDescription())) {
-                    product.setDescription(itemDTO.getDescription());
-                }
-                productRepository.save(product);
-
                 OrderItem orderItem = new OrderItem();
                 orderItem.setOrder(order);
                 orderItem.setOrderHistory(null);
-                orderItem.setProduct(product);
                 orderItem.setQuantity(itemDTO.getQuantity() != null ? itemDTO.getQuantity() : 0);
                 orderItem.setPriceAtTime(itemDTO.getPriceAtTime() != null ? itemDTO.getPriceAtTime() : 0.0f);
                 orderItem.setSupplierPrice(itemDTO.getSupplierPrice() != null ? itemDTO.getSupplierPrice() : 0.0f);
                 orderItem.setPurchaseStatus(itemDTO.getPurchaseStatus() != null ? itemDTO.getPurchaseStatus() : "PENDING");
                 orderItem.setPurchaseRefusalReason(itemDTO.getPurchaseRefusalReason());
+                orderItem.setTrackingNumber(itemDTO.getTrackingNumber());
+
+                // Set product for regular orders (non-self-pickup)
+                if (orderDetails.getTotalClientPrice() > 0 && itemDTO.getProductId() != null) {
+                    Product product = productRepository.findById(itemDTO.getProductId())
+                            .orElseThrow(() -> new RuntimeException("Продукт с ID " + itemDTO.getProductId() + " не найден"));
+                    orderItem.setProduct(product);
+                }
+
                 order.getItems().add(orderItem);
             }
         }
@@ -227,14 +271,16 @@ public class OrderController {
             for (OrderItem item : order.getItems()) {
                 if ("NOT_PURCHASED".equals(item.getPurchaseStatus()) && item.getPurchaseRefusalReason() != null) {
                     try {
+                        String productName = item.getProduct() != null ? item.getProduct().getName() :
+                                (item.getTrackingNumber() != null ? "Self-Pickup: " + item.getTrackingNumber() : "Unknown");
                         notificationService.sendOrderItemStatusChangeNotification(
                                 order.getUser(),
                                 order.getId(),
-                                item.getProduct().getName(),
+                                productName,
                                 item.getPurchaseRefusalReason()
                         );
                     } catch (Exception e) {
-                        System.out.println("Failed to send item notification for " + item.getProduct().getName() + ": " + e.getMessage());
+                        System.out.println("Failed to send item notification for item ID " + item.getId() + ": " + e.getMessage());
                     }
                 }
             }
@@ -260,6 +306,7 @@ public class OrderController {
                         historyItem.setSupplierPrice(item.getSupplierPrice());
                         historyItem.setPurchaseStatus(item.getPurchaseStatus());
                         historyItem.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
+                        historyItem.setTrackingNumber(item.getTrackingNumber());
                         return historyItem;
                     })
                     .collect(Collectors.toList()));
@@ -326,7 +373,7 @@ public class OrderController {
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
                     itemDTO.setId(item.getId());
-                    itemDTO.setProductId(item.getProduct().getId().toString());
+                    itemDTO.setProductId(item.getProduct().getId());
                     itemDTO.setProductName(item.getProduct().getName());
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPriceAtTime(item.getPriceAtTime());
@@ -361,16 +408,17 @@ public class OrderController {
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
                     itemDTO.setId(item.getId());
-                    itemDTO.setProductId(item.getProduct().getId().toString());
-                    itemDTO.setProductName(item.getProduct().getName());
+                    itemDTO.setProductId(item.getProduct() != null ? item.getProduct().getId() : null);
+                    itemDTO.setProductName(item.getProduct() != null ? item.getProduct().getName() : "Unknown");
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPriceAtTime(item.getPriceAtTime());
-                    itemDTO.setUrl(item.getProduct().getUrl());
-                    itemDTO.setImageUrl(item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
-                    itemDTO.setDescription(item.getProduct().getDescription());
+                    itemDTO.setUrl(item.getProduct() != null ? item.getProduct().getUrl() : null);
+                    itemDTO.setImageUrl(item.getProduct() != null && item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
+                    itemDTO.setDescription(item.getProduct() != null ? item.getProduct().getDescription() : null);
                     itemDTO.setSupplierPrice(item.getSupplierPrice());
                     itemDTO.setPurchaseStatus(item.getPurchaseStatus());
                     itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
+                    itemDTO.setTrackingNumber(item.getTrackingNumber());
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
@@ -392,6 +440,12 @@ public class OrderController {
     @Data
     static class CreateOrderRequest {
         private List<CartItemDTO> cartItems;
+        private String deliveryAddress;
+    }
+
+    @Data
+    static class SelfPickupOrderRequest {
+        private List<String> trackingNumbers;
         private String deliveryAddress;
     }
 
@@ -438,6 +492,7 @@ public class OrderController {
         private Float supplierPrice;
         private String purchaseStatus;
         private String purchaseRefusalReason;
+        private String trackingNumber;
     }
 
     @Data

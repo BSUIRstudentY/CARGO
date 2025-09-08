@@ -12,7 +12,6 @@ import com.example.demo.Repositories.UserRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,9 +30,8 @@ public class BatchCargoController {
     @Autowired
     private OrderRepository orderRepository;
 
-
-
-
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -80,9 +78,10 @@ public class BatchCargoController {
         return ResponseEntity.ok(mapToBatchCargoDTO(batchCargo));
     }
 
-    @GetMapping("usr/{id}")
+    @GetMapping("/usr/{id}")
     public ResponseEntity<BatchCargoDetailDTO> getUserBatchCargoDetail(@PathVariable Long id) {
-        BatchCargo batchCargo = batchCargoRepository.findByIdAndUserEmail(id, ContextHolder.getCurrentUserEmail()).get();
+        BatchCargo batchCargo = batchCargoRepository.findByIdAndUserEmail(id, ContextHolder.getCurrentUserEmail())
+                .orElse(null);
         if (batchCargo == null) {
             return ResponseEntity.notFound().build();
         }
@@ -96,8 +95,6 @@ public class BatchCargoController {
 
         return ResponseEntity.ok(dto);
     }
-
-
 
     @GetMapping("/{id}")
     public ResponseEntity<BatchCargoDetailDTO> getBatchCargoDetail(@PathVariable Long id) {
@@ -116,9 +113,6 @@ public class BatchCargoController {
         return ResponseEntity.ok(dto);
     }
 
-    @Autowired
-    private OrderItemRepository orderItemRepository;
-
     @PutMapping("/items/{itemId}")
     @Transactional
     public ResponseEntity<Void> markItemStatus(@PathVariable Long itemId, @RequestBody ItemStatusRequest request) {
@@ -130,11 +124,13 @@ public class BatchCargoController {
         item.setPurchaseStatus(request.getStatus());
 
         if ("NOT_PURCHASED".equals(request.getStatus())) {
-            // Refund to user balance
+            // Refund to user balance, only for non-self-pickup orders
             Order order = item.getOrder();
-            User user = order.getUser();
-            user.setBalance(user.getBalance() + item.getPriceAtTime() * item.getQuantity());
-            userRepository.save(user);
+            if (order.getTotalClientPrice() > 0) {
+                User user = order.getUser();
+                user.setBalance(user.getBalance() + item.getPriceAtTime() * item.getQuantity());
+                userRepository.save(user);
+            }
         }
 
         // Check if all items in order are marked
@@ -174,19 +170,46 @@ public class BatchCargoController {
         dto.setTotalClientPrice(order.getTotalClientPrice());
         dto.setDeliveryAddress(order.getDeliveryAddress());
         dto.setReasonRefusal(order.getReasonRefusal());
+        boolean isSelfPickup = order.getTotalClientPrice() == 0;
         dto.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
                     itemDTO.setId(item.getId());
-                    itemDTO.setProductId(item.getProduct().getId());
-                    itemDTO.setProductName(item.getProduct().getName());
-                    itemDTO.setQuantity(item.getQuantity());
-                    itemDTO.setPriceAtTime(item.getPriceAtTime());
-                    itemDTO.setUrl(item.getProduct().getUrl());
-                    itemDTO.setImageUrl(item.getProduct().getImageUrl());
-                    itemDTO.setDescription(item.getProduct().getDescription());
-                    itemDTO.setSupplierPrice(item.getSupplierPrice());
-                    itemDTO.setPurchaseStatus(item.getPurchaseStatus() != null ? item.getPurchaseStatus() : "PENDING");
+                    if (isSelfPickup || item.getProduct() == null) {
+                        // Handle self-pickup orders or items with null product
+                        itemDTO.setProductId(null);
+                        itemDTO.setProductName(item.getTrackingNumber() != null ? "Self-Pickup: " + item.getTrackingNumber() : "Unknown");
+                        itemDTO.setQuantity(item.getQuantity());
+                        itemDTO.setPriceAtTime(item.getPriceAtTime());
+                        itemDTO.setUrl(null);
+                        itemDTO.setImageUrl(null);
+                        itemDTO.setDescription(null);
+                        itemDTO.setSupplierPrice(item.getSupplierPrice());
+                        itemDTO.setPurchaseStatus(item.getPurchaseStatus() != null ? item.getPurchaseStatus() : "PENDING");
+                        itemDTO.setTrackingNumber(item.getTrackingNumber());
+                    } else {
+                        // Handle regular orders
+                        try {
+                            itemDTO.setProductId(item.getProduct().getId());
+                            itemDTO.setProductName(item.getProduct().getName());
+                            itemDTO.setUrl(item.getProduct().getUrl());
+                            itemDTO.setImageUrl(item.getProduct().getImageUrl());
+                            itemDTO.setDescription(item.getProduct().getDescription());
+                        } catch (NullPointerException e) {
+                            // Log for debugging
+                            System.err.println("Null product for OrderItem ID: " + item.getId() + " in Order ID: " + order.getId());
+                            itemDTO.setProductId(null);
+                            itemDTO.setProductName("Unknown");
+                            itemDTO.setUrl(null);
+                            itemDTO.setImageUrl(null);
+                            itemDTO.setDescription(null);
+                        }
+                        itemDTO.setQuantity(item.getQuantity());
+                        itemDTO.setPriceAtTime(item.getPriceAtTime());
+                        itemDTO.setSupplierPrice(item.getSupplierPrice());
+                        itemDTO.setPurchaseStatus(item.getPurchaseStatus() != null ? item.getPurchaseStatus() : "PENDING");
+                        itemDTO.setTrackingNumber(item.getTrackingNumber());
+                    }
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
@@ -194,17 +217,15 @@ public class BatchCargoController {
         return dto;
     }
 
-
-
     @GetMapping("/departure")
-    public List<BatchCargo> getDeparture()
-    {
+    public List<BatchCargo> getDeparture() {
         String userEmail = ContextHolder.getCurrentUserEmail();
-        User user = userRepository.findByEmail(userEmail).get();
+        User user = userRepository.findByEmail(userEmail).orElse(null);
+        if (user == null) {
+            return List.of();
+        }
         return batchCargoRepository.findByUser(user);
-
     }
-
 
     // DTO classes
     @Data
@@ -244,7 +265,7 @@ public class BatchCargoController {
 
     @Data
     static class OrderItemDTO {
-        private Long id; // Add this
+        private Long id;
         private String productId;
         private String productName;
         private Integer quantity;
@@ -254,6 +275,7 @@ public class BatchCargoController {
         private String description;
         private Float supplierPrice;
         private String purchaseStatus;
+        private String trackingNumber;
     }
 
     @Data

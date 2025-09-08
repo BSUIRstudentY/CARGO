@@ -18,8 +18,10 @@ import SupportPage from './SupportPage';
 import TicketChatPage from './TicketChatPage';
 import Notifications from './Notifications';
 import Reviews from './Reviews';
-import CostCalculator from './CostCalculator'; // Новый импорт
-import BatchCargoDetails from './BatchCargpDetails';
+import CostCalculator from './CostCalculator';
+import BatchCargoDetails from './BatchCargoDetails';
+import PublicOffer from './PublicOffer';
+import BatchCargoProcessing from './BatchCargoProcessing';
 
 function AppLayout() {
   const [backgroundColor, setBackgroundColor] = useState(() => localStorage.getItem('backgroundColor') || '#2F2F2F');
@@ -40,7 +42,7 @@ function AppLayout() {
     { path: '/catalog', label: 'Каталог', icon: '📦' },
     { path: '/terminal', label: 'Терминал', icon: '💻' },
     { path: '/cart', label: 'Корзина', icon: '🛒' },
-    { path: '/calculator', label: 'Калькулятор стоимости', icon: '🧮' }, // Новый пункт
+    { path: '/calculator', label: 'Калькулятор стоимости', icon: '🧮' },
     { path: '/profile', label: 'Профиль', icon: '👤' },
     { path: '/notifications', label: 'Уведомления', icon: '🔔' },
     { path: '/delivery-payment', label: 'Доставка и оплата', icon: '🚚' },
@@ -63,11 +65,14 @@ function AppLayout() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
-        backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"%3E%3Crect width="100" height="100" fill="url(%23pattern0)" /%3E%3Cdefs%3E%3Cpattern id="pattern0" patternUnits="userSpaceOnUse" width="50" height="50"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="1"/%3E%3C/pattern%3E%3C/defs%3E%3C/svg%3E')`,
-        backgroundRepeat: 'repeat',
-        zIndex: 0,
-      }}></div>
+      <div
+        className="absolute inset-0 opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"%3E%3Crect width="100" height="100" fill="url(%23pattern0)" /%3E%3Cdefs%3E%3Cpattern id="pattern0" patternUnits="userSpaceOnUse" width="50" height="50"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="1"/%3E%3C/pattern%3E%3C/defs%3E%3C/svg%3E')`,
+          backgroundRepeat: 'repeat',
+          zIndex: 0,
+        }}
+      ></div>
       {/* Кнопка для открытия панели */}
       <button
         onClick={toggleSidebar}
@@ -88,7 +93,6 @@ function AppLayout() {
           />
         </svg>
       </button>
-
       {/* Боковая панель с анимацией */}
       <aside
         className={`w-64 bg-gray-800 shadow-lg fixed top-0 left-0 h-screen z-40 transition-transform duration-300 ease-in-out ${
@@ -132,7 +136,6 @@ function AppLayout() {
             </nav>
           </div>
           <div className="relative">
-            {/* Анимация машины и пыли */}
             <div className={`car-animation ${isSidebarOpen ? 'active' : ''} w-24 h-12 absolute bottom-16 left-2`}>
               <img src="/car.png" alt="Cargo Truck" className="car w-full h-full object-contain filter invert brightness-200 z-50" />
               <div className="dust z-40"></div>
@@ -148,7 +151,6 @@ function AppLayout() {
           </div>
         </div>
       </aside>
-
       {/* Основное содержимое с маршрутами */}
       <main className="flex-1 p-6 relative z-10">
         <Routes>
@@ -156,7 +158,7 @@ function AppLayout() {
           <Route path="/catalog" element={<Catalog />} />
           <Route path="/terminal" element={<MultiTerminal />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/calculator" element={<CostCalculator />} /> {/* Новый маршрут */}
+          <Route path="/calculator" element={<CostCalculator />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/delivery-payment" element={<DeliveryPayment />} />
@@ -190,6 +192,8 @@ function AppLayout() {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/order-details/:orderId" element={<OrderDetails />} />
           <Route path="/batch-cargo-details/:batchId" element={<BatchCargoDetails />} />
+          <Route path="/public-offer" element={<PublicOffer />} />
+          <Route path="/batch-cargos/:batchId/order/:orderId" element={<BatchCargoProcessing/>}/>
         </Routes>
       </main>
       <Footer />

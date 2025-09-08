@@ -1,42 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from './AuthProvider';
 import api from '../api/axiosInstance';
 import { UserIcon, BellIcon, KeyIcon, CheckIcon, XMarkIcon, CurrencyDollarIcon, UsersIcon, TagIcon } from '@heroicons/react/24/solid';
 
 const PersonalDataTab = ({ setError }) => {
-  const { user, updateUser } = useAuth();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(user?.notificationsEnabled || false);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(user?.twoFactorEnabled || false);
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || 'https://via.placeholder.com/150');
-  const [isLoading, setIsLoading] = useState(false);
+  const [userData, setUserData] = useState({
+    email: '',
+    username: '',
+    phone: '',
+    company: '',
+    role: '',
+    referralCode: '',
+    referralCount: 0,
+    balance: 0,
+    moneySpent: 0,
+    notificationsEnabled: false,
+    twoFactorEnabled: false,
+    avatarUrl: 'https://via.placeholder.com/150',
+    emailVerified: false,
+    phoneVerified: false,
+  });
+  const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [showVerificationModal, setShowVerificationModal] = useState(null); // 'email' or 'phone'
   const [verificationCode, setVerificationCode] = useState('');
 
-  // Sync user data
+  // Fetch user data from /api/users/me
   useEffect(() => {
-    if (user?.email) {
-      setNotificationsEnabled(user.notificationsEnabled || false);
-      setTwoFactorEnabled(user.twoFactorEnabled || false);
-      setAvatarUrl(user.avatarUrl || 'https://via.placeholder.com/150');
-    }
-  }, [user]);
+    const fetchUserData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.get('/users/me');
+        setUserData(response.data);
+      } catch (error) {
+        const errorMsg = `Ошибка загрузки данных пользователя: ${error.response?.data?.message || error.message}`;
+        setErrorMessage(errorMsg);
+        setError(errorMsg);
+        console.error('Error fetching user data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [setError]);
 
   const handleNotificationToggle = async (type) => {
     setIsLoading(true);
     try {
+      const updates = {};
       if (type === 'email') {
-        const newValue = !notificationsEnabled;
-        await updateUser({ notificationsEnabled: newValue });
-        setNotificationsEnabled(newValue);
-        alert('Настройки уведомлений по email обновлены!');
+        updates.notificationsEnabled = !userData.notificationsEnabled;
       } else if (type === '2fa') {
-        const newValue = !twoFactorEnabled;
-        await updateUser({ twoFactorEnabled: newValue });
-        setTwoFactorEnabled(newValue);
-        alert('Настройки двухфакторной аутентификации обновлены!');
+        updates.twoFactorEnabled = !userData.twoFactorEnabled;
       }
+      const response = await api.put('/users', updates);
+      setUserData((prev) => ({ ...prev, ...updates }));
+      alert(
+        type === 'email'
+          ? 'Настройки уведомлений по email обновлены!'
+          : 'Настройки двухфакторной аутентификации обновлены!'
+      );
     } catch (error) {
       const errorMsg = `Ошибка обновления настроек: ${error.response?.data?.message || error.message}`;
       setErrorMessage(errorMsg);
@@ -73,6 +97,10 @@ const PersonalDataTab = ({ setError }) => {
     try {
       const response = await api.post(`/verification/confirm-${type}`, null, { params: { code: verificationCode } });
       alert(response.data);
+      setUserData((prev) => ({
+        ...prev,
+        [type === 'email' ? 'emailVerified' : 'phoneVerified']: true,
+      }));
       setVerificationCode('');
       setShowVerificationModal(null);
     } catch (error) {
@@ -101,7 +129,17 @@ const PersonalDataTab = ({ setError }) => {
           </motion.div>
         )}
       </AnimatePresence>
-
+      {/* Loading Overlay */}
+      {isLoading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000]"
+        >
+          <div className="animate-spin rounded-full h-10 w-10 border-t-3 border-cyan-400" />
+        </motion.div>
+      )}
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -112,7 +150,6 @@ const PersonalDataTab = ({ setError }) => {
         <UserIcon className="w-8 h-8 text-cyan-400" />
         <h2 className="text-3xl font-bold text-white tracking-tight">Личный кабинет</h2>
       </motion.div>
-
       {/* User Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -123,20 +160,19 @@ const PersonalDataTab = ({ setError }) => {
         <div className="flex flex-col sm:flex-row items-center gap-6">
           <div className="relative">
             <img
-              src={avatarUrl}
+              src={userData.avatarUrl}
               alt="User Avatar"
               className="w-32 h-32 rounded-full border-4 border-cyan-400/30 shadow-lg object-cover ring-2 ring-cyan-400/50"
             />
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-emerald-400/20 opacity-50" />
           </div>
           <div className="text-center sm:text-left space-y-2">
-            <h3 className="text-2xl font-semibold text-white">{user?.username || 'Гость'}</h3>
-            <p className="text-gray-300 text-base">{user?.company || 'Компания не указана'}</p>
-            <p className="text-sm text-cyan-400">Роль: {user?.role || 'Не указана'}</p>
+            <h3 className="text-2xl font-semibold text-white">{userData.username || 'Гость'}</h3>
+            <p className="text-gray-300 text-base">{userData.company || 'Компания не указана'}</p>
+            <p className="text-sm text-cyan-400">Роль: {userData.role || 'Не указана'}</p>
           </div>
         </div>
       </motion.div>
-
       {/* Contact Info Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -149,12 +185,12 @@ const PersonalDataTab = ({ setError }) => {
           <div>
             <label className="block text-sm font-medium text-gray-300">Email</label>
             <div className="flex items-center justify-between">
-              <p className="text-base text-white">{user?.email || 'user@example.com'}</p>
+              <p className="text-base text-white">{userData.email || 'user@example.com'}</p>
               <div className="flex items-center gap-2">
-                <p className={`text-sm ${user?.emailVerified ? 'text-green-400' : 'text-red-400'}`}>
-                  {user?.emailVerified ? 'Верифицирован' : 'Не верифицирован'}
+                <p className={`text-sm ${userData.emailVerified ? 'text-green-400' : 'text-red-400'}`}>
+                  {userData.emailVerified ? 'Верифицирован' : 'Не верифицирован'}
                 </p>
-                {!user?.emailVerified && (
+                {!userData.emailVerified && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -171,12 +207,12 @@ const PersonalDataTab = ({ setError }) => {
           <div>
             <label className="block text-sm font-medium text-gray-300">Телефон</label>
             <div className="flex items-center justify-between">
-              <p className="text-base text-white">{user?.phone || 'Не указан'}</p>
+              <p className="text-base text-white">{userData.phone || 'Не указан'}</p>
               <div className="flex items-center gap-2">
-                <p className={`text-sm ${user?.phoneVerified ? 'text-green-400' : 'text-red-400'}`}>
-                  {user?.phoneVerified ? 'Верифицирован' : 'Не верифицирован'}
+                <p className={`text-sm ${userData.phoneVerified ? 'text-green-400' : 'text-red-400'}`}>
+                  {userData.phoneVerified ? 'Верифицирован' : 'Не верифицирован'}
                 </p>
-                {!user?.phoneVerified && (
+                {!userData.phoneVerified && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -192,7 +228,6 @@ const PersonalDataTab = ({ setError }) => {
           </div>
         </div>
       </motion.div>
-
       {/* Financial Info Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -206,19 +241,18 @@ const PersonalDataTab = ({ setError }) => {
             <label className="block text-sm font-medium text-gray-300">Баланс</label>
             <div className="flex items-center gap-2">
               <CurrencyDollarIcon className="w-5 h-5 text-cyan-400" />
-              <p className="text-base text-white">{user?.balance?.toFixed(2) || '0.00'} BYN</p>
+              <p className="text-base text-white">{userData.balance?.toFixed(2) || '0.00'} BYN</p>
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300">Потрачено</label>
             <div className="flex items-center gap-2">
               <CurrencyDollarIcon className="w-5 h-5 text-cyan-400" />
-              <p className="text-base text-white">{user?.moneySpent?.toFixed(2) || '0.00'} BYN</p>
+              <p className="text-base text-white">{userData.moneySpent?.toFixed(2) || '0.00'} BYN</p>
             </div>
           </div>
         </div>
       </motion.div>
-
       {/* Referral Info Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -232,19 +266,18 @@ const PersonalDataTab = ({ setError }) => {
             <label className="block text-sm font-medium text-gray-300">Реферальный код</label>
             <div className="flex items-center gap-2">
               <TagIcon className="w-5 h-5 text-cyan-400" />
-              <p className="text-base text-white">{user?.referralCode || 'Не указан'}</p>
+              <p className="text-base text-white">{userData.referralCode || 'Не указан'}</p>
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300">Количество рефералов</label>
             <div className="flex items-center gap-2">
               <UsersIcon className="w-5 h-5 text-cyan-400" />
-              <p className="text-base text-white">{user?.referralCount || 0}</p>
+              <p className="text-base text-white">{userData.referralCount || 0}</p>
             </div>
           </div>
         </div>
       </motion.div>
-
       {/* Security Settings Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -265,7 +298,7 @@ const PersonalDataTab = ({ setError }) => {
             >
               <input
                 type="checkbox"
-                checked={notificationsEnabled}
+                checked={userData.notificationsEnabled}
                 onChange={() => handleNotificationToggle('email')}
                 className="sr-only peer"
                 disabled={isLoading}
@@ -285,7 +318,7 @@ const PersonalDataTab = ({ setError }) => {
             >
               <input
                 type="checkbox"
-                checked={twoFactorEnabled}
+                checked={userData.twoFactorEnabled}
                 onChange={() => handleNotificationToggle('2fa')}
                 className="sr-only peer"
                 disabled={isLoading}
@@ -296,7 +329,6 @@ const PersonalDataTab = ({ setError }) => {
           </div>
         </div>
       </motion.div>
-
       {/* Verification Modal */}
       <AnimatePresence>
         {showVerificationModal && (
@@ -347,20 +379,9 @@ const PersonalDataTab = ({ setError }) => {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Loading Overlay */}
-      {isLoading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000]"
-        >
-          <div className="animate-spin rounded-full h-10 w-10 border-t-3 border-cyan-400" />
-        </motion.div>
-      )}
     </div>
   );
 };
+
 
 export default PersonalDataTab;

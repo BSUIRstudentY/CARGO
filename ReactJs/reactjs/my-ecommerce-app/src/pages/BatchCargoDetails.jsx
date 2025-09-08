@@ -19,7 +19,6 @@ const BatchCargoDetails = () => {
       try {
         const response = await api.get(`/batch-cargos/usr/${batchId}`);
         if (response?.data) {
-          // Sanitize data to ensure orders and items are arrays
           const sanitizedBatchCargo = {
             ...response.data,
             orders: Array.isArray(response.data.orders)
@@ -111,78 +110,35 @@ const BatchCargoDetails = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
-              className="mb-6 p-4 bg-red-500/10 border border-red-red-500 rounded-lg text-red-500 text-center"
+              className="mb-6 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-center"
             >
               {error}
             </motion.div>
           )}
         </AnimatePresence>
-        {batchCargo.orders.map((order) => (
-          <div key={order.id} className="mb-12">
-            <h3 className="text-2xl font-semibold text-white mb-4">
-              Заказ #{order.orderNumber}
-            </h3>
-            <p className="text-gray-300 mb-4">Статус: {order.status}</p>
-            <p className="text-gray-300 mb-6">
-              Общая стоимость: {order.totalClientPrice} ₽
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-6 gap-4">
-              {order.items.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-xl p-3 shadow-md border border-gray-700/50"
-                >
-                  <div className="flex flex-col gap-2">
-                    <div className="relative w-full aspect-[4/3] rounded-md overflow-hidden">
-                      <img
-                        src={item.imageUrl || 'https://via.placeholder.com/150'}
-                        alt={item.name || 'Товар'}
-                        className="w-full h-full object-cover border border-[var(--accent-color)] shadow-sm"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-[var(--accent-color)]">
-                        {item.productName || 'Без названия'}
-                      </h4>
-                      <p className="text-base text-gray-400 mt-1">
-                        Цена: ₽{(item.priceAtTime || 0).toFixed(2)} x {item.quantity || 1}
-                      </p>
-                      <p className="text-base text-gray-400">
-                        Статус закупки:{' '}
-                        <span
-                          className={
-                            item.purchaseStatus === 'PURCHASED'
-                              ? 'text-green-500'
-                              : item.purchaseStatus === 'NOT_PURCHASED'
-                              ? 'text-red-500'
-                              : 'text-yellow-500'
-                          }
-                        >
-                          {item.purchaseStatus === 'PURCHASED'
-                            ? 'Выкуплен'
-                            : item.purchaseStatus === 'NOT_PURCHASED'
-                            ? 'Не выкуплен'
-                            : 'Ожидает'}
-                        </span>
-                      </p>
-                      {item.purchaseStatus === 'NOT_PURCHASED' && item.purchaseRefusalReason && (
-                        <p className="text-base text-red-500">
-                          Причина отказа: {item.purchaseRefusalReason}
-                        </p>
-                      )}
-                      <p className="text-base text-gray-400">
-                        ID товара: {item.id || 'Не определён'}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        ))}
+        {/* Orders as Clickable Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {batchCargo.orders.map((order) => (
+            <motion.div
+              key={order.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-xl p-4 shadow-md border border-gray-700/50 cursor-pointer hover:bg-gray-700/90 transition duration-300"
+              onClick={() => navigate(`/batch-cargos/${batchId}/order/${order.id}`)}
+            >
+              <h3 className="text-xl font-semibold text-white">
+                Заказ #{order.orderNumber}
+              </h3>
+              <p className="text-sm text-gray-400 mt-2">
+                Статус: {order.status}
+              </p>
+              <p className="text-sm text-gray-400 mt-1">
+                Общая стоимость: {order.totalClientPrice} ₽
+              </p>
+            </motion.div>
+          ))}
+        </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

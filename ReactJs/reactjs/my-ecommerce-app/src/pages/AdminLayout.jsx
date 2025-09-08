@@ -15,7 +15,7 @@ import UpcomingArrivals from './UpcomingArrivals';
 import OrderProcessing from './OrderProcessing';
 import AdminPromocode from './AdminPromocode';
 import AdminQuest from './AdminQuest'; // New import
-import BatchCargoDetails from './BatchCargpDetails';
+
 
 function AdminLayout() {
   const { logout } = useAuth();
