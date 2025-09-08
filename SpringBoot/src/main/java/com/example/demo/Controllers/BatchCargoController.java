@@ -1,5 +1,6 @@
 package com.example.demo.Controllers;
 
+import com.example.demo.Components.ContextHolder;
 import com.example.demo.Entities.BatchCargo;
 import com.example.demo.Entities.Order;
 import com.example.demo.Entities.OrderItem;
@@ -29,6 +30,10 @@ public class BatchCargoController {
 
     @Autowired
     private OrderRepository orderRepository;
+
+
+
+
 
     @Autowired
     private UserRepository userRepository;
@@ -74,6 +79,25 @@ public class BatchCargoController {
 
         return ResponseEntity.ok(mapToBatchCargoDTO(batchCargo));
     }
+
+    @GetMapping("usr/{id}")
+    public ResponseEntity<BatchCargoDetailDTO> getUserBatchCargoDetail(@PathVariable Long id) {
+        BatchCargo batchCargo = batchCargoRepository.findByIdAndUserEmail(id, ContextHolder.getCurrentUserEmail()).get();
+        if (batchCargo == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        BatchCargoDetailDTO dto = new BatchCargoDetailDTO();
+        dto.setId(batchCargo.getId());
+        dto.setCreationDate(batchCargo.getCreationDate());
+        dto.setPurchaseDate(batchCargo.getPurchaseDate());
+        dto.setStatus(batchCargo.getStatus());
+        dto.setOrders(batchCargo.getOrders().stream().map(this::mapToOrderDTO).collect(Collectors.toList()));
+
+        return ResponseEntity.ok(dto);
+    }
+
+
 
     @GetMapping("/{id}")
     public ResponseEntity<BatchCargoDetailDTO> getBatchCargoDetail(@PathVariable Long id) {
@@ -169,6 +193,18 @@ public class BatchCargoController {
         dto.setUserEmail(order.getUser().getEmail());
         return dto;
     }
+
+
+
+    @GetMapping("/departure")
+    public List<BatchCargo> getDeparture()
+    {
+        String userEmail = ContextHolder.getCurrentUserEmail();
+        User user = userRepository.findByEmail(userEmail).get();
+        return batchCargoRepository.findByUser(user);
+
+    }
+
 
     // DTO classes
     @Data

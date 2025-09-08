@@ -1,5 +1,6 @@
 package com.example.demo.Entities;
 
+import com.example.demo.Entities.QuestProgress;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -16,28 +17,27 @@ import java.util.List;
 @Getter
 @Setter
 public class User {
-    @Column(nullable = false)
-    private String username;
-
     @Id
     @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
+    private String username;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(nullable = true)
+    private String phone;
+
+    @Column(nullable = true)
+    private String company;
 
     @Column(nullable = false)
     private String role;
 
     @Column(nullable = true)
     private String referralCode;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
-    private User referredBy;
-
-    @OneToMany(mappedBy = "referredBy", fetch = FetchType.LAZY)
-    private List<User> referrals = new ArrayList<>();
 
     @Column(nullable = false)
     private Integer referralCount = 0;
@@ -54,23 +54,43 @@ public class User {
     @Column(nullable = true)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private Float balance = 0.0f;
+
     @Column(nullable = true)
     private Double moneySpent;
+
+    @Column(nullable = false)
+    private Boolean notificationsEnabled = false;
+
+    @Column(nullable = false)
+    private Boolean twoFactorEnabled = false;
+
+    @Column(nullable = true)
+    private String avatarUrl;
+
+    @Column(nullable = false)
+    private Boolean emailVerified = false;
+
+    @Column(nullable = false)
+    private Boolean phoneVerified = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    private User referredBy;
+
+    @OneToMany(mappedBy = "referredBy", fetch = FetchType.LAZY)
+    private List<User> referrals = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<QuestProgress> questProgresses = new ArrayList<>();
 
-    @Column(nullable = false)
-    private Float balance = 0.0f;
-
     public User() {}
 
     public void verifyDiscount() {
-        if (temporaryDiscountExpired == null) {
-            temporaryDiscountExpired = LocalDateTime.now().plusMonths(2);
-        }
-        while (temporaryDiscountExpired.isBefore(LocalDateTime.now())) {
-            temporaryDiscountExpired = temporaryDiscountExpired.plusMonths(2);
+        if (temporaryDiscountExpired != null && temporaryDiscountExpired.isBefore(LocalDateTime.now())) {
+            this.temporaryDiscountPercent = 0.0f;
+            this.temporaryDiscountExpired = null;
         }
     }
 
@@ -80,9 +100,13 @@ public class User {
 
     public void addTemporaryDiscountPercent(float discountPercent) {
         this.temporaryDiscountPercent = Math.min((this.temporaryDiscountPercent + discountPercent), 80.0f);
+        if (this.temporaryDiscountExpired == null) {
+            this.temporaryDiscountExpired = LocalDateTime.now().plusMonths(2);
+        }
     }
 
     public float getTotalDiscount() {
+        verifyDiscount();
         return this.discountPercent + this.temporaryDiscountPercent;
     }
 

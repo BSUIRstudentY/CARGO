@@ -102,6 +102,7 @@ public class ReferralController {
 
         user.setReferredBy(referrer);
         referrer.getReferrals().add(user);
+        referrer.incrementReferralCount();
         userService.saveUser(user);
         userService.saveUser(referrer);
         QuestEvent questEvent = new QuestEvent(referrer.getEmail(), QuestConditionType.INVITE);

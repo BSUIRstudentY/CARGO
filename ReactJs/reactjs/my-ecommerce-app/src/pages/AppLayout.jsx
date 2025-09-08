@@ -19,6 +19,7 @@ import TicketChatPage from './TicketChatPage';
 import Notifications from './Notifications';
 import Reviews from './Reviews';
 import CostCalculator from './CostCalculator'; // Новый импорт
+import BatchCargoDetails from './BatchCargpDetails';
 
 function AppLayout() {
   const [backgroundColor, setBackgroundColor] = useState(() => localStorage.getItem('backgroundColor') || '#2F2F2F');
@@ -188,6 +189,7 @@ function AppLayout() {
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/order-details/:orderId" element={<OrderDetails />} />
+          <Route path="/batch-cargo-details/:batchId" element={<BatchCargoDetails />} />
         </Routes>
       </main>
       <Footer />
