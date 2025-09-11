@@ -14,7 +14,7 @@ public class UserDTO {
     @JsonSerialize(using = LocalDateTimeArraySerializer.class)
     private LocalDateTime temporaryDiscountExpired;
     private String referralCode;
-git
+
     // Getters and setters
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }

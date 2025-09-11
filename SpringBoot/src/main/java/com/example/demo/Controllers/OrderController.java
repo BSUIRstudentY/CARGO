@@ -73,15 +73,18 @@ public class OrderController {
                 .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
                 .sum());
         order.setDeliveryAddress(request.getDeliveryAddress());
+        order.setDiscountType(request.getDiscountType());
+        order.setDiscountValue(request.getDiscountValue());
+        order.setInsurance(request.getInsurance() != null ? request.getInsurance() : false);
 
         List<OrderItem> orderItems = cart.getItems().stream()
                 .map(cartItem -> {
                     OrderItem orderItem = new OrderItem();
                     orderItem.setOrder(order);
-                    orderItem.setOrderHistory(null);
                     orderItem.setProduct(cartItem.getProduct());
                     orderItem.setQuantity(cartItem.getQuantity());
                     orderItem.setPriceAtTime(cartItem.getProduct().getPrice());
+                    orderItem.setPurchaseStatus("PENDING"); // Ensure purchaseStatus is set
                     return orderItem;
                 })
                 .collect(Collectors.toList());
@@ -163,6 +166,11 @@ public class OrderController {
         System.out.println("Processing PUT /api/orders/" + id + " for user: " + getCurrentUserEmail());
         System.out.println("Request body: " + orderDetails);
 
+        // Validate OrderDTO
+        if (orderDetails == null) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("Request body cannot be null", 400));
+        }
+
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Заказ с ID " + id + " не найден"));
 
@@ -176,16 +184,18 @@ public class OrderController {
         }
 
         order.setTotalClientPrice(orderDetails.getTotalClientPrice());
-        order.setSupplierCost(orderDetails.getSupplierCost());
-        order.setCustomsDuty(orderDetails.getCustomsDuty());
-        order.setShippingCost(orderDetails.getShippingCost());
+        order.setSupplierCost(orderDetails.getSupplierCost() != null ? orderDetails.getSupplierCost() : 0.0f);
+        order.setCustomsDuty(orderDetails.getCustomsDuty() != null ? orderDetails.getCustomsDuty() : 0.0f);
+        order.setShippingCost(orderDetails.getShippingCost() != null ? orderDetails.getShippingCost() : 0.0f);
         order.setDeliveryAddress(orderDetails.getDeliveryAddress());
         order.setTrackingNumber(orderDetails.getTrackingNumber());
-        order.setStatus(orderDetails.getStatus());
+        order.setStatus(orderDetails.getStatus() != null ? orderDetails.getStatus() : "PENDING");
         order.setReasonRefusal(orderDetails.getReasonRefusal());
 
         if (order.getItems() != null) {
             order.getItems().clear();
+        }
+        if (orderDetails.getItems() != null) {
             for (OrderItemDTO itemDTO : orderDetails.getItems()) {
                 if (itemDTO.getProductId() == null) {
                     System.out.println("Validation failed: productId is null for item " + itemDTO);
@@ -195,6 +205,7 @@ public class OrderController {
                 Product product = productRepository.findById(String.valueOf(UUID.fromString(itemDTO.getProductId())))
                         .orElseThrow(() -> new RuntimeException("Product with ID " + itemDTO.getProductId() + " not found"));
 
+                // Update product details if provided
                 if (itemDTO.getProductName() != null && !itemDTO.getProductName().equals(product.getName())) {
                     product.setName(itemDTO.getProductName());
                 }
@@ -211,18 +222,27 @@ public class OrderController {
 
                 OrderItem orderItem = new OrderItem();
                 orderItem.setOrder(order);
-                orderItem.setOrderHistory(null);
                 orderItem.setProduct(product);
-                orderItem.setQuantity(itemDTO.getQuantity() != null ? itemDTO.getQuantity() : 0);
-                orderItem.setPriceAtTime(itemDTO.getPriceAtTime() != null ? itemDTO.getPriceAtTime() : 0.0f);
+                orderItem.setQuantity(itemDTO.getQuantity() != null ? itemDTO.getQuantity() : 1);
+                orderItem.setPriceAtTime(itemDTO.getPriceAtTime() != null ? itemDTO.getPriceAtTime() : product.getPrice());
                 orderItem.setSupplierPrice(itemDTO.getSupplierPrice() != null ? itemDTO.getSupplierPrice() : 0.0f);
-                orderItem.setPurchaseStatus(itemDTO.getPurchaseStatus() != null ? itemDTO.getPurchaseStatus() : "PENDING");
+                // Ensure purchaseStatus is never null
+                String purchaseStatus = itemDTO.getPurchaseStatus();
+                if (purchaseStatus == null || purchaseStatus.trim().isEmpty()) {
+                    purchaseStatus = "PENDING";
+                } else {
+                    // Validate purchaseStatus against allowed values if necessary
+                    if (!List.of("PENDING", "PURCHASED", "NOT_PURCHASED").contains(purchaseStatus)) {
+                        System.out.println("Invalid purchaseStatus: " + purchaseStatus);
+                        return ResponseEntity.badRequest().body(new ErrorResponse("Invalid purchase status: " + purchaseStatus, 400));
+                    }
+                }
+                orderItem.setPurchaseStatus(purchaseStatus);
                 orderItem.setPurchaseRefusalReason(itemDTO.getPurchaseRefusalReason());
                 order.getItems().add(orderItem);
             }
         }
 
-        // Send notifications for NOT_PURCHASED items
         if (order.getItems() != null) {
             for (OrderItem item : order.getItems()) {
                 if ("NOT_PURCHASED".equals(item.getPurchaseStatus()) && item.getPurchaseRefusalReason() != null) {
@@ -249,6 +269,14 @@ public class OrderController {
             orderHistory.setTotalClientPrice(order.getTotalClientPrice());
             orderHistory.setDeliveryAddress(order.getDeliveryAddress());
             orderHistory.setReasonRefusal(order.getReasonRefusal());
+            orderHistory.setSupplierCost(order.getSupplierCost());
+            orderHistory.setCustomsDuty(order.getCustomsDuty());
+            orderHistory.setShippingCost(order.getShippingCost());
+            orderHistory.setTrackingNumber(order.getTrackingNumber());
+            orderHistory.setInsurance(order.getInsurance());
+            orderHistory.setDiscountType(order.getDiscountType());
+            orderHistory.setDiscountValue(order.getDiscountValue());
+            orderHistory.setPromocode(order.getPromocode());
             orderHistory.setItems(order.getItems().stream()
                     .map(item -> {
                         OrderItem historyItem = new OrderItem();
@@ -322,6 +350,14 @@ public class OrderController {
         orderDTO.setTotalClientPrice(order.getTotalClientPrice());
         orderDTO.setDeliveryAddress(order.getDeliveryAddress());
         orderDTO.setReasonRefusal(order.getReasonRefusal());
+        orderDTO.setSupplierCost(order.getSupplierCost());
+        orderDTO.setCustomsDuty(order.getCustomsDuty());
+        orderDTO.setShippingCost(order.getShippingCost());
+        orderDTO.setTrackingNumber(order.getTrackingNumber());
+        orderDTO.setInsurance(order.getInsurance());
+        orderDTO.setDiscountType(order.getDiscountType());
+        orderDTO.setDiscountValue(order.getDiscountValue());
+        orderDTO.setPromocode(order.getPromocode() != null ? order.getPromocode().getCode() : null);
         orderDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
@@ -357,6 +393,10 @@ public class OrderController {
         orderDTO.setDeliveryAddress(order.getDeliveryAddress());
         orderDTO.setTrackingNumber(order.getTrackingNumber());
         orderDTO.setReasonRefusal(order.getReasonRefusal());
+        orderDTO.setInsurance(order.getInsurance());
+        orderDTO.setDiscountType(order.getDiscountType());
+        orderDTO.setDiscountValue(order.getDiscountValue());
+        orderDTO.setPromocode(order.getPromocode() != null ? order.getPromocode().getCode() : null);
         orderDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
@@ -389,10 +429,15 @@ public class OrderController {
         }
     }
 
+
     @Data
     static class CreateOrderRequest {
         private List<CartItemDTO> cartItems;
         private String deliveryAddress;
+        private String promocode;
+        private Boolean insurance;
+        private String discountType;
+        private Float discountValue;
     }
 
     @Data
@@ -410,6 +455,10 @@ public class OrderController {
         private List<OrderItemDTO> items;
         private String userEmail;
         private String reasonRefusal;
+        private Boolean insurance;
+        private String discountType;
+        private Float discountValue;
+        private String promocode;
     }
 
     @Data
@@ -419,10 +468,18 @@ public class OrderController {
         private Timestamp dateCreated;
         private String status;
         private Float totalClientPrice;
+        private Float supplierCost;
+        private Float customsDuty;
+        private Float shippingCost;
         private String deliveryAddress;
-        private String reasonRefusal;
+        private String trackingNumber;
         private List<OrderItemDTO> items;
         private String userEmail;
+        private String reasonRefusal;
+        private Boolean insurance;
+        private String discountType;
+        private Float discountValue;
+        private String promocode;
     }
 
     @Data

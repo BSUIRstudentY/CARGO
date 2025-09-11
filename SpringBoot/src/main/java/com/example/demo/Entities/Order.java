@@ -72,4 +72,13 @@ public class Order {
 
     @Column(name = "insurance_cost", nullable = true)
     private Float insuranceCost;
+
+    @Column(name = "insurance", nullable = true)
+    private Boolean insurance;
+
+    @Column(name = "discount_type", nullable = true)
+    private String discountType;
+
+    @Column(name = "discount_value", nullable = true)
+    private Float discountValue;
 }
