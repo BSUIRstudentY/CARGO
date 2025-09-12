@@ -1,614 +1,387 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Tilt from 'react-parallax-tilt';
-import { useAuth } from './AuthProvider';
 import api from '../api/axiosInstance';
-import { UserIcon, PencilIcon, CheckIcon, XMarkIcon, KeyIcon, BellIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-
-// Utility function to format expiration date in Russian and Chinese
-const formatExpirationDate = (date) => {
-  if (!date) return { ru: 'Не завершено', zh: '未完成' };
-  const [year, month, day, hour, minute] = date;
-  const formattedDate = new Date(year, month - 1, day, hour, minute);
-  return {
-    ru: formattedDate.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-    zh: formattedDate.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-  };
-};
-
-// Utility function to calculate time remaining for temporary discount
-const getTimeRemaining = (expirationDate) => {
-  if (!expirationDate) return { ru: '0 мин.', zh: '0 分钟' };
-  const [year, month, day, hour, minute, second, nano] = expirationDate;
-  const expirationUTC = new Date(Date.UTC(year, month - 1, day, hour - 3, minute, second, Math.floor(nano / 1000000)));
-  const currentUTC = new Date();
-  const diffMs = expirationUTC - currentUTC;
-  if (diffMs <= 0) return { ru: '0 мин.', zh: '0 分钟' };
-  const months = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30));
-  const weeks = Math.floor((diffMs % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24 * 7));
-  const days = Math.floor((diffMs % (1000 * 60 * 60 * 24 * 7)) / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-  return {
-    ru: [
-      months > 0 ? `${months} мес.` : '',
-      weeks > 0 ? `${weeks} нед.` : '',
-      days > 0 ? `${days} дн.` : '',
-      hours > 0 ? `${hours} ч.` : '',
-      minutes >= 0 ? `${minutes} мин.` : '',
-    ].filter(Boolean).join(' ') || '0 мин.',
-    zh: [
-      months > 0 ? `${months} 月` : '',
-      weeks > 0 ? `${weeks} 周` : '',
-      days > 0 ? `${days} 天` : '',
-      hours > 0 ? `${hours} 小时` : '',
-      minutes >= 0 ? `${minutes} 分钟` : '',
-    ].filter(Boolean).join(' ') || '0 分钟',
-  };
-};
-
-// Utility function to verify temporary discount
-const verifyDiscount = (temporaryDiscountExpired) => {
-  if (!temporaryDiscountExpired) return 0;
-  const [year, month, day, hour, minute, second, nano] = temporaryDiscountExpired;
-  const expirationUTC = new Date(Date.UTC(year, month - 1, day, hour - 3, minute, second, Math.floor(nano / 1000000)));
-  const currentUTC = new Date();
-  return expirationUTC > currentUTC ? 1 : 0;
-};
+import { UserIcon, BellIcon, KeyIcon, CheckIcon, XMarkIcon, CurrencyDollarIcon, UsersIcon, TagIcon } from '@heroicons/react/24/solid';
 
 const PersonalDataTab = ({ setError }) => {
-  const { user, updateUser } = useAuth();
-  const [editMode, setEditMode] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(user?.notificationsEnabled || false);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(user?.twoFactorEnabled || false);
-  const [editForm, setEditForm] = useState({
-    username: user?.username || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    company: user?.company || '',
+  const [userData, setUserData] = useState({
+    email: '',
+    username: '',
+    phone: '',
+    company: '',
+    role: '',
+    referralCode: '',
+    referralCount: 0,
+    balance: 0,
+    moneySpent: 0,
+    notificationsEnabled: false,
+    twoFactorEnabled: false,
+    avatarUrl: 'https://via.placeholder.com/150',
+    emailVerified: false,
+    phoneVerified: false,
   });
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  });
-  const [passwordError, setPasswordError] = useState('');
-  const [isPasswordSectionOpen, setIsPasswordSectionOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState('https://via.placeholder.com/150');
-  const [language, setLanguage] = useState('ru'); // Toggle between Russian and Chinese
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [showVerificationModal, setShowVerificationModal] = useState(null); // 'email' or 'phone'
+  const [verificationCode, setVerificationCode] = useState('');
 
-  // Calculate total discount
-  const temporaryDiscountPercent = user?.temporaryDiscountExpired && verifyDiscount(user.temporaryDiscountExpired) ? user.temporaryDiscountPercent : 0;
-  const totalDiscount = (user?.discountPercent || 0) + temporaryDiscountPercent;
-  const discountProgress = totalDiscount || 0;
-  const maxDiscount = 100; // Maximum discount percentage (from User.java: 20% permanent + 80% temporary)
-  const timeRemaining = user?.temporaryDiscountExpired ? getTimeRemaining(user.temporaryDiscountExpired) : null;
-
-  // Fetch user data
+  // Fetch user data from /api/users/me
   useEffect(() => {
-    if (user?.email) {
-      setEditForm({
-        username: user.username || '',
-        email: user.email || '',
-        phone: user.phone || '',
-        company: user.company || '',
-      });
-      setNotificationsEnabled(user.notificationsEnabled || false);
-      setTwoFactorEnabled(user.twoFactorEnabled || false);
-      // Simulate fetching avatar (replace with actual API call if available)
-      setAvatarUrl(user.avatarUrl || 'https://via.placeholder.com/150');
-    }
-  }, [user]);
+    const fetchUserData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.get('/users/me');
+        setUserData(response.data);
+      } catch (error) {
+        const errorMsg = `Ошибка загрузки данных пользователя: ${error.response?.data?.message || error.message}`;
+        setErrorMessage(errorMsg);
+        setError(errorMsg);
+        console.error('Error fetching user data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const handleEditToggle = () => {
-    setEditMode(!editMode);
-    if (!editMode) {
-      setEditForm({
-        username: user?.username || '',
-        email: user?.email || '',
-        phone: user?.phone || '',
-        company: user?.company || '',
-      });
-    }
-  };
+    fetchUserData();
+  }, [setError]);
 
-  const handleSaveProfile = async () => {
+  const handleNotificationToggle = async (type) => {
     setIsLoading(true);
     try {
-      await updateUser({
-        username: editForm.username,
-        email: editForm.email,
-        phone: editForm.phone,
-        company: editForm.company,
-        notificationsEnabled,
-      });
-      setEditMode(false);
-      setError(null);
-      alert(language === 'ru' ? 'Профиль успешно обновлён!' : '个人资料更新成功！');
-    } catch (error) {
-      const errorMessage =
-        language === 'ru'
-          ? `Ошибка обновления профиля: ${error.response?.data?.message || error.message}`
-          : `更新个人资料失败：${error.response?.data?.message || error.message}`;
-      setError(errorMessage);
-      console.error('Error updating profile:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleChangePassword = async () => {
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordError(language === 'ru' ? 'Новые пароли не совпадают' : '新密码不匹配');
-      return;
-    }
-    if (!passwordForm.currentPassword || !passwordForm.newPassword) {
-      setPasswordError(language === 'ru' ? 'Все поля обязательны' : '所有字段均为必填项');
-      return;
-    }
-    setIsLoading(true);
-    try {
-      await api.put('/profile/change-password',
-       {
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword,
-      });
-      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setPasswordError('');
-      alert(language === 'ru' ? 'Пароль успешно изменён!' : '密码更改成功！');
-    } catch (error) {
-      const errorMessage =
-        language === 'ru'
-          ? `Ошибка смены пароля: ${error.response?.data?.message || error.message}`
-          : `更改密码失败：${error.response?.data?.message || error.message}`;
-      setPasswordError(errorMessage);
-      console.error('Error changing password:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleNotificationToggle = async () => {
-    setIsLoading(true);
-    try {
-      const newValue = !notificationsEnabled;
-      await updateUser({ notificationsEnabled: newValue });
-      setNotificationsEnabled(newValue);
+      const updates = {};
+      if (type === 'email') {
+        updates.notificationsEnabled = !userData.notificationsEnabled;
+      } else if (type === '2fa') {
+        updates.twoFactorEnabled = !userData.twoFactorEnabled;
+      }
+      const response = await api.put('/users', updates);
+      setUserData((prev) => ({ ...prev, ...updates }));
       alert(
-        language === 'ru'
-          ? 'Настройки уведомлений обновлены!'
-          : '通知设置已更新！'
+        type === 'email'
+          ? 'Настройки уведомлений по email обновлены!'
+          : 'Настройки двухфакторной аутентификации обновлены!'
       );
     } catch (error) {
-      const errorMessage =
-        language === 'ru'
-          ? `Ошибка обновления уведомлений: ${error.response?.data?.message || error.message}`
-          : `更新通知设置失败：${error.response?.data?.message || error.message}`;
-      setError(errorMessage);
-      console.error('Error updating notifications:', error);
+      const errorMsg = `Ошибка обновления настроек: ${error.response?.data?.message || error.message}`;
+      setErrorMessage(errorMsg);
+      setError(errorMsg);
+      console.error('Error updating settings:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleTwoFactorToggle = async () => {
+  const handleRequestVerification = async (type) => {
     setIsLoading(true);
     try {
-      const newValue = !twoFactorEnabled;
-      await updateUser({ twoFactorEnabled: newValue });
-      setTwoFactorEnabled(newValue);
-      alert(
-        language === 'ru'
-          ? 'Настройки двухфакторной аутентификации обновлены!'
-          : '双因素认证设置已更新！'
-      );
+      await api.post(`/verification/request-${type}`);
+      setShowVerificationModal(type);
+      alert(`Код верификации отправлен на ${type === 'email' ? 'email' : 'телефон'}!`);
     } catch (error) {
-      const errorMessage =
-        language === 'ru'
-          ? `Ошибка обновления двухфакторной аутентификации: ${error.response?.data?.message || error.message}`
-          : `更新双因素认证失败：${error.response?.data?.message || error.message}`;
-      setError(errorMessage);
-      console.error('Error updating two-factor:', error);
+      const errorMsg = `Ошибка запроса верификации ${type === 'email' ? 'email' : 'телефона'}: ${error.response?.data?.message || error.message}`;
+      setErrorMessage(errorMsg);
+      setError(errorMsg);
+      console.error(`Error requesting ${type} verification:`, error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleAvatarUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => setAvatarUrl(reader.result);
-      reader.readAsDataURL(file);
-      // Optionally, upload to backend (not implemented in UserController yet)
+  const handleConfirmVerification = async (type) => {
+    if (!verificationCode) {
+      setErrorMessage('Введите код верификации');
+      setError('Введите код верификации');
+      return;
     }
-  };
-
-  const toggleLanguage = () => {
-    setLanguage(language === 'ru' ? 'zh' : 'ru');
+    setIsLoading(true);
+    try {
+      const response = await api.post(`/verification/confirm-${type}`, null, { params: { code: verificationCode } });
+      alert(response.data);
+      setUserData((prev) => ({
+        ...prev,
+        [type === 'email' ? 'emailVerified' : 'phoneVerified']: true,
+      }));
+      setVerificationCode('');
+      setShowVerificationModal(null);
+    } catch (error) {
+      const errorMsg = `Ошибка подтверждения ${type === 'email' ? 'email' : 'телефона'}: ${error.response?.data?.message || error.message}`;
+      setErrorMessage(errorMsg);
+      setError(errorMsg);
+      console.error(`Error confirming ${type} verification:`, error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg shadow-2xl p-8 relative overflow-hidden">
-      {/* Background Glow Effect */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none" />
-
-      <div className="relative">
-        {/* Header with Language Toggle */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center">
-            <UserIcon className="w-8 h-8 mr-2 text-[var(--accent-color)]" />
-            <h2 className="text-3xl font-bold text-[var(--accent-color)]">
-              {language === 'ru' ? 'Личные данные' : '个人信息'}
-            </h2>
-          </div>
-          <button
-            onClick={toggleLanguage}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition duration-300 transform hover:scale-105"
-          >
-            {language === 'ru' ? '中文' : 'Русский'}
-          </button>
-        </div>
-
-        {/* Error Message */}
-        <AnimatePresence>
-          {setError && (
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
-              transition={{ duration: 0.3 }}
-              className="mb-6 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-center"
-            >
-              {language === 'ru' ? 'Произошла ошибка, попробуйте снова.' : '发生错误，请重试。'}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* User Info Card */}
-        <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+    <div className="w-full p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl min-h-screen">
+      {/* Error Message */}
+      <AnimatePresence>
+        {errorMessage && (
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-8 mb-8 shadow-xl border border-gray-700/50"
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-center text-base font-medium"
           >
-            <div className="flex flex-col sm:flex-row gap-6">
-              {/* Avatar Section */}
-              <div className="flex-shrink-0">
-                <img
-                  src={avatarUrl}
-                  alt="User Avatar"
-                  className="w-32 h-32 rounded-full border-4 border-[var(--accent-color)] shadow-lg object-cover"
-                />
-                <label className="block mt-4">
-                  <span className="text-gray-300 cursor-pointer hover:text-[var(--accent-color)] transition duration-300">
-                    {language === 'ru' ? 'Изменить аватар' : '更改头像'}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-
-              {/* User Details */}
-              <div className="flex-1">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-2xl font-semibold text-white">
-                    {language === 'ru' ? 'Профиль пользователя' : '用户资料'}
-                  </h3>
-                  <button
-                    onClick={handleEditToggle}
-                    className="text-[var(--accent-color)] hover:text-opacity-90 transition duration-300 transform hover:scale-110"
-                  >
-                    <PencilIcon className="w-6 h-6" />
-                  </button>
-                </div>
-
-                {!editMode ? (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-lg font-medium text-gray-300">
-                        {language === 'ru' ? 'Имя' : '姓名'}
-                      </label>
-                      <p className="text-xl text-white">{user?.username || (language === 'ru' ? 'Гость' : '访客')}</p>
-                    </div>
-                    <div>
-                      <label className="block text-lg font-medium text-gray-300">
-                        {language === 'ru' ? 'Компания' : '公司'}
-                      </label>
-                      <p className="text-xl text-white">{user?.company || (language === 'ru' ? 'Не указана' : '未填写')}</p>
-                    </div>
-                    <div>
-                      <label className="block text-lg font-medium text-gray-300">
-                        {language === 'ru' ? 'Телефон' : '电话'}
-                      </label>
-                      <p className="text-xl text-white">{user?.phone || (language === 'ru' ? 'Не указан' : '未填写')}</p>
-                    </div>
-                    <div>
-                      <label className="block text-lg font-medium text-gray-300">Email</label>
-                      <p className="text-xl text-white">{user?.email || 'user@example.com'}</p>
-                    </div>
-                    <div>
-                      <label className="block text-lg font-medium text-gray-300">
-                        {language === 'ru' ? 'Общая скидка' : '总折扣'}
-                      </label>
-                      <p className="text-xl text-white">{totalDiscount}%</p>
-                      {temporaryDiscountPercent > 0 && user?.temporaryDiscountExpired && (
-                        <p className="text-sm text-red-400 mt-2">
-                          {language === 'ru'
-                            ? `Временная скидка истекает через: ${getTimeRemaining(user.temporaryDiscountExpired).ru}`
-                            : `临时折扣剩余时间：${getTimeRemaining(user.temporaryDiscountExpired).zh}`}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-lg font-medium text-gray-300">
-                        {language === 'ru' ? 'Имя *' : '姓名 *'}
-                      </label>
-                      <input
-                        type="text"
-                        value={editForm.username}
-                        onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                        className="w-full p-3 bg-gray-900 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition duration-300"
-                        placeholder={language === 'ru' ? 'Имя' : '姓名'}
-                        maxLength="255"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-lg font-medium text-gray-300">
-                        {language === 'ru' ? 'Компания' : '公司'}
-                      </label>
-                      <input
-                        type="text"
-                        value={editForm.company}
-                        onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
-                        className="w-full p-3 bg-gray-900 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition duration-300"
-                        placeholder={language === 'ru' ? 'Компания' : '公司'}
-                        maxLength="255"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-lg font-medium text-gray-300">
-                        {language === 'ru' ? 'Телефон *' : '电话 *'}
-                      </label>
-                      <input
-                        type="text"
-                        value={editForm.phone}
-                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                        className="w-full p-3 bg-gray-900 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition duration-300"
-                        placeholder={language === 'ru' ? 'Телефон' : '电话'}
-                        maxLength="255"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-lg font-medium text-gray-300">Email *</label>
-                      <input
-                        type="email"
-                        value={editForm.email}
-                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                        className="w-full p-3 bg-gray-900 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition duration-300"
-                        placeholder="Email"
-                        maxLength="255"
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleSaveProfile}
-                        disabled={isLoading}
-                        className="px-6 py-3 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition duration-300 flex items-center justify-center"
-                      >
-                        <CheckIcon className="w-5 h-5 mr-2" />
-                        {language === 'ru' ? 'Сохранить' : '保存'}
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleEditToggle}
-                        disabled={isLoading}
-                        className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition duration-300 flex items-center justify-center"
-                      >
-                        <XMarkIcon className="w-5 h-5 mr-2" />
-                        {language === 'ru' ? 'Отмена' : '取消'}
-                      </motion.button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Discount Progress Bar */}
-            <div className="mt-6">
-              <label className="block text-lg font-medium text-gray-300">
-                {language === 'ru' ? 'Прогресс скидки' : '折扣进度'}
-              </label>
-              <div className="w-full bg-gray-600 rounded-full h-4 mt-2">
-                <motion.div
-                  className="bg-gradient-to-r from-[var(--accent-color)] to-emerald-500 h-4 rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(discountProgress / maxDiscount) * 100}%` }}
-                  transition={{ duration: 1, ease: 'easeInOut' }}
-                />
-              </div>
-              <p className="text-sm text-gray-400 mt-2">
-                {language === 'ru'
-                  ? `Общая скидка: ${discountProgress}% (Постоянная: ${user?.discountPercent || 0}%, Временная: ${temporaryDiscountPercent}%)`
-                  : `总折扣：${discountProgress}% (固定折扣：${user?.discountPercent || 0}%, 临时折扣：${temporaryDiscountPercent}%)`}
-              </p>
-            </div>
+            {errorMessage}
           </motion.div>
-        </Tilt>
-
-        {/* Password Change Section */}
+        )}
+      </AnimatePresence>
+      {/* Loading Overlay */}
+      {isLoading && (
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-8 mb-8 shadow-xl border border-gray-700/50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000]"
         >
-          <button
-            onClick={() => setIsPasswordSectionOpen(!isPasswordSectionOpen)}
-            className="flex items-center w-full p-3 text-white rounded-lg hover:bg-gray-700 transition duration-300"
-          >
-            <KeyIcon className="w-6 h-6 mr-2 text-[var(--accent-color)]" />
-            <span className="text-xl font-semibold">
-              {language === 'ru' ? 'Смена пароля' : '更改密码'}
-            </span>
-            <ChevronDownIcon className={`w-5 h-5 ml-auto transition-transform ${isPasswordSectionOpen ? 'rotate-180' : ''}`} />
-          </button>
-          <AnimatePresence>
-            {isPasswordSectionOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="mt-4 space-y-6"
-              >
-                <div>
-                  <label className="block text-lg font-medium text-gray-300">
-                    {language === 'ru' ? 'Текущий пароль' : '当前密码'}
-                  </label>
-                  <input
-                    type="password"
-                    value={passwordForm.currentPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                    className="w-full p-3 bg-gray-900 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition duration-300"
-                    placeholder={language === 'ru' ? 'Текущий пароль' : '当前密码'}
-                  />
-                </div>
-                <div>
-                  <label className="block text-lg font-medium text-gray-300">
-                    {language === 'ru' ? 'Новый пароль' : '新密码'}
-                  </label>
-                  <input
-                    type="password"
-                    value={passwordForm.newPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                    className="w-full p-3 bg-gray-900 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition duration-300"
-                    placeholder={language === 'ru' ? 'Новый пароль' : '新密码'}
-                  />
-                </div>
-                <div>
-                  <label className="block text-lg font-medium text-gray-300">
-                    {language === 'ru' ? 'Подтвердите новый пароль' : '确认新密码'}
-                  </label>
-                  <input
-                    type="password"
-                    value={passwordForm.confirmPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                    className="w-full p-3 bg-gray-900 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition duration-300"
-                    placeholder={language === 'ru' ? 'Подтвердите новый пароль' : '确认新密码'}
-                  />
-                </div>
-                {passwordError && (
-                  <p className="text-red-500 text-lg">{passwordError}</p>
-                )}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleChangePassword}
-                    disabled={isLoading}
-                    className="px-6 py-3 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition duration-300 flex items-center justify-center"
-                  >
-                    <CheckIcon className="w-5 h-5 mr-2" />
-                    {language === 'ru' ? 'Сохранить пароль' : '保存密码'}
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })}
-                    disabled={isLoading}
-                    className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition duration-300 flex items-center justify-center"
-                  >
-                    <XMarkIcon className="w-5 h-5 mr-2" />
-                    {language === 'ru' ? 'Очистить' : '清除'}
-                  </motion.button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div className="animate-spin rounded-full h-10 w-10 border-t-3 border-cyan-400" />
         </motion.div>
-
-        {/* Notifications and 2FA Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-8 shadow-xl border border-gray-700/50"
-        >
-          <h3 className="text-2xl font-semibold text-white mb-6">
-            {language === 'ru' ? 'Настройки безопасности и уведомлений' : '安全与通知设置'}
-          </h3>
-          <div className="space-y-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                checked={notificationsEnabled}
-                onChange={handleNotificationToggle}
-                className="mr-2 accent-[var(--accent-color)] w-5 h-5"
-                disabled={isLoading}
-              />
-              <label className="text-lg text-gray-300">
-                {language === 'ru' ? 'Включить уведомления по email' : '启用电子邮件通知'}
-              </label>
-              <BellIcon className="w-5 h-5 ml-2 text-[var(--accent-color)]" />
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                checked={twoFactorEnabled}
-                onChange={handleTwoFactorToggle}
-                className="mr-2 accent-[var(--accent-color)] w-5 h-5"
-                disabled={isLoading}
-              />
-              <label className="text-lg text-gray-300">
-                {language === 'ru' ? 'Включить двухфакторную аутентификацию' : '启用双因素认证'}
-              </label>
-              <KeyIcon className="w-5 h-5 ml-2 text-[var(--accent-color)]" />
+      )}
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-8 flex items-center gap-3"
+      >
+        <UserIcon className="w-8 h-8 text-cyan-400" />
+        <h2 className="text-3xl font-bold text-white tracking-tight">Личный кабинет</h2>
+      </motion.div>
+      {/* User Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 mb-6 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
+      >
+        <div className="flex flex-col sm:flex-row items-center gap-6">
+          <div className="relative">
+            <img
+              src={userData.avatarUrl}
+              alt="User Avatar"
+              className="w-32 h-32 rounded-full border-4 border-cyan-400/30 shadow-lg object-cover ring-2 ring-cyan-400/50"
+            />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-emerald-400/20 opacity-50" />
+          </div>
+          <div className="text-center sm:text-left space-y-2">
+            <h3 className="text-2xl font-semibold text-white">{userData.username || 'Гость'}</h3>
+            <p className="text-gray-300 text-base">{userData.company || 'Компания не указана'}</p>
+            <p className="text-sm text-cyan-400">Роль: {userData.role || 'Не указана'}</p>
+          </div>
+        </div>
+      </motion.div>
+      {/* Contact Info Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 mb-6 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
+      >
+        <h3 className="text-lg font-semibold text-white mb-4">Контактная информация</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Email</label>
+            <div className="flex items-center justify-between">
+              <p className="text-base text-white">{userData.email || 'user@example.com'}</p>
+              <div className="flex items-center gap-2">
+                <p className={`text-sm ${userData.emailVerified ? 'text-green-400' : 'text-red-400'}`}>
+                  {userData.emailVerified ? 'Верифицирован' : 'Не верифицирован'}
+                </p>
+                {!userData.emailVerified && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleRequestVerification('email')}
+                    disabled={isLoading}
+                    className="px-3 py-1 bg-cyan-400 text-white rounded-lg text-sm hover:bg-cyan-500 transition duration-300"
+                  >
+                    Верифицировать
+                  </motion.button>
+                )}
+              </div>
             </div>
           </div>
-        </motion.div>
-
-        {/* Loading Overlay */}
-        {isLoading && (
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Телефон</label>
+            <div className="flex items-center justify-between">
+              <p className="text-base text-white">{userData.phone || 'Не указан'}</p>
+              <div className="flex items-center gap-2">
+                <p className={`text-sm ${userData.phoneVerified ? 'text-green-400' : 'text-red-400'}`}>
+                  {userData.phoneVerified ? 'Верифицирован' : 'Не верифицирован'}
+                </p>
+                {!userData.phoneVerified && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleRequestVerification('phone')}
+                    disabled={isLoading}
+                    className="px-3 py-1 bg-cyan-400 text-white rounded-lg text-sm hover:bg-cyan-500 transition duration-300"
+                  >
+                    Верифицировать
+                  </motion.button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+      {/* Financial Info Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 mb-6 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
+      >
+        <h3 className="text-lg font-semibold text-white mb-4">Финансовая информация</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Баланс</label>
+            <div className="flex items-center gap-2">
+              <CurrencyDollarIcon className="w-5 h-5 text-cyan-400" />
+              <p className="text-base text-white">{userData.balance?.toFixed(2) || '0.00'} BYN</p>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Потрачено</label>
+            <div className="flex items-center gap-2">
+              <CurrencyDollarIcon className="w-5 h-5 text-cyan-400" />
+              <p className="text-base text-white">{userData.moneySpent?.toFixed(2) || '0.00'} BYN</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+      {/* Referral Info Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 mb-6 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
+      >
+        <h3 className="text-lg font-semibold text-white mb-4">Реферальная программа</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Реферальный код</label>
+            <div className="flex items-center gap-2">
+              <TagIcon className="w-5 h-5 text-cyan-400" />
+              <p className="text-base text-white">{userData.referralCode || 'Не указан'}</p>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Количество рефералов</label>
+            <div className="flex items-center gap-2">
+              <UsersIcon className="w-5 h-5 text-cyan-400" />
+              <p className="text-base text-white">{userData.referralCount || 0}</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+      {/* Security Settings Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
+      >
+        <h3 className="text-lg font-semibold text-white mb-4">Настройки безопасности и уведомлений</h3>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BellIcon className="w-5 h-5 text-cyan-400" />
+              <label className="text-sm text-gray-300">Уведомления по email</label>
+            </div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="relative inline-flex items-center cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                checked={userData.notificationsEnabled}
+                onChange={() => handleNotificationToggle('email')}
+                className="sr-only peer"
+                disabled={isLoading}
+              />
+              <div className="w-11 h-6 bg-gray-700 rounded-full peer-checked:bg-cyan-400/50 transition duration-300"></div>
+              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-5 transition duration-300"></div>
+            </motion.div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <KeyIcon className="w-5 h-5 text-cyan-400" />
+              <label className="text-sm text-gray-300">Двухфакторная аутентификация</label>
+            </div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="relative inline-flex items-center cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                checked={userData.twoFactorEnabled}
+                onChange={() => handleNotificationToggle('2fa')}
+                className="sr-only peer"
+                disabled={isLoading}
+              />
+              <div className="w-11 h-6 bg-gray-700 rounded-full peer-checked:bg-cyan-400/50 transition duration-300"></div>
+              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-5 transition duration-300"></div>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
+      {/* Verification Modal */}
+      <AnimatePresence>
+        {showVerificationModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
+            className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000]"
           >
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[var(--accent-color)]" />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-gray-800/90 backdrop-blur-lg rounded-xl p-6 w-full max-w-xs border border-cyan-400/20 shadow-lg"
+            >
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Верификация {showVerificationModal === 'email' ? 'Email' : 'Телефона'}
+              </h3>
+              <input
+                type="text"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                className="w-full p-3 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300"
+                placeholder="Введите код"
+              />
+              <div className="flex gap-3 mt-4">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleConfirmVerification(showVerificationModal)}
+                  disabled={isLoading}
+                  className="flex-1 py-2 bg-cyan-400 text-white rounded-lg hover:bg-cyan-500 transition duration-300 text-sm"
+                >
+                  Подтвердить
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowVerificationModal(null)}
+                  disabled={isLoading}
+                  className="flex-1 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition duration-300 text-sm"
+                >
+                  Отмена
+                </motion.button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 };
+
 
 export default PersonalDataTab;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from '../api/axiosInstance'; // Импортируем предоставленный Axios-клиент
 
 function SelfPickupCargo() {
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -7,7 +8,9 @@ function SelfPickupCargo() {
     return savedTrackingNumbers ? JSON.parse(savedTrackingNumbers) : [];
   });
   const [newTrackingNumber, setNewTrackingNumber] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   const [errors, setErrors] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     localStorage.setItem('savedTrackingNumbers', JSON.stringify(trackingNumbers));
@@ -32,15 +35,42 @@ function SelfPickupCargo() {
     setTrackingNumbers(trackingNumbers.filter((n) => n !== number));
   };
 
+  const handleSubmitTrackingNumbers = async () => {
+    if (trackingNumbers.length === 0) {
+      setErrors('Добавьте хотя бы один трек-номер');
+      return;
+    }
+    if (!deliveryAddress.trim()) {
+      setErrors('Адрес доставки обязателен');
+      return;
+    }
+    try {
+      const response = await api.post('/orders/self-pickup', {
+        trackingNumbers,
+        deliveryAddress,
+      });
+      setSuccessMessage(`Заказ успешно создан! ID: ${response.data.id}`);
+      setTrackingNumbers([]);
+      setDeliveryAddress(''); // Очищаем адрес после успешной отправки
+      setErrors('');
+      localStorage.removeItem('savedTrackingNumbers');
+    } catch (error) {
+      setErrors('Ошибка при создании заказа: ' + (error.response?.data?.message || error.message));
+      setSuccessMessage('');
+    }
+  };
+
   return (
     <div className="mx-auto min-h-screen max-w-7xl bg-gradient-to-b from-gray-900 to-gray-800 text-white relative overflow-hidden">
       {/* Background texture overlay */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
-        backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"%3E%3Crect width="100" height="100" fill="url(%23pattern0)" /%3E%3Cdefs%3E%3Cpattern id="pattern0" patternUnits="userSpaceOnUse" width="50" height="50"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.5"/%3E%3C/pattern%3E%3C/defs%3E%3C/svg%3E')`,
-        backgroundRepeat: 'repeat',
-        zIndex: 0,
-      }}></div>
-
+      <div
+        className="absolute inset-0 opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"%3E%3Crect width="100" height="100" fill="url(%23pattern0)" /%3E%3Cdefs%3E%3Cpattern id="pattern0" patternUnits="userSpaceOnUse" width="50" height="50"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.5"/%3E%3C/pattern%3E%3C/defs%3E%3C/svg%3E')`,
+          backgroundRepeat: 'repeat',
+          zIndex: 0,
+        }}
+      ></div>
       <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header with animated title and decorative element */}
         <div className="text-center mb-12">
@@ -49,7 +79,6 @@ function SelfPickupCargo() {
             <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-[var(--accent-color)] rounded-full opacity-50 animate-pulse"></span>
           </h1>
         </div>
-
         <div className="max-w-7xl mx-auto space-y-12">
           {/* Instruction Section with Enhanced Styling */}
           <div className="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700/50 hover:border-[var(--accent-color)] transition-all duration-300">
@@ -64,10 +93,12 @@ function SelfPickupCargo() {
             </p>
             <ol className="list-decimal pl-6 space-y-4 text-gray-300">
               <li>
-                <strong>Заполнение адреса склада:</strong> Укажите адрес склада на нужной площадке с вашим кодом клиента (последние 4 цифры вашего номера телефона, например, BL1234 без скобок и пробелов). Адрес:
+                <strong>Заполнение адреса склада:</strong> Укажите адрес склада на нужной площадке с вашим кодом клиента
+                (последние 4 цифры вашего номера телефона, например, BL1234 без скобок и пробелов). Адрес:
                 <br />
                 <span className="block mt-2 bg-gray-700 p-2 rounded-lg text-sm break-words">
-                  广东省佛山市南海区大沥镇时代水岸二期教育路波子园林餐厅小路走到底的院子右手边Cargo DP 唛头BL(и 4 последние цифры вашего номера телефона) 刘云鹏 13976192260
+                  广东省佛山市南海区大沥镇时代水岸二期教育路波子园林餐厅小路走到底的院子右手边Cargo DP 唛头BL(и 4 последние
+                  цифры вашего номера телефона) 刘云鹏 13976192260
                 </span>
                 <p className="mt-2 text-sm text-red-400">
                   Код клиента обязателен в адресе. Если его нет, товар зачислится к потеряшкам.
@@ -77,25 +108,35 @@ function SelfPickupCargo() {
                 <strong>Проверка адреса:</strong> После заполнения отправьте скриншот адреса на сайт для проверки.
               </li>
               <li>
-                <strong>Выкуп и отслеживание:</strong> Выкупайте товары на наш склад и самостоятельно отслеживайте их перемещение по Китаю.
+                <strong>Выкуп и отслеживание:</strong> Выкупайте товары на наш склад и самостоятельно отслеживайте их
+                перемещение по Китаю.
               </li>
               <li>
-                <strong>Формирование консолидации:</strong> После прибытия всех товаров на склад сформируйте список трек-номеров (статус "получено") и отправьте его на сайт. Сдавайте консолидацию через 1-2 дня после прибытия последнего товара. Не отправляйте заранее, так как статус в логистике может быть ошибочным.
+                <strong>Формирование консолидации:</strong> После прибытия всех товаров на склад сформируйте список
+                трек-номеров (статус "получено") и отправьте его на сайт вместе с адресом доставки. Сдавайте консолидацию через 1-2 дня после
+                прибытия последнего товара. Не отправляйте заранее, так как статус в логистике может быть ошибочным.
               </li>
               <li>
-                <strong>Фото товаров:</strong> После получения треков на сборку, в разделе "Фото товара" с вашим кодом клиента появятся фото (накладная и товар). Фото загружаются в течение рабочего дня (если треки отправлены с 16:00 до 9:00 — в ближайшее время). Качество может быть ниже ожидаемого, это бесплатно. Проверка на брак — платная услуга (см. раздел "Тарифы").
+                <strong>Фото товаров:</strong> После получения треков на сборку, в разделе "Фото товара" с вашим кодом
+                клиента появятся фото (накладная и товар). Фото загружаются в течение рабочего дня (если треки отправлены с
+                16:00 до 9:00 — в ближайшее время). Качество может be ниже ожидаемого, это бесплатно. Проверка на брак —
+                платная услуга (см. раздел "Тарифы").
                 <br />
-                Если товар не соответствует, оформите возврат (5 юаней/трек) через сайт, отправив трек и скриншот. Возврат по Китаю оплачивается вами или продавцом.
+                Если товар не соответствует, оформите возврат (5 юаней/трек) через сайт, отправив трек и скриншот. Возврат
+                по Китаю оплачивается вами или продавцом.
               </li>
               <li>
-                <strong>Подтверждение:</strong> Мониторьте фото в разделе "Фото товара" по коду клиента и дате. Если всё устраивает, подтвердите на сайте. Без ответа в течение рабочего дня считается "Всё ок", и треки передаются на сборку/отправку (1-2 дня, до 3 в пиковые периоды).
+                <strong>Подтверждение:</strong> Мониторьте фото в разделе "Фото товара" по коду клиента и дате. Если всё
+                устраивает, подтвердите на сайте. Без ответа в течение рабочего дня считается "Всё ок", и треки передаются
+                на сборку/отправку (1-2 дня, до 3 в пиковые периоды).
               </li>
               <li>
-                <strong>Накладная:</strong> После упаковки (2-7 дней) сайт пришлёт накладную с данными: дата отправки, вес, кол-во мест, объём, плотность, цена/кг, страховка, упаковка, общая сумма ($, CNY). Оплатите в течение 7 дней любым доступным способом.
+                <strong>Накладная:</strong> После упаковки (2-7 дней) сайт пришлёт накладную с данными: дата отправки, вес,
+                кол-во мест, объём, плотность, цена/кг, страховка, упаковка, общая сумма ($, CNY). Оплатите в течение 7
+                дней любым доступным способом.
               </li>
             </ol>
           </div>
-
           {/* Tracking Number Cards Section */}
           <div className="flex flex-wrap gap-4">
             <div
@@ -120,7 +161,6 @@ function SelfPickupCargo() {
               </div>
             ))}
           </div>
-
           {/* Add Tracking Number Form */}
           {isFormVisible && (
             <div className="bg-gray-700/80 p-6 rounded-xl shadow-md border-2 border-gray-600/50 animate-slide-up w-full max-w-md mx-auto">
@@ -138,11 +178,11 @@ function SelfPickupCargo() {
                     value={newTrackingNumber}
                     onChange={(e) => setNewTrackingNumber(e.target.value)}
                     className={`w-full px-3 py-2 border-2 rounded-lg bg-gray-600/50 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition duration-300 ${
-                      errors ? 'border-red-500' : 'border-gray-500'
+                      errors.includes('Трек-номер') ? 'border-red-500' : 'border-gray-500'
                     }`}
                     placeholder="Введите трек-номер (например, BL1234)"
                   />
-                  {errors && <p className="text-red-400 text-xs mt-1 animate-pulse">{errors}</p>}
+                  {errors.includes('Трек-номер') && <p className="text-red-400 text-xs mt-1 animate-pulse">{errors}</p>}
                 </div>
               </div>
               <div className="mt-4 flex justify-end space-x-3">
@@ -164,12 +204,48 @@ function SelfPickupCargo() {
               </div>
             </div>
           )}
+          {/* Delivery Address Input and Submit Button */}
+          {trackingNumbers.length > 0 && (
+            <div className="mt-6 flex flex-col items-center space-y-4">
+              <div className="w-full max-w-md">
+                <label className="block text-md font-medium text-gray-300 mb-2">Адрес доставки *</label>
+                <input
+                  type="text"
+                  value={deliveryAddress}
+                  onChange={(e) => setDeliveryAddress(e.target.value)}
+                  className={`w-full px-3 py-2 border-2 rounded-lg bg-gray-600/50 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition duration-300 ${
+                    errors.includes('Адрес доставки') ? 'border-red-500' : 'border-gray-500'
+                  }`}
+                  placeholder="Введите адрес доставки"
+                />
+                {errors.includes('Адрес доставки') && (
+                  <p className="text-red-400 text-xs mt-1 animate-pulse">{errors}</p>
+                )}
+              </div>
+              <button
+                className="px-6 py-3 bg-[var(--accent-color)] text-white font-medium rounded-lg hover:bg-[var(--accent-hover-color)] transition-all duration-300 transform hover:scale-105 shadow-md"
+                onClick={handleSubmitTrackingNumbers}
+              >
+                Отправить трек-номера
+              </button>
+            </div>
+          )}
+          {/* Success or Error Message */}
+          {successMessage && (
+            <div className="mt-4 p-4 bg-green-600/80 text-white rounded-lg text-center animate-slide-up">
+              {successMessage}
+            </div>
+          )}
+          {errors && !isFormVisible && !errors.includes('Адрес доставки') && !errors.includes('Трек-номер') && (
+            <div className="mt-4 p-4 bg-red-600/80 text-white rounded-lg text-center animate-slide-up">
+              {errors}
+            </div>
+          )}
         </div>
-
         {/* Decorative Footer Accent */}
         <div className="mt-12 text-center text-gray-500 text-sm">
           <p>© 2025 ChinaShopBY. Все права защищены.</p>
-          <p className="mt-1 animate-pulse text-[var(--accent-color)]">Обновлено: 07.08.2025 18:28 BST</p>
+          <p className="mt-1 animate-pulse text-[var(--accent-color)]">Обновлено: 08.09.2025 19:14 CEST</p>
         </div>
       </div>
     </div>
@@ -178,54 +254,55 @@ function SelfPickupCargo() {
 
 // Добавление CSS-анимаций и кастомных стилей
 const styles = `
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-down {
-  animation: fadeInDown 0.6s ease-out;
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-slide-up {
-  animation: slideUp 0.5s ease-out;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-.animate-pulse {
-  animation: pulse 1.5s infinite;
-}
-.car-animation {
-  position: relative;
-  transition: all 0.3s ease;
-}
-.car-animation.active .car {
-  animation: drive 2s infinite linear;
-}
-@keyframes drive {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(100px); }
-}
-.dust {
-  position: absolute;
-  bottom: -5px;
-  left: 0;
-  width: 10px;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  animation: dustAnimation 1s infinite;
-}
-@keyframes dustAnimation {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(0); opacity: 0; }
-}
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in-down {
+    animation: fadeInDown 0.6s ease-out;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .animate-pulse {
+    animation: pulse 1.5s infinite;
+  }
+  .car-animation {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  .car-animation.active .car {
+    animation: drive 2s infinite linear;
+  }
+  @keyframes drive {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(100px); }
+  }
+  .dust {
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 10px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: dustAnimation 1s infinite;
+  }
+  @keyframes dustAnimation {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
+  }
 `;
+
 const styleSheet = document.createElement('style');
 styleSheet.textContent = styles;
 document.head.appendChild(styleSheet);

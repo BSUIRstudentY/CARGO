@@ -32,10 +32,10 @@ public class UserController {
         }
     }
 
-
     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDTO> getCurrentUser() {
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        String userEmail = getCurrentUserEmail();
         if (userEmail == null) {
             return ResponseEntity.status(403).body(null);
         }
@@ -48,11 +48,25 @@ public class UserController {
         UserDTO userDTO = new UserDTO();
         userDTO.setEmail(user.getEmail());
         userDTO.setUsername(user.getUsername());
+        userDTO.setPhone(user.getPhone());
+        userDTO.setCompany(user.getCompany());
+        userDTO.setRole(user.getRole());
+        userDTO.setReferralCode(user.getReferralCode());
+        userDTO.setReferralCount(user.getReferralCount());
+        userDTO.setDiscountPercent(user.getDiscountPercent());
+        userDTO.setTemporaryDiscountPercent(user.getTemporaryDiscountPercent());
+        userDTO.setTemporaryDiscountExpired(user.getTemporaryDiscountExpired());
         userDTO.setTotalDiscount(user.getTotalDiscount());
+        userDTO.setBalance(user.getBalance());
+        userDTO.setMoneySpent(user.getMoneySpent());
+        userDTO.setNotificationsEnabled(user.getNotificationsEnabled());
+        userDTO.setTwoFactorEnabled(user.getTwoFactorEnabled());
+        userDTO.setAvatarUrl(user.getAvatarUrl());
+        userDTO.setEmailVerified(user.getEmailVerified());
+        userDTO.setPhoneVerified(user.getPhoneVerified());
 
         return ResponseEntity.ok(userDTO);
     }
-
 
     // Получение профиля текущего пользователя
     @GetMapping
@@ -89,9 +103,21 @@ public class UserController {
         if (updates.containsKey("email")) {
             user.setEmail((String) updates.get("email"));
         }
-        /*if (updates.containsKey("notificationsEnabled")) {
+        if (updates.containsKey("phone")) {
+            user.setPhone((String) updates.get("phone"));
+        }
+        if (updates.containsKey("company")) {
+            user.setCompany((String) updates.get("company"));
+        }
+        if (updates.containsKey("avatarUrl")) {
+            user.setAvatarUrl((String) updates.get("avatarUrl"));
+        }
+        if (updates.containsKey("notificationsEnabled")) {
             user.setNotificationsEnabled((Boolean) updates.get("notificationsEnabled"));
-        }*/
+        }
+        if (updates.containsKey("twoFactorEnabled")) {
+            user.setTwoFactorEnabled((Boolean) updates.get("twoFactorEnabled"));
+        }
 
         userRepository.save(user);
         return ResponseEntity.ok(user);

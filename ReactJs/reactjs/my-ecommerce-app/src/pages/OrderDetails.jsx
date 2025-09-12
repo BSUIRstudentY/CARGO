@@ -27,9 +27,9 @@ function OrderDetails() {
       } catch (error) {
         setError(
           'Ошибка загрузки деталей заказа: ' +
-          (error.response?.status === 403
-            ? 'Доступ запрещён. Обратитесь к администратору.'
-            : error.response?.data?.errorMessage || error.message)
+            (error.response?.status === 403
+              ? 'Доступ запрещён. Обратитесь к администратору.'
+              : error.response?.data?.errorMessage || error.message)
         );
         console.error('Error fetching order details:', error);
       } finally {
@@ -94,6 +94,8 @@ function OrderDetails() {
     );
   }
 
+  const isSelfPickup = order.totalClientPrice === 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -107,9 +109,8 @@ function OrderDetails() {
           <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-color)] to-emerald-500">
             Детали заказа #{order.orderNumber}
           </h2>
-          <p className="text-lg text-gray-400 mt-2">Просмотрите информацию о вашем заказе и его стоимости</p>
+          <p className="text-lg text-gray-400 mt-2">Просмотрите информацию о вашем заказе</p>
         </motion.header>
-
         {/* Error Message */}
         <AnimatePresence>
           {error && (
@@ -124,7 +125,6 @@ function OrderDetails() {
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* Order Information and Financial Details */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
@@ -160,7 +160,6 @@ function OrderDetails() {
               <p className="text-gray-300"><strong>Адрес доставки:</strong> {order.deliveryAddress || 'Не указан'}</p>
             </motion.div>
           </Tilt>
-
           {/* Financial Details */}
           <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
             <motion.div
@@ -170,110 +169,142 @@ function OrderDetails() {
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none rounded-2xl" />
               <h3 className="text-2xl font-semibold text-[var(--accent-color)] mb-6">Финансовые детали</h3>
-              {order.supplierCost > 0 && (
-                <p className="text-gray-300 mb-3"><strong>Стоимость поставщика:</strong> ¥{order.supplierCost.toFixed(2)}</p>
-              )}
-              {order.shippingCost > 0 && (
-                <p className="text-gray-300 mb-3"><strong>Стоимость доставки:</strong> ¥{order.shippingCost.toFixed(2)}</p>
-              )}
-              {order.customsDuty > 0 && (
-                <p className="text-gray-300 mb-3"><strong>Пошлина:</strong> ¥{order.customsDuty.toFixed(2)}</p>
-              )}
-              {order.insuranceCost > 0 && (
-                <p className="text-gray-300 mb-3"><strong>Стоимость страховки:</strong> ¥{order.insuranceCost.toFixed(2)}</p>
-              )}
-              {order.userDiscountApplied > 0 && (
-                <p className="text-gray-300 mb-3"><strong>Скидка пользователя:</strong> -¥{order.userDiscountApplied.toFixed(2)}</p>
-              )}
-              {order.discountApplied > 0 && (
-                <p className="text-gray-300 mb-3">
-                  <strong>Скидка по промокоду:</strong> -¥{order.discountApplied.toFixed(2)}
-                  {order.promocode && (
-                    <span className="text-emerald-400 ml-2">
-                      <CheckCircleIcon className="w-5 h-5 inline mr-1" />
-                      (Промокод: {order.promocode})
-                    </span>
-                  )}
+              {isSelfPickup ? (
+                <p className="text-yellow-300 bg-yellow-500/20 p-3 rounded-lg mb-3">
+                  <strong>Примечание:</strong> Для самовыкупа оплата требуется только за доставку.
                 </p>
+              ) : (
+                <>
+                  {order.supplierCost > 0 && (
+                    <p className="text-gray-300 mb-3"><strong>Стоимость поставщика:</strong> ¥{order.supplierCost.toFixed(2)}</p>
+                  )}
+                  {order.shippingCost > 0 && (
+                    <p className="text-gray-300 mb-3"><strong>Стоимость доставки:</strong> ¥{order.shippingCost.toFixed(2)}</p>
+                  )}
+                  {order.customsDuty > 0 && (
+                    <p className="text-gray-300 mb-3"><strong>Пошлина:</strong> ¥{order.customsDuty.toFixed(2)}</p>
+                  )}
+                  {order.insuranceCost > 0 && (
+                    <p className="text-gray-300 mb-3"><strong>Стоимость страховки:</strong> ¥{order.insuranceCost.toFixed(2)}</p>
+                  )}
+                  {order.userDiscountApplied > 0 && (
+                    <p className="text-gray-300 mb-3"><strong>Скидка пользователя:</strong> -¥{order.userDiscountApplied.toFixed(2)}</p>
+                  )}
+                  {order.discountApplied > 0 && (
+                    <p className="text-gray-300 mb-3">
+                      <strong>Скидка по промокоду:</strong> -¥{order.discountApplied.toFixed(2)}
+                      {order.promocode && (
+                        <span className="text-emerald-400 ml-2">
+                          <CheckCircleIcon className="w-5 h-5 inline mr-1" />
+                          (Промокод: {order.promocode})
+                        </span>
+                      )}
+                    </p>
+                  )}
+                  {order.trackingNumber && (
+                    <p className="text-gray-300 mb-3"><strong>Трек-номер:</strong> {order.trackingNumber}</p>
+                  )}
+                  <div className="mt-6">
+                    <p className="text-gray-300 font-semibold mb-2"><strong>Итоговая сумма:</strong></p>
+                    <div className="w-full bg-gray-600 rounded-full h-3">
+                      <motion.div
+                        className="bg-gradient-to-r from-[var(--accent-color)] to-emerald-500 h-3 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: '100%' }}
+                        transition={{ duration: 1, ease: 'easeInOut' }}
+                      />
+                    </div>
+                    <p className="text-3xl font-bold text-[var(--accent-color)] mt-2">¥{order.totalClientPrice.toFixed(2)}</p>
+                  </div>
+                </>
               )}
-              {order.trackingNumber && (
-                <p className="text-gray-300 mb-3"><strong>Трек-номер:</strong> {order.trackingNumber}</p>
-              )}
-              <div className="mt-6">
-                <p className="text-gray-300 font-semibold mb-2"><strong>Итоговая сумма:</strong></p>
-                <div className="w-full bg-gray-600 rounded-full h-3">
-                  <motion.div
-                    className="bg-gradient-to-r from-[var(--accent-color)] to-emerald-500 h-3 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: '100%' }}
-                    transition={{ duration: 1, ease: 'easeInOut' }}
-                  />
-                </div>
-                <p className="text-3xl font-bold text-[var(--accent-color)] mt-2">¥{order.totalClientPrice.toFixed(2)}</p>
-              </div>
             </motion.div>
           </Tilt>
         </motion.section>
-
-        {/* Items Section */}
+        {/* Tracking Numbers or Items Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
           className="bg-gradient-to-r from-gray-700 to-gray-600 rounded-2xl shadow-2xl p-8 mb-12"
         >
-          <h3 className="text-2xl font-semibold text-white mb-6">Товары в заказе</h3>
-          {order.items && order.items.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {order.items.map((item, index) => (
-                <Tilt key={index} tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
-                  <motion.div
-                    className="bg-gradient-to-b from-gray-700 to-gray-800 rounded-lg border border-gray-600 p-4 transition-all duration-300 hover:shadow-[0_0_15px_#10b981] cursor-pointer"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                    onClick={() => navigate(`/product/${item.productId}`)}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-20 h-20 overflow-hidden rounded-md">
-                        {item.imageUrl ? (
-                          <img
-                            src={item.imageUrl}
-                            alt={item.productName || 'Товар'}
-                            className="w-full h-full object-cover transform hover:scale-105 transition duration-300"
-                            onError={(e) => { e.target.src = 'https://via.placeholder.com/80x80?text=Нет+фото'; }}
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gray-600 flex items-center justify-center text-xs text-gray-400">
-                            Нет фото
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-white text-lg">{item.productName || 'Без названия'}</p>
-                        {item.description && (
-                          <p className="text-sm text-gray-400 mt-1 line-clamp-2">{item.description}</p>
-                        )}
-                        <p className="text-gray-300 mt-1">x{item.quantity} • ¥{item.priceAtTime.toFixed(2)}</p>
-                      </div>
-                    </div>
-                    <div className="w-full bg-gray-600 rounded-full h-2 mt-3">
-                      <motion.div
-                        className="bg-gradient-to-r from-[var(--accent-color)] to-emerald-500 h-2 rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(item.quantity / Math.max(...order.items.map(i => i.quantity), 1)) * 100}%` }}
-                        transition={{ duration: 1, ease: 'easeInOut' }}
-                      />
-                    </div>
-                  </motion.div>
-                </Tilt>
-              ))}
-            </div>
+          <h3 className="text-2xl font-semibold text-white mb-6">
+            {isSelfPickup ? 'Трек-номера' : 'Товары в заказе'}
+          </h3>
+          {isSelfPickup ? (
+            order.items && order.items.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {order.items.map((item, index) => (
+                  <Tilt key={index} tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+                    <motion.div
+                      className="bg-gradient-to-b from-gray-700 to-gray-800 rounded-lg border border-gray-600 p-4 transition-all duration-300 hover:shadow-[0_0_15px_#10b981]"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                    >
+                      <p className="font-medium text-white text-lg">
+                        {item.trackingNumber || 'Трек-номер не указан'}
+                      </p>
+                      
+                    </motion.div>
+                  </Tilt>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-center text-lg">Нет трек-номеров в заказе.</p>
+            )
           ) : (
-            <p className="text-gray-400 text-center text-lg">Нет товаров в заказе.</p>
+            order.items && order.items.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {order.items.map((item, index) => (
+                  <Tilt key={index} tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+                    <motion.div
+                      className="bg-gradient-to-b from-gray-700 to-gray-800 rounded-lg border border-gray-600 p-4 transition-all duration-300 hover:shadow-[0_0_15px_#10b981] cursor-pointer"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      onClick={() => navigate(`/product/${item.productId}`)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-20 h-20 overflow-hidden rounded-md">
+                          {item.imageUrl ? (
+                            <img
+                              src={item.imageUrl}
+                              alt={item.productName || 'Товар'}
+                              className="w-full h-full object-cover transform hover:scale-105 transition duration-300"
+                              onError={(e) => { e.target.src = 'https://via.placeholder.com/80x80?text=Нет+фото'; }}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-600 flex items-center justify-center text-xs text-gray-400">
+                              Нет фото
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-white text-lg">{item.productName || 'Без названия'}</p>
+                          {item.description && (
+                            <p className="text-sm text-gray-400 mt-1 line-clamp-2">{item.description}</p>
+                          )}
+                          <p className="text-gray-300 mt-1">x{item.quantity} • ¥{item.priceAtTime.toFixed(2)}</p>
+                        </div>
+                      </div>
+                      <div className="w-full bg-gray-600 rounded-full h-2 mt-3">
+                        <motion.div
+                          className="bg-gradient-to-r from-[var(--accent-color)] to-emerald-500 h-2 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(item.quantity / Math.max(...order.items.map(i => i.quantity), 1)) * 100}%` }}
+                          transition={{ duration: 1, ease: 'easeInOut' }}
+                        />
+                      </div>
+                    </motion.div>
+                  </Tilt>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-center text-lg">Нет товаров в заказе.</p>
+            )
           )}
         </motion.section>
-
         {/* Actions Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
@@ -290,7 +321,7 @@ function OrderDetails() {
             <ArrowLeftIcon className="w-5 h-5" />
             Вернуться назад
           </motion.button>
-          {order.status === 'VERIFIED' && (
+          {order.status === 'VERIFIED' && order.totalClientPrice > 0 && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

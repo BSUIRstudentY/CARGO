@@ -16,6 +16,7 @@ import OrderProcessing from './OrderProcessing';
 import AdminPromocode from './AdminPromocode';
 import AdminQuest from './AdminQuest'; // New import
 
+
 function AdminLayout() {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -153,6 +154,7 @@ function AdminLayout() {
           <Route path="/admin/upcoming-purchases/:id" element={<BatchDetail />} />
           <Route path="/admin/upcoming-arrivals" element={<UpcomingArrivals />} />
           <Route path="/admin/upcoming-purchases/:batchId/order/:orderId" element={<OrderProcessing />} />
+          
         </Routes>
       </main>
     </div>
