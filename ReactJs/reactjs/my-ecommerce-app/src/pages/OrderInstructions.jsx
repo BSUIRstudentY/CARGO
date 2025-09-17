@@ -6,7 +6,6 @@ const OrderInstructions = () => {
   const location = useLocation();
   const stepRefs = useRef([]);
   const progressRef = useRef(null);
-
   // Определяем активный маршрут для подсветки кнопок
   const isActive = (path) => location.pathname === path;
 
@@ -29,11 +28,9 @@ const OrderInstructions = () => {
       },
       { threshold: 0.5 }
     );
-
     stepRefs.current.forEach((ref) => {
       if (ref) observer.observe(ref);
     });
-
     return () => {
       stepRefs.current.forEach((ref) => {
         if (ref) observer.unobserve(ref);
@@ -44,8 +41,6 @@ const OrderInstructions = () => {
   return (
     <section className="max-w-7xl mx-auto px-4 text-white min-h-screen relative overflow-hidden">
       {/* Фон с текстурой контейнера */}
-      
-
       <style>{`
         @keyframes slideIn {
           from { transform: translateX(-100%); opacity: 0; }
@@ -63,12 +58,15 @@ const OrderInstructions = () => {
         .step-card:nth-child(3) { animation-delay: 0.2s; }
         .step-card:nth-child(4) { animation-delay: 0.3s; }
         .step-card:nth-child(5) { animation-delay: 0.4s; }
+        .step-card:nth-child(6) { animation-delay: 0.5s; }
+        .step-card:nth-child(7) { animation-delay: 0.6s; }
+        .step-card:nth-child(8) { animation-delay: 0.7s; }
         .timeline-dot {
           transition: transform 0.3s ease, background-color 0.3s ease;
-          transform: translate(-50%, -50%); /* Center horizontally and move up vertically */
+          transform: translate(-50%, -50%);
         }
         .timeline-dot:hover {
-          transform: translate(-50%, -50%) scale(1.2); /* Maintain vertical offset during hover */
+          transform: translate(-50%, -50%) scale(1.2);
         }
         .cta-button {
           animation: pulse 2s infinite;
@@ -81,7 +79,6 @@ const OrderInstructions = () => {
           transform: scale(1.05);
         }
       `}</style>
-
       <div className="max-w-6xl mx-auto py-10 md:py-16 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="col-span-12">
@@ -89,9 +86,6 @@ const OrderInstructions = () => {
             <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 text-center">
               Инструкции по заказу
             </h1>
-
-            
-
             {/* Основной контент */}
             <div className="space-y-10">
               {/* Инструкции по заказу */}
@@ -103,7 +97,7 @@ const OrderInstructions = () => {
                   <h2 className="text-2xl font-bold text-[var(--accent-color)]">Как оформить заказ</h2>
                 </div>
                 <p className="text-gray-300 mb-6">
-                  На ChinaShopBY мы сделали процесс заказа простым и удобным. Следуйте этим шагам, чтобы успешно оформить покупку товаров из Китая:
+                  На Fluvion мы сделали процесс заказа простым и удобным. Следуйте этим шагам, чтобы успешно оформить покупку товаров из Китая:
                 </p>
                 <div className="space-y-6">
                   {/* Шаг 1: Добавление товара */}
@@ -122,17 +116,16 @@ const OrderInstructions = () => {
                         <ul className="list-disc pl-5 mt-2 space-y-2 text-gray-300">
                           <li>
                             <strong>Через каталог:</strong> Перейдите в раздел{' '}
-                            <span className="font-bold text-[var(--accent-color)]">Каталог</span>, где представлены проверенные товары от наших поставщиков. Выберите нужный товар, укажите параметры (например, размер, цвет, количество) и нажмите "Добавить в корзину". Каталог идеально подходит для быстрого выбора популярных товаров с гарантированным качеством.
+                            <span className="font-bold text-[var(--accent-color)]">Каталог</span>, где представлены проверенные товары, ранее заказанные другими клиентами. Выберите товар, укажите параметры (например, размер, цвет, количество) и нажмите "Добавить в корзину".
                           </li>
                           <li>
-                            <strong>Через терминал:</strong> Если вы хотите заказать товар, которого нет в каталоге, используйте{' '}
-                            <span className="font-bold text-[var(--accent-color)]">Терминал</span>. Введите все необходимые данные о товаре: ссылку на товар (например, с AliExpress, Taobao), описание, количество, цвет, размер и другие параметры. Терминал позволяет заказывать уникальные товары, но требует точного заполнения всех полей для корректной обработки.
+                            <strong>Через терминал:</strong> Если нужного товара нет в каталоге, используйте{' '}
+                            <span className="font-bold text-[var(--accent-color)]">Терминал</span>. Введите ссылку на товар (например, с AliExpress, Taobao), описание, количество, цвет, размер и другие параметры.
                           </li>
                         </ul>
                       </div>
                     </div>
                   </div>
-
                   {/* Шаг 2: Оформление корзины */}
                   <div ref={(el) => (stepRefs.current[1] = el)} className="step-card bg-gray-900 p-6 rounded-lg border border-gray-700 hover:border-[var(--accent-color)] transition-all duration-300">
                     <div className="flex items-start">
@@ -148,17 +141,16 @@ const OrderInstructions = () => {
                           <span className="font-bold text-[var(--accent-color)]">Корзину</span>. Здесь вы можете:
                         </p>
                         <ul className="list-disc pl-5 mt-2 space-y-2 text-gray-300">
-                          <li>Указать адрес доставки: выберите существующий адрес из вашего профиля или добавьте новый.</li>
-                          <li>Применить промокод: если у вас есть промокод, введите его в соответствующее поле для получения скидки.</li>
-                          <li>Добавить страховку: выберите опцию страхования груза для защиты от возможных повреждений или потерь во время доставки.</li>
+                          <li>Указать адрес доставки: выберите отделение Европочты для доставки.</li>
+                          <li>Применить промокод: введите промокод для получения скидки, если он у вас есть.</li>
+                          <li>Добавить страховку: выберите опцию страхования груза для защиты от возможных повреждений.</li>
                         </ul>
                         <p className="mt-2 text-gray-300">
-                          После проверки всех деталей нажмите "Оформить заказ". Итоговая стоимость будет рассчитана с учётом цены товара, доставки, таможенных сборов и комиссии.
+                          После проверки деталей нажмите "Оформить заказ". Итоговая стоимость будет рассчитана с учётом цены товара, упаковки, доставки по Китаю, таможенных сборов и комиссии.
                         </p>
                       </div>
                     </div>
                   </div>
-
                   {/* Шаг 3: Ожидание проверки */}
                   <div ref={(el) => (stepRefs.current[2] = el)} className="step-card bg-gray-900 p-6 rounded-lg border border-gray-700 hover:border-[var(--accent-color)] transition-all duration-300">
                     <div className="flex items-start">
@@ -170,12 +162,11 @@ const OrderInstructions = () => {
                       <div>
                         <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-2">3. Ожидание проверки администратором</h3>
                         <p className="text-gray-300">
-                          После оформления заказа он отправляется на проверку нашей команде. Администраторы проверяют корректность данных, наличие товара у поставщика и актуальность цен. Этот процесс занимает обычно 1–2 рабочих дня. Вы получите уведомление по email или в личном кабинете о статусе проверки.
+                          После оформления заказа он отправляется на проверку нашей команде. Администраторы проверяют корректность данных, наличие товара у поставщика и актуальность цен. Этот процесс занимает 1–2 рабочих дня. Вы получите уведомление по email или в личном кабинете о статусе проверки.
                         </p>
                       </div>
                     </div>
                   </div>
-
                   {/* Шаг 4: Просмотр заказа */}
                   <div ref={(el) => (stepRefs.current[3] = el)} className="step-card bg-gray-900 p-6 rounded-lg border border-gray-700 hover:border-[var(--accent-color)] transition-all duration-300">
                     <div className="flex items-start">
@@ -188,12 +179,11 @@ const OrderInstructions = () => {
                         <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-2">4. Просмотр заказа в профиле</h3>
                         <p className="text-gray-300">
                           После проверки администратором ваш заказ появится в разделе{' '}
-                          <span className="font-bold text-[var(--accent-color)]">Профиль</span> в вкладке "Отправления". Здесь вы увидите итоговую информацию о заказе, включая возможные корректировки, внесённые администратором (например, уточнение веса, габаритов или стоимости доставки).
+                          <span className="font-bold text-[var(--accent-color)]">Профиль</span> во вкладке "Отправления". Здесь вы увидите итоговую информацию, включая корректировки (например, уточнение веса, габаритов или стоимости доставки по Китаю).
                         </p>
                       </div>
                     </div>
                   </div>
-
                   {/* Шаг 5: Оплата */}
                   <div ref={(el) => (stepRefs.current[4] = el)} className="step-card bg-gray-900 p-6 rounded-lg border border-gray-700 hover:border-[var(--accent-color)] transition-all duration-300">
                     <div className="flex items-start">
@@ -203,21 +193,69 @@ const OrderInstructions = () => {
                         className="w-16 h-16 mr-4 rounded-md filter grayscale image-hover"
                       />
                       <div>
-                        <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-2">5. Оплата через эквайринг</h3>
+                        <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-2">5. Оплата заказа</h3>
                         <p className="text-gray-300">
-                          Когда заказ подтверждён, вы можете оплатить его через систему эквайринга. Мы принимаем банковские карты (Visa, Mastercard), электронные кошельки (WebMoney, ЮMoney, Qiwi) и банковские переводы (для юридических лиц). Все платежи защищены 256-битным SSL-шифрованием. После успешной оплаты вы получите подтверждение, и заказ будет передан в логистику для доставки.
+                          После подтверждения заказа вы можете оплатить его через эквайринг Альфа-Банка. Мы принимаем банковские карты (Visa, Mastercard). Все платежи защищены 256-битным SSL-шифрованием. После оплаты заказ передаётся в логистику.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Шаг 6: Ожидание транспортировки заказа в РБ */}
+                  <div ref={(el) => (stepRefs.current[5] = el)} className="step-card bg-gray-900 p-6 rounded-lg border border-gray-700 hover:border-[var(--accent-color)] transition-all duration-300">
+                    <div className="flex items-start">
+                      <img
+                        src="https://via.placeholder.com/150?text=Transport"
+                        alt="Transport"
+                        className="w-16 h-16 mr-4 rounded-md filter grayscale image-hover"
+                      />
+                      <div>
+                        <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-2">6. Ожидание транспортировки заказа в РБ</h3>
+                        <p className="text-gray-300">
+                          После оплаты заказ включается в ближайший сборный груз для транспортировки из Китая в Республику Беларусь через транспортную компанию Карго. Вы можете отслеживать статус транспортировки в разделе{' '}
+                          <span className="font-bold text-[var(--accent-color)]">Отправления</span> в вашем профиле.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Шаг 7: Отправка заказа Европочтой клиенту */}
+                  <div ref={(el) => (stepRefs.current[6] = el)} className="step-card bg-gray-900 p-6 rounded-lg border border-gray-700 hover:border-[var(--accent-color)] transition-all duration-300">
+                    <div className="flex items-start">
+                      <img
+                        src="https://via.placeholder.com/150?text=Europochta"
+                        alt="Europochta"
+                        className="w-16 h-16 mr-4 rounded-md filter grayscale image-hover"
+                      />
+                      <div>
+                        <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-2">7. Отправка заказа Европочтой клиенту</h3>
+                        <p className="text-gray-300">
+                          После прибытия заказа на склад в Минске он передаётся в Европочту для доставки в выбранное вами отделение. Вы получите уведомление с трек-номером и ориентировочным сроком доставки.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Шаг 8: Оплата полной доставки заказа */}
+                  <div ref={(el) => (stepRefs.current[7] = el)} className="step-card bg-gray-900 p-6 rounded-lg border border-gray-700 hover:border-[var(--accent-color)] transition-all duration-300">
+                    <div className="flex items-start">
+                      <img
+                        src="https://via.placeholder.com/150?text=Final+Payment"
+                        alt="Final Payment"
+                        className="w-16 h-16 mr-4 rounded-md filter grayscale image-hover"
+                      />
+                      <div>
+                        <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-2">8. Оплата полной доставки заказа</h3>
+                        <p className="text-gray-300">
+                          При получении заказа в отделении Европочты вы оплачиваете полную стоимость доставки, которая включает транспортировку из Китая в Беларусь ($6 за кг) и услуги Европочты. Оплата производится через эквайринг Альфа-Банка или наличными в отделении.
                         </p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-
               {/* Визуальный процесс заказа (вертикальная временная шкала) */}
               <div className="container py-12">
                 <h2 className="text-4xl sm:text-5xl font-bold mb-6 text-center text-[var(--accent-color)]">Процесс заказа</h2>
                 <div className="text-center text-lg sm:text-xl mb-8 text-gray-300">
-                  <p>Пошаговое руководство по оформлению заказа на ChinaShopBY</p>
+                  <p>Пошаговое руководство по оформлению заказа на Fluvion</p>
                 </div>
                 <div className="relative max-w-3xl mx-auto">
                   <div className="absolute left-1/2 transform -translate-x-1/2 w-1 bg-gray-600 h-full"></div>
@@ -229,7 +267,7 @@ const OrderInstructions = () => {
                     },
                     {
                       title: 'Оформление корзины',
-                      description: 'Укажите адрес, примените промокод и выберите страховку в корзине.',
+                      description: 'Укажите отделение Европочты, примените промокод и выберите страховку.',
                       icon: <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM17 18c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-8.1-5.83L10.17 12h6.66l1.28-1.83c.36-.51.86-.83 1.41-.83H22v-2h-2.49l-1.28 1.83c-.36.51-.86.83-1.41.83H10.1l-1.28 1.83zM4 6v2h2l3.6 7.59-1.35 2.44C7.91 18.58 8.36 19 9 19h12v-2H9.42l1.35-2.44L4 6H2V4h2.49l1.28 1.83c.36.51.86.83 1.41.83H20v2H7.49l-1.28-1.83c-.36-.51-.86-.83-1.41-.83H4z" /></svg>,
                     },
                     {
@@ -243,13 +281,27 @@ const OrderInstructions = () => {
                       icon: <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>,
                     },
                     {
-                      title: 'Оплата',
-                      description: 'Оплатите заказ через эквайринг с помощью карты или кошелька.',
+                      title: 'Оплата заказа',
+                      description: 'Оплатите заказ через эквайринг Альфа-Банка.',
+                      icon: <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M21 4H3c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 15H3V8h18v11zm-2-1.5c0 .83-.67 1.5-1.5 1.5h-4c-.83 0-1.5-.67-1.5-1.5V16h8v1.5zM12 10h6v2h-6v-2z" /></svg>,
+                    },
+                    {
+                      title: 'Транспортировка в РБ',
+                      description: 'Заказ включается в сборный груз и транспортируется в Беларусь.',
+                      icon: <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM17 12h3l2 3h-5v-3z" /></svg>,
+                    },
+                    {
+                      title: 'Отправка Европочтой',
+                      description: 'Заказ передаётся в Европочту для доставки в выбранное отделение.',
+                      icon: <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 12l-8-5v-2l8 5 8-5v2l-8 5z" /></svg>,
+                    },
+                    {
+                      title: 'Оплата доставки',
+                      description: 'Оплатите доставку ($6/кг + услуги Европочты) при получении заказа.',
                       icon: <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M21 4H3c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 15H3V8h18v11zm-2-1.5c0 .83-.67 1.5-1.5 1.5h-4c-.83 0-1.5-.67-1.5-1.5V16h8v1.5zM12 10h6v2h-6v-2z" /></svg>,
                     },
                   ].map((step, index) => (
                     <div key={index} className="relative mb-8 flex items-center">
-                      
                       <div className={`w-full pl-12 ${index % 2 === 0 ? 'pr-8' : 'pl-8 text-right'} bg-gray-900 p-4 rounded-lg shadow-lg`}>
                         <div className="flex items-center justify-between">
                           {index % 2 === 0 ? (
@@ -275,7 +327,6 @@ const OrderInstructions = () => {
                   ))}
                 </div>
               </div>
-
               {/* Призыв к действию */}
               <div className="bg-gray-800 p-8 rounded-lg shadow-lg text-center">
                 <h2 className="text-3xl font-bold text-[var(--accent-color)] mb-4">Готовы начать?</h2>

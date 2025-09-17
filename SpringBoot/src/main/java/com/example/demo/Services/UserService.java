@@ -8,6 +8,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
@@ -37,7 +39,6 @@ public class UserService {
     }
 
 
-
     public String getCurrentUserEmail() {
         try {
             return SecurityContextHolder.getContext().getAuthentication().getName();
@@ -45,4 +46,14 @@ public class UserService {
             return null;
         }
     }
+
+
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
+    }
 }
+

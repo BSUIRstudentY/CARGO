@@ -2,6 +2,8 @@ package com.example.demo.Repositories;
 
 import com.example.demo.Entities.BatchCargo;
 import com.example.demo.Entities.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -13,7 +15,7 @@ import java.util.Optional;
 public interface BatchCargoRepository extends JpaRepository<BatchCargo, Long> {
 
     @Query("SELECT DISTINCT bc FROM BatchCargo bc JOIN bc.orders o WHERE o.user = :user")
-    List<BatchCargo> findByUser(User user);
+    Page<BatchCargo> findByUser(User user, Pageable pageable);
 
 
     @Query("SELECT b FROM BatchCargo b WHERE b.status = 'UNFINISHED'")

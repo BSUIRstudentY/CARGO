@@ -1,10 +1,12 @@
 package com.example.demo.Controllers;
 
+import com.example.demo.Components.ContextHolder;
 import com.example.demo.Entities.ChatMessage;
 import com.example.demo.Entities.Ticket;
 import com.example.demo.Entities.TicketStatus;
 import com.example.demo.Entities.User;
 import com.example.demo.Repositories.ChatMessageRepository;
+import com.example.demo.Repositories.TicketRepository;
 import com.example.demo.Repositories.UserRepository;
 import com.example.demo.Services.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tickets")
 public class TicketController {
+
+    @Autowired
+    private TicketRepository ticketRepository;
 
     private final TicketService ticketService;
     private final UserRepository userRepository;
@@ -56,11 +61,8 @@ public class TicketController {
     // Получить тикеты конкретного юзера (изменено на POST с RequestBody)
     @PostMapping("/user")
     public ResponseEntity<List<Ticket>> getUserTickets(@RequestBody UserIdRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!authentication.getName().equals(request.getUserId())) {
-            return ResponseEntity.status(403).build(); // Только владелец может видеть свои тикеты
-        }
-        return ResponseEntity.ok(ticketService.getTicketsByUserId(request.getUserId()));
+        List<Ticket> tickets = ticketRepository.findByUserEmail(ContextHolder.getCurrentUserEmail());
+        return ResponseEntity.ok(tickets);
     }
 
     public static class UserIdRequest {

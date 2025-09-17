@@ -1,18 +1,41 @@
 package com.example.demo.Controllers;
 
 import com.example.demo.Services.AuthService;
+import com.example.demo.Services.UserActivityService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+
+
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
     @Autowired
     private AuthService authService;
+
+
+
+    @Autowired
+    private UserActivityService userActivityService;
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String username = SecurityContextHolder.getContext().getAuthentication() != null ?
+                SecurityContextHolder.getContext().getAuthentication().getName() : null;
+        if (username != null) {
+
+            userActivityService.removeUserActivity(username);
+        }
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok("Logout successful");
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {

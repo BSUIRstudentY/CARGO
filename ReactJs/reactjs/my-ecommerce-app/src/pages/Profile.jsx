@@ -8,15 +8,15 @@ import ShipmentsTab from '../components/ShipmentsTab';
 import OrderHistoryTab from '../components/OrderHistoryTab';
 import PaymentMethodsTab from '../components/PaymentMethodsTab';
 import ReferralTab from '../components/ReferralTab';
-import BatchCargosTab from '../components/BatchCargosTab'; // New component
+import BatchCargosTab from '../components/BatchCargosTab';
 
 function Profile() {
   const { user, logout } = useAuth();
-  const [currentOrders, setCurrentOrders] = useState([]);
   const [orderHistory, setOrderHistory] = useState([]);
   const [error, setError] = useState(null);
   const [userRole, setUserRole] = useState('USER');
   const [activeTab, setActiveTab] = useState('personal-data');
+  const [refreshTrigger, setRefreshTrigger] = useState(Date.now());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,8 +28,6 @@ function Profile() {
 
     const fetchData = async () => {
       try {
-        const ordersResponse = await api.get('/orders');
-        setCurrentOrders(ordersResponse.data);
         const historyResponse = await api.get('/order-history');
         setOrderHistory(historyResponse.data);
       } catch (error) {
@@ -68,12 +66,8 @@ function Profile() {
   const handlePay = async (orderId) => {
     try {
       await api.put(`/orders/${orderId}`, { status: 'PAID' });
-      setCurrentOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === orderId ? { ...order, status: 'PAID' } : order
-        )
-      );
       alert('Заказ оплачен!');
+      setRefreshTrigger(Date.now()); // Trigger refetch
     } catch (error) {
       console.error('Error paying order:', error);
       alert('Ошибка при оплате заказа');
@@ -88,13 +82,13 @@ function Profile() {
     },
     {
       id: 'shipments',
-      label: 'Заказы', // Renamed from Отправления
+      label: 'Заказы',
       icon: 'M16.755 5.932h-1.99a2.56 2.56 0 0 0 .455-1.394 2.767 2.767 0 0 0-.822-2.054 2.812 2.812 0 0 0-2.07-.815 2.584 2.584 0 0 0-1.866.857 4.16 4.16 0 0 0-.46.631 4.165 4.165 0 0 0-.461-.631 2.565 2.565 0 0 0-1.866-.857 2.831 2.831 0 0 0-2.07.815 2.786 2.786 0 0 0-.823 2.054c.013.499.171.983.456 1.394h-1.99c-.408 0-1.004-.096-1.292.19-.287.285-.243.928-.243 1.332V9.89c0 .35-.143.907.081 1.179.224.272.962.242 1.309.313l-.162 4.597c0 .404.028.907.316 1.193.287.285.811.33 1.218.33h11.052c.407 0 .931-.045 1.22-.33.287-.286.315-.79.315-1.193l-.163-4.597c.347-.07 1.086-.041 1.31-.313.223-.272.081-.828.081-1.18V7.455c0-.404.044-1.047-.244-1.333-.288-.285-.884-.19-1.291-.19Zm-4.912-2.195a.736.736 0 0 1 .537-.241h.027a.976.976 0 0 1 .697.29.958.958 0 0 1 .274.7.726.726 0 0 1-.243.532c-.53.466-1.4.705-2.12.82.114-.712.355-1.576.828-2.1Zm-4.935.04a.986.986 0 0 1 .684-.281h.03a.741.741 0 0 1 .537.241c.47.525.711 1.389.825 2.102-.713-.115-1.592-.354-2.116-.82a.73.73 0 0 1-.244-.534.961.961 0 0 1 .284-.707Z',
     },
     {
       id: 'batch-cargos',
-      label: 'Отправления', // New tab
-      icon: 'M12 4a8 8 0 0 0-8 8c0 4.41 3.59 8 8 8s8-3.59 8-8-3.59-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm2-6h-2v2h-2v-2H8v-2h2V8h2v2h2v2z', // Reused icon (replace if needed)
+      label: 'Отправления',
+      icon: 'M12 4a8 8 0 0 0-8 8c0 4.41 3.59 8 8 8s8-3.59 8-8-3.59-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm2-6h-2v2h-2v-2H8v-2h2V8h2v2h2v2z',
     },
     {
       id: 'history',
@@ -170,13 +164,13 @@ function Profile() {
               Удалить аккаунт
             </button>
           </div>
-          <div className="w-full lg:w-3/4">
+          <div className="w-full lg:w-3/4 h-[70vh] overflow-hidden">
             {activeTab === 'personal-data' && <PersonalDataTab setError={setError} />}
             {activeTab === 'shipments' && (
               <ShipmentsTab
-                currentOrders={currentOrders}
                 handleViewOrderDetails={handleViewOrderDetails}
                 handlePay={handlePay}
+                refresh={refreshTrigger}
               />
             )}
             {activeTab === 'batch-cargos' && (

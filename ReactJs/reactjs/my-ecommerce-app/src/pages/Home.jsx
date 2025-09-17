@@ -30,7 +30,7 @@ const Home = () => {
           <div className="container py-12 py-md-16 text-center">
             <div className="row">
               <div className="col-md-7 col-lg-6 col-xl-5 mx-auto">
-                <h1 className="text-5xl sm:text-6xl font-bold mb-4 text-white">О ChinaShopBY</h1>
+                <h1 className="text-5xl sm:text-6xl font-bold mb-4 text-white">Fluvion</h1>
                 <div className="lead px-4 sm:px-10 mb-4 text-white text-lg sm:text-xl">
                   <p>Ваш путь к лучшим товарам из Китая</p>
                 </div>

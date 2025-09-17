@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../api/axiosInstance';
-import { UserIcon, BellIcon, KeyIcon, CheckIcon, XMarkIcon, CurrencyDollarIcon, UsersIcon, TagIcon } from '@heroicons/react/24/solid';
+import { UserIcon, BellIcon, KeyIcon, CurrencyDollarIcon, UsersIcon, TagIcon } from '@heroicons/react/24/solid';
 
 const PersonalDataTab = ({ setError }) => {
   const [userData, setUserData] = useState({
@@ -16,16 +16,17 @@ const PersonalDataTab = ({ setError }) => {
     moneySpent: 0,
     notificationsEnabled: false,
     twoFactorEnabled: false,
-    avatarUrl: 'https://via.placeholder.com/150',
+    avatarUrl: 'https://placehold.co/150x150',
     emailVerified: false,
     phoneVerified: false,
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [showVerificationModal, setShowVerificationModal] = useState(null); // 'email' or 'phone'
+  const [isVerificationLoading, setIsVerificationLoading] = useState({ email: false, phone: false });
+  const [statusMessage, setStatusMessage] = useState(null);
+  const [showVerificationModal, setShowVerificationModal] = useState(null);
   const [verificationCode, setVerificationCode] = useState('');
 
-  // Fetch user data from /api/users/me
+  // Fetch user data on mount
   useEffect(() => {
     const fetchUserData = async () => {
       setIsLoading(true);
@@ -34,18 +35,18 @@ const PersonalDataTab = ({ setError }) => {
         setUserData(response.data);
       } catch (error) {
         const errorMsg = `Ошибка загрузки данных пользователя: ${error.response?.data?.message || error.message}`;
-        setErrorMessage(errorMsg);
+        setStatusMessage(errorMsg);
         setError(errorMsg);
         console.error('Error fetching user data:', error);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchUserData();
   }, [setError]);
 
-  const handleNotificationToggle = async (type) => {
+  // Memoized handler for notification toggles
+  const handleNotificationToggle = useCallback(async (type) => {
     setIsLoading(true);
     try {
       const updates = {};
@@ -56,76 +57,91 @@ const PersonalDataTab = ({ setError }) => {
       }
       const response = await api.put('/users', updates);
       setUserData((prev) => ({ ...prev, ...updates }));
-      alert(
+      setStatusMessage(
         type === 'email'
           ? 'Настройки уведомлений по email обновлены!'
           : 'Настройки двухфакторной аутентификации обновлены!'
       );
     } catch (error) {
       const errorMsg = `Ошибка обновления настроек: ${error.response?.data?.message || error.message}`;
-      setErrorMessage(errorMsg);
+      setStatusMessage(errorMsg);
       setError(errorMsg);
       console.error('Error updating settings:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userData, setError]);
 
-  const handleRequestVerification = async (type) => {
-    setIsLoading(true);
+  // Memoized handler for requesting verification
+  const handleRequestVerification = useCallback(async (type) => {
+    setIsVerificationLoading((prev) => ({ ...prev, [type]: true }));
     try {
-      await api.post(`/verification/request-${type}`);
+      if (type === 'email' && !userData.email) {
+        throw new Error('Email не указан');
+      }
+      console.log('Sending verification request:', `/verification/request-${type}`, { email: userData.email });
+      await api.post(`/verification/request-${type}`, { email: userData.email });
       setShowVerificationModal(type);
-      alert(`Код верификации отправлен на ${type === 'email' ? 'email' : 'телефон'}!`);
+      setStatusMessage(`Код верификации отправлен на ${type === 'email' ? 'email' : 'телефон'}!`);
     } catch (error) {
       const errorMsg = `Ошибка запроса верификации ${type === 'email' ? 'email' : 'телефона'}: ${error.response?.data?.message || error.message}`;
-      setErrorMessage(errorMsg);
+      setStatusMessage(errorMsg);
       setError(errorMsg);
       console.error(`Error requesting ${type} verification:`, error);
     } finally {
-      setIsLoading(false);
+      setIsVerificationLoading((prev) => ({ ...prev, [type]: false }));
     }
-  };
+  }, [userData.email, setError]);
 
-  const handleConfirmVerification = async (type) => {
+  // Handler for confirming verification
+  const handleConfirmVerification = useCallback(async (type) => {
     if (!verificationCode) {
-      setErrorMessage('Введите код верификации');
+      setStatusMessage('Введите код верификации');
       setError('Введите код верификации');
       return;
     }
     setIsLoading(true);
     try {
+      console.log('Confirming verification:', `/verification/confirm-${type}`, { code: verificationCode });
       const response = await api.post(`/verification/confirm-${type}`, null, { params: { code: verificationCode } });
-      alert(response.data);
-      setUserData((prev) => ({
-        ...prev,
-        [type === 'email' ? 'emailVerified' : 'phoneVerified']: true,
-      }));
-      setVerificationCode('');
-      setShowVerificationModal(null);
+      if (response?.data) {
+        setStatusMessage(response.data);
+        setUserData((prev) => ({
+          ...prev,
+          [type === 'email' ? 'emailVerified' : 'phoneVerified']: true,
+        }));
+        setVerificationCode('');
+        setShowVerificationModal(null);
+      } else {
+        throw new Error('Ответ сервера не содержит данных');
+      }
     } catch (error) {
-      const errorMsg = `Ошибка подтверждения ${type === 'email' ? 'email' : 'телефона'}: ${error.response?.data?.message || error.message}`;
-      setErrorMessage(errorMsg);
+      const errorMsg = error.response?.data?.message || error.message || `Ошибка подтверждения ${type === 'email' ? 'email' : 'телефона'}`;
+      setStatusMessage(errorMsg);
       setError(errorMsg);
       console.error(`Error confirming ${type} verification:`, error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [verificationCode, setError]);
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl min-h-screen">
-      {/* Error Message */}
+    <div className="w-full p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl h-[70vh] overflow-y-auto scrollbar-hide">
+      {/* Status Message */}
       <AnimatePresence>
-        {errorMessage && (
+        {statusMessage && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-center text-base font-medium"
+            className={`mb-6 p-4 rounded-lg text-center text-base font-medium ${
+              statusMessage.includes('Ошибка')
+                ? 'bg-red-500/20 border-red-500/50 text-red-400'
+                : 'bg-green-500/20 border-green-500/50 text-green-400'
+            }`}
           >
-            {errorMessage}
+            {statusMessage}
           </motion.div>
         )}
       </AnimatePresence>
@@ -195,10 +211,12 @@ const PersonalDataTab = ({ setError }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleRequestVerification('email')}
-                    disabled={isLoading}
-                    className="px-3 py-1 bg-cyan-400 text-white rounded-lg text-sm hover:bg-cyan-500 transition duration-300"
+                    disabled={isVerificationLoading.email}
+                    className={`px-3 py-1 rounded-lg text-sm text-white transition duration-300 ${
+                      isVerificationLoading.email ? 'bg-gray-500' : 'bg-cyan-400 hover:bg-cyan-500'
+                    }`}
                   >
-                    Верифицировать
+                    {isVerificationLoading.email ? 'Отправка...' : 'Верифицировать'}
                   </motion.button>
                 )}
               </div>
@@ -217,10 +235,12 @@ const PersonalDataTab = ({ setError }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleRequestVerification('phone')}
-                    disabled={isLoading}
-                    className="px-3 py-1 bg-cyan-400 text-white rounded-lg text-sm hover:bg-cyan-500 transition duration-300"
+                    disabled={isVerificationLoading.phone}
+                    className={`px-3 py-1 rounded-lg text-sm text-white transition duration-300 ${
+                      isVerificationLoading.phone ? 'bg-gray-500' : 'bg-cyan-400 hover:bg-cyan-500'
+                    }`}
                   >
-                    Верифицировать
+                    {isVerificationLoading.phone ? 'Отправка...' : 'Верифицировать'}
                   </motion.button>
                 )}
               </div>
@@ -382,6 +402,5 @@ const PersonalDataTab = ({ setError }) => {
     </div>
   );
 };
-
 
 export default PersonalDataTab;

@@ -10,4 +10,5 @@ public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findByEmail(String email);
     Boolean existsByReferralCode(String code);
     Optional<User> findByReferralCode(String code);
+    long count();
 }

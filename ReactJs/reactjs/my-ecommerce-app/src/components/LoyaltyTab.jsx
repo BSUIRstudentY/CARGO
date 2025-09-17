@@ -243,7 +243,6 @@ const LoyaltyTab = () => {
         setLoading(false);
       }
     };
-
     if (user?.email) fetchData();
   }, [user?.email, getQuestName]);
 
@@ -334,7 +333,16 @@ const LoyaltyTab = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6 sm:p-12">
+    <div className="h-[70vh] overflow-y-auto scrollbar-hide bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6 sm:p-12">
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+        }
+      `}</style>
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <motion.header
@@ -353,7 +361,6 @@ const LoyaltyTab = () => {
             Пройти обучение
           </button>
         </motion.header>
-
         {/* Error Message */}
         <AnimatePresence>
           {error && (
@@ -368,7 +375,6 @@ const LoyaltyTab = () => {
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* Discounts Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
@@ -378,7 +384,6 @@ const LoyaltyTab = () => {
         >
           {/* Background Glow Effect */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none" />
-          
           {/* Total Discount with Breakdown */}
           <StatCard className="relative">
             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_0%,transparent_70%)] rounded-2xl pointer-events-none" />
@@ -425,12 +430,11 @@ const LoyaltyTab = () => {
                 Постоянная: {userData.discountPercent}% (Действует бессрочно)
               </p>
               <p className="text-sm font-medium text-gray-400 tracking-wide">
-                Временная: {userData.temporaryDiscountPercent || 0}% 
+                Временная: {userData.temporaryDiscountPercent || 0}%
                 {userData.temporaryDiscountExpired ? '' : ' (Нет активной скидки)'}
               </p>
             </div>
           </StatCard>
-
           {/* Warning Message for Temporary Discount Expiration */}
           {userData.temporaryDiscountPercent > 0 && userData.temporaryDiscountExpired && (
             <motion.div
@@ -448,7 +452,6 @@ const LoyaltyTab = () => {
             </motion.div>
           )}
         </motion.section>
-
         {/* Quests Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
@@ -469,7 +472,6 @@ const LoyaltyTab = () => {
             {questList}
           </div>
         </motion.section>
-
         {/* Referral Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
@@ -520,7 +522,6 @@ const LoyaltyTab = () => {
             </div>
           )}
         </motion.section>
-
         {/* Rewards History Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
@@ -551,7 +552,6 @@ const LoyaltyTab = () => {
             )}
           </div>
         </motion.section>
-
         {/* FAQ Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
@@ -572,7 +572,6 @@ const LoyaltyTab = () => {
             ))}
           </div>
         </motion.section>
-
         {/* Tutorial Modal */}
         <AnimatePresence>
           {showTutorial && (
@@ -605,7 +604,6 @@ const LoyaltyTab = () => {
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* Quest Details Modal */}
         <AnimatePresence>
           {selectedQuest && (

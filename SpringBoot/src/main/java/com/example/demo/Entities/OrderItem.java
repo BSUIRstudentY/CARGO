@@ -37,6 +37,8 @@ public class OrderItem {
     @Column(name = "price_at_time", nullable = false)
     private Float priceAtTime;
 
+    private Float chinaDeliveryPrice;
+
     @Column(name = "supplier_price", nullable = true)
     private Float supplierPrice;
 

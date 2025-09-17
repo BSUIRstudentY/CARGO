@@ -44,7 +44,7 @@ public class NotificationService {
         notification.setCategory("ORDER_UPDATE");
 
         notificationRepository.save(notification);
-
+        System.out.println(event.getOrder().toString());
         messagingTemplate.convertAndSend("/topic/personal/" + event.getOrder().getUser().getEmail(), notification);
     }
 

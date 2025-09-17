@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosInstance';
@@ -250,7 +249,7 @@ function Catalog() {
                   </div>
                   <div className="p-3">
                     <h4 className="text-base font-semibold text-white mb-1 line-clamp-1">{product.name}</h4>
-                    <p className="text-gray-400 text-xs line-clamp-1">{product.description}</p>
+                    {/* Убрано отображение description */}
                     <div className="mt-2">
                       <span className="text-green-400 font-bold text-sm">¥{product.price?.toFixed(2) || '0.00'}</span>
                     </div>
@@ -367,7 +366,6 @@ const styles = `
     border-color: #10b981;
   }
 `;
-
 const styleSheet = document.createElement('style');
 styleSheet.textContent = styles;
 document.head.appendChild(styleSheet);

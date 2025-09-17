@@ -1,6 +1,7 @@
 package com.example.demo.jwt;
 
 import com.example.demo.Services.CustomUserDetailsService;
+import com.example.demo.Services.UserActivityService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,26 +28,38 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
+    @Autowired
+    private UserActivityService userActivityService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
+            logger.debug("JWT: {}", jwt);
             if (jwt != null && jwtUtil.validateToken(jwt, jwtUtil.extractEmail(jwt))) {
                 String email = jwtUtil.extractEmail(jwt);
+                logger.debug("Extracted email from JWT: {}", email);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                logger.debug("Loaded UserDetails: {}", userDetails != null ? userDetails.getUsername() : "null");
 
                 if (userDetails != null) {
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    logger.debug("Authentication set for user: {}", userDetails.getUsername());
+                    userActivityService.updateUserActivity(email); // Обновляем активность
+                } else {
+                    logger.warn("UserDetails not found for email: {}", email);
                 }
+            } else {
+                logger.debug("Invalid or missing JWT");
             }
         } catch (Exception e) {
-            logger.error("Не удалось установить аутентификацию пользователя: {}", e.getMessage());
+            logger.error("Cannot set user authentication: {}", e.getMessage());
             if (e instanceof io.jsonwebtoken.security.SignatureException) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Недействительная подпись JWT");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT signature");
                 return;
             }
         }

@@ -15,6 +15,7 @@ import UpcomingArrivals from './UpcomingArrivals';
 import OrderProcessing from './OrderProcessing';
 import AdminPromocode from './AdminPromocode';
 import AdminQuest from './AdminQuest'; // New import
+import AdminStats from './AdminStats';
 
 
 function AdminLayout() {
@@ -141,7 +142,7 @@ function AdminLayout() {
           <Route path="/admin/orders/check/:id" element={<OrderCheck />} />
           <Route path="/admin/support" element={<AdminSupportPage />} />
           <Route path="/admin/support/ticket/:ticketId/chat" element={<TicketChatPage />} />
-          <Route path="/admin/statistics" element={<AdminPanel section="statistics" />} />
+          
           <Route path="/admin/settings" element={<AdminPanel section="settings" />} />
           <Route path="/admin/suppliers" element={<AdminPanel section="suppliers" />} />
           <Route path="/admin/commission" element={<AdminPanel section="commission" />} />
@@ -154,6 +155,7 @@ function AdminLayout() {
           <Route path="/admin/upcoming-purchases/:id" element={<BatchDetail />} />
           <Route path="/admin/upcoming-arrivals" element={<UpcomingArrivals />} />
           <Route path="/admin/upcoming-purchases/:batchId/order/:orderId" element={<OrderProcessing />} />
+          <Route path="/admin/statistics" element={<AdminStats/>} />
           
         </Routes>
       </main>

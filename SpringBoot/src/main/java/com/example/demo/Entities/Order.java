@@ -18,7 +18,6 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_email", nullable = false)
-    @JsonIgnore
     private User user;
 
     @Column(name = "order_number", nullable = false, unique = true)
@@ -72,4 +71,31 @@ public class Order {
 
     @Column(name = "insurance_cost", nullable = true)
     private Float insuranceCost;
+
+    private Float weight;
+
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", user=" + user +
+                ", orderNumber='" + orderNumber + '\'' +
+                ", reasonRefusal='" + reasonRefusal + '\'' +
+                ", dateCreated=" + dateCreated +
+                ", status='" + status + '\'' +
+                ", totalClientPrice=" + totalClientPrice +
+                ", supplierCost=" + supplierCost +
+                ", customsDuty=" + customsDuty +
+                ", shippingCost=" + shippingCost +
+                ", deliveryAddress='" + deliveryAddress + '\'' +
+                ", trackingNumber='" + trackingNumber + '\'' +
+                ", discountApplied=" + discountApplied +
+                ", userDiscountApplied=" + userDiscountApplied +
+                ", promocode=" + promocode +
+                ", batchCargo=" + batchCargo +
+                ", items=" + items +
+                ", insuranceCost=" + insuranceCost +
+                '}';
+    }
 }

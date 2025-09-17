@@ -1,4 +1,41 @@
 spring:
+
+
+  servlet:
+    session:
+      timeout: 5m  # Таймаут сессии 5 минут
+      cookie:
+        http-only: true  # Запрещает доступ к куки через JavaScript
+        secure: true    # Куки отправляется только по HTTPS (для продакшна; уберите для localhost без HTTPS)
+
+
+  application:
+    name: demo
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+    cache:
+      type: redis
+    task:
+      execution:
+        pool:
+          core-size: 5
+          max-size: 10
+          queue-capacity: 100
+        thread-name-prefix: async-task-
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: fluvionbiz@gmail.com
+    password: ooik zsds ephb ijel
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   kafka:
     bootstrap-servers: localhost:9092  # Адрес(а) Kafka-брокера(ов). Можно указать несколько через запятую, напр. localhost:9092,localhost:9093.
 
@@ -50,7 +87,6 @@ server:
 jwt:
   secret: your-very-secure-secret-key-32-chars-long
   expiration: 86400000
-
 
 
 

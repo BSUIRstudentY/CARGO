@@ -5,6 +5,10 @@ import com.example.demo.POJO.OrderStatusEvent;
 import com.example.demo.Repositories.*;
 import com.example.demo.Services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -33,6 +38,9 @@ public class OrderController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CatalogRepository catalogRepository;
 
     @Autowired
     private OrderHistoryRepository orderHistoryRepository;
@@ -177,38 +185,113 @@ public class OrderController {
 
     @GetMapping("/orders")
     @Transactional(readOnly = true)
-    public ResponseEntity<List<OrderDTO>> getOrders(@RequestParam(required = false) String status) {
+    public ResponseEntity<PagedResponse<OrderDTO>> getOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "dateCreated,desc") String sort,
+            @RequestParam(required = false) String status) {
+
         String userEmail = getCurrentUserEmail();
         if (userEmail == null) {
             return ResponseEntity.status(403).body(null);
         }
 
-        List<Order> orders;
-        if (status != null && !status.equals("ALL")) {
-            if (status.contains(",")) {
-                String[] statuses = status.split(",");
-                orders = orderRepository.findByStatusIn(List.of(statuses));
-            } else {
-                orders = orderRepository.findByStatus(status);
-            }
-        } else {
-            orders = orderRepository.findByStatusNotIn(List.of("REFUSED", "RECEIVED"));
-        }
+        // Parse sort parameter
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        Sort.Direction sortDirection = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortField));
 
+        Page<Order> orderPage;
         boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
                 .getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-        if (!isAdmin) {
-            orders = orders.stream()
-                    .filter(order -> order.getUser().getEmail().equals(userEmail))
-                    .collect(Collectors.toList());
+
+        if (status != null && !status.equals("ALL")) {
+            if (status.contains(",")) {
+                String[] statuses = status.split(",");
+                if (!isAdmin) {
+                    // Filter by userEmail and statuses for non-admins
+
+                    orderPage = orderRepository.findByStatusNotInAndUserEmail(List.of(statuses), userEmail, pageable);
+                } else {
+                    orderPage = orderRepository.findByStatusIn(List.of(statuses), pageable);
+                }
+            } else {
+                if (!isAdmin) {
+                    orderPage = orderRepository.findByUserEmailAndStatus(userEmail, status, pageable);
+                } else {
+                    orderPage = orderRepository.findByStatus(status, pageable);
+                }
+            }
+        } else {
+            if (!isAdmin) {
+                orderPage = orderRepository.findByStatusNotInAndUserEmail(
+                        List.of("REFUSED", "RECEIVED"), userEmail, pageable);
+            } else {
+                orderPage = orderRepository.findByStatusNotIn(List.of("REFUSED", "RECEIVED"), pageable);
+            }
         }
 
-        List<OrderDTO> orderDTOs = orders.stream()
+        List<OrderDTO> orderDTOs = orderPage.getContent().stream()
                 .map(this::mapToOrderDTO)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(orderDTOs);
+        PagedResponse<OrderDTO> response = new PagedResponse<>(
+                orderDTOs,
+                orderPage.getNumber(),
+                orderPage.getSize(),
+                orderPage.getTotalElements(),
+                orderPage.getTotalPages(),
+                orderPage.isLast()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    // PagedResponse class to include pagination metadata
+    public static class PagedResponse<T> {
+        private List<T> content;
+        private int page;
+        private int size;
+        private long totalElements;
+        private int totalPages;
+        private boolean last;
+
+        public PagedResponse(List<T> content, int page, int size, long totalElements, int totalPages, boolean last) {
+            this.content = content;
+            this.page = page;
+            this.size = size;
+            this.totalElements = totalElements;
+            this.totalPages = totalPages;
+            this.last = last;
+        }
+
+        // Getters
+        public List<T> getContent() {
+            return content;
+        }
+
+        public int getPage() {
+            return page;
+        }
+
+        public int getSize() {
+            return size;
+        }
+
+        public long getTotalElements() {
+            return totalElements;
+        }
+
+        public int getTotalPages() {
+            return totalPages;
+        }
+
+        public boolean isLast() {
+            return last;
+        }
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -233,7 +316,7 @@ public class OrderController {
             }
         }
 
-        order.setTotalClientPrice(orderDetails.getTotalClientPrice());
+        // Update basic order fields
         order.setSupplierCost(orderDetails.getSupplierCost());
         order.setCustomsDuty(orderDetails.getCustomsDuty());
         order.setShippingCost(orderDetails.getShippingCost());
@@ -242,9 +325,90 @@ public class OrderController {
         order.setStatus(orderDetails.getStatus());
         order.setReasonRefusal(orderDetails.getReasonRefusal());
 
+        // Step 1: Recalculate totalClientPrice using existing order data and updated items
+        float totalClientPrice = 0.0f;
+        float userDiscountAmount = order.getUserDiscountApplied() != null ? order.getUserDiscountApplied() : 0.0f;
+        float promocodeDiscountAmount = order.getDiscountApplied() != null ? order.getDiscountApplied() : 0.0f;
+        float insuranceCost = order.getInsuranceCost() != null ? order.getInsuranceCost() : 0.0f;
+
+        // Calculate base total price from updated items (if provided)
+        if (orderDetails.getItems() != null && !orderDetails.getItems().isEmpty()) {
+            totalClientPrice = (float) orderDetails.getItems().stream()
+                    .mapToDouble(item -> (item.getPriceAtTime() != null ? item.getPriceAtTime() : 0.0f) * (item.getQuantity() != null ? item.getQuantity() : 1))
+                    .sum();
+        } else {
+            // Fallback to existing items if no new items provided
+            totalClientPrice = (float) order.getItems().stream()
+                    .mapToDouble(item -> (item.getPriceAtTime() != null ? item.getPriceAtTime() : 0.0f) * (item.getQuantity() != null ? item.getQuantity() : 1))
+                    .sum();
+        }
+
+        // Reapply user discount (verify and recalculate if needed)
+        User user = order.getUser();
+        if (user != null) {
+            user.verifyDiscount(); // Ensure discount is valid
+            float userDiscountPercent = user.getTotalDiscount();
+            if (userDiscountPercent > 0) {
+                userDiscountAmount = totalClientPrice * (userDiscountPercent / 100);
+                order.setUserDiscountApplied(userDiscountAmount);
+            }
+        }
+
+        // Reapply promocode discount (using existing promocode)
+        Promocode promocode = order.getPromocode();
+        if (promocode != null) {
+            // Validate promocode is still active
+            if (!promocode.getIsActive() ||
+                    LocalDateTime.now().isBefore(promocode.getValidFrom()) ||
+                    LocalDateTime.now().isAfter(promocode.getValidUntil())) {
+                // If promocode is invalid, clear it
+                order.setPromocode(null);
+                order.setDiscountApplied(0.0f);
+                promocodeDiscountAmount = 0.0f;
+            } else {
+                // Check usage limit
+                if (promocode.getUsageLimit() != null && promocode.getUsedCount() >= promocode.getUsageLimit()) {
+                    // If usage limit exceeded, clear it
+                    order.setPromocode(null);
+                    order.setDiscountApplied(0.0f);
+                    promocodeDiscountAmount = 0.0f;
+                } else {
+                    // Apply discount based on discountType
+                    if (promocode.getDiscountType() == DiscountType.PERCENTAGE) {
+                        promocodeDiscountAmount = totalClientPrice * (promocode.getDiscountValue() / 100);
+                    } else { // FIXED
+                        promocodeDiscountAmount = promocode.getDiscountValue();
+                    }
+                    order.setDiscountApplied(promocodeDiscountAmount);
+                }
+            }
+        }
+
+        // Reapply insurance cost (check if insurance was applied)
+        boolean hasInsurance = insuranceCost > 0;
+        if (hasInsurance) {
+            insuranceCost = totalClientPrice * 0.05f; // Recalculate 5%
+            order.setInsuranceCost(insuranceCost);
+        }
+
+        // Ensure final price is not negative
+        float totalDiscountAmount = userDiscountAmount + promocodeDiscountAmount;
+        float finalPrice = totalClientPrice - totalDiscountAmount + insuranceCost;
+        if (finalPrice < 0) {
+            System.out.println("Validation failed: final price is negative");
+            return ResponseEntity.badRequest().body(new ErrorResponse("Скидка превышает стоимость заказа", 400));
+        }
+
+        // Set recalculated order details
+        order.setTotalClientPrice(finalPrice);
+
+        // Step 2: Update order items
         if (order.getItems() != null) {
+
             order.getItems().clear();
             for (OrderItemDTO itemDTO : orderDetails.getItems()) {
+                Catalog catalog = new Catalog();
+
                 OrderItem orderItem = new OrderItem();
                 orderItem.setOrder(order);
                 orderItem.setOrderHistory(null);
@@ -254,13 +418,22 @@ public class OrderController {
                 orderItem.setPurchaseStatus(itemDTO.getPurchaseStatus() != null ? itemDTO.getPurchaseStatus() : "PENDING");
                 orderItem.setPurchaseRefusalReason(itemDTO.getPurchaseRefusalReason());
                 orderItem.setTrackingNumber(itemDTO.getTrackingNumber());
+                orderItem.setChinaDeliveryPrice(itemDTO.getChinaDeliveryPrice());
 
                 // Set product for regular orders (non-self-pickup)
                 if (orderDetails.getTotalClientPrice() > 0 && itemDTO.getProductId() != null) {
                     Product product = productRepository.findById(itemDTO.getProductId())
                             .orElseThrow(() -> new RuntimeException("Продукт с ID " + itemDTO.getProductId() + " не найден"));
                     orderItem.setProduct(product);
+                    if(!catalogRepository.existsByProductId(itemDTO.getProductId()))
+                    {
+                        catalog.setProduct(product);
+                        catalogRepository.save(catalog);
+                    }
+
+
                 }
+
 
                 order.getItems().add(orderItem);
             }
@@ -307,6 +480,7 @@ public class OrderController {
                         historyItem.setPurchaseStatus(item.getPurchaseStatus());
                         historyItem.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
                         historyItem.setTrackingNumber(item.getTrackingNumber());
+                        historyItem.setChinaDeliveryPrice(item.getChinaDeliveryPrice());
                         return historyItem;
                     })
                     .collect(Collectors.toList()));
@@ -325,11 +499,13 @@ public class OrderController {
             orderRepository.delete(order);
         } else {
             orderRepository.save(order);
+
         }
 
         if (order.getStatus().equals("VERIFIED")) {
             try {
                 OrderStatusEvent event = new OrderStatusEvent(order);
+                event.getOrder().setUser(order.getUser());
                 kafkaTemplate.send("order-status", event.getOrder().getUser().getEmail(), event);
             } catch (Exception e) {
                 System.out.println("Failed to send Kafka message: " + e.getMessage());
@@ -383,6 +559,8 @@ public class OrderController {
                     itemDTO.setSupplierPrice(item.getSupplierPrice());
                     itemDTO.setPurchaseStatus(item.getPurchaseStatus());
                     itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
+                    itemDTO.setChinaDeliveryPrice(item.getChinaDeliveryPrice());
+
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
@@ -404,6 +582,21 @@ public class OrderController {
         orderDTO.setDeliveryAddress(order.getDeliveryAddress());
         orderDTO.setTrackingNumber(order.getTrackingNumber());
         orderDTO.setReasonRefusal(order.getReasonRefusal());
+        orderDTO.setInsuranceCost(order.getInsuranceCost());
+        orderDTO.setUserDiscountApplied(order.getUserDiscountApplied());
+
+        // Safely handle promocode
+        Promocode promocode = order.getPromocode();
+        if (promocode != null) {
+            orderDTO.setDiscountValue(promocode.getDiscountValue());
+            orderDTO.setDiscountType(promocode.getDiscountType() != null ? promocode.getDiscountType() : null);
+
+        } else {
+            orderDTO.setDiscountValue(0f);
+            orderDTO.setDiscountType(null);
+
+        }
+
         orderDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
@@ -419,6 +612,7 @@ public class OrderController {
                     itemDTO.setPurchaseStatus(item.getPurchaseStatus());
                     itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
                     itemDTO.setTrackingNumber(item.getTrackingNumber());
+                    itemDTO.setChinaDeliveryPrice(item.getChinaDeliveryPrice());
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
@@ -464,6 +658,10 @@ public class OrderController {
         private List<OrderItemDTO> items;
         private String userEmail;
         private String reasonRefusal;
+        private Float insuranceCost;
+        private DiscountType discountType;
+        private Float discountValue;
+        private Float userDiscountApplied;
     }
 
     @Data
@@ -493,6 +691,7 @@ public class OrderController {
         private String purchaseStatus;
         private String purchaseRefusalReason;
         private String trackingNumber;
+        private Float chinaDeliveryPrice;
     }
 
     @Data

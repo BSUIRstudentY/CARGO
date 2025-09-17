@@ -11,6 +11,10 @@ import com.example.demo.Repositories.OrderRepository;
 import com.example.demo.Repositories.UserRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -218,13 +222,38 @@ public class BatchCargoController {
     }
 
     @GetMapping("/departure")
-    public List<BatchCargo> getDeparture() {
+    @Transactional(readOnly = true)
+    public ResponseEntity<PagedResponse<BatchCargoDTO>> getDeparture(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "creationDate,desc") String sort) {
         String userEmail = ContextHolder.getCurrentUserEmail();
         User user = userRepository.findByEmail(userEmail).orElse(null);
         if (user == null) {
-            return List.of();
+            return ResponseEntity.status(403).body(new PagedResponse<>(List.of(), 0, size, 0, 0, true));
         }
-        return batchCargoRepository.findByUser(user);
+
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        Sort.Direction sortDirection = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortField));
+
+        Page<BatchCargo> batchPage = batchCargoRepository.findByUser(user, pageable);
+        List<BatchCargoDTO> batchDTOs = batchPage.getContent().stream()
+                .map(this::mapToBatchCargoDTO)
+                .collect(Collectors.toList());
+
+        PagedResponse<BatchCargoDTO> response = new PagedResponse<>(
+                batchDTOs,
+                batchPage.getNumber(),
+                batchPage.getSize(),
+                batchPage.getTotalElements(),
+                batchPage.getTotalPages(),
+                batchPage.isLast()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     // DTO classes
@@ -281,5 +310,53 @@ public class BatchCargoController {
     @Data
     static class ItemStatusRequest {
         private String status; // PURCHASED or NOT_PURCHASED
+    }
+
+
+
+
+
+    // PagedResponse class (same as in OrderController.java)
+    public static class PagedResponse<T> {
+        private List<T> content;
+        private int page;
+        private int size;
+        private long totalElements;
+        private int totalPages;
+        private boolean last;
+
+        public PagedResponse(List<T> content, int page, int size, long totalElements, int totalPages, boolean last) {
+            this.content = content;
+            this.page = page;
+            this.size = size;
+            this.totalElements = totalElements;
+            this.totalPages = totalPages;
+            this.last = last;
+        }
+
+        // Getters
+        public List<T> getContent() {
+            return content;
+        }
+
+        public int getPage() {
+            return page;
+        }
+
+        public int getSize() {
+            return size;
+        }
+
+        public long getTotalElements() {
+            return totalElements;
+        }
+
+        public int getTotalPages() {
+            return totalPages;
+        }
+
+        public boolean isLast() {
+            return last;
+        }
     }
 }

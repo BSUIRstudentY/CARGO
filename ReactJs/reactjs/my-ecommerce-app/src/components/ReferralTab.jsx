@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import api from '../api/axiosInstance';
 import { useAuth } from './AuthProvider';
@@ -120,7 +119,16 @@ const ReferralTab = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6 sm:p-12">
+    <div className="h-[70vh] overflow-y-auto scrollbar-hide bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6 sm:p-12">
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+        }
+      `}</style>
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <motion.header
@@ -132,7 +140,6 @@ const ReferralTab = () => {
           <h2 className="text-4xl font-bold text-[var(--accent-color)] mb-2">Реферальная программа</h2>
           <p className="text-lg text-gray-400">Приглашайте друзей и получайте бонусы за их регистрацию!</p>
         </motion.header>
-
         {/* Error Message */}
         <AnimatePresence>
           {error && (
@@ -147,7 +154,6 @@ const ReferralTab = () => {
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* Referral Code Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
@@ -179,7 +185,6 @@ const ReferralTab = () => {
             <p className="text-center text-gray-400">Реферальный код отсутствует. Выполните квесты, чтобы получить код!</p>
           )}
         </motion.section>
-
         {/* Activate Referral Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
@@ -208,7 +213,6 @@ const ReferralTab = () => {
             Введите код друга, чтобы получить бонусы за регистрацию.
           </p>
         </motion.section>
-
         {/* Referrals List Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}

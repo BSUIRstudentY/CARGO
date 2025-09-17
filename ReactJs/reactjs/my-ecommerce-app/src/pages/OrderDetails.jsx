@@ -27,9 +27,9 @@ function OrderDetails() {
       } catch (error) {
         setError(
           'Ошибка загрузки деталей заказа: ' +
-            (error.response?.status === 403
-              ? 'Доступ запрещён. Обратитесь к администратору.'
-              : error.response?.data?.errorMessage || error.message)
+          (error.response?.status === 403
+            ? 'Доступ запрещён. Обратитесь к администратору.'
+            : error.response?.data?.errorMessage || error.message)
         );
         console.error('Error fetching order details:', error);
       } finally {
@@ -96,6 +96,16 @@ function OrderDetails() {
 
   const isSelfPickup = order.totalClientPrice === 0;
 
+  // Calculate total items price for breakdown
+  const totalItemsPrice = order.items?.reduce((sum, item) => {
+    return sum + ((item.priceAtTime || 0) * (item.quantity || 1));
+  }, 0) || 0;
+
+  // Calculate total china delivery price
+  const totalChinaDeliveryPrice = order.items?.reduce((sum, item) => {
+    return sum + (item.chinaDeliveryPrice || 0);
+  }, 0) || 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -111,6 +121,7 @@ function OrderDetails() {
           </h2>
           <p className="text-lg text-gray-400 mt-2">Просмотрите информацию о вашем заказе</p>
         </motion.header>
+
         {/* Error Message */}
         <AnimatePresence>
           {error && (
@@ -125,6 +136,7 @@ function OrderDetails() {
             </motion.div>
           )}
         </AnimatePresence>
+
         {/* Order Information and Financial Details */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
@@ -158,8 +170,12 @@ function OrderDetails() {
                 )}
               </p>
               <p className="text-gray-300"><strong>Адрес доставки:</strong> {order.deliveryAddress || 'Не указан'}</p>
+              {order.trackingNumber && (
+                <p className="text-gray-300"><strong>Трек-номер:</strong> {order.trackingNumber}</p>
+              )}
             </motion.div>
           </Tilt>
+
           {/* Financial Details */}
           <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
             <motion.div
@@ -169,42 +185,40 @@ function OrderDetails() {
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none rounded-2xl" />
               <h3 className="text-2xl font-semibold text-[var(--accent-color)] mb-6">Финансовые детали</h3>
+
               {isSelfPickup ? (
                 <p className="text-yellow-300 bg-yellow-500/20 p-3 rounded-lg mb-3">
                   <strong>Примечание:</strong> Для самовыкупа оплата требуется только за доставку.
                 </p>
               ) : (
                 <>
-                  {order.supplierCost > 0 && (
-                    <p className="text-gray-300 mb-3"><strong>Стоимость поставщика:</strong> ¥{order.supplierCost.toFixed(2)}</p>
-                  )}
-                  {order.shippingCost > 0 && (
-                    <p className="text-gray-300 mb-3"><strong>Стоимость доставки:</strong> ¥{order.shippingCost.toFixed(2)}</p>
-                  )}
-                  {order.customsDuty > 0 && (
-                    <p className="text-gray-300 mb-3"><strong>Пошлина:</strong> ¥{order.customsDuty.toFixed(2)}</p>
-                  )}
+                  <p className="text-gray-300 mb-3"><strong>Сумма товаров:</strong> ¥{totalItemsPrice.toFixed(2)}</p>
+                  {totalChinaDeliveryPrice > 0 && (<p className="text-gray-300 mb-3"><strong>Доставка по Китаю:</strong> ¥{totalChinaDeliveryPrice.toFixed(2)}</p>)}
+                  
                   {order.insuranceCost > 0 && (
                     <p className="text-gray-300 mb-3"><strong>Стоимость страховки:</strong> ¥{order.insuranceCost.toFixed(2)}</p>
                   )}
+                  {order.supplierCost > 0 && (
+                    <p className="text-gray-300 mb-3"><strong>Стоимость поставщика:</strong> ¥{order.supplierCost.toFixed(2)}</p>
+                  )}              
+                  
                   {order.userDiscountApplied > 0 && (
-                    <p className="text-gray-300 mb-3"><strong>Скидка пользователя:</strong> -¥{order.userDiscountApplied.toFixed(2)}</p>
+                    <p className="text-green-400 mb-3"><strong>Скидка пользователя:</strong> -¥{order.userDiscountApplied.toFixed(2)}</p>
                   )}
-                  {order.discountApplied > 0 && (
-                    <p className="text-gray-300 mb-3">
-                      <strong>Скидка по промокоду:</strong> -¥{order.discountApplied.toFixed(2)}
-                      {order.promocode && (
-                        <span className="text-emerald-400 ml-2">
-                          <CheckCircleIcon className="w-5 h-5 inline mr-1" />
-                          (Промокод: {order.promocode})
-                        </span>
-                      )}
-                    </p>
+                  {order.discountValue > 0 && (
+                    
+                    <p className="text-green-400 mb-3"><strong>Скидка по промокоду({order.discountType === "PERCENTAGE" && (order.discountValue)}%):</strong> -¥{order.discountType === "PERCENTAGE" ? (totalItemsPrice*order.discountValue/100).toFixed(2) : order.discountValue}</p>
+                    
                   )}
-                  {order.trackingNumber && (
-                    <p className="text-gray-300 mb-3"><strong>Трек-номер:</strong> {order.trackingNumber}</p>
+                  {order.userDiscountApplied > 0 && (
+                    
+                    <p className="text-green-400 mb-3"><strong>Скидка пользователя:</strong> -¥{order.userDiscountApplied}</p>
+                    
                   )}
-                  <div className="mt-6">
+                  
+                  
+
+                  <div className="mt-6 pt-4 border-t border-gray-600">
                     <p className="text-gray-300 font-semibold mb-2"><strong>Итоговая сумма:</strong></p>
                     <div className="w-full bg-gray-600 rounded-full h-3">
                       <motion.div
@@ -214,13 +228,14 @@ function OrderDetails() {
                         transition={{ duration: 1, ease: 'easeInOut' }}
                       />
                     </div>
-                    <p className="text-3xl font-bold text-[var(--accent-color)] mt-2">¥{order.totalClientPrice.toFixed(2)}</p>
+                    <p className="text-3xl font-bold text-[var(--accent-color)] mt-2">¥{(order.totalClientPrice + totalChinaDeliveryPrice).toFixed(2) }</p>
                   </div>
                 </>
               )}
             </motion.div>
           </Tilt>
         </motion.section>
+
         {/* Tracking Numbers or Items Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
@@ -245,7 +260,6 @@ function OrderDetails() {
                       <p className="font-medium text-white text-lg">
                         {item.trackingNumber || 'Трек-номер не указан'}
                       </p>
-                      
                     </motion.div>
                   </Tilt>
                 ))}
@@ -282,10 +296,11 @@ function OrderDetails() {
                         </div>
                         <div className="flex-1">
                           <p className="font-medium text-white text-lg">{item.productName || 'Без названия'}</p>
-                          {item.description && (
-                            <p className="text-sm text-gray-400 mt-1 line-clamp-2">{item.description}</p>
-                          )}
+                          
                           <p className="text-gray-300 mt-1">x{item.quantity} • ¥{item.priceAtTime.toFixed(2)}</p>
+                          {item.chinaDeliveryPrice > 0 && (
+                            <p className="text-gray-300 mt-1">Доставка по Китаю: ¥{item.chinaDeliveryPrice.toFixed(2)}</p>
+                          )}
                         </div>
                       </div>
                       <div className="w-full bg-gray-600 rounded-full h-2 mt-3">
@@ -305,6 +320,7 @@ function OrderDetails() {
             )
           )}
         </motion.section>
+
         {/* Actions Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}

@@ -21,6 +21,8 @@ import Reviews from './Reviews';
 import CostCalculator from './CostCalculator';
 import BatchCargoDetails from './BatchCargoDetails';
 import PublicOffer from './PublicOffer';
+import PrivacyPolicy from '../components/PrivacyPolicy';
+import UserAgreement from '../components/UserAgreement';
 import BatchCargoProcessing from './BatchCargoProcessing';
 
 function AppLayout() {
@@ -111,7 +113,7 @@ function AppLayout() {
                 >
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
                 </svg>
-                ChinaShopBY
+                Fluvion
               </h2>
             </div>
             <nav>
@@ -171,20 +173,17 @@ function AppLayout() {
             <section id="about" className="mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-center text-[var(--accent-color)]">О нас</h2>
               <p className="text-center text-lg sm:text-xl text-gray-300">
-                ChinaShopBY - ваш надежный партнер для покупок из Китая. Мы предлагаем лучшие цены и удобный сервис.
+                Fluvion - ваш надежный партнер для покупок из Китая. Мы предлагаем лучшие цены и удобный сервис для заказа товаров с доставкой в Беларусь.
               </p>
-              {Array.from({ length: 50 }).map((_, i) => (
-                <p key={i} className="my-4">Пример текста для прокрутки {i + 1}</p>
-              ))}
             </section>
           } />
           <Route path="/contact" element={
             <section id="contact">
               <h2 className="text-3xl sm:text-4xl font-bold text-center text-[var(--accent-color)]">Контакты</h2>
               <div className="bg-gray-800 p-6 rounded-lg shadow-md text-center text-white">
-                <p>Email: info@chinashopby.com</p>
-                <p>Телефон: +375 29 123-45-67</p>
-                <p>Адрес: Минск, ул. Примерная, 1</p>
+                <p>Email: <a href="mailto:support@fluvion.by" className="text-[var(--accent-color)] underline">support@fluvion.by</a></p>
+                <p>Телефон: <a href="tel:+375291234567" className="text-[var(--accent-color)] underline">+375 29 123-45-67</a></p>
+                <p>Адрес: 223710, Республика Беларусь, г. Солигорск, ул. Железнодорожная 6</p>
               </div>
             </section>
           } />
@@ -193,7 +192,9 @@ function AppLayout() {
           <Route path="/order-details/:orderId" element={<OrderDetails />} />
           <Route path="/batch-cargo-details/:batchId" element={<BatchCargoDetails />} />
           <Route path="/public-offer" element={<PublicOffer />} />
-          <Route path="/batch-cargos/:batchId/order/:orderId" element={<BatchCargoProcessing/>}/>
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/user-agreement" element={<UserAgreement />} />
+          <Route path="/batch-cargos/:batchId/order/:orderId" element={<BatchCargoProcessing />} />
         </Routes>
       </main>
       <Footer />

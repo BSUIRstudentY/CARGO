@@ -80,9 +80,11 @@ public class User {
     private User referredBy;
 
     @OneToMany(mappedBy = "referredBy", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<User> referrals = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<QuestProgress> questProgresses = new ArrayList<>();
 
     public User() {}

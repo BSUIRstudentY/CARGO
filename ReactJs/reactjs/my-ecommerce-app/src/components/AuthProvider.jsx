@@ -107,12 +107,23 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userRole');
-    setAuthState({ isAuthenticated: false, user: { email: null, username: null, role: null } });
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout', {}, { withCredentials: true }); // Вызов серверного logout
+      localStorage.removeItem('token');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userRole');
+      setAuthState({ isAuthenticated: false, user: { email: null, username: null, role: null } });
+    } catch (error) {
+      console.error('Ошибка при выходе:', error);
+      // Продолжаем очистку на клиенте даже при ошибке сервера
+      localStorage.removeItem('token');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userRole');
+      setAuthState({ isAuthenticated: false, user: { email: null, username: null, role: null } });
+    }
   };
 
   return (

@@ -15,4 +15,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     @Query("SELECT t FROM Ticket t WHERE t.admin.email = :email")
     List<Ticket> findByAdmin_Email(@Param("email") String email);
+
+
 }
