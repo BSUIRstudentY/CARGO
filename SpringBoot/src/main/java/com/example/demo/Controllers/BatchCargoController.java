@@ -1,5 +1,6 @@
 package com.example.demo.Controllers;
 
+import com.example.demo.Components.ContextHolder;
 import com.example.demo.Entities.BatchCargo;
 import com.example.demo.Entities.Order;
 import com.example.demo.Entities.OrderItem;
@@ -8,13 +9,15 @@ import com.example.demo.Repositories.BatchCargoRepository;
 import com.example.demo.Repositories.OrderItemRepository;
 import com.example.demo.Repositories.OrderRepository;
 import com.example.demo.Repositories.UserRepository;
+import com.example.demo.Services.NotificationService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -24,7 +27,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/batch-cargos")
 public class BatchCargoController {
 
     @Autowired
@@ -34,10 +37,16 @@ public class BatchCargoController {
     private OrderRepository orderRepository;
 
     @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private OrderItemRepository orderItemRepository;
+    private JavaMailSender mailSender;
+
+    @Autowired
+    private NotificationService notificationService;
 
     private final WebClient webClient;
 
@@ -46,21 +55,33 @@ public class BatchCargoController {
         this.webClient = webClientBuilder.baseUrl("http://localhost:8080/api").build();
     }
 
-    @GetMapping("/batch-cargos/unfinished")
+    @GetMapping("/unfinished")
     public ResponseEntity<List<BatchCargoDTO>> getUnfinishedBatches() {
         List<BatchCargo> batches = batchCargoRepository.findUnfinishedBatches();
         List<BatchCargoDTO> dtoList = batches.stream().map(this::mapToBatchCargoDTO).collect(Collectors.toList());
         return ResponseEntity.ok(dtoList);
     }
 
-    @GetMapping("/batch-cargos/finished")
+    @GetMapping("/finished")
     public ResponseEntity<List<BatchCargoDTO>> getFinishedBatches() {
-        List<BatchCargo> batches = batchCargoRepository.findFinishedBatches();
+        List<BatchCargo> batches = batchCargoRepository.findByStatusIn(List.of("FINISHED", "ARRIVED_IN_MINSK", "COMPLETED"));
         List<BatchCargoDTO> dtoList = batches.stream().map(this::mapToBatchCargoDTO).collect(Collectors.toList());
         return ResponseEntity.ok(dtoList);
     }
 
-    @PostMapping("/batch-cargos")
+    @GetMapping("/departure")
+    public ResponseEntity<List<BatchCargoDTO>> getDeparture() {
+        String userEmail = ContextHolder.getCurrentUserEmail();
+        User user = userRepository.findByEmail(userEmail).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(403).body(List.of());
+        }
+        List<BatchCargo> batches = batchCargoRepository.findByUser(user);
+        List<BatchCargoDTO> dtoList = batches.stream().map(this::mapToBatchCargoDTO).collect(Collectors.toList());
+        return ResponseEntity.ok(dtoList);
+    }
+
+    @PostMapping
     @Transactional
     public ResponseEntity<BatchCargoDTO> createBatchCargo(@RequestBody BatchCargoRequest request) {
         BatchCargo batchCargo = new BatchCargo();
@@ -72,9 +93,23 @@ public class BatchCargoController {
         batchCargo = batchCargoRepository.save(batchCargo);
 
         BatchCargo finalBatchCargo = batchCargo;
+        // Convert purchaseDate to LocalDate for date-only comparison
+        java.time.LocalDate purchaseLocalDate = finalBatchCargo.getPurchaseDate()
+                .toInstant()
+                .atZone(java.time.ZoneId.systemDefault())
+                .toLocalDate();
+
         List<Order> eligibleOrders = orderRepository.findByStatus("VERIFIED").stream()
-                .filter(order -> order.getDateCreated() != null && finalBatchCargo.getCreationDate() != null)
-                .filter(order -> order.getDateCreated().compareTo(finalBatchCargo.getCreationDate()) <= 0)
+                .filter(order -> order.getDateCreated() != null && finalBatchCargo.getPurchaseDate() != null)
+                .filter(order -> {
+                    // Convert order's dateCreated to LocalDate
+                    java.time.LocalDate orderLocalDate = order.getDateCreated()
+                            .toInstant()
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDate();
+                    // Compare dates only (ignore time)
+                    return !orderLocalDate.isAfter(purchaseLocalDate);
+                })
                 .filter(order -> order.getBatchCargo() == null)
                 .collect(Collectors.toList());
 
@@ -95,32 +130,49 @@ public class BatchCargoController {
             orderRepository.save(order);
         }
 
-        // Check if all orders are PROCESSED to set batch status to FINISHED
         boolean allOrdersProcessed = eligibleOrders.stream().allMatch(o -> "PROCESSED".equals(o.getStatus()));
         if (allOrdersProcessed && !eligibleOrders.isEmpty()) {
             batchCargo.setStatus("FINISHED");
             batchCargoRepository.save(batchCargo);
-            // Send notification for FINISHED batch
             for (Order order : eligibleOrders) {
-                Map<String, Object> notification = new HashMap<>();
-                notification.put("userEmail", order.getUser().getEmail());
-                notification.put("message", String.format("Сборный груз #%d завершён и готов к отправке.", batchCargo.getId()));
-                notification.put("relatedId", batchCargo.getId());
-                notification.put("category", "BATCH_UPDATE");
-                webClient.post()
-                        .uri("/notifications")
-                        .body(Mono.just(notification), Map.class)
-                        .retrieve()
-                        .bodyToMono(Void.class)
-                        .doOnError(error -> System.err.println("Failed to send notification for order %d: %s"))
-                        .subscribe();
+                User user = userRepository.findByEmail(order.getUser().getEmail()).orElse(null);
+                if (user != null) {
+                    notificationService.sendUserNotification(
+                            user,
+                            String.format("Сборный груз #%d завершён и готов к отправке.", batchCargo.getId()),
+                            batchCargo.getId(),
+                            "BATCH_UPDATE"
+                    );
+                } else {
+                    System.err.println("User not found for email: " + order.getUser().getEmail());
+                }
             }
         }
 
         return ResponseEntity.ok(mapToBatchCargoDTO(batchCargo));
     }
 
-    @GetMapping("/batch-cargos/{id}")
+    @GetMapping("/usr/{id}")
+    public ResponseEntity<BatchCargoDetailDTO> getUserBatchCargoDetail(@PathVariable Long id) {
+        String userEmail = ContextHolder.getCurrentUserEmail();
+        BatchCargo batchCargo = batchCargoRepository.findByIdAndUserEmail(id, userEmail).orElse(null);
+        if (batchCargo == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        BatchCargoDetailDTO dto = new BatchCargoDetailDTO();
+        dto.setId(batchCargo.getId());
+        dto.setCreationDate(batchCargo.getCreationDate());
+        dto.setPurchaseDate(batchCargo.getPurchaseDate());
+        dto.setStatus(batchCargo.getStatus());
+        dto.setReasonRefusal(batchCargo.getReasonRefusal());
+        dto.setPhotoUrl(batchCargo.getPhotoUrl());
+        dto.setDescription(batchCargo.getDescription());
+        dto.setOrders(batchCargo.getOrders().stream().map(this::mapToOrderDTO).collect(Collectors.toList()));
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/{id}")
     public ResponseEntity<BatchCargoDetailDTO> getBatchCargoDetail(@PathVariable Long id) {
         BatchCargo batchCargo = batchCargoRepository.findById(id).orElse(null);
         if (batchCargo == null) {
@@ -133,41 +185,39 @@ public class BatchCargoController {
         dto.setPurchaseDate(batchCargo.getPurchaseDate());
         dto.setStatus(batchCargo.getStatus());
         dto.setReasonRefusal(batchCargo.getReasonRefusal());
-        dto.setOrders(batchCargo.getOrders().stream().map(this::mapToOrderDTO).collect(Collectors.toList()));
         dto.setPhotoUrl(batchCargo.getPhotoUrl());
         dto.setDescription(batchCargo.getDescription());
+        dto.setOrders(batchCargo.getOrders().stream().map(this::mapToOrderDTO).collect(Collectors.toList()));
         return ResponseEntity.ok(dto);
     }
 
-    @PutMapping("/batch-cargos/{id}")
+    @PutMapping("/{id}")
     @Transactional
-    public ResponseEntity<BatchCargoDTO> updateBatchCargo(@PathVariable Long id, @RequestBody UpdateBatchCargoRequest updatedBatch) {
+    public ResponseEntity<BatchCargoDTO> updateBatchCargo(@PathVariable Long id, @RequestBody UpdateBatchCargoRequest request) {
         try {
             BatchCargo batch = batchCargoRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Batch not found"));
 
-            batch.setStatus(updatedBatch.getStatus());
-            batch.setReasonRefusal(updatedBatch.getReasonRefusal());
-            batch.setPhotoUrl(updatedBatch.getPhotoUrl());
-            batch.setDescription(updatedBatch.getDescription());
+            batch.setStatus(request.getStatus());
+            batch.setReasonRefusal(request.getReasonRefusal());
+            batch.setPhotoUrl(request.getPhotoUrl());
+            batch.setDescription(request.getDescription());
 
             BatchCargo savedBatch = batchCargoRepository.save(batch);
 
-            if ("REFUSED".equals(updatedBatch.getStatus())) {
+            if ("REFUSED".equals(request.getStatus())) {
                 for (Order order : batch.getOrders()) {
-                    Map<String, Object> notification = new HashMap<>();
-                    notification.put("userEmail", order.getUser().getEmail());
-                    notification.put("message", String.format("Сборный груз #%d был отклонён. Причина: %s", id, updatedBatch.getReasonRefusal()));
-                    notification.put("relatedId", id);
-                    notification.put("category", "BATCH_UPDATE");
-
-                    webClient.post()
-                            .uri("/notifications")
-                            .body(Mono.just(notification), Map.class)
-                            .retrieve()
-                            .bodyToMono(Void.class)
-                            .doOnError(error -> System.err.println("Failed to send notification for order %d: %s"))
-                            .subscribe();
+                    User user = userRepository.findByEmail(order.getUser().getEmail()).orElse(null);
+                    if (user != null) {
+                        notificationService.sendUserNotification(
+                                user,
+                                String.format("Сборный груз #%d был отклонён. Причина: %s", id, request.getReasonRefusal()),
+                                id,
+                                "BATCH_UPDATE"
+                        );
+                    } else {
+                        System.err.println("User not found for email: " + order.getUser().getEmail());
+                    }
                 }
             }
 
@@ -181,14 +231,107 @@ public class BatchCargoController {
         }
     }
 
-    @DeleteMapping("/batch-cargos/{id}")
+    @PutMapping("/{id}/arrived-minsk")
+    @Transactional
+    public ResponseEntity<BatchCargoDTO> markArrivedInMinsk(@PathVariable Long id) {
+        try {
+            BatchCargo batch = batchCargoRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Batch not found"));
+            if (!"FINISHED".equals(batch.getStatus())) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
+            batch.setStatus("ARRIVED_IN_MINSK");
+            BatchCargo savedBatch = batchCargoRepository.save(batch);
+
+            for (Order order : batch.getOrders()) {
+                User user = userRepository.findByEmail(order.getUser().getEmail()).orElse(null);
+                if (user != null) {
+                    notificationService.sendUserNotification(
+                            user,
+                            String.format("Сборный груз #%d пришел в Минск и уже на Европочте.", id),
+                            id,
+                            "BATCH_UPDATE"
+                    );
+                } else {
+                    System.err.println("User not found for email: " + order.getUser().getEmail());
+                }
+
+                try {
+                    SimpleMailMessage message = new SimpleMailMessage();
+                    message.setTo(order.getUser().getEmail());
+                    message.setSubject("Сборный груз прибыл в Минск");
+                    message.setText("Ваш груз из сборного груза прибыл в Минск и уже на Европочте.");
+                    mailSender.send(message);
+                } catch (Exception mailError) {
+                    System.err.println("Failed to send arrived in Minsk email to " + order.getUser().getEmail() + ": " + mailError.getMessage());
+                }
+            }
+
+            return ResponseEntity.ok(mapToBatchCargoDTO(savedBatch));
+        } catch (RuntimeException e) {
+            System.err.println("Batch not found for id " + id + ": " + e.getMessage());
+            return ResponseEntity.status(404).body(null);
+        } catch (Exception e) {
+            System.err.println("Error marking batch as arrived in Minsk " + id + ": " + e.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @PutMapping("/{id}/delivered")
+    @Transactional
+    public ResponseEntity<BatchCargoDTO> markDelivered(@PathVariable Long id) {
+        try {
+            BatchCargo batch = batchCargoRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Batch not found"));
+            if (!"ARRIVED_IN_MINSK".equals(batch.getStatus())) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
+            batch.setStatus("COMPLETED");
+            BatchCargo savedBatch = batchCargoRepository.save(batch);
+
+            for (Order order : batch.getOrders()) {
+                User user = userRepository.findByEmail(order.getUser().getEmail()).orElse(null);
+                if (user != null) {
+                    notificationService.sendUserNotification(
+                            user,
+                            String.format("Груз #%d доставлен, нужно его забрать.", id),
+                            id,
+                            "BATCH_UPDATE"
+                    );
+                } else {
+                    System.err.println("User not found for email: " + order.getUser().getEmail());
+                }
+
+                try {
+                    SimpleMailMessage message = new SimpleMailMessage();
+                    message.setTo(order.getUser().getEmail());
+                    message.setSubject("Груз доставлен");
+                    message.setText("Ваш груз из сборного груза доставлен. Нужно его забрать.");
+                    mailSender.send(message);
+                } catch (Exception mailError) {
+                    System.err.println("Failed to send delivered email to " + order.getUser().getEmail() + ": " + mailError.getMessage());
+                }
+            }
+
+            return ResponseEntity.ok(mapToBatchCargoDTO(savedBatch));
+        } catch (RuntimeException e) {
+            System.err.println("Batch not found for id " + id + ": " + e.getMessage());
+            return ResponseEntity.status(404).body(null);
+        } catch (Exception e) {
+            System.err.println("Error marking batch as delivered " + id + ": " + e.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<Void> deleteBatchCargo(@PathVariable Long id) {
         try {
             BatchCargo batch = batchCargoRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Batch not found"));
 
-            // Disassociate orders from the batch and reset status to VERIFIED
             List<Order> orders = batch.getOrders();
             for (Order order : orders) {
                 order.setBatchCargo(null);
@@ -198,9 +341,7 @@ public class BatchCargoController {
                 orderRepository.save(order);
             }
 
-            // Delete the batch
             batchCargoRepository.delete(batch);
-
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             System.err.println("Batch not found for id " + id + ": " + e.getMessage());
@@ -219,27 +360,31 @@ public class BatchCargoController {
             return ResponseEntity.notFound().build();
         }
 
-        item.setPurchaseStatus(request.getStatus());
-        if ("NOT_PURCHASED".equals(request.getStatus())) {
+        String status = request.getStatus();
+        if (!List.of("PURCHASED", "NOT_PURCHASED").contains(status)) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        item.setPurchaseStatus(status);
+        if ("NOT_PURCHASED".equals(status)) {
             item.setPurchaseRefusalReason(request.getPurchaseRefusalReason());
             Order order = item.getOrder();
-            User user = order.getUser();
-            user.setBalance(user.getBalance() + item.getPriceAtTime() * item.getQuantity());
-            userRepository.save(user);
+            if (order.getTotalClientPrice() > 0) {
+                User user = order.getUser();
+                user.setBalance(user.getBalance() + item.getPriceAtTime() * item.getQuantity());
+                userRepository.save(user);
+            }
 
-            Map<String, Object> notification = new HashMap<>();
-            notification.put("userEmail", order.getUser().getEmail());
-            notification.put("message", String.format("Товар #%d в заказе #%s не выкуплен. Причина: %s", itemId, order.getOrderNumber(), request.getPurchaseRefusalReason()));
-            notification.put("relatedId", order.getId());
-            notification.put("category", "ORDER_UPDATE");
-
-            webClient.post()
-                    .uri("/notifications")
-                    .body(Mono.just(notification), Map.class)
-                    .retrieve()
-                    .bodyToMono(Void.class)
-                    .doOnError(error -> System.err.println("Failed to send notification: " + error.getMessage()))
-                    .subscribe();
+            User notificationUser = order.getUser();
+            String productName = item.getProduct() != null ? item.getProduct().getName() :
+                    (item.getTrackingNumber() != null ? "Self-Pickup: " + item.getTrackingNumber() : "Unknown");
+            notificationService.sendUserNotification(
+                    notificationUser,
+                    String.format("Товар #%d (%s) в заказе #%s не выкуплен. Причина: %s",
+                            itemId, productName, order.getOrderNumber(), request.getPurchaseRefusalReason()),
+                    order.getId(),
+                    "ORDER_UPDATE"
+            );
         }
 
         orderItemRepository.save(item);
@@ -257,20 +402,14 @@ public class BatchCargoController {
                 if (allOrdersProcessed) {
                     batch.setStatus("FINISHED");
                     batchCargoRepository.save(batch);
-                    // Send notification for FINISHED batch
                     for (Order o : batch.getOrders()) {
-                        Map<String, Object> notification = new HashMap<>();
-                        notification.put("userEmail", o.getUser().getEmail());
-                        notification.put("message", String.format("Сборный груз #%d завершён и готов к отправке.", batch.getId()));
-                        notification.put("relatedId", batch.getId());
-                        notification.put("category", "BATCH_UPDATE");
-                        webClient.post()
-                                .uri("/notifications")
-                                .body(Mono.just(notification), Map.class)
-                                .retrieve()
-                                .bodyToMono(Void.class)
-                                .doOnError(error -> System.err.println("Failed to send notification for order %d: %s"))
-                                .subscribe();
+                        User user = o.getUser();
+                        notificationService.sendUserNotification(
+                                user,
+                                String.format("Сборный груз #%d завершён и готов к отправке.", batch.getId()),
+                                batch.getId(),
+                                "BATCH_UPDATE"
+                        );
                     }
                 }
             }
@@ -299,20 +438,39 @@ public class BatchCargoController {
         dto.setTotalClientPrice(order.getTotalClientPrice());
         dto.setDeliveryAddress(order.getDeliveryAddress());
         dto.setReasonRefusal(order.getReasonRefusal());
+        boolean isSelfPickup = order.getTotalClientPrice() == 0;
         dto.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
                     itemDTO.setId(item.getId());
-                    itemDTO.setProductId(item.getProduct().getId());
-                    itemDTO.setProductName(item.getProduct().getName());
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPriceAtTime(item.getPriceAtTime());
-                    itemDTO.setUrl(item.getProduct().getUrl());
-                    itemDTO.setImageUrl(item.getProduct().getImageUrl());
-                    itemDTO.setDescription(item.getProduct().getDescription());
                     itemDTO.setSupplierPrice(item.getSupplierPrice());
                     itemDTO.setPurchaseStatus(item.getPurchaseStatus() != null ? item.getPurchaseStatus() : "PENDING");
                     itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
+                    itemDTO.setTrackingNumber(item.getTrackingNumber());
+                    if (isSelfPickup || item.getProduct() == null) {
+                        itemDTO.setProductId(null);
+                        itemDTO.setProductName(item.getTrackingNumber() != null ? "Self-Pickup: " + item.getTrackingNumber() : "Unknown");
+                        itemDTO.setUrl(null);
+                        itemDTO.setImageUrl(null);
+                        itemDTO.setDescription(null);
+                    } else {
+                        try {
+                            itemDTO.setProductId(item.getProduct().getId().toString());
+                            itemDTO.setProductName(item.getProduct().getName());
+                            itemDTO.setUrl(item.getProduct().getUrl());
+                            itemDTO.setImageUrl(item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
+                            itemDTO.setDescription(item.getProduct().getDescription());
+                        } catch (NullPointerException e) {
+                            System.err.println("Null product for OrderItem ID: " + item.getId() + " in Order ID: " + order.getId());
+                            itemDTO.setProductId(null);
+                            itemDTO.setProductName("Unknown");
+                            itemDTO.setUrl(null);
+                            itemDTO.setImageUrl("https://placehold.co/128x128?text=No+Image");
+                            itemDTO.setDescription(null);
+                        }
+                    }
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
@@ -320,7 +478,6 @@ public class BatchCargoController {
         return dto;
     }
 
-    // DTO classes
     @Data
     static class BatchCargoDTO {
         private Long id;
@@ -332,22 +489,22 @@ public class BatchCargoController {
     }
 
     @Data
+    static class BatchCargoRequest {
+        private Date purchaseDate;
+        private String photoUrl;
+        private String description;
+    }
+
+    @Data
     static class BatchCargoDetailDTO {
         private Long id;
         private Timestamp creationDate;
         private Timestamp purchaseDate;
         private String status;
         private String reasonRefusal;
+        private String photoUrl;
+        private String description;
         private List<OrderDTO> orders;
-        private String photoUrl;
-        private String description;
-    }
-
-    @Data
-    static class BatchCargoRequest {
-        private Date purchaseDate;
-        private String photoUrl;
-        private String description;
     }
 
     @Data
@@ -384,6 +541,7 @@ public class BatchCargoController {
         private Float supplierPrice;
         private String purchaseStatus;
         private String purchaseRefusalReason;
+        private String trackingNumber;
     }
 
     @Data

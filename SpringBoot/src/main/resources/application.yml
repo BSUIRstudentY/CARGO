@@ -1,4 +1,15 @@
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: fluvionbiz@gmail.com
+    password: 1206_1105timaZ
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   kafka:
     bootstrap-servers: localhost:9092  # Адрес(а) Kafka-брокера(ов). Можно указать несколько через запятую, напр. localhost:9092,localhost:9093.
 

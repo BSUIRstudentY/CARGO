@@ -58,7 +58,6 @@ function BatchDetail() {
     setLoading(true);
     try {
       const updatedBatch = {
-        ...batch,
         status: 'REFUSED',
         reasonRefusal: refusalReason,
         photoUrl: batch.photoUrl || null,
@@ -140,7 +139,7 @@ function BatchDetail() {
   const handleMarkPurchased = async (orderId, itemId) => {
     setLoading(true);
     try {
-      await api.put(`/items/${itemId}`, { status: 'PURCHASED' });
+      await api.put(`/batch-cargos/items/${itemId}`, { status: 'PURCHASED' });
       const response = await api.get(`/batch-cargos/${id}`);
       setBatch(response.data);
       if (response.data.status === 'FINISHED') {
@@ -164,7 +163,7 @@ function BatchDetail() {
     }
     setLoading(true);
     try {
-      await api.put(`/items/${selectedItemId}`, {
+      await api.put(`/batch-cargos/items/${selectedItemId}`, {
         status: 'NOT_PURCHASED',
         purchaseRefusalReason: itemRefusalReason,
       });
@@ -261,6 +260,9 @@ function BatchDetail() {
                     {item.supplierPrice && (
                       <p className="text-sm text-gray-300 mb-1">Цена поставщика: ¥{item.supplierPrice.toFixed(2)}</p>
                     )}
+                    {item.trackingNumber && (
+                      <p className="text-sm text-gray-300 mb-1">Трек-номер: {item.trackingNumber}</p>
+                    )}
                     <p
                       className={`text-sm mb-1 ${
                         item.purchaseStatus === 'PURCHASED'
@@ -275,9 +277,10 @@ function BatchDetail() {
                     {item.description && (
                       <p className="text-sm text-gray-300 mb-1">Описание: {item.description}</p>
                     )}
-                     {item.url && (
-                          <p className="text-xs text-gray-300">Ссылка: {item.url}</p>
-                        )}
+                    {item.url && (
+                      <p className="text-sm text-gray-300 mb-1">Ссылка: {item.url}</p>
+                    )}
+                   
                     {item.purchaseRefusalReason && (
                       <p className="text-sm text-red-400">Причина отказа: {item.purchaseRefusalReason}</p>
                     )}
@@ -316,16 +319,16 @@ function BatchDetail() {
           Отказать
         </button>
         <button
-          onClick={handleDeleteBatch}
-          className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
-        >
-          Удалить сборный груз
-        </button>
-        <button
           onClick={() => navigate('/admin/upcoming-purchases')}
           className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200"
         >
           Назад
+        </button>
+        <button
+          onClick={handleDeleteBatch}
+          className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+        >
+          Удалить сборный груз
         </button>
       </div>
       {showRefusalModal && (
@@ -366,10 +369,13 @@ function BatchDetail() {
                   Отказать
                 </button>
                 <button
-                  onClick={handleDeleteBatch}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+                  onClick={() => {
+                    setShowRefusalModal(false);
+                    setRefusalReason('');
+                  }}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200"
                 >
-                  Удалить сборный груз
+                  Отмена
                 </button>
               </div>
             </div>
