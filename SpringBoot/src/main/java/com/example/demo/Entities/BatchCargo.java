@@ -1,8 +1,5 @@
 package com.example.demo.Entities;
 
-
-import jakarta.persistence.Entity;
-
 import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.List;
@@ -22,10 +19,35 @@ public class BatchCargo {
     private Timestamp purchaseDate;
 
     @Column(nullable = false)
-    private String status; // UNFINISHED, FINISHED
+    private String status; // UNFINISHED, FINISHED, REFUSED
+
+    @Column(name = "reason_refusal")
+    private String reasonRefusal; // Reason for refusal, nullable
 
     @OneToMany(mappedBy = "batchCargo")
     private List<Order> orders;
+
+    @Column(name = "photo_url")
+    private String photoUrl;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    public String getDescription(){
+        return this.description;
+    }
+
+    public void setDescription(String description){
+        this.description = description;
+    }
+
+    public String getPhotoUrl(){
+        return this.photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl){
+        this.photoUrl = photoUrl;
+    }
 
     // Getters and Setters
     public Long getId() {
@@ -58,6 +80,14 @@ public class BatchCargo {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getReasonRefusal() {
+        return reasonRefusal;
+    }
+
+    public void setReasonRefusal(String reasonRefusal) {
+        this.reasonRefusal = reasonRefusal;
     }
 
     public List<Order> getOrders() {

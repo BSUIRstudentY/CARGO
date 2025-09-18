@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,7 +7,6 @@ const Home = () => {
   const [isImageVisible, setIsImageVisible] = useState(false);
 
   useEffect(() => {
-    // Активируем анимацию при загрузке
     setIsImageVisible(true);
   }, []);
 
@@ -15,52 +15,39 @@ const Home = () => {
   };
 
   return (
-    <section className="max-w-7xl mx-auto  px-4 bg-gradient-to-b from-gray-900 to-gray-800 text-white min-h-screen relative overflow-hidden">
-      {/* Геройский блок */}
-      <section className="section-frame overflow-hidden">
-        <div
-          className="wrapper bg-soft-primary mask-bg"
-          style={{
-            backgroundImage: "ur[](https://via.placeholder.com/1920x600?text=China+Shop+Background)",
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'cover',
-            backgroundPosition: '50% 50%',
-          }}
-        >
-          <div className="container py-12 py-md-16 text-center">
-            <div className="row">
-              <div className="col-md-7 col-lg-6 col-xl-5 mx-auto">
-                <h1 className="text-5xl sm:text-6xl font-bold mb-4 text-white">Fluvion</h1>
-                <div className="lead px-4 sm:px-10 mb-4 text-white text-lg sm:text-xl">
-                  <p>Ваш путь к лучшим товарам из Китая</p>
-                </div>
-              </div>
-            </div>
-          </div>
+    <section className="max-w-7xl mx-auto px-4 bg-gradient-to-b from-gray-900 to-gray-800 text-white min-h-screen relative overflow-hidden">
+      {/* Hero Section */}
+      <section className="py-12 sm:py-16 text-center">
+        <div className="flex items-center justify-center mb-6">
+          <img src="/logo.png" alt="Fluvion Logo" className="w-16 h-16 object-contain" />
+          <h1 className="text-4xl sm:text-5xl font-bold" style={{ color: '#FF0000' }}>Fluvion</h1>
         </div>
+        <p className="text-lg sm:text-xl text-gray-300 max-w-prose mx-auto">
+          Ваш путь к лучшим товарам из Китая
+        </p>
       </section>
 
-      {/* Блок о компании */}
-      <div className="container py-6 py-md-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      {/* About Section */}
+      <div className="container py-10 sm:py-14">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="order-2 lg:order-1 flex justify-center">
-            <div className={`img-mask rounded-xl overflow-hidden ${isImageVisible ? 'animate-image-in' : 'animate-image-out'}`}>
+            <div className={`rounded-xl overflow-hidden ${isImageVisible ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}>
               <img
                 src="/220.jpg"
-                alt="ChinaShopBY Team"
-                className="w-full h-64 lg:h-80 object-cover transition-opacity duration-500"
+                alt="Fluvion Team"
+                className="w-full h-64 lg:h-80 object-cover"
               />
             </div>
           </div>
           <div className="order-1 lg:order-2 text-center lg:text-left">
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">О нашей компании</h2>
-            <p className="text-lg sm:text-xl mb-6 text-gray-300 max-w-prose mx-auto lg:mx-0">
-              ChinaShopBY специализируется на поставках качественных товаров из Китая, предлагая широкий ассортимент электроники, аксессуаров и товаров для дома. Мы гордимся своим уникальным терминалом для удобных покупок и надежной доставкой, обеспечивая лучшие цены и поддержку клиентов 24/7. Начните прямо сейчас!
+            <p className="text-lg sm:text-xl text-gray-300 mb-6 max-w-prose mx-auto lg:mx-0">
+              <span style={{ color: '#FF0000' }}>Fluvion</span> специализируется на поставках качественных товаров из Китая, предлагая широкий ассортимент электроники, аксессуаров и товаров для дома. Мы гордимся своим уникальным терминалом для удобных покупок и надежной доставкой, обеспечивая лучшие цены и поддержку клиентов 24/7. Начните прямо сейчас!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <button
                 onClick={() => navigate('/catalog')}
-                className="bg-[var(--accent-color)] text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition duration-300 w-full sm:w-auto"
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 w-full sm:w-auto"
               >
                 Перейти в каталог
               </button>
@@ -75,65 +62,65 @@ const Home = () => {
         </div>
       </div>
 
-      {/* История развития */}
-      <div className="container py-12 py-md-16">
-        <h2 className="text-4xl sm:text-5xl font-bold mb-6 text-center">Наша история развития</h2>
-        <div className="text-center text-lg sm:text-xl mb-8 text-gray-300">
-          <p>ChinaShopBY начал свой путь в 2020 году, стремясь упростить покупки из Китая для каждого.</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 process-wrapper">
+      {/* History Section */}
+      <div className="container py-10 sm:py-14">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-center">Наша история развития</h2>
+        <p className="text-center text-lg sm:text-xl text-gray-300 mb-8">
+          <span style={{ color: '#FF0000' }}>Fluvion</span> начал свой путь в 2020 году, стремясь упростить покупки из Китая для каждого.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="text-center">
-            <span className="inline-block bg-gray-800 rounded-full p-4 mb-4">
-              <span className="text-2xl font-bold text-[var(--accent-color)]">1</span>
-            </span>
+            <div className="inline-block bg-gray-800 rounded-full p-4 mb-4">
+              <span className="text-2xl font-bold text-blue-600">1</span>
+            </div>
             <h4 className="text-xl font-semibold mb-2">2020 — Начало пути</h4>
             <p className="text-gray-400">Запуск платформы для закупок из Китая.</p>
           </div>
           <div className="text-center">
-            <span className="inline-block bg-gray-800 rounded-full p-4 mb-4">
-              <span className="text-2xl font-bold text-[var(--accent-color)]">2</span>
-            </span>
+            <div className="inline-block bg-gray-800 rounded-full p-4 mb-4">
+              <span className="text-2xl font-bold text-blue-600">2</span>
+            </div>
             <h4 className="text-xl font-semibold mb-2">2021 — Уникальный терминал</h4>
             <p className="text-gray-400">Внедрение инновационного терминала для покупок.</p>
           </div>
           <div className="text-center">
-            <span className="inline-block bg-gray-800 rounded-full p-4 mb-4">
-              <span className="text-2xl font-bold text-[var(--accent-color)]">3</span>
-            </span>
+            <div className="inline-block bg-gray-800 rounded-full p-4 mb-4">
+              <span className="text-2xl font-bold text-blue-600">3</span>
+            </div>
             <h4 className="text-xl font-semibold mb-2">2022 — Расширение ассортимента</h4>
             <p className="text-gray-400">Добавление тысяч новых товаров в каталог.</p>
           </div>
           <div className="text-center">
-            <span className="inline-block bg-gray-800 rounded-full p-4 mb-4">
-              <span className="text-2xl font-bold text-[var(--accent-color)]">4</span>
-            </span>
+            <div className="inline-block bg-gray-800 rounded-full p-4 mb-4">
+              <span className="text-2xl font-bold text-blue-600">4</span>
+            </div>
             <h4 className="text-xl font-semibold mb-2">2023 — Улучшение доставки</h4>
             <p className="text-gray-400">Оптимизация логистики для быстрой доставки.</p>
           </div>
           <div className="text-center">
-            <span className="inline-block bg-gray-800 rounded-full p-4 mb-4">
-              <span className="text-2xl font-bold text-[var(--accent-color)]">5</span>
-            </span>
+            <div className="inline-block bg-gray-800 rounded-full p-4 mb-4">
+              <span className="text-2xl font-bold text-blue-600">5</span>
+            </div>
             <h4 className="text-xl font-semibold mb-2">2024 — Поддержка клиентов</h4>
             <p className="text-gray-400">Запуск 24/7 службы поддержки.</p>
           </div>
           <div className="text-center">
-            <span className="inline-block bg-gray-800 rounded-full p-4 mb-4">
-              <span className="text-2xl font-bold text-[var(--accent-color)]">6</span>
-            </span>
+            <div className="inline-block bg-gray-800 rounded-full p-4 mb-4">
+              <span className="text-2xl font-bold text-blue-600">6</span>
+            </div>
             <h4 className="text-xl font-semibold mb-2">2025 — Рост и инновации</h4>
             <p className="text-gray-400">Продолжение развития с новыми технологиями.</p>
           </div>
         </div>
       </div>
 
-      {/* Статистика */}
+      {/* Statistics Section */}
       <div className="container mb-12">
-        <div className="bg-gray-800 rounded-t-lg p-6 sm:p-10 shadow-lg">
+        <div className="bg-gray-800 rounded-lg p-6 sm:p-10 shadow-lg">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
             <div>
               <h3 className="text-4xl font-bold text-white">50,000</h3>
-              <p className="text-gray-400">Клиентов ChinaShopBY</p>
+              <p className="text-gray-400">Клиентов <span style={{ color: '#FF0000' }}>Fluvion</span></p>
             </div>
             <div>
               <h3 className="text-4xl font-bold text-white">75%</h3>
@@ -151,7 +138,8 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Блок с сайтами закупки */}
+
+ {/* Блок с сайтами закупки */}
       <div className="container py-8 py-md-12">
         <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center">Где мы закупаем товары</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -218,71 +206,49 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Форма обратной связи */}
-      <div className="container py-8 py-md-12">
-        <div className="text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Задать вопрос или получить консультацию</h2>
-          <div className="max-w-3xl mx-auto mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="mb-4">
-                <input
-                  type="text"
-                  placeholder="Ваше имя"
-                  className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
-                  aria-required="true"
-                />
-              </div>
-              <div className="mb-4">
-                <input
-                  type="tel"
-                  placeholder="Ваш телефон"
-                  className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
-                  aria-required="true"
-                />
-              </div>
-              <div className="md:col-span-2 mb-4">
-                <textarea
-                  placeholder="Ваше сообщение"
-                  className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] h-32"
-                  aria-required="true"
-                ></textarea>
-              </div>
-              <div className="md:col-span-2 mb-4 flex items-center">
-                <input
-                  type="checkbox"
-                  className="mr-2"
-                  id="agree"
-                  aria-invalid="false"
-                />
-                <label htmlFor="agree" className="text-gray-400">
-                  Выражаю свое <a href="/user-agreement" className="text-[var(--accent-color)] hover:underline">согласие</a> на обработку персональных данных
-                </label>
-              </div>
-              <div className="md:col-span-2 text-center">
-                <button
-                  className="bg-[var(--accent-color)] text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition duration-300"
-                  type="submit"
-                >
-                  Отправить
-                </button>
-              </div>
+
+      {/* Form Section */}
+      <div className="container py-10 sm:py-14">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center">Задать вопрос или получить консультацию</h2>
+        <div className="max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Ваше имя"
+              className="p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+            <input
+              type="tel"
+              placeholder="Ваш телефон"
+              className="p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+            <textarea
+              placeholder="Ваше сообщение"
+              className="md:col-span-2 p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 h-32"
+            ></textarea>
+            <div className="md:col-span-2 flex items-center">
+              <input type="checkbox" id="agree" className="mr-2" />
+              <label htmlFor="agree" className="text-gray-400">
+                Выражаю свое <a href="/user-agreement" className="text-blue-600 hover:underline">согласие</a> на обработку персональных данных
+              </label>
             </div>
+            <button className="md:col-span-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+              Отправить
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Карта */}
+      {/* Map Section */}
       <div className="container mb-12">
-        <div className="map map-style-1">
-          <iframe
-            src="https://yandex.ru/map-widget/v1/-/CCUZiIhIDB"
-            width="100%"
-            height="400"
-            frameBorder="0"
-            allowFullScreen
-            className="rounded-lg"
-          ></iframe>
-        </div>
+        <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-center">Наша локация</h2>
+        <iframe
+          src="https://yandex.ru/map-widget/v1/?um=constructor%3A0e4a8b7a7b7b7b7b7b7b7b7b7b7b7b7b&source=constructor"
+          width="100%"
+          height="400"
+          frameBorder="0"
+          className="rounded-lg"
+        ></iframe>
       </div>
     </section>
   );

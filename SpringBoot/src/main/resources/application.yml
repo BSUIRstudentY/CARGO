@@ -1,14 +1,10 @@
 spring:
-
-
   servlet:
     session:
-      timeout: 5m  # Таймаут сессии 5 минут
+      timeout: 5m
       cookie:
-        http-only: true  # Запрещает доступ к куки через JavaScript
-        secure: true    # Куки отправляется только по HTTPS (для продакшна; уберите для localhost без HTTPS)
-
-
+        http-only: true
+        secure: true
   application:
     name: demo
     redis:
@@ -28,46 +24,30 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: fluvionbiz@gmail.com
-    password: ooik zsds ephb ijel
+    password: 1206_1105timaZ
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
-
   kafka:
-    bootstrap-servers: localhost:9092  # Адрес(а) Kafka-брокера(ов). Можно указать несколько через запятую, напр. localhost:9092,localhost:9093.
-
-    producer: # Настройки для продюсера (отправителя сообщений).
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer  # Класс для сериализации ключа сообщения. StringSerializer преобразует строку в байты.
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer  # Класс для сериализации значения сообщения. Аналогично, для строк.
-      # Дополнительные опции (опционально):
-      # acks: all  # Уровень подтверждения: all — ждать от всех реплик, 1 — от лидера, 0 — без подтверждения. По умолчанию 1.
-      # retries: 3  # Количество попыток переотправки при ошибке.
-      # batch-size: 16384  # Размер батча в байтах для группировки сообщений перед отправкой.
-
-    consumer: # Настройки для консьюмера (получателя сообщений).
-      group-id: notification-group  # Идентификатор группы консьюмеров. Все консьюмеры в одной группе делят партиции топика (балансировка нагрузки). Если группа новая, оффсеты начинаются с auto-offset-reset.
-      auto-offset-reset: earliest  # Что делать, если нет сохранённого оффсета: earliest — читать с начала топика, latest — с конца, none — ошибка.
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer  # Класс для десериализации ключа. StringDeserializer преобразует байты обратно в строку.
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer  # Класс для десериализации значения. Аналогично.
-      # Дополнительные опции (опционально):
-      # enable-auto-commit: true  # Автоматически коммитить оффсеты? По умолчанию true, но для надёжности лучше false и коммитить вручную.
-      # auto-commit-interval-ms: 5000  # Интервал автокоммита в мс.
-      # max-poll-records: 500  # Максимум записей за один poll (вызов).
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       properties:
-        spring.json.trusted.packages: com.example.demo.Entities, com.example.demo.POJO  # Замените на пакет, где лежат ваши классы (User, SupportMessageEvent)
-
-
-
-
+        spring.json.trusted.packages: com.example.demo.Entities, com.example.demo.POJO
   datasource:
     url: jdbc:mysql://localhost:3306/CargoDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -76,20 +56,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
   sql:
     init:
       mode: always
-
 server:
   port: 8080
-
 jwt:
   secret: your-very-secure-secret-key-32-chars-long
   expiration: 86400000
-
-
-
-
-
-

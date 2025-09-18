@@ -1,5 +1,6 @@
 package com.example.demo.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,9 +18,10 @@ public class OrderHistory {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_email", nullable = false)
+    @JsonIgnore
     private User user;
 
-    @Column(name = "order_number", nullable = false, unique = true)
+    @Column(name = "order_number", nullable = false)
     private String orderNumber;
 
     @Column(name = "reasonRefusal", nullable = true)
@@ -29,7 +31,7 @@ public class OrderHistory {
     private Timestamp dateCreated;
 
     @Column(name = "status", nullable = false)
-    private String status; // Например, "Доставлено", "Отменено"
+    private String status;
 
     @Column(name = "total_client_price", nullable = false)
     private Float totalClientPrice;
@@ -49,6 +51,24 @@ public class OrderHistory {
     @Column(name = "tracking_number", length = 100)
     private String trackingNumber;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "promocode_id")
+    @JsonIgnore
+    private Promocode promocode;
+
     @OneToMany(mappedBy = "orderHistory", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<OrderItem> items;
+
+    @Column(name = "insurance_cost", nullable = true)
+    private Float insuranceCost;
+
+    @Column(name = "insurance", nullable = true)
+    private Boolean insurance;
+
+    @Column(name = "discount_type", nullable = true)
+    private String discountType;
+
+    @Column(name = "discount_value", nullable = true)
+    private Float discountValue;
 }

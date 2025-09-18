@@ -72,8 +72,17 @@ public class Order {
     @Column(name = "insurance_cost", nullable = true)
     private Float insuranceCost;
 
-    private Float weight;
+    @Column(name = "insurance", nullable = true)
+    private Boolean insurance;
 
+    @Column(name = "discount_type", nullable = true)
+    private String discountType;
+
+    @Column(name = "discount_value", nullable = true)
+    private Float discountValue;
+
+    @Column(name = "weight", nullable = true)
+    private Float weight;
 
     @Override
     public String toString() {
@@ -96,6 +105,10 @@ public class Order {
                 ", batchCargo=" + batchCargo +
                 ", items=" + items +
                 ", insuranceCost=" + insuranceCost +
+                ", insurance=" + insurance +
+                ", discountType='" + discountType + '\'' +
+                ", discountValue=" + discountValue +
+                ", weight=" + weight +
                 '}';
     }
 }

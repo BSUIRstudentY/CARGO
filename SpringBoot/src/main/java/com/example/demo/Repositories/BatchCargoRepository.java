@@ -17,6 +17,7 @@ public interface BatchCargoRepository extends JpaRepository<BatchCargo, Long> {
     @Query("SELECT DISTINCT bc FROM BatchCargo bc JOIN bc.orders o WHERE o.user = :user")
     Page<BatchCargo> findByUser(User user, Pageable pageable);
 
+    List<BatchCargo> findByStatusIn(List<String> statuses);
 
     @Query("SELECT b FROM BatchCargo b WHERE b.status = 'UNFINISHED'")
     List<BatchCargo> findUnfinishedBatches();

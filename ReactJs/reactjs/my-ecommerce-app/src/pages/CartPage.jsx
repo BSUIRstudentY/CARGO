@@ -29,7 +29,7 @@ function useDebounce(callback, delay) {
 }
 
 function CartPage() {
-    const { cart, removeFromCart, updateQuantity, clearCart, confirmOrder, loading, error, setCart } = useCart();
+    const { cart, removeFromCart, updateQuantity, clearCart, confirmOrder, loading, error, setError, setCart } = useCart();
     const { user } = useAuth();
     const [showConfirm, setShowConfirm] = useState(false);
     const [deliveryAddress, setDeliveryAddress] = useState('');
@@ -43,35 +43,41 @@ function CartPage() {
     const [userDiscountPercent, setUserDiscountPercent] = useState(0);
 
     useEffect(() => {
-        const fetchCartData = async () => {
-            try {
-                const response = await api.get('/cart');
-                if (response?.data) {
-                    const cartData = response.data.map(item => ({
-                        productId: item.productId || item.id,
-                        imageUrl: item.imageUrl || 'https://via.placeholder.com/128x128?text=Нет+фото',
-                        name: item.productName || item.name || 'Unnamed Product',
-                        price: item.price || 0,
-                        quantity: item.quantity || 1,
-                    }));
-                    setCart(cartData);
-                    const initialQuantities = cartData.reduce((acc, item) => ({
-                        ...acc,
-                        [item.productId]: item.quantity || 1,
-                    }), {});
-                    setLocalQuantities(initialQuantities);
-                } else {
-                    setCart([]);
-                    setLocalQuantities({});
-                }
-            } catch (err) {
-                console.error('Ошибка при загрузке корзины:', err.response || err);
-                if (err.response?.status === 403) {
-                    setCart([]);
-                    setLocalQuantities({});
-                }
-            }
-        };
+       const fetchCartData = async () => {
+    try {
+        console.log('Fetching cart data...');
+        const response = await api.get('/cart');
+        console.log('fetchCartData response:', response.data);
+        if (!response.data || !Array.isArray(response.data)) {
+            console.warn('fetchCartData: No valid cart data received');
+            setCart([]);
+            setError('Корзина пуста');
+            return;
+        }
+        const cartData = response.data.map(item => ({
+            productId: item.productId || item.id,
+            imageUrl: item.imageUrl || 'https://via.placeholder.com/128x128?text=Нет+фото',
+            name: item.productName || item.name || 'Unnamed Product',
+            price: item.price || 0,
+            quantity: item.quantity || 1,
+        }));
+        console.log('Parsed cart data:', cartData);
+        setCart(cartData);
+        const initialQuantities = cartData.reduce((acc, item) => ({
+            ...acc,
+            [item.productId]: item.quantity || 1,
+        }), {});
+        setLocalQuantities(initialQuantities);
+    } catch (err) {
+        console.error('Ошибка при загрузке корзины:', err.response || err);
+        setError('Ошибка при загрузке корзины: ' + (err.response?.data?.message || err.message));
+        setCart([]);
+        if (err.response?.status === 403) {
+            localStorage.removeItem('token');
+            navigate('/login');
+        }
+    }
+};
 
         const fetchUserDiscount = async () => {
             try {
@@ -145,26 +151,31 @@ function CartPage() {
         debouncedValidatePromocode(newCode);
     };
 
-    const handleConfirmOrder = async () => {
-        if (!deliveryAddress) {
-            alert('Пожалуйста, укажите адрес доставки');
-            return;
-        }
-        try {
-            const response = await confirmOrder(deliveryAddress, promoApplied ? promoCode : null, insurance, discountType, discountValue);
-            setShowConfirm(false);
-            setDeliveryAddress('');
-            setPromoCode('');
-            setPromoApplied(false);
-            setDiscountType(null);
-            setDiscountValue(0);
-            setInsurance(false);
-            console.log('Order response:', response); // Log response for debugging
-        } catch (error) {
-            console.error('Ошибка при создании заказа:', error.response || error);
-            alert('Ошибка при создании заказа: ' + (error.response?.data?.message || error.message));
-        }
-    };
+const handleConfirmOrder = async () => {
+    console.log('Cart state in handleConfirmOrder:', cart);
+    if (!deliveryAddress) {
+        setError('Пожалуйста, укажите адрес доставки');
+        return;
+    }
+    if (!cart || cart.length === 0) {
+        setError('Корзина пуста');
+        return;
+    }
+    try {
+        const response = await confirmOrder(deliveryAddress, promoApplied ? promoCode : null, insurance, discountType, discountValue);
+        setShowConfirm(false);
+        setDeliveryAddress('');
+        setPromoCode('');
+        setPromoApplied(false);
+        setDiscountType(null);
+        setDiscountValue(0);
+        setInsurance(false);
+        console.log('Order response:', response);
+    } catch (error) {
+        console.error('Ошибка при создании заказа:', error);
+        setError(error.message);
+    }
+};
 
     const handleQuantityChange = (productId, value) => {
         setLocalQuantities(prev => ({
@@ -347,14 +358,14 @@ function CartPage() {
                                 >
                                     Очистить
                                 </button>
-                                <button
-                                    onClick={() => setShowConfirm(true)}
-                                    className="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white hover:bg-[var(--accent-color)]-dark hover:shadow-lg transition-all duration-300"
-                                    style={{ '--accent-color-dark': `${(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--accent-color').replace('#', ''), 16) - 0x101010).toString(16).padStart(6, '0')}` }}
-                                    disabled={loading || !deliveryAddress}
-                                >
-                                    Оформить
-                                </button>
+                               <button
+    onClick={() => setShowConfirm(true)}
+    className="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white hover:bg-[var(--accent-color)]-dark hover:shadow-lg transition-all duration-300"
+    style={{ '--accent-color-dark': `${(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--accent-color').replace('#', ''), 16) - 0x101010).toString(16).padStart(6, '0')}` }}
+    disabled={loading || !deliveryAddress || cart.length === 0}
+>
+    Оформить
+</button>
                             </div>
                         </div>
                     </div>

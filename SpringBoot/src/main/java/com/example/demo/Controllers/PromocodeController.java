@@ -2,6 +2,11 @@ package com.example.demo.Controllers;
 
 import com.example.demo.Entities.Promocode;
 import com.example.demo.Repositories.PromocodeRepository;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,6 +32,8 @@ public class PromocodeController {
 
     @PostMapping("/validate")
     public ResponseEntity<?> validatePromocode(@RequestBody PromocodeRequest promocodeRequest) {
+
+
         if (!promocodeRepository.existsByCode(promocodeRequest.getCode())) {
             System.out.println("doesnt exist");
             return ResponseEntity.badRequest().body("Промокод не существует");
@@ -49,6 +56,7 @@ public class PromocodeController {
             return ResponseEntity.badRequest().body("Промокод исчерпал лимит использований");
         }
 
+        // Возвращаем тип скидки и значение
         return ResponseEntity.ok(new PromocodeResponse(promocode.getDiscountType().toString(), promocode.getDiscountValue()));
     }
 

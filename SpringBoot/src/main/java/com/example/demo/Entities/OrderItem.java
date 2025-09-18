@@ -2,11 +2,7 @@ package com.example.demo.Entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @Entity
 @Table(name = "order_items")
@@ -22,7 +18,6 @@ public class OrderItem {
     @JoinColumn(name = "order_id")
     private Order order;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_history_id")
     private OrderHistory orderHistory;
@@ -37,23 +32,18 @@ public class OrderItem {
     @Column(name = "price_at_time", nullable = false)
     private Float priceAtTime;
 
-    private Float chinaDeliveryPrice;
-
     @Column(name = "supplier_price", nullable = true)
     private Float supplierPrice;
 
     @Column(name = "tracking_number")
     private String trackingNumber;
 
-
-    // Getter and Setter for purchaseStatus
-    @Setter
-    @Getter
-    @Column(nullable = false)
+    @Column(name = "purchase_status", nullable = false)
     private String purchaseStatus = "PENDING"; // PURCHASED, NOT_PURCHASED, PENDING
 
-    @Column
-    private String purchaseRefusalReason; // New field for refusal reason
+    @Column(name = "purchase_refusal_reason")
+    private String purchaseRefusalReason;
 
-
+    @Column(name = "china_delivery_price", nullable = true)
+    private Float chinaDeliveryPrice;
 }

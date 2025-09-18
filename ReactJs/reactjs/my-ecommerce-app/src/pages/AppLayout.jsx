@@ -75,27 +75,36 @@ function AppLayout() {
           zIndex: 0,
         }}
       ></div>
-      {/* Кнопка для открытия панели */}
+      {/* Кнопка для открытия/закрытия боковой панели с большим логотипом */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-50 bg-[var(--accent-color)] p-2 rounded-full text-white hover:bg-opacity-80 transition-colors duration-200"
+        className={`fixed top-4 left-4 z-50 p-4 bg-transparent hover:bg-gray-800/50 rounded transition-all duration-500 hover:shadow-lg cursor-pointer ${
+          isSidebarOpen ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
+        }`}
+        style={{ transition: 'opacity 0.5s ease, transform 0.5s ease' }}
       >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
+        <img
+          src="/logo.png"
+          alt="Fluvion Logo"
+          className="w-32 h-auto object-contain"
+          style={{
+            filter: 'drop-shadow(0 4px 15px rgba(255, 87, 34, 0.7))',
+            transition: 'transform 0.3s ease',
+          }}
+        />
+        {/* Эффект огня, активируется при открытии */}
+        <div
+          className={`fire-effect absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 ${
+            isSidebarOpen ? 'fire-active' : ''
+          }`}
+          style={{ transition: 'opacity 0.5s ease' }}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d={isSidebarOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16m-7 6h7'}
-          />
-        </svg>
+          <div className="fire-layer base"></div>
+          <div className="fire-layer middle"></div>
+          <div className="fire-layer top"></div>
+        </div>
       </button>
-      {/* Боковая панель с анимацией */}
+      {/* Боковая панель с анимацией и логотипом в заголовке */}
       <aside
         className={`w-64 bg-gray-800 shadow-lg fixed top-0 left-0 h-screen z-40 transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full delay-750'
@@ -104,16 +113,19 @@ function AppLayout() {
         <div className="p-6 h-full flex flex-col justify-between relative">
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-[var(--accent-color)] flex items-center">
-                <svg
-                  className="w-8 h-8 mr-2"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
-                </svg>
-                Fluvion
+              <h2
+                className={`text-2xl font-bold flex items-center cursor-pointer transition-all duration-500 ${
+                  isSidebarOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
+                }`}
+                onClick={closeSidebar}
+                style={{ transition: 'opacity 0.5s ease, transform 0.5s ease' }}
+              >
+                <img
+                  src="/logo.png"
+                  alt="Fluvion Logo"
+                  className="w-8 h-8 mr-1 object-contain hover:opacity-80 transition-opacity duration-200"
+                />
+                <span style={{ letterSpacing: '-0.5px', color: '#FF0000' }}>LUVION</span>
               </h2>
             </div>
             <nav>
@@ -139,7 +151,11 @@ function AppLayout() {
           </div>
           <div className="relative">
             <div className={`car-animation ${isSidebarOpen ? 'active' : ''} w-24 h-12 absolute bottom-16 left-2`}>
-              <img src="/car.png" alt="Cargo Truck" className="car w-full h-full object-contain filter invert brightness-200 z-50" />
+              <img
+                src="/car.png"
+                alt="Cargo Truck"
+                className="car w-full h-full object-contain filter invert brightness-200 z-50"
+              />
               <div className="dust z-40"></div>
             </div>
             {isAuthenticated && (
@@ -198,6 +214,54 @@ function AppLayout() {
         </Routes>
       </main>
       <Footer />
+      <style>
+        {`
+          .fire-effect {
+            display: none;
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+          }
+          .fire-active {
+            display: block;
+          }
+          .fire-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 165, 0, 0.9) 0%, rgba(255, 69, 0, 0.7) 50%, rgba(255, 0, 0, 0) 70%);
+            animation: fireFlicker 0.4s infinite alternate, fireRise 1.2s infinite;
+            filter: blur(3px);
+          }
+          .fire-layer.base {
+            animation-delay: 0s;
+            opacity: 0.8;
+          }
+          .fire-layer.middle {
+            animation-delay: 0.1s;
+            opacity: 0.6;
+            transform: scale(0.7);
+          }
+          .fire-layer.top {
+            animation-delay: 0.2s;
+            opacity: 0.4;
+            transform: scale(0.5);
+          }
+          @keyframes fireFlicker {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.3); }
+          }
+          @keyframes fireRise {
+            0% { transform: translateY(0); opacity: 0.9; }
+            100% { transform: translateY(-40px); opacity: 0; }
+          }
+          button:hover img {
+            transform: scale(1.05);
+          }
+        `}
+      </style>
     </div>
   );
 }

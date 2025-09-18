@@ -1,138 +1,443 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import api from '../api/axiosInstance';
 
-const BatchDetail = () => {
+function BatchDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [batch, setBatch] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [language, setLanguage] = useState('ru'); // Поддержка русского и китайского
+  const [showRefusalModal, setShowRefusalModal] = useState(false);
+  const [refusalReason, setRefusalReason] = useState('');
+  const [showItemRefusalModal, setShowItemRefusalModal] = useState(false);
+  const [itemRefusalReason, setItemRefusalReason] = useState('');
+  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+
+  const basicReasons = [
+    'Неверная ссылка',
+    'Товар закончился',
+    'Не понятно какую комплектацию выбирать',
+    'Аномальный товар',
+    'Товар продается только в составе набора/опта',
+    'Ограниченные способы оплаты у поставщика',
+    'Запрещено к пересылке',
+    'Другое',
+  ];
 
   useEffect(() => {
     setLoading(true);
     api.get(`/batch-cargos/${id}`)
       .then((response) => {
+        console.log('Batch data:', response.data);
         setBatch(response.data);
         setLoading(false);
       })
       .catch((error) => {
-        setError(language === 'ru' ? 'Ошибка загрузки сборного груза' : '加载批量货物失败');
-        setLoading(false);
         console.error('Error fetching batch:', error);
+        setError('Ошибка загрузки сборного груза');
+        setLoading(false);
       });
-  }, [id, language]);
+  }, [id]);
 
-  const handleProcessOrder = (orderId) => {
-    navigate(`/admin/upcoming-purchases/${id}/order/${orderId}`);
+  useEffect(() => {
+    console.log('showRefusalModal:', showRefusalModal);
+    console.log('showItemRefusalModal:', showItemRefusalModal);
+  }, [showRefusalModal, showItemRefusalModal]);
+
+  const handleProcessOrder = (orderId, order) => {
+    navigate(`/admin/upcoming-purchases/${id}/order/${orderId}`, { state: { order } });
   };
 
-  const toggleLanguage = () => {
-    setLanguage(language === 'ru' ? 'zh' : 'ru');
+  const handleRefuse = async () => {
+    if (!refusalReason) {
+      alert('Укажите причину отказа');
+      return;
+    }
+    setLoading(true);
+    try {
+      const updatedBatch = {
+        status: 'REFUSED',
+        reasonRefusal: refusalReason,
+        photoUrl: batch.photoUrl || null,
+        description: batch.description || null
+      };
+      const response = await api.put(`/batch-cargos/${id}`, updatedBatch);
+      if (response?.data) {
+        setBatch(response.data);
+        try {
+          const notificationPromises = batch.orders.map((order) =>
+            api.post('/notifications', {
+              userEmail: order.userEmail,
+              message: `Сборный груз #${batch.id} был отклонён. Причина: ${refusalReason}`,
+              relatedId: id,
+              category: 'BATCH_UPDATE',
+            })
+          );
+          await Promise.all(notificationPromises);
+          console.log('Notifications sent for batch:', id);
+        } catch (notificationError) {
+          console.error('Error sending notification:', notificationError);
+          alert('Сборный груз отклонён, но уведомление не отправлено: ' + (notificationError.response?.data?.message || notificationError.message));
+        }
+        alert('Сборный груз отклонён!');
+        navigate('/admin/upcoming-purchases');
+      } else {
+        throw new Error('Ответ сервера не содержит данных');
+      }
+    } catch (error) {
+      console.error('Error refusing batch:', error);
+      let errorMessage = 'Ошибка отклонения сборного груза';
+      if (error.response) {
+        if (error.response.status === 403) {
+          errorMessage = 'Доступ запрещён (403). Проверьте права доступа или токен авторизации.';
+        } else {
+          errorMessage = error.response.data?.message || error.message || 'Неизвестная ошибка';
+        }
+      } else {
+        errorMessage = error.message || 'Ошибка сети';
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+      setShowRefusalModal(false);
+      setRefusalReason('');
+    }
   };
 
-  if (loading) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
-      >
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[var(--accent-color)]" />
-      </motion.div>
-    );
-  }
+  const handleDeleteBatch = async () => {
+    if (!window.confirm('Вы уверены, что хотите удалить сборный груз?')) {
+      return;
+    }
+    setLoading(true);
+    try {
+      await api.delete(`/batch-cargos/${id}`);
+      alert('Сборный груз удалён!');
+      navigate('/admin/upcoming-purchases');
+    } catch (error) {
+      console.error('Error deleting batch:', error);
+      let errorMessage = 'Ошибка удаления сборного груза';
+      if (error.response) {
+        if (error.response.status === 403) {
+          errorMessage = 'Доступ запрещён (403). Проверьте права доступа или токен авторизации.';
+        } else if (error.response.status === 404) {
+          errorMessage = 'Сборный груз не найден';
+        } else {
+          errorMessage = error.response.data?.message || error.message || 'Неизвестная ошибка';
+        }
+      } else {
+        errorMessage = error.message || 'Ошибка сети';
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+      setShowRefusalModal(false);
+    }
+  };
 
-  if (error) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="text-center text-red-500 p-8"
-      >
-        {error}
-      </motion.div>
-    );
-  }
+  const handleMarkPurchased = async (orderId, itemId) => {
+    setLoading(true);
+    try {
+      await api.put(`/batch-cargos/items/${itemId}`, { status: 'PURCHASED' });
+      const response = await api.get(`/batch-cargos/${id}`);
+      setBatch(response.data);
+      if (response.data.status === 'FINISHED') {
+        alert('Сборный груз завершён и перемещён в ближайшие прибытия!');
+        navigate('/admin/upcoming-arrivals');
+      } else {
+        alert('Товар помечен как выкупленный');
+      }
+    } catch (error) {
+      console.error('Error marking item as purchased:', error);
+      setError('Ошибка при пометке товара как выкупленного');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (!batch) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="text-center text-gray-400 p-8"
-      >
-        {language === 'ru' ? 'Сборный груз не найден' : '未找到批量货物'}
-      </motion.div>
-    );
-  }
+  const handleMarkNotPurchased = async () => {
+    if (!itemRefusalReason) {
+      alert('Укажите причину невыкупа');
+      return;
+    }
+    setLoading(true);
+    try {
+      await api.put(`/batch-cargos/items/${selectedItemId}`, {
+        status: 'NOT_PURCHASED',
+        purchaseRefusalReason: itemRefusalReason,
+      });
+      const response = await api.get(`/batch-cargos/${id}`);
+      setBatch(response.data);
+      if (response.data.status === 'FINISHED') {
+        alert('Сборный груз завершён и перемещён в ближайшие прибытия!');
+        navigate('/admin/upcoming-arrivals');
+      } else {
+        alert(`Товар помечен как невыкупленный. Причина: ${itemRefusalReason}`);
+      }
+    } catch (error) {
+      console.error('Error marking item as not purchased:', error);
+      setError('Ошибка при пометке товара как невыкупленного');
+    } finally {
+      setLoading(false);
+      setShowItemRefusalModal(false);
+      setItemRefusalReason('');
+      setSelectedItemId(null);
+      setSelectedOrderId(null);
+    }
+  };
+
+  const openItemRefusalModal = (orderId, itemId) => {
+    setSelectedOrderId(orderId);
+    setSelectedItemId(itemId);
+    setShowItemRefusalModal(true);
+  };
+
+  if (loading) return <p className="text-center text-gray-400 animate-pulse">Загрузка...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
+  if (!batch) return <p className="text-center text-gray-400">Сборный груз не найден</p>;
 
   return (
-    <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg shadow-2xl p-8 relative overflow-hidden min-h-screen">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none" />
-      <div className="relative">
-        {/* Header with Language Toggle */}
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-[var(--accent-color)]">
-            {language === 'ru'
-              ? `Сборный груз #${batch.id} - Дата выкупа: ${new Date(batch.purchaseDate).toLocaleDateString('ru-RU')}`
-              : `批量货物 #${batch.id} - 购买日期: ${new Date(batch.purchaseDate).toLocaleDateString('zh-CN')}`}
-          </h2>
-          <button
-            onClick={toggleLanguage}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition duration-300 transform hover:scale-105"
+    <div className="p-6 bg-gray-800 min-h-screen text-white">
+      <h2 className="text-3xl font-bold text-[var(--accent-color)] mb-6">
+        Сборный груз #{batch.id} - Дата выкупа: {new Date(batch.purchaseDate).toLocaleDateString()}
+      </h2>
+      <p className="text-lg mb-4">
+        Статус: {batch.status === 'REFUSED' ? `Отклонён (${batch.reasonRefusal})` : batch.status}
+      </p>
+      <div className="grid grid-cols-1 gap-4">
+        {batch.orders.map((order) => (
+          <div
+            key={order.id}
+            className={`bg-gray-700 p-4 rounded-lg shadow-md ${order.status === 'PROCESSED' ? 'line-through opacity-70' : ''}`}
           >
-            {language === 'ru' ? '中文' : 'Русский'}
-          </button>
-        </div>
-
-        {/* Error Message */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
-              transition={{ duration: 0.3 }}
-              className="mb-6 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-center"
+            <h3
+              className="text-lg font-semibold text-[var(--accent-color)] cursor-pointer"
+              onClick={() => handleProcessOrder(order.id, order)}
             >
-              {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Orders List */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {batch.orders.map((order, index) => (
-            <motion.div
-              key={order.id}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-6 shadow-xl border border-gray-700/50 cursor-pointer hover:shadow-lg transition-shadow duration-200"
-              onClick={() => handleProcessOrder(order.id)}
-            >
-              <h3 className="text-xl font-semibold text-[var(--accent-color)]">
-                {language === 'ru' ? `Заказ #${order.orderNumber}` : `订单 #${order.orderNumber}`}
-              </h3>
-              <p className="text-sm text-gray-400">
-                {language === 'ru' ? 'Статус: ' : '状态: '} {order.status}
-              </p>
-              <p className="text-sm text-gray-400">
-                {language === 'ru' ? 'Сумма: ' : '金额: '} ¥{order.totalClientPrice.toFixed(2)}
-              </p>
-              <p className="text-sm text-gray-400">
-                {language === 'ru' ? 'Клиент: ' : '客户: '} {order.userEmail || (language === 'ru' ? 'Не указан' : '未指定')}
-              </p>
-            </motion.div>
-          ))}
-        </div>
+              Заказ #{order.orderNumber}
+            </h3>
+            <p className="text-sm text-gray-400">Статус: {order.status}</p>
+            <p className="text-sm text-gray-400">Сумма: ¥{order.totalClientPrice.toFixed(2)}</p>
+            <p className="text-sm text-gray-400">Клиент: {order.userEmail}</p>
+            <div className="mt-4 grid grid-cols-1 gap-2">
+              {order.items.map((item) => (
+                <div
+                  key={item.id}
+                  className={`bg-gray-600 p-4 rounded-md flex gap-4 ${
+                    item.purchaseStatus === 'PURCHASED'
+                      ? 'border-l-4 border-green-500'
+                      : item.purchaseStatus === 'NOT_PURCHASED'
+                      ? 'border-l-4 border-red-500'
+                      : 'border-l-4 border-yellow-500'
+                  }`}
+                >
+                  <div className="flex-shrink-0 w-24 h-24">
+                    {item.imageUrl ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.productName || 'Товар'}
+                        className="w-full h-full object-cover rounded-md"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          const parent = e.target.parentNode;
+                          const fallbackDiv = document.createElement('div');
+                          fallbackDiv.className = 'w-full h-full bg-gray-500 flex items-center justify-center text-sm text-gray-300 rounded-md';
+                          fallbackDiv.textContent = 'Нет фото';
+                          parent.appendChild(fallbackDiv);
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-500 flex items-center justify-center text-sm text-gray-300 rounded-md">
+                        Нет фото
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-grow">
+                    <h4 className="text-md font-medium mb-2">{item.productName}</h4>
+                    <p className="text-sm text-gray-300 mb-1">Количество: {item.quantity}</p>
+                    <p className="text-sm text-gray-300 mb-1">Цена: ¥{item.priceAtTime.toFixed(2)}</p>
+                    {item.supplierPrice && (
+                      <p className="text-sm text-gray-300 mb-1">Цена поставщика: ¥{item.supplierPrice.toFixed(2)}</p>
+                    )}
+                    {item.trackingNumber && (
+                      <p className="text-sm text-gray-300 mb-1">Трек-номер: {item.trackingNumber}</p>
+                    )}
+                    <p
+                      className={`text-sm mb-1 ${
+                        item.purchaseStatus === 'PURCHASED'
+                          ? 'text-green-400'
+                          : item.purchaseStatus === 'NOT_PURCHASED'
+                          ? 'text-red-400'
+                          : 'text-yellow-400'
+                      }`}
+                    >
+                      Статус закупки: {item.purchaseStatus || 'PENDING'}
+                    </p>
+                    {item.description && (
+                      <p className="text-sm text-gray-300 mb-1">Описание: {item.description}</p>
+                    )}
+                    {item.url && (
+                      <p className="text-sm text-gray-300 mb-1">Ссылка: {item.url}</p>
+                    )}
+                   
+                    {item.purchaseRefusalReason && (
+                      <p className="text-sm text-red-400">Причина отказа: {item.purchaseRefusalReason}</p>
+                    )}
+                    {item.purchaseStatus !== 'PURCHASED' && item.purchaseStatus !== 'NOT_PURCHASED' && (
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          onClick={() => handleMarkPurchased(order.id, item.id)}
+                          className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200"
+                        >
+                          Выкуплен
+                        </button>
+                        <button
+                          onClick={() => openItemRefusalModal(order.id, item.id)}
+                          className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+                        >
+                          Не выкуплен
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
+      <div className="mt-6 flex justify-end gap-4">
+        <button
+          onClick={() => {
+            console.log('Refuse button clicked');
+            setShowRefusalModal(true);
+          }}
+          className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+          disabled={batch.status !== 'UNFINISHED'}
+        >
+          Отказать
+        </button>
+        <button
+          onClick={() => navigate('/admin/upcoming-purchases')}
+          className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200"
+        >
+          Назад
+        </button>
+        <button
+          onClick={handleDeleteBatch}
+          className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+        >
+          Удалить сборный груз
+        </button>
+      </div>
+      {showRefusalModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-700 p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-4">Причина отказа</h3>
+            <div className="space-y-4">
+              <select
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === 'Другое') {
+                    setRefusalReason('');
+                  } else {
+                    setRefusalReason(value);
+                  }
+                }}
+                className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
+              >
+                <option value="">Выберите базовую причину</option>
+                {basicReasons.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {reason}
+                  </option>
+                ))}
+              </select>
+              <textarea
+                value={refusalReason}
+                onChange={(e) => setRefusalReason(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
+                rows="4"
+                placeholder="Опишите причину отказа (можно добавить детали)..."
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={handleRefuse}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+                >
+                  Отказать
+                </button>
+                <button
+                  onClick={() => {
+                    setShowRefusalModal(false);
+                    setRefusalReason('');
+                  }}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200"
+                >
+                  Отмена
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showItemRefusalModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-700 p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h3 className="text-xl font-semibold text-[var(--accent-color)] mb-4">Причина невыкупа товара</h3>
+            <div className="space-y-4">
+              <select
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === 'Другое') {
+                    setItemRefusalReason('');
+                  } else {
+                    setItemRefusalReason(value);
+                  }
+                }}
+                className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
+              >
+                <option value="">Выберите базовую причину</option>
+                {basicReasons.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {reason}
+                  </option>
+                ))}
+              </select>
+              <textarea
+                value={itemRefusalReason}
+                onChange={(e) => setItemRefusalReason(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg"
+                rows="4"
+                placeholder="Опишите причину невыкупа (можно добавить детали)..."
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={handleMarkNotPurchased}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+                >
+                  Подтвердить
+                </button>
+                <button
+                  onClick={() => {
+                    setShowItemRefusalModal(false);
+                    setItemRefusalReason('');
+                    setSelectedItemId(null);
+                    setSelectedOrderId(null);
+                  }}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200"
+                >
+                  Отмена
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {error && <p className="text-center text-red-500 mt-2">{error}</p>}
     </div>
   );
-};
+}
 
 export default BatchDetail;
