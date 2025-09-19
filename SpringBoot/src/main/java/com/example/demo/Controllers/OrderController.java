@@ -1,6 +1,5 @@
 package com.example.demo.Controllers;
 
-// [Импорты остаются без изменений, включаем все необходимые]
 import com.example.demo.Entities.*;
 import com.example.demo.POJO.OrderStatusEvent;
 import com.example.demo.Repositories.*;
@@ -308,7 +307,7 @@ public class OrderController {
                     return ResponseEntity.badRequest().body(new ErrorResponse("Product ID cannot be null for order item", 400));
                 }
 
-                Product product = productRepository.findById(UUID.fromString(itemDTO.getProductId()))
+                Product product = productRepository.findById(String.valueOf(UUID.fromString(itemDTO.getProductId())))
                         .orElseThrow(() -> new RuntimeException("Product with ID " + itemDTO.getProductId() + " not found"));
 
                 // Обновление данных продукта
@@ -632,6 +631,25 @@ public class OrderController {
         public ErrorResponse(String message, int status) {
             this.message = message;
             this.status = status;
+        }
+    }
+
+    @Data
+    static class PagedResponse<T> {
+        private List<T> content;
+        private int page;
+        private int size;
+        private long totalElements;
+        private int totalPages;
+        private boolean last;
+
+        public PagedResponse(List<T> content, int page, int size, long totalElements, int totalPages, boolean last) {
+            this.content = content;
+            this.page = page;
+            this.size = size;
+            this.totalElements = totalElements;
+            this.totalPages = totalPages;
+            this.last = last;
         }
     }
 }

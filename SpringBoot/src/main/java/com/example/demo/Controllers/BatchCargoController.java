@@ -1,6 +1,5 @@
 package com.example.demo.Controllers;
 
-// [Импорты остаются без изменений, используем все из обоих вариантов]
 import com.example.demo.Components.ContextHolder;
 import com.example.demo.Entities.BatchCargo;
 import com.example.demo.Entities.Order;
@@ -86,10 +85,27 @@ public class BatchCargoController {
         }
 
         if (all) {
-            // Возвращаем весь список (функционал из main)
-            List<BatchCargo> batches = batchCargoRepository.findByUser(user);
-            List<BatchCargoDTO> dtoList = batches.stream().map(this::mapToBatchCargoDTO).collect(Collectors.toList());
-            return ResponseEntity.ok(dtoList);
+            // Возвращаем весь список с пагинацией
+            String[] sortParams = sort.split(",");
+            String sortField = sortParams[0];
+            Sort.Direction sortDirection = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
+                    ? Sort.Direction.DESC : Sort.Direction.ASC;
+            Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortField));
+
+            Page<BatchCargo> batchPage = batchCargoRepository.findByUser(user, pageable);
+            List<BatchCargoDTO> batchDTOs = batchPage.getContent().stream()
+                    .map(this::mapToBatchCargoDTO)
+                    .collect(Collectors.toList());
+
+            PagedResponse<BatchCargoDTO> response = new PagedResponse<>(
+                    batchDTOs,
+                    batchPage.getNumber(),
+                    batchPage.getSize(),
+                    batchPage.getTotalElements(),
+                    batchPage.getTotalPages(),
+                    batchPage.isLast()
+            );
+            return ResponseEntity.ok(response);
         } else {
             // Возвращаем с пагинацией (функционал из HEAD)
             String[] sortParams = sort.split(",");
