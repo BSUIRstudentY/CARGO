@@ -38,7 +38,8 @@ public class SecurityConfiguration {
             "/api/cluster",
             "/ws/**", // Add WebSocket endpoint to whitelist
             "/ws-pure/**",
-            "/ws-notifications/**"
+            "/ws-notifications/**",
+            "/api/catalog"
 
     };
 
@@ -62,7 +63,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("https://fluvion.by", "http://localhost:5173"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

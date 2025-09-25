@@ -24,6 +24,8 @@ import PublicOffer from './PublicOffer';
 import PrivacyPolicy from '../components/PrivacyPolicy';
 import UserAgreement from '../components/UserAgreement';
 import BatchCargoProcessing from './BatchCargoProcessing';
+import OrderDetailsHistory from './OrderDetailsHistory';
+import { HomeIcon, ShoppingBagIcon, ComputerDesktopIcon, ShoppingCartIcon, CalculatorIcon, UserIcon, BellIcon, TruckIcon, ClipboardDocumentListIcon, QuestionMarkCircleIcon, WrenchScrewdriverIcon, InformationCircleIcon, PhoneIcon, StarIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/solid';
 
 function AppLayout() {
   const [backgroundColor, setBackgroundColor] = useState(() => localStorage.getItem('backgroundColor') || '#2F2F2F');
@@ -40,21 +42,21 @@ function AppLayout() {
   }, [backgroundColor, accentColor]);
 
   const navItems = [
-    { path: '/', label: 'Главная', icon: '🏠' },
-    { path: '/catalog', label: 'Каталог', icon: '📦' },
-    { path: '/terminal', label: 'Терминал', icon: '💻' },
-    { path: '/cart', label: 'Корзина', icon: '🛒' },
-    { path: '/calculator', label: 'Калькулятор стоимости', icon: '🧮' },
-    { path: '/profile', label: 'Профиль', icon: '👤' },
-    { path: '/notifications', label: 'Уведомления', icon: '🔔' },
-    { path: '/delivery-payment', label: 'Доставка и оплата', icon: '🚚' },
-    { path: '/order-instructions', label: 'Инструкции по заказу', icon: '📋' },
-    { path: '/self-pickup', label: 'Самовыкуп', icon: '📦' },
-    { path: '/faq', label: 'FAQ', icon: '❓' },
-    { path: '/support', label: 'Поддержка', icon: '🛠️' },
-    { path: '/about', label: 'О нас', icon: 'ℹ️' },
-    { path: '/contact', label: 'Контакты', icon: '📞' },
-    { path: '/reviews', label: 'Отзывы', icon: '⭐' },
+    { path: '/', label: 'Главная', icon: <HomeIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/catalog', label: 'Каталог', icon: <ShoppingBagIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/terminal', label: 'Терминал', icon: <ComputerDesktopIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/cart', label: 'Корзина', icon: <ShoppingCartIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/calculator', label: 'Калькулятор стоимости', icon: <CalculatorIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/profile', label: 'Профиль', icon: <UserIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/notifications', label: 'Уведомления', icon: <BellIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/delivery-payment', label: 'Доставка и оплата', icon: <TruckIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/order-instructions', label: 'Инструкции по заказу', icon: <ClipboardDocumentListIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/self-pickup', label: 'Самовыкуп', icon: <ShoppingBagIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/faq', label: 'FAQ', icon: <QuestionMarkCircleIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/support', label: 'Поддержка', icon: <WrenchScrewdriverIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/about', label: 'О нас', icon: <InformationCircleIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/contact', label: 'Контакты', icon: <PhoneIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/reviews', label: 'Отзывы', icon: <StarIcon className="w-5 h-5 text-cyan-400" /> },
   ];
 
   const toggleSidebar = () => {
@@ -75,10 +77,9 @@ function AppLayout() {
           zIndex: 0,
         }}
       ></div>
-      {/* Кнопка для открытия/закрытия боковой панели с большим логотипом */}
       <button
         onClick={toggleSidebar}
-        className={`fixed top-4 left-4 z-50 p-4 bg-transparent hover:bg-gray-800/50 rounded transition-all duration-500 hover:shadow-lg cursor-pointer ${
+        className={`fixed top-4 left-4 z-50 p-4 bg-gray-800/50 rounded-lg transition-all duration-300 cursor-pointer ${
           isSidebarOpen ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
         }`}
         style={{ transition: 'opacity 0.5s ease, transform 0.5s ease' }}
@@ -87,26 +88,11 @@ function AppLayout() {
           src="/logo.png"
           alt="Fluvion Logo"
           className="w-32 h-auto object-contain"
-          style={{
-            filter: 'drop-shadow(0 4px 15px rgba(255, 87, 34, 0.7))',
-            transition: 'transform 0.3s ease',
-          }}
+          style={{ transition: 'transform 0.3s ease' }}
         />
-        {/* Эффект огня, активируется при открытии */}
-        <div
-          className={`fire-effect absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 ${
-            isSidebarOpen ? 'fire-active' : ''
-          }`}
-          style={{ transition: 'opacity 0.5s ease' }}
-        >
-          <div className="fire-layer base"></div>
-          <div className="fire-layer middle"></div>
-          <div className="fire-layer top"></div>
-        </div>
       </button>
-      {/* Боковая панель с анимацией и логотипом в заголовке */}
       <aside
-        className={`w-64 bg-gray-800 shadow-lg fixed top-0 left-0 h-screen z-40 transition-transform duration-300 ease-in-out ${
+        className={`w-64 bg-gray-800/50 fixed top-0 left-0 h-screen z-40 transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full delay-750'
         }`}
       >
@@ -114,11 +100,8 @@ function AppLayout() {
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2
-                className={`text-2xl font-bold flex items-center cursor-pointer transition-all duration-500 ${
-                  isSidebarOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
-                }`}
+                className="text-2xl font-bold flex items-center cursor-pointer text-white tracking-tight"
                 onClick={closeSidebar}
-                style={{ transition: 'opacity 0.5s ease, transform 0.5s ease' }}
               >
                 <img
                   src="/logo.png"
@@ -137,12 +120,10 @@ function AppLayout() {
                         navigate(item.path);
                         closeSidebar();
                       }}
-                      className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-700 transition-all duration-200 text-green-300 hover:text-green-100 flex items-center group"
+                      className="w-full text-left px-4 py-3 rounded-lg bg-gray-700/40 hover:bg-gray-700/50 transition-all duration-300 flex items-center text-cyan-400 hover:text-cyan-200"
                     >
-                      <span className="mr-2 transition-transform duration-300 group-hover:translate-x-1">
-                        {item.icon}
-                      </span>
-                      {item.label}
+                      <span className="mr-2">{item.icon}</span>
+                      <span>{item.label}</span>
                     </button>
                   </li>
                 ))}
@@ -161,15 +142,17 @@ function AppLayout() {
             {isAuthenticated && (
               <button
                 onClick={logout}
-                className="w-full mt-6 px-4 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all duration-200 hover:scale-105"
+                className="w-full mt-6 px-4 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all duration-300"
               >
-                Выйти
+                <div className="flex items-center justify-center gap-2">
+                  <ArrowRightOnRectangleIcon className="w-5 h-5 text-cyan-400" />
+                  <span>Выйти</span>
+                </div>
               </button>
             )}
           </div>
         </div>
       </aside>
-      {/* Основное содержимое с маршрутами */}
       <main className="flex-1 p-6 relative z-10">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -196,7 +179,7 @@ function AppLayout() {
           <Route path="/contact" element={
             <section id="contact">
               <h2 className="text-3xl sm:text-4xl font-bold text-center text-[var(--accent-color)]">Контакты</h2>
-              <div className="bg-gray-800 p-6 rounded-lg shadow-md text-center text-white">
+              <div className="bg-gray-800/50 p-6 rounded-lg text-center text-white">
                 <p>Email: <a href="mailto:support@fluvion.by" className="text-[var(--accent-color)] underline">support@fluvion.by</a></p>
                 <p>Телефон: <a href="tel:+375291234567" className="text-[var(--accent-color)] underline">+375 29 123-45-67</a></p>
                 <p>Адрес: 223710, Республика Беларусь, г. Солигорск, ул. Железнодорожная 6</p>
@@ -206,6 +189,7 @@ function AppLayout() {
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/order-details/:orderId" element={<OrderDetails />} />
+          <Route path="/order-details-history/:orderId" element={<OrderDetailsHistory />} />
           <Route path="/batch-cargo-details/:batchId" element={<BatchCargoDetails />} />
           <Route path="/public-offer" element={<PublicOffer />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -214,54 +198,6 @@ function AppLayout() {
         </Routes>
       </main>
       <Footer />
-      <style>
-        {`
-          .fire-effect {
-            display: none;
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            pointer-events: none;
-          }
-          .fire-active {
-            display: block;
-          }
-          .fire-layer {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 165, 0, 0.9) 0%, rgba(255, 69, 0, 0.7) 50%, rgba(255, 0, 0, 0) 70%);
-            animation: fireFlicker 0.4s infinite alternate, fireRise 1.2s infinite;
-            filter: blur(3px);
-          }
-          .fire-layer.base {
-            animation-delay: 0s;
-            opacity: 0.8;
-          }
-          .fire-layer.middle {
-            animation-delay: 0.1s;
-            opacity: 0.6;
-            transform: scale(0.7);
-          }
-          .fire-layer.top {
-            animation-delay: 0.2s;
-            opacity: 0.4;
-            transform: scale(0.5);
-          }
-          @keyframes fireFlicker {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.3); }
-          }
-          @keyframes fireRise {
-            0% { transform: translateY(0); opacity: 0.9; }
-            100% { transform: translateY(-40px); opacity: 0; }
-          }
-          button:hover img {
-            transform: scale(1.05);
-          }
-        `}
-      </style>
     </div>
   );
 }

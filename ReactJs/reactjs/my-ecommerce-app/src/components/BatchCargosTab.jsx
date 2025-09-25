@@ -35,9 +35,9 @@ const BatchCargosTab = ({ userEmail, handleViewOrderDetails, refresh }) => {
           }
         },
         {
-          root: containerRef.current, // Use BatchCargosTab container as root
-          rootMargin: '100px', // Trigger 100px before bottom
-          threshold: 0.1, // Trigger when 10% of element is visible
+          root: containerRef.current,
+          rootMargin: '100px',
+          threshold: 0.1,
         }
       );
       observer.current.observe(node);
@@ -51,7 +51,6 @@ const BatchCargosTab = ({ userEmail, handleViewOrderDetails, refresh }) => {
     try {
       const response = await api.get(`/batch-cargos/departure?page=${pageNum - 1}&size=10&sort=creationDate,desc`);
       const { content, last } = response.data;
-      // Ensure orders array exists for each batch cargo
       const sanitizedData = content.map((batch) => ({
         ...batch,
         orders: Array.isArray(batch.orders) ? batch.orders : [],
@@ -83,6 +82,22 @@ const BatchCargosTab = ({ userEmail, handleViewOrderDetails, refresh }) => {
 
   const handleViewBatchCargoDetails = (batchId) => {
     navigate(`/batch-cargo-details/${batchId}`);
+  };
+
+  // Map status to display text and color
+  const getStatusDisplay = (status) => {
+    switch (status) {
+      case 'UNFINISHED':
+        return { text: 'В процессе', color: 'text-yellow-300' };
+      case 'FINISHED':
+        return { text: 'Завершён', color: 'text-emerald-300' };
+      case 'ARRIVED_IN_MINSK':
+        return { text: 'Груз в Минске', color: 'text-blue-300' };
+      case 'COMPLETED':
+        return { text: 'Груз доставлен', color: 'text-green-300' };
+      default:
+        return { text: status, color: 'text-gray-300' };
+    }
   };
 
   return (
@@ -123,47 +138,46 @@ const BatchCargosTab = ({ userEmail, handleViewOrderDetails, refresh }) => {
         </p>
       ) : (
         <div className="grid gap-4">
-          {batchCargos.map((batch, index) => (
-            <Tilt key={batch.id} tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
-              <div ref={index === batchCargos.length - 1 ? lastBatchElementRef : null}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  onClick={() => handleViewBatchCargoDetails(batch.id)}
-                  className="bg-gradient-to-b from-gray-700 to-gray-800 rounded-lg border border-gray-600 p-4 transition-all duration-300 hover:shadow-[0_0_15px_#10b981] cursor-pointer relative z-10"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <TruckIcon className="w-6 h-6 text-[var(--accent-color)]" />
-                      <h3 className="text-xl font-semibold text-white">
-                        Груз #{batch.id}
-                      </h3>
+          {batchCargos.map((batch, index) => {
+            const statusDisplay = getStatusDisplay(batch.status);
+            return (
+              <Tilt key={batch.id} tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+                <div ref={index === batchCargos.length - 1 ? lastBatchElementRef : null}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    onClick={() => handleViewBatchCargoDetails(batch.id)}
+                    className="bg-gradient-to-b from-gray-700 to-gray-800 rounded-lg border border-gray-600 p-4 transition-all duration-300 hover:shadow-[0_0_15px_#10b981] cursor-pointer relative z-10"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <TruckIcon className="w-6 h-6 text-[var(--accent-color)]" />
+                        <h3 className="text-xl font-semibold text-white">
+                          Груз #{batch.id}
+                        </h3>
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-gray-300 mt-2">
-                    <strong>Дата создания:</strong> {new Date(batch.creationDate).toLocaleDateString()}
-                  </p>
-                  <p className="text-gray-300">
-                    <strong>Дата закупки:</strong> {new Date(batch.purchaseDate).toLocaleDateString()}
-                  </p>
-                  <p className="text-gray-300">
-                    <strong>Статус:</strong>{' '}
-                    <span
-                      className={
-                        batch.status === 'UNFINISHED' ? 'text-yellow-300' : 'text-emerald-300'
-                      }
-                    >
-                      {batch.status === 'UNFINISHED' ? 'В процессе' : 'Завершён'}
-                    </span>
-                  </p>
-                  <p className="text-gray-300">
-                    <strong>Заказов:</strong> {(batch.orders || []).length}
-                  </p>
-                </motion.div>
-              </div>
-            </Tilt>
-          ))}
+                    <p className="text-gray-300 mt-2">
+                      <strong>Дата создания:</strong> {new Date(batch.creationDate).toLocaleDateString()}
+                    </p>
+                    <p className="text-gray-300">
+                      <strong>Дата закупки:</strong> {new Date(batch.purchaseDate).toLocaleDateString()}
+                    </p>
+                    <p className="text-gray-300">
+                      <strong>Статус:</strong>{' '}
+                      <span className={statusDisplay.color}>
+                        {statusDisplay.text}
+                      </span>
+                    </p>
+                    <p className="text-gray-300">
+                      <strong>Заказов:</strong> {(batch.orders || []).length}
+                    </p>
+                  </motion.div>
+                </div>
+              </Tilt>
+            );
+          })}
         </div>
       )}
       {loading && !isInitialLoad.current && (

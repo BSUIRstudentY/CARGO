@@ -1,6 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../components/CartContext';
-import api from '../api/axiosInstance';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingCartIcon, XMarkIcon, DocumentCheckIcon } from '@heroicons/react/24/solid';
+import Tilt from 'react-parallax-tilt';
+
+// Append global styles
+const styles = `
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in-down {
+    animation: fadeInDown 0.6s ease-out;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .animate-pulse {
+    animation: pulse 1.5s infinite;
+  }
+`;
+const styleSheet = document.createElement('style');
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);
 
 function MultiTerminal() {
   const { addToCart } = useCart();
@@ -87,247 +117,349 @@ function MultiTerminal() {
       return;
     }
     try {
-      await addToCart(products); // Отправка массива товаров
+      await addToCart(products);
       alert('Все товары добавлены в корзину!');
       setProducts([]);
+      setErrors({});
     } catch (error) {
       console.error('Ошибка при добавлении в корзину:', error);
-      alert('Произошла ошибка при добавлении товаров в корзину.');
+      setErrors({
+        cart: `Ошибка при добавлении в корзину: ${error.response?.data?.message || error.message || 'Неизвестная ошибка'}`,
+      });
     }
   };
 
   return (
-    <div className="mx-auto min-h-screen max-w-7xl bg-gradient-to-b from-gray-900 to-gray-800 text-white relative overflow-hidden">
-      {/* Background texture overlay */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
-        backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"%3E%3Crect width="100" height="100" fill="url(%23pattern0)" /%3E%3Cdefs%3E%3Cpattern id="pattern0" patternUnits="userSpaceOnUse" width="50" height="50"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.5"/%3E%3C/pattern%3E%3C/defs%3E%3C/svg%3E')`,
-        backgroundRepeat: 'repeat',
-        zIndex: 0,
-      }}></div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div
+        className="absolute inset-0 opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+          backgroundRepeat: 'repeat',
+        }}
+      />
+      <div className="max-w-7xl mx-auto relative z-10">
+        <motion.header
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-emerald-500 tracking-tight animate-fade-in-down">
+            Многофункциональный терминал
+          </h1>
+          <p className="text-lg text-gray-300 mt-2">Добавляйте и управляйте товарами с китайских площадок</p>
+        </motion.header>
 
-      <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8 relative z-10">
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-center mb-12 text-[var(--accent-color)] animate-fade-in-down relative">
-          Многофункциональный терминал
-          <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-[var(--accent-color)] rounded-full opacity-50 animate-pulse"></span>
-        </h1>
+        <AnimatePresence>
+          {Object.keys(errors).length > 0 && errors.cart && (
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.3 }}
+              className="mb-8 p-4 bg-red-500/30 border border-red-500/50 rounded-lg text-red-300 text-center text-base font-medium shadow-md"
+            >
+              {errors.cart}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <div className="max-w-7xl mx-auto space-y-12">
-          {/* Instruction Section */}
-          <div className="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700/50 hover:border-[var(--accent-color)] transition-all duration-300">
-            <h2 className="text-2xl font-semibold text-[var(--accent-color)] mb-4 flex items-center">
-              <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
-              </svg>
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="space-y-12"
+        >
+          <motion.div
+            className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-6 rounded-2xl shadow-lg border border-cyan-500/30 relative overflow-hidden"
+            whileTap={{ scale: 0.97 }}
+          >
+            <div
+              className="absolute inset-0 opacity-10 pointer-events-none"
+              style={{
+                backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                backgroundRepeat: 'repeat',
+              }}
+            />
+            <h2 className="text-2xl font-bold text-cyan-400 mb-4 flex items-center">
+              <DocumentCheckIcon className="w-6 h-6 mr-2" />
               Инструкция по покупке
             </h2>
-            <p className="text-gray-300 mb-4">
-              Используйте терминал для добавления и управления товарами с китайских площадок. Следуйте этим шагам:
+            <p className="text-gray-300 mb-4 text-base">
+              Используйте терминал для добавления и управления товарами с китайских площадок:
             </p>
             <ol className="list-decimal pl-6 space-y-4 text-gray-300">
               <li>
-                <strong>Добавление товара:</strong> Нажмите "Добавить товар" и заполните форму с названием, URL, ценой и, при желании, ссылкой на изображение и описанием. Убедитесь, что данные верны.
+                <strong>Добавление товара:</strong> Заполните форму с названием, URL, ценой и описанием.
               </li>
               <li>
-                <strong>Проверка данных:</strong> После заполнения проверьте введённую информацию перед сохранением. Исправьте ошибки, если они есть.
+                <strong>Проверка данных:</strong> Проверьте информацию перед сохранением.
               </li>
               <li>
-                <strong>Сохранение товара:</strong> Сохраните товар локально. Он отобразится в списке для дальнейшего использования.
+                <strong>Сохранение товара:</strong> Сохраните товар локально для дальнейшего использования.
               </li>
               <li>
-                <strong>Управление товарами:</strong> Удаляйте товары из списка при необходимости или добавляйте все сохранённые товары в корзину одним кликом.
+                <strong>Управление товарами:</strong> Удаляйте или добавляйте товары в корзину.
               </li>
               <li>
-                <strong>Добавление в корзину:</strong> После проверки списка нажмите "Добавить все в корзину" для отправки товаров на дальнейшую обработку.
+                <strong>Добавление в корзину:</strong> Отправьте товары на обработку.
               </li>
             </ol>
-          </div>
+          </motion.div>
 
-          {/* Product Cards Section */}
-          <div className="flex flex-wrap gap-8">
-            <div
-              className="bg-gray-700/80 p-6 rounded-2xl border-2 border-gray-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
-              onClick={() => setIsFormVisible(true)}
-            >
-              <div className="w-64 h-64 flex items-center justify-center text-5xl text-[var(--accent-color)] font-bold">
-                +
-              </div>
-              <p className="text-center text-gray-300 mt-4">Добавить товар</p>
-            </div>
-            {isFormVisible && (
-              <div className="bg-gray-700/80 p-6 rounded-2xl border-4 border-[var(--accent-color)] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 w-64">
-                {product.imageUrl ? (
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="w-full h-40 object-cover rounded-lg mb-6"
-                    onError={(e) => (e.target.src = 'https://via.placeholder.com/128x128?text=Нет+фото')}
-                  />
-                ) : (
-                  <div className="w-full h-40 bg-gray-500 flex items-center justify-center rounded-lg text-gray-300 text-sm mb-10">
-                    Нет фото
-                  </div>
-                )}
-                <h4 className="text-xl font-semibold text-gray-100 truncate">{product.name || 'Название'}</h4>
-                <p className="text-lg text-[var(--accent-color)] font-medium mt-2">Цена: ¥{product.price || '0'}</p>
-                <button
-                  className="mt-6 text-red-400 hover:text-red-600 text-md font-medium transition duration-300"
-                  onClick={cancelProduct}
-                >
-                  Отмена
-                </button>
-              </div>
-            )}
-            {products.map((item) => (
-              <div
-                key={item.id}
-                className="bg-gray-700/80 p-6 rounded-2xl border-2 border-gray-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 w-64"
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+              <motion.div
+                className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-6 rounded-2xl border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/40 transition-shadow duration-300 transform cursor-pointer"
+                whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setIsFormVisible(true)}
               >
-                {item.imageUrl ? (
-                  <img
-                    src={item.imageUrl}
-                    alt={item.name}
-                    className="w-full h-40 object-cover rounded-lg mb-6"
-                    onError={(e) => (e.target.src = 'https://via.placeholder.com/128x128?text=Нет+фото')}
-                  />
-                ) : (
-                  <div className="w-full h-40 bg-gray-500 flex items-center justify-center rounded-lg text-gray-300 text-sm mb-10">
-                    Нет фото
-                  </div>
-                )}
-                <h4 className="text-xl font-semibold text-gray-100 truncate">{item.name}</h4>
-                <p className="text-lg text-[var(--accent-color)] font-medium mt-2">Цена: ¥{item.price}</p>
-                <button
-                  className="mt-6 text-red-400 hover:text-red-600 text-md font-medium transition duration-300"
-                  onClick={() => removeProduct(item.id)}
+                <div
+                  className="absolute inset-0 opacity-10 pointer-events-none"
+                  style={{
+                    backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                    backgroundRepeat: 'repeat',
+                  }}
+                />
+                <div className="w-full h-40 flex items-center justify-center text-5xl text-cyan-400 font-bold">
+                  +
+                </div>
+                <p className="text-center text-gray-300 mt-4 text-base">Добавить товар</p>
+              </motion.div>
+            </Tilt>
+            {isFormVisible && (
+              <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+                <motion.div
+                  className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-6 rounded-2xl border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/40 transition-shadow duration-300"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+                  whileTap={{ scale: 0.97 }}
                 >
-                  Удалить
-                </button>
-              </div>
+                  <div
+                    className="absolute inset-0 opacity-10 pointer-events-none"
+                    style={{
+                      backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                      backgroundRepeat: 'repeat',
+                    }}
+                  />
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name || 'Предпросмотр'}
+                      className="w-full h-40 object-cover rounded-lg mb-6 border border-gray-600/20"
+                      onError={(e) => (e.target.src = 'https://via.placeholder.com/128x128?text=Нет+фото')}
+                    />
+                  ) : (
+                    <div className="w-full h-40 bg-gray-700/50 flex items-center justify-center rounded-lg text-gray-300 text-base mb-6 border border-gray-600/20">
+                      Нет фото
+                    </div>
+                  )}
+                  <h4 className="text-lg font-bold text-white truncate">{product.name || 'Название'}</h4>
+                  <p className="text-base text-cyan-400 font-medium mt-2">¥{product.price || '0'}</p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="mt-6 text-red-400 hover:text-red-600 text-base font-medium transition duration-300"
+                    onClick={cancelProduct}
+                    aria-label="Отменить добавление товара"
+                  >
+                    Отмена
+                  </motion.button>
+                </motion.div>
+              </Tilt>
+            )}
+            {products.map((item, index) => (
+              <Tilt key={item.id} tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+                <motion.div
+                  className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-6 rounded-2xl border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/40 transition-shadow duration-300"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <div
+                    className="absolute inset-0 opacity-10 pointer-events-none"
+                    style={{
+                      backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                      backgroundRepeat: 'repeat',
+                    }}
+                  />
+                  {item.imageUrl ? (
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="w-full h-40 object-cover rounded-lg mb-6 border border-gray-600/20"
+                      onError={(e) => (e.target.src = 'https://via.placeholder.com/128x128?text=Нет+фото')}
+                    />
+                  ) : (
+                    <div className="w-full h-40 bg-gray-700/50 flex items-center justify-center rounded-lg text-gray-300 text-base mb-6 border border-gray-600/20">
+                      Нет фото
+                    </div>
+                  )}
+                  <h4 className="text-lg font-bold text-white truncate">{item.name}</h4>
+                  <p className="text-base text-cyan-400 font-medium mt-2">¥{item.price}</p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="mt-6 text-red-400 hover:text-red-600 text-base font-medium transition duration-300"
+                    onClick={() => removeProduct(item.id)}
+                    aria-label={`Удалить товар ${item.name}`}
+                  >
+                    Удалить
+                  </motion.button>
+                </motion.div>
+              </Tilt>
             ))}
           </div>
 
-          {/* Product Form */}
           {isFormVisible && (
-            <div className="bg-gray-700/80 p-8 rounded-2xl shadow-md border-2 border-gray-600/50 animate-slide-up">
-              <h2 className="text-2xl font-semibold text-gray-200 mb-6">Добавить новый товар</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-lg font-medium text-gray-300 mb-2">Название *</label>
-                  <input
-                    type="text"
-                    value={product.name}
-                    onChange={handleFieldChange('name')}
-                    className={`w-full px-4 py-3 border-2 rounded-lg bg-gray-600/50 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition duration-300 ${
-                      errors.name ? 'border-red-500' : 'border-gray-500'
-                    }`}
-                    placeholder="Скопируйте название с 1688"
-                  />
-                  {errors.name && <p className="text-red-400 text-sm mt-1 animate-pulse">{errors.name}</p>}
-                </div>
-                <div>
-                  <label className="block text-lg font-medium text-gray-300 mb-2">URL товара *</label>
-                  <input
-                    type="text"
-                    value={product.url}
-                    onChange={handleFieldChange('url')}
-                    className={`w-full px-4 py-3 border-2 rounded-lg bg-gray-600/50 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition duration-300 ${
-                      errors.url ? 'border-red-500' : 'border-gray-500'
-                    }`}
-                    placeholder="https://detail.1688.com/offer/123.html"
-                  />
-                  {errors.url && <p className="text-red-400 text-sm mt-1 animate-pulse">{errors.url}</p>}
-                </div>
-                <div>
-                  <label className="block text-lg font-medium text-gray-300 mb-2">Цена (¥)</label>
-                  <input
-                    type="text"
-                    value={product.price}
-                    onChange={handleFieldChange('price')}
-                    className={`w-full px-4 py-3 border-2 rounded-lg bg-gray-600/50 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition duration-300 ${
-                      errors.price ? 'border-red-500' : 'border-gray-500'
-                    }`}
-                    placeholder="Введите цену"
-                  />
-                </div>
-                <div>
-                  <label className="block text-lg font-medium text-gray-300 mb-2">Ссылка на изображение</label>
-                  <input
-                    type="text"
-                    value={product.imageUrl}
-                    onChange={handleFieldChange('imageUrl')}
-                    className="w-full px-4 py-3 border-2 rounded-lg bg-gray-600/50 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] border-gray-500"
-                    placeholder="URL изображения"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-lg font-medium text-gray-300 mb-2">Описание</label>
-                  <textarea
-                    value={product.description}
-                    onChange={handleFieldChange('description')}
-                    className="w-full px-4 py-3 border-2 rounded-lg bg-gray-600/50 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] border-gray-500 resize-y"
-                    placeholder="Описание товара"
-                    rows="4"
-                  />
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end space-x-4">
-                <button
-                  className="px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-105 shadow-md"
-                  onClick={cancelProduct}
-                >
-                  Отмена
-                </button>
-                <button
-                  className="px-6 py-3 bg-[var(--accent-color)] text-white font-medium rounded-lg hover:bg-[var(--accent-hover-color)] transition-all duration-300 transform hover:scale-105 shadow-md"
-                  onClick={saveProduct}
-                >
-                  Сохранить
-                </button>
-              </div>
-            </div>
-          )}
-          {products.length > 0 && (
-            <div className="mt-8 text-center">
-              <button
-                className="w-full sm:w-auto bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-all duration-300 transform hover:scale-105 shadow-md"
-                onClick={addAllToCart}
+            <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+              <motion.div
+                className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-8 rounded-2xl shadow-lg border border-cyan-500/30 animate-slide-up relative"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                whileTap={{ scale: 0.97 }}
               >
-                Добавить все в корзину
-              </button>
-            </div>
+                <div
+                  className="absolute inset-0 opacity-10 pointer-events-none"
+                  style={{
+                    backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                    backgroundRepeat: 'repeat',
+                  }}
+                />
+                <button
+                  className="absolute top-4 right-4 text-gray-300 hover:text-red-400 transition duration-300"
+                  onClick={cancelProduct}
+                  aria-label="Закрыть форму"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+                <h2 className="text-2xl font-bold text-cyan-400 mb-6">Добавить новый товар</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-base font-medium text-gray-300 mb-2" htmlFor="name">
+                      Название *
+                    </label>
+                    <input
+                      id="name"
+                      type="text"
+                      value={product.name}
+                      onChange={handleFieldChange('name')}
+                      className={`w-full px-4 py-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300 ${errors.name ? 'border-red-500' : ''}`}
+                      placeholder="Скопируйте название с 1688"
+                      aria-required="true"
+                    />
+                    {errors.name && <p className="text-red-400 text-sm mt-1 animate-pulse">{errors.name}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-base font-medium text-gray-300 mb-2" htmlFor="url">
+                      URL товара *
+                    </label>
+                    <input
+                      id="url"
+                      type="text"
+                      value={product.url}
+                      onChange={handleFieldChange('url')}
+                      className={`w-full px-4 py-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300 ${errors.url ? 'border-red-500' : ''}`}
+                      placeholder="https://detail.1688.com/offer/123.html"
+                      aria-required="true"
+                    />
+                    {errors.url && <p className="text-red-400 text-sm mt-1 animate-pulse">{errors.url}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-base font-medium text-gray-300 mb-2" htmlFor="price">
+                      Цена (¥)
+                    </label>
+                    <input
+                      id="price"
+                      type="text"
+                      value={product.price}
+                      onChange={handleFieldChange('price')}
+                      className={`w-full px-4 py-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300 ${errors.price ? 'border-red-500' : ''}`}
+                      placeholder="Введите цену"
+                    />
+                    {errors.price && <p className="text-red-400 text-sm mt-1 animate-pulse">{errors.price}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-base font-medium text-gray-300 mb-2" htmlFor="imageUrl">
+                      Ссылка на изображение
+                    </label>
+                    <input
+                      id="imageUrl"
+                      type="text"
+                      value={product.imageUrl}
+                      onChange={handleFieldChange('imageUrl')}
+                      className="w-full px-4 py-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300"
+                      placeholder="URL изображения"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-base font-medium text-gray-300 mb-2" htmlFor="description">
+                      Описание
+                    </label>
+                    <textarea
+                      id="description"
+                      value={product.description}
+                      onChange={handleFieldChange('description')}
+                      className="w-full px-4 py-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300 resize-y"
+                      placeholder="Описание товара"
+                      rows="4"
+                    />
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end space-x-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 text-base font-semibold shadow-sm"
+                    onClick={cancelProduct}
+                    aria-label="Отменить добавление товара"
+                  >
+                    Отмена
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-6 py-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold shadow-sm"
+                    onClick={saveProduct}
+                    aria-label="Сохранить товар"
+                  >
+                    Сохранить
+                  </motion.button>
+                </div>
+              </motion.div>
+            </Tilt>
           )}
-        </div>
+
+          {products.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="text-center"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-6 py-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 mx-auto shadow-sm"
+                onClick={addAllToCart}
+                aria-label="Добавить все товары в корзину"
+              >
+                <ShoppingCartIcon className="w-5 h-5" />
+                Добавить все в корзину
+              </motion.button>
+            </motion.div>
+          )}
+        </motion.section>
       </div>
     </div>
   );
 }
-
-// Добавление CSS-анимаций
-const styles = `
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-down {
-  animation: fadeInDown 0.6s ease-out;
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-slide-up {
-  animation: slideUp 0.5s ease-out;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-.animate-pulse {
-  animation: pulse 1.5s infinite;
-}
-`;
-const styleSheet = document.createElement('style');
-styleSheet.textContent = styles;
-document.head.appendChild(styleSheet);
 
 export default MultiTerminal;

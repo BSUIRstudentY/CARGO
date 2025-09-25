@@ -1,4 +1,6 @@
 spring:
+  main:
+    lazy-initialization: true
   servlet:
     session:
       timeout: 5m
@@ -7,19 +9,19 @@ spring:
         secure: true
   application:
     name: demo
-    redis:
-      host: localhost
-      port: 6379
-      timeout: 2000ms
-    cache:
-      type: redis
-    task:
-      execution:
-        pool:
-          core-size: 5
-          max-size: 10
-          queue-capacity: 100
-        thread-name-prefix: async-task-
+  redis:
+    host: redis
+    port: 6379
+    timeout: 2000ms
+  cache:
+    type: redis
+  task:
+    execution:
+      pool:
+        core-size: 5
+        max-size: 10
+        queue-capacity: 100
+      thread-name-prefix: async-task-
   mail:
     host: smtp.gmail.com
     port: 587
@@ -32,7 +34,7 @@ spring:
           starttls:
             enable: true
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -44,9 +46,9 @@ spring:
       properties:
         spring.json.trusted.packages: com.example.demo.Entities, com.example.demo.POJO
   datasource:
-    url: jdbc:mysql://localhost:3306/CargoDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: root
+    url: jdbc:mysql://mysql:3306/CargoDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: fluvion_user
+    password: 1206_1105timaZ
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -56,6 +58,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+    open-in-view: false
   sql:
     init:
       mode: always

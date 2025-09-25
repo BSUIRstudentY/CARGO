@@ -71,4 +71,17 @@ public class OrderHistory {
 
     @Column(name = "discount_value", nullable = true)
     private Float discountValue;
+
+    @Column(name = "discount_applied", nullable = true)
+    private Float discountApplied; // Added missing field
+
+    @Column(name = "user_discount_applied", nullable = true)
+    private Float userDiscountApplied; // Added missing field
+
+    @ManyToOne
+    @JoinColumn(name = "batch_cargo_id")
+    private BatchCargo batchCargo; // Added missing field
+
+    @Column(name = "weight", nullable = true)
+    private Float weight; // Added missing field
 }

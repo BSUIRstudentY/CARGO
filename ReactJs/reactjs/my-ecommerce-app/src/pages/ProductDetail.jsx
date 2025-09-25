@@ -118,7 +118,7 @@ function ProductDetail() {
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#10b981', '#34d399', '#6ee7b7'],
+        colors: ['#06b6d4', '#0ea5e9', '#38bdf8'],
       });
     } catch (error) {
       if (error.response && error.response.status === 403) {
@@ -157,7 +157,7 @@ function ProductDetail() {
         particleCount: 50,
         spread: 50,
         origin: { y: 0.6 },
-        colors: ['#10b981', '#34d399'],
+        colors: ['#06b6d4', '#0ea5e9'],
       });
       fetchProduct();
     } catch (error) {
@@ -172,7 +172,7 @@ function ProductDetail() {
   const maskedMarketplaceLink = (url) => {
     return url ? (
       <span className="flex items-center gap-2">
-        <LinkIcon className="w-5 h-5 text-emerald-400" />
+        <LinkIcon className="w-5 h-5 text-cyan-400" />
         Зашифрованная ссылка на маркетплейс
       </span>
     ) : (
@@ -181,8 +181,8 @@ function ProductDetail() {
   };
 
   const renderDescription = (description) => {
-    if (!description) return <p className="text-gray-300">Детали товара будут здесь.</p>;
-    const lines = description.split('\n').filter(line => line.trim() !== '');
+    if (!description) return <p className="text-gray-300 text-base">Детали товара будут здесь.</p>;
+    const lines = description.split('\n').filter((line) => line.trim() !== '');
     return (
       <div className="space-y-4 text-gray-300 leading-relaxed">
         {lines.map((line, index) => {
@@ -190,8 +190,8 @@ function ProductDetail() {
             const cleanedLine = line.replace(/^(•|\*|-|#)\s+/, '');
             return (
               <div key={index} className="flex items-start gap-2 pl-4">
-                <span className="text-[var(--accent-color)] mt-1 flex-shrink-0">•</span>
-                <span className="text-sm">{cleanedLine}</span>
+                <span className="text-cyan-400 mt-1 flex-shrink-0">•</span>
+                <span className="text-base">{cleanedLine}</span>
               </div>
             );
           }
@@ -200,13 +200,16 @@ function ProductDetail() {
           if (boldMatches.length > 0) {
             const parts = line.split(boldRegex);
             return (
-              <p key={index} className="text-sm">
-                {parts.map((part, i) => {
-                  if (i % 2 === 1 && (part.includes('**') || part.includes('__'))) {
-                    return <span key={i} className="font-bold text-white">{part.slice(2, -2)}</span>;
-                  }
-                  return <span key={i}>{part}</span>;
-                })}
+              <p key={index} className="text-base">
+                {parts.map((part, i) =>
+                  i % 2 === 1 && (part.includes('**') || part.includes('__')) ? (
+                    <span key={i} className="font-bold text-white">
+                      {part.slice(2, -2)}
+                    </span>
+                  ) : (
+                    <span key={i}>{part}</span>
+                  )
+                )}
               </p>
             );
           }
@@ -215,17 +218,20 @@ function ProductDetail() {
           if (italicMatches.length > 0) {
             const parts = line.split(italicRegex);
             return (
-              <p key={index} className="text-sm">
-                {parts.map((part, i) => {
-                  if (i % 2 === 1 && (part.includes('*') || part.includes('_'))) {
-                    return <span key={i} className="italic text-gray-200">{part.slice(2, -2)}</span>;
-                  }
-                  return <span key={i}>{part}</span>;
-                })}
+              <p key={index} className="text-base">
+                {parts.map((part, i) =>
+                  i % 2 === 1 && (part.includes('*') || part.includes('_')) ? (
+                    <span key={i} className="italic text-gray-200">
+                      {part.slice(2, -2)}
+                    </span>
+                  ) : (
+                    <span key={i}>{part}</span>
+                  )
+                )}
               </p>
             );
           }
-          return <p key={index} className="text-sm">{line}</p>;
+          return <p key={index} className="text-base">{line}</p>;
         })}
       </div>
     );
@@ -238,8 +244,9 @@ function ProductDetail() {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-white text-2xl bg-gray-700/90 p-6 rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+          className="text-center text-white text-2xl bg-gray-800/80 p-6 rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/30"
         >
+          <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-cyan-500 mx-auto mb-4" />
           Загрузка...
         </motion.div>
       </div>
@@ -253,7 +260,7 @@ function ProductDetail() {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-red-500 text-2xl bg-gray-700/90 p-6 rounded-lg shadow-[0_0_15px_rgba(239,68,68,0.1)]"
+          className="text-center text-red-300 text-2xl bg-red-500/30 p-6 rounded-lg border border-red-500/50 shadow-lg"
         >
           {error}
         </motion.div>
@@ -268,7 +275,7 @@ function ProductDetail() {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-gray-400 text-2xl bg-gray-700/90 p-6 rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+          className="text-center text-gray-300 text-2xl bg-gray-800/80 p-6 rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/30"
         >
           Товар не найден
         </motion.div>
@@ -286,10 +293,10 @@ function ProductDetail() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-color)] to-emerald-500">
+          <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-emerald-500 tracking-tight">
             Подробности товара: {product.name}
           </h2>
-          <p className="text-lg text-gray-400 mt-2">Ознакомьтесь с деталями и добавьте товар в корзину</p>
+          <p className="text-lg text-gray-300 mt-2">Ознакомьтесь с деталями и добавьте товар в корзину</p>
         </motion.header>
 
         {/* Error Message */}
@@ -300,7 +307,7 @@ function ProductDetail() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
-              className="mb-8 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500"
+              className="mb-8 p-4 bg-red-500/30 border border-red-500/50 rounded-lg text-red-300 text-center text-base font-medium shadow-md"
             >
               {cartError || error}
             </motion.div>
@@ -315,42 +322,54 @@ function ProductDetail() {
           className="flex flex-col lg:flex-row gap-8 mb-12"
         >
           {/* Product Image */}
-          <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+          <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
             <motion.div
-              className="w-full lg:w-1/2 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-6 shadow-xl border border-gray-700/50 transition-transform duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.5)]"
-              whileHover={{ y: -8, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              className="w-full lg:w-1/2 bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-6 shadow-lg border border-cyan-500/30 transition-shadow duration-300 hover:shadow-cyan-500/40 relative overflow-hidden"
+              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+              whileTap={{ scale: 0.97 }}
             >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1)_0%,transparent_70%)] pointer-events-none rounded-2xl" />
+              <div
+                className="absolute inset-0 opacity-10 pointer-events-none"
+                style={{
+                  backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                  backgroundRepeat: 'repeat',
+                }}
+              />
               {product.imageUrl ? (
                 <img
                   src={product.imageUrl}
                   alt={product.name}
-                  className="w-full h-96 object-cover rounded-lg transform hover:scale-105 transition duration-300"
+                  className="w-full h-96 object-cover rounded-lg border border-gray-600/20 transform hover:scale-105 transition duration-300"
                   onError={(e) => {
                     e.target.src = 'https://via.placeholder.com/384x384?text=Изображение+не+доступно';
                   }}
                 />
               ) : (
-                <div className="w-full h-96 bg-gray-700 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-400">Изображение отсутствует</span>
+                <div className="w-full h-96 bg-gray-700/50 rounded-lg flex items-center justify-center text-gray-300 text-base border border-gray-600/20">
+                  Изображение отсутствует
                 </div>
               )}
             </motion.div>
           </Tilt>
 
           {/* Product Information */}
-          <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+          <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
             <motion.div
-              className="w-full lg:w-1/2 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-6 shadow-xl border border-gray-700/50 transition-transform duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.5)]"
-              whileHover={{ y: -8, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              className="w-full lg:w-1/2 bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-6 shadow-lg border border-cyan-500/30 transition-shadow duration-300 hover:shadow-cyan-500/40 relative overflow-hidden"
+              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+              whileTap={{ scale: 0.97 }}
             >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1)_0%,transparent_70%)] pointer-events-none rounded-2xl" />
-              <h3 className="text-2xl font-semibold text-[var(--accent-color)] mb-4">{product.name}</h3>
+              <div
+                className="absolute inset-0 opacity-10 pointer-events-none"
+                style={{
+                  backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                  backgroundRepeat: 'repeat',
+                }}
+              />
+              <h3 className="text-2xl font-bold text-cyan-400 mb-4">{product.name}</h3>
               <div className="flex justify-between mb-4">
-                <span className="text-emerald-400 font-bold text-xl">¥{product.price?.toFixed(2)}</span>
-                <span className="text-yellow-400 font-bold text-xl">BYN {(product.price * 3.5)?.toFixed(2)}</span>
+                <span className="text-green-400 font-semibold text-xl">¥{product.price?.toFixed(2)}</span>
+                <span className="text-yellow-400 font-semibold text-xl">BYN {(product.price * 3.5)?.toFixed(2)}</span>
               </div>
               {/* Average Rating Display */}
               {product.reviewQuantity > 0 ? (
@@ -371,21 +390,21 @@ function ProductDetail() {
                       />
                     ))}
                   </div>
-                  <span className="text-gray-400 ml-2">({product.reviewQuantity} отзывов)</span>
+                  <span className="text-gray-300 ml-2">({product.reviewQuantity} отзывов)</span>
                 </div>
               ) : (
                 <div className="mb-4">
-                  <span className="text-gray-400">Отзывов пока нет</span>
+                  <span className="text-gray-300">Отзывов пока нет</span>
                 </div>
               )}
               {/* Quantity */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Количество:</label>
+                <label className="block text-sm font-medium text-gray-200 mb-2">Количество:</label>
                 <input
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full p-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition"
+                  className="w-full p-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300"
                   min="1"
                 />
               </div>
@@ -394,7 +413,7 @@ function ProductDetail() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleAddToCart(product)}
-                className="w-full px-6 py-3 bg-gradient-to-r from-[var(--accent-color)] to-emerald-500 text-white rounded-lg hover:bg-opacity-90 transition flex items-center justify-center gap-2 mb-2"
+                className="w-full px-6 py-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 shadow-sm mb-2"
                 disabled={cartLoading}
               >
                 <ShoppingCartIcon className="w-5 h-5" />
@@ -404,19 +423,19 @@ function ProductDetail() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate(-1)}
-                className="w-full px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-gray-700/80 text-white rounded-lg hover:bg-gray-600/80 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 shadow-sm"
               >
                 <ArrowLeftIcon className="w-5 h-5" />
                 Назад
               </motion.button>
               {/* Marketplace Link */}
               <div className="mt-4">
-                <p className="text-sm text-gray-300 mb-2">Куплено на:</p>
+                <p className="text-sm text-gray-200 mb-2">Куплено на:</p>
                 <a
                   href={product.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-emerald-400 hover:underline flex items-center gap-2"
+                  className="text-cyan-400 hover:underline flex items-center gap-2"
                   onClick={(e) => {
                     e.preventDefault();
                     alert(`Открывается: ${product.url}`);
@@ -436,16 +455,16 @@ function ProductDetail() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mb-12"
         >
-          <div className="flex border-b border-gray-600 mb-6">
+          <div className="flex border-b border-cyan-500/30 mb-6">
             {['details', 'reviews'].map((tab) => (
               <motion.button
                 key={tab}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`px-4 py-2 text-lg font-medium ${
+                className={`px-4 py-2 text-lg font-semibold ${
                   activeTab === tab
-                    ? 'border-b-2 border-[var(--accent-color)] text-[var(--accent-color)]'
-                    : 'text-gray-400 hover:text-gray-200'
+                    ? 'border-b-2 border-cyan-500 text-cyan-400'
+                    : 'text-gray-300 hover:text-gray-200'
                 }`}
                 onClick={() => {
                   setActiveTab(tab);
@@ -460,46 +479,53 @@ function ProductDetail() {
               </motion.button>
             ))}
           </div>
-          <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-6 shadow-xl border border-gray-700/50">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1)_0%,transparent_70%)] pointer-events-none rounded-2xl" />
+          <div className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-6 shadow-lg border border-cyan-500/30 relative overflow-hidden">
+            <div
+              className="absolute inset-0 opacity-10 pointer-events-none"
+              style={{
+                backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                  backgroundRepeat: 'repeat',
+                }}
+            />
             {activeTab === 'details' && (
               <div>
                 <div className="mb-6">
-                  <h4 className="text-xl font-semibold text-[var(--accent-color)] mb-4">Описание</h4>
+                  <h4 className="text-xl font-bold text-cyan-400 mb-4">Описание</h4>
                   {renderDescription(product.description)}
                 </div>
                 <div>
-                  <h4 className="text-xl font-semibold text-[var(--accent-color)] mb-4">Информация о товаре</h4>
-                  <p className="text-gray-300 mb-2">Продано: {product.salesCount || 0} раз</p>
-                  <p className="text-gray-300 mb-2">Кластер: {product.cluster !== undefined ? product.cluster : 'Не определен'}</p>
-                  <p className="text-gray-300">Последнее обновление: {new Date(product.lastUpdated).toLocaleString('ru-RU')}</p>
+                  <h4 className="text-xl font-bold text-cyan-400 mb-4">Информация о товаре</h4>
+                  <p className="text-gray-300 text-base mb-2">Продано: {product.salesCount || 0} раз</p>
+                  <p className="text-gray-300 text-base mb-2">Кластер: {product.cluster !== undefined ? product.cluster : 'Не определен'}</p>
+                  <p className="text-gray-300 text-base">Последнее обновление: {new Date(product.lastUpdated).toLocaleString('ru-RU')}</p>
                 </div>
               </div>
             )}
             {activeTab === 'reviews' && (
               <div>
                 {/* Reviews List */}
-                <div ref={reviewsContainerRef} className="max-h-[50vh] overflow-y-auto scrollbar-hide">
+                <div ref={reviewsContainerRef} className="max-h-[50vh] overflow-y-auto no-scrollbar">
                   <style jsx>{`
-                    .scrollbar-hide::-webkit-scrollbar {
+                    .no-scrollbar::-webkit-scrollbar {
                       display: none;
                     }
-                    .scrollbar-hide {
-                      -ms-overflow-style: none; /* IE and Edge */
-                      scrollbar-width: none; /* Firefox */
+                    .no-scrollbar {
+                      -ms-overflow-style: none;
+                      scrollbar-width: none;
                     }
-                  `}</style>
-                  <h4 className="text-xl font-semibold text-[var(--accent-color)] mb-4">Отзывы</h4>
+                  `}
+                  </style>
+                  <h4 className="text-xl font-bold text-cyan-400 mb-4">Отзывы</h4>
                   {reviews.length > 0 ? (
                     <div className="space-y-4">
                       {reviews.map((review, index) => (
                         <div
                           key={review.id}
                           ref={index === reviews.length - 1 ? lastReviewElementRef : null}
-                          className="bg-gradient-to-b from-gray-700 to-gray-800 rounded-lg p-4 border border-gray-600"
+                          className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-lg p-4 border border-cyan-500/30 shadow-md hover:shadow-cyan-500/30 transition-shadow duration-300"
                         >
                           <div className="flex items-center mb-2">
-                            <p className="text-gray-300 font-medium">{review.username}</p>
+                            <p className="text-gray-200 font-semibold">{review.username}</p>
                             <div className="ml-2 flex">
                               {[...Array(5)].map((_, i) => (
                                 <StarIcon
@@ -509,28 +535,34 @@ function ProductDetail() {
                               ))}
                             </div>
                           </div>
-                          <p className="text-gray-400 text-sm">{new Date(review.createdAt).toLocaleString('ru-RU')}</p>
-                          <p className="text-gray-300 mt-2">{review.comment}</p>
+                          <p className="text-gray-300 text-sm">{new Date(review.createdAt).toLocaleString('ru-RU')}</p>
+                          <p className="text-gray-300 text-base mt-2">{review.comment}</p>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-400">Отзывов пока нет. Будьте первым!</p>
+                    <p className="text-gray-300 text-base">Отзывов пока нет. Будьте первым!</p>
                   )}
                   {loadingReviews && (
-                    <div className="text-center text-gray-400 mt-4">
-                      <ClockIcon className="w-6 h-6 animate-spin mx-auto text-[var(--accent-color)]" />
-                      <p>Загрузка...</p>
+                    <div className="text-center text-gray-300 mt-4">
+                      <ClockIcon className="w-6 h-6 animate-spin mx-auto text-cyan-500" />
+                      <p className="text-base">Загрузка...</p>
                     </div>
                   )}
                 </div>
                 {/* Review Form */}
-                <div className="mt-6 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-6 shadow-xl border border-gray-700/50">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1)_0%,transparent_70%)] pointer-events-none rounded-2xl" />
+                <div className="mt-6 bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-6 shadow-lg border border-cyan-500/30 relative overflow-hidden">
+                  <div
+                    className="absolute inset-0 opacity-10 pointer-events-none"
+                    style={{
+                      backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                      backgroundRepeat: 'repeat',
+                    }}
+                  />
                   <form onSubmit={handleReviewSubmit}>
-                    <h5 className="text-lg font-medium text-gray-300 mb-2">Оставить отзыв</h5>
+                    <h5 className="text-lg font-semibold text-gray-200 mb-2">Оставить отзыв</h5>
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Рейтинг:</label>
+                      <label className="block text-sm font-medium text-gray-200 mb-2">Рейтинг:</label>
                       <div className="flex">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <motion.button
@@ -547,11 +579,11 @@ function ProductDetail() {
                       </div>
                     </div>
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Комментарий:</label>
+                      <label className="block text-sm font-medium text-gray-200 mb-2">Комментарий:</label>
                       <textarea
                         value={reviewForm.comment}
                         onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
-                        className="w-full p-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition"
+                        className="w-full p-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300"
                         rows="4"
                         placeholder="Ваш отзыв о товаре..."
                       />
@@ -560,7 +592,7 @@ function ProductDetail() {
                       type="submit"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="px-4 py-2 bg-gradient-to-r from-[var(--accent-color)] to-emerald-500 text-white rounded-lg hover:bg-opacity-90 transition"
+                      className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold shadow-sm"
                       disabled={cartLoading || loadingReviews}
                     >
                       Отправить отзыв
@@ -579,40 +611,49 @@ function ProductDetail() {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="mb-12"
         >
-          <h3 className="text-2xl font-semibold text-white mb-6">Похожие товары</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <h3 className="text-2xl font-bold text-white mb-6">Похожие товары</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {similarProducts.length > 0 ? (
               similarProducts.map((similar, index) => (
-                <Tilt key={similar.id} tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+                <Tilt key={similar.id} tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
                   <motion.div
-                    className="bg-gradient-to-b from-gray-700 to-gray-800 rounded-lg border border-gray-600 p-4 transition-all duration-300 hover:shadow-[0_0_15px_#10b981]"
-                    initial={{ opacity: 0, y: 20 }}
+                    className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-4 border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/40 transition-shadow duration-300 relative overflow-hidden"
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+                    whileTap={{ scale: 0.97 }}
                   >
+                    <div
+                      className="absolute inset-0 opacity-10 pointer-events-none"
+                      style={{
+                        backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                        backgroundRepeat: 'repeat',
+                      }}
+                    />
                     <div className="w-full h-48 overflow-hidden rounded-lg">
                       {similar.imageUrl ? (
                         <img
                           src={similar.imageUrl}
                           alt={similar.name}
-                          className="w-full h-full object-cover transform hover:scale-105 transition duration-300"
+                          className="w-full h-full object-cover transform hover:scale-105 transition duration-300 border border-gray-600/20"
                           onError={(e) => {
                             e.target.src = 'https://via.placeholder.com/192x192?text=Изображение+не+доступно';
                           }}
                         />
                       ) : (
-                        <div className="w-full h-full bg-gray-600 flex items-center justify-center text-gray-400 text-sm">
+                        <div className="w-full h-full bg-gray-700/50 flex items-center justify-center text-gray-300 text-base border border-gray-600/20">
                           Изображение отсутствует
                         </div>
                       )}
                     </div>
                     <div className="p-4">
-                      <h4 className="text-lg font-semibold text-white mb-2">{similar.name}</h4>
+                      <h4 className="text-lg font-bold text-white mb-2 line-clamp-1">{similar.name}</h4>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleAddToCart(similar)}
-                        className="w-full px-4 py-2 bg-gradient-to-r from-[var(--accent-color)] to-emerald-500 text-white rounded-lg hover:bg-opacity-90 transition flex items-center justify-center gap-2 mb-2"
+                        className="w-full px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 shadow-sm mb-2"
                         disabled={cartLoading}
                       >
                         <ShoppingCartIcon className="w-5 h-5" />
@@ -622,7 +663,7 @@ function ProductDetail() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => navigate(`/product/${similar.id}`)}
-                        className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
+                        className="w-full px-4 py-2 bg-gray-700/80 text-white rounded-lg hover:bg-gray-600/80 transition duration-300 text-base font-semibold shadow-sm"
                       >
                         Подробнее
                       </motion.button>
@@ -631,7 +672,9 @@ function ProductDetail() {
                 </Tilt>
               ))
             ) : (
-              <p className="text-gray-400 text-center col-span-full text-lg">Похожие товары не найдены</p>
+              <p className="text-gray-300 text-base text-center col-span-full bg-gray-800/80 p-6 rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/30">
+                Похожие товары не найдены
+              </p>
             )}
           </div>
         </motion.section>

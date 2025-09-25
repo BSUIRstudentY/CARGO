@@ -239,7 +239,7 @@ export function CartProvider({ children }) {
             `Скидка пользователя: ${response.data.userDiscountApplied > 0 ? `-¥${response.data.userDiscountApplied.toFixed(2)}` : 'Нет'}\n` +
             `Скидка по промокоду: ${response.data.discountApplied > 0 ? `-¥${response.data.discountApplied.toFixed(2)}` : 'Нет'}\n` +
             `Страховка: ${response.data.insuranceCost > 0 ? `¥${response.data.insuranceCost.toFixed(2)}` : 'Нет'}`);
-      navigate(`/orders/${response.data.orderId}`); // Redirect to order details
+      navigate(`/order-details/${response.data.orderId}`); // Redirect to order details
       return response.data;
     } catch (error) {
       console.error('Error confirming order:', error.response?.data?.message || error.message);

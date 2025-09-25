@@ -5,6 +5,9 @@ import com.example.demo.Entities.OrderItem;
 import com.example.demo.Repositories.OrderHistoryRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,33 +26,41 @@ public class OrderHistoryController {
 
     @GetMapping
     @Transactional(readOnly = true)
-    public ResponseEntity<List<OrderHistoryDTO>> getOrderHistory(@RequestParam(required = false) String status) {
+    public ResponseEntity<OrderHistoryPageDTO> getOrderHistory(
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         String userEmail = getCurrentUserEmail();
         if (userEmail == null) {
             return ResponseEntity.status(403).body(null);
         }
 
-        List<OrderHistory> orders;
-        if (status != null && !status.equals("ALL")) {
-            orders = orderHistoryRepository.findByUserEmail(userEmail).stream()
-                    .filter(order -> order.getStatus().equals(status))
-                    .collect(Collectors.toList());
-        } else {
-            orders = orderHistoryRepository.findByUserEmail(userEmail);
+        // Validate status
+        if (status != null && !status.equals("ALL") && !List.of("REFUSED", "COMPLETED", "PENDING").contains(status)) {
+            return ResponseEntity.badRequest().body(null);
         }
 
+        Pageable pageable = PageRequest.of(page, size);
+        Page<OrderHistory> orderPage;
         boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
                 .getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
         if (isAdmin && status != null && !status.equals("ALL")) {
-            orders = orderHistoryRepository.findAll().stream()
-                    .filter(order -> order.getStatus().equals(status))
-                    .collect(Collectors.toList());
+            orderPage = (Page<OrderHistory>) orderHistoryRepository.findAll(pageable)
+                    .map(order -> order.getStatus().equals(status) ? order : null)
+                    .filter(order -> order != null);
         } else if (isAdmin) {
-            orders = orderHistoryRepository.findAll();
+            orderPage = orderHistoryRepository.findAll(pageable);
+        } else if (status != null && !status.equals("ALL")) {
+            orderPage = (Page<OrderHistory>) orderHistoryRepository.findByUserEmail(userEmail, pageable)
+                    .map(order -> order.getStatus().equals(status) ? order : null)
+                    .filter(order -> order != null);
+        } else {
+            orderPage = orderHistoryRepository.findByUserEmail(userEmail, pageable);
         }
 
-        List<OrderHistoryDTO> orderDTOs = orders.stream()
+        List<OrderHistoryDTO> orderDTOs = orderPage.getContent().stream()
                 .map(order -> {
                     OrderHistoryDTO orderDTO = new OrderHistoryDTO();
                     orderDTO.setId(order.getId());
@@ -57,19 +68,53 @@ public class OrderHistoryController {
                     orderDTO.setDateCreated(order.getDateCreated());
                     orderDTO.setStatus(order.getStatus());
                     orderDTO.setTotalClientPrice(order.getTotalClientPrice());
+                    orderDTO.setSupplierCost(order.getSupplierCost());
+                    orderDTO.setCustomsDuty(order.getCustomsDuty());
+                    orderDTO.setShippingCost(order.getShippingCost());
                     orderDTO.setDeliveryAddress(order.getDeliveryAddress());
+                    orderDTO.setTrackingNumber(order.getTrackingNumber());
                     orderDTO.setReasonRefusal(order.getReasonRefusal());
+                    orderDTO.setInsurance(order.getInsurance());
+                    orderDTO.setDiscountType(order.getDiscountType());
+                    orderDTO.setDiscountValue(order.getDiscountValue());
+                    orderDTO.setPromocode(order.getPromocode() != null ? order.getPromocode().getCode() : null); // Fixed null check
+                    orderDTO.setInsuranceCost(order.getInsuranceCost());
+                    orderDTO.setUserDiscountApplied(order.getUserDiscountApplied());
                     orderDTO.setItems(order.getItems().stream()
                             .map(item -> {
                                 OrderItemDTO itemDTO = new OrderItemDTO();
-                                itemDTO.setProductId(item.getProduct().getId());
-                                itemDTO.setProductName(item.getProduct().getName());
-                                itemDTO.setQuantity(item.getQuantity());
-                                itemDTO.setPriceAtTime(item.getPriceAtTime());
-                                itemDTO.setUrl(item.getProduct().getUrl());
-                                itemDTO.setImageUrl(item.getProduct().getImageUrl());
-                                itemDTO.setDescription(item.getProduct().getDescription());
-                                itemDTO.setSupplierPrice(item.getSupplierPrice());
+                                try {
+                                    itemDTO.setId(item.getId());
+                                    itemDTO.setProductId(item.getProduct() != null ? item.getProduct().getId().toString() : null);
+                                    itemDTO.setProductName(item.getProduct() != null ? item.getProduct().getName() : "Unknown");
+                                    itemDTO.setUrl(item.getProduct() != null ? item.getProduct().getUrl() : null);
+                                    itemDTO.setImageUrl(item.getProduct() != null && item.getProduct().getImageUrl() != null
+                                            ? item.getProduct().getImageUrl()
+                                            : "https://placehold.co/128x128?text=No+Image");
+                                    itemDTO.setDescription(item.getProduct() != null ? item.getProduct().getDescription() : null);
+                                    itemDTO.setQuantity(item.getQuantity());
+                                    itemDTO.setPriceAtTime(item.getPriceAtTime());
+                                    itemDTO.setSupplierPrice(item.getSupplierPrice());
+                                    itemDTO.setPurchaseStatus(item.getPurchaseStatus());
+                                    itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
+                                    itemDTO.setTrackingNumber(item.getTrackingNumber());
+                                    itemDTO.setChinaDeliveryPrice(item.getChinaDeliveryPrice());
+                                } catch (Exception e) {
+                                    System.err.println("Error mapping product for OrderItem ID: " + item.getId() + " in Order ID: " + order.getId());
+                                    itemDTO.setId(item.getId());
+                                    itemDTO.setProductId(null);
+                                    itemDTO.setProductName("Unknown");
+                                    itemDTO.setUrl(null);
+                                    itemDTO.setImageUrl("https://placehold.co/128x128?text=No+Image");
+                                    itemDTO.setDescription(null);
+                                    itemDTO.setQuantity(item.getQuantity());
+                                    itemDTO.setPriceAtTime(item.getPriceAtTime());
+                                    itemDTO.setSupplierPrice(item.getSupplierPrice());
+                                    itemDTO.setPurchaseStatus(item.getPurchaseStatus());
+                                    itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
+                                    itemDTO.setTrackingNumber(item.getTrackingNumber());
+                                    itemDTO.setChinaDeliveryPrice(item.getChinaDeliveryPrice());
+                                }
                                 return itemDTO;
                             })
                             .collect(Collectors.toList()));
@@ -78,7 +123,13 @@ public class OrderHistoryController {
                 })
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(orderDTOs);
+        OrderHistoryPageDTO pageDTO = new OrderHistoryPageDTO();
+        pageDTO.setOrders(orderDTOs);
+        pageDTO.setCurrentPage(orderPage.getNumber());
+        pageDTO.setTotalPages(orderPage.getTotalPages());
+        pageDTO.setTotalItems(orderPage.getTotalElements());
+
+        return ResponseEntity.ok(pageDTO);
     }
 
     @GetMapping("/{id}")
@@ -103,25 +154,64 @@ public class OrderHistoryController {
             return ResponseEntity.status(403).body(null);
         }
 
+        // Validate status
+        if (!List.of("REFUSED", "COMPLETED", "PENDING").contains(order.getStatus())) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
         OrderHistoryDTO orderDTO = new OrderHistoryDTO();
         orderDTO.setId(order.getId());
         orderDTO.setOrderNumber(order.getOrderNumber());
         orderDTO.setDateCreated(order.getDateCreated());
         orderDTO.setStatus(order.getStatus());
         orderDTO.setTotalClientPrice(order.getTotalClientPrice());
+        orderDTO.setSupplierCost(order.getSupplierCost());
+        orderDTO.setCustomsDuty(order.getCustomsDuty());
+        orderDTO.setShippingCost(order.getShippingCost());
         orderDTO.setDeliveryAddress(order.getDeliveryAddress());
+        orderDTO.setTrackingNumber(order.getTrackingNumber());
         orderDTO.setReasonRefusal(order.getReasonRefusal());
+        orderDTO.setInsurance(order.getInsurance());
+        orderDTO.setDiscountType(order.getDiscountType());
+        orderDTO.setDiscountValue(order.getDiscountValue());
+        orderDTO.setPromocode(order.getPromocode() != null ? order.getPromocode().getCode() : null); // Fixed null check
+        orderDTO.setInsuranceCost(order.getInsuranceCost());
+        orderDTO.setUserDiscountApplied(order.getUserDiscountApplied());
         orderDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
-                    itemDTO.setProductId(item.getProduct().getId());
-                    itemDTO.setProductName(item.getProduct().getName());
-                    itemDTO.setQuantity(item.getQuantity());
-                    itemDTO.setPriceAtTime(item.getPriceAtTime());
-                    itemDTO.setUrl(item.getProduct().getUrl());
-                    itemDTO.setImageUrl(item.getProduct().getImageUrl());
-                    itemDTO.setDescription(item.getProduct().getDescription());
-                    itemDTO.setSupplierPrice(item.getSupplierPrice());
+                    try {
+                        itemDTO.setId(item.getId());
+                        itemDTO.setProductId(item.getProduct() != null ? item.getProduct().getId().toString() : null);
+                        itemDTO.setProductName(item.getProduct() != null ? item.getProduct().getName() : "Unknown");
+                        itemDTO.setUrl(item.getProduct() != null ? item.getProduct().getUrl() : null);
+                        itemDTO.setImageUrl(item.getProduct() != null && item.getProduct().getImageUrl() != null
+                                ? item.getProduct().getImageUrl()
+                                : "https://placehold.co/128x128?text=No+Image");
+                        itemDTO.setDescription(item.getProduct() != null ? item.getProduct().getDescription() : null);
+                        itemDTO.setQuantity(item.getQuantity());
+                        itemDTO.setPriceAtTime(item.getPriceAtTime());
+                        itemDTO.setSupplierPrice(item.getSupplierPrice());
+                        itemDTO.setPurchaseStatus(item.getPurchaseStatus());
+                        itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
+                        itemDTO.setTrackingNumber(item.getTrackingNumber());
+                        itemDTO.setChinaDeliveryPrice(item.getChinaDeliveryPrice());
+                    } catch (Exception e) {
+                        System.err.println("Error mapping product for OrderItem ID: " + item.getId() + " in Order ID: " + order.getId());
+                        itemDTO.setId(item.getId());
+                        itemDTO.setProductId(null);
+                        itemDTO.setProductName("Unknown");
+                        itemDTO.setUrl(null);
+                        itemDTO.setImageUrl("https://placehold.co/128x128?text=No+Image");
+                        itemDTO.setDescription(null);
+                        itemDTO.setQuantity(item.getQuantity());
+                        itemDTO.setPriceAtTime(item.getPriceAtTime());
+                        itemDTO.setSupplierPrice(item.getSupplierPrice());
+                        itemDTO.setPurchaseStatus(item.getPurchaseStatus());
+                        itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
+                        itemDTO.setTrackingNumber(item.getTrackingNumber());
+                        itemDTO.setChinaDeliveryPrice(item.getChinaDeliveryPrice());
+                    }
                     return itemDTO;
                 })
                 .collect(Collectors.toList()));
@@ -139,20 +229,39 @@ public class OrderHistoryController {
     }
 
     @Data
-    class OrderHistoryDTO {
+    static class OrderHistoryPageDTO {
+        private List<OrderHistoryDTO> orders;
+        private int currentPage;
+        private int totalPages;
+        private long totalItems;
+    }
+
+    @Data
+    static class OrderHistoryDTO {
         private Long id;
         private String orderNumber;
         private Timestamp dateCreated;
         private String status;
         private Float totalClientPrice;
+        private Float supplierCost;
+        private Float customsDuty;
+        private Float shippingCost;
         private String deliveryAddress;
+        private String trackingNumber;
         private String reasonRefusal;
+        private Boolean insurance;
+        private String discountType;
+        private Float discountValue;
+        private String promocode;
+        private Float insuranceCost;
+        private Float userDiscountApplied;
         private List<OrderItemDTO> items;
         private String userEmail;
     }
 
     @Data
-    class OrderItemDTO {
+    static class OrderItemDTO {
+        private Long id;
         private String productId;
         private String productName;
         private Integer quantity;
@@ -161,5 +270,9 @@ public class OrderHistoryController {
         private String imageUrl;
         private String description;
         private Float supplierPrice;
+        private String purchaseStatus;
+        private String purchaseRefusalReason;
+        private String trackingNumber;
+        private Float chinaDeliveryPrice;
     }
 }

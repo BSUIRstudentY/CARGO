@@ -3,7 +3,7 @@ import { Client } from '@stomp/stompjs';
 
 export const createStompClient = () => {
   return new Client({
-    brokerURL: 'ws://localhost:8080/ws-pure',
+    brokerURL: 'ws://fluvion.by/ws-pure',
     reconnectDelay: 5000,
     heartbeatIncoming: 4000,
     heartbeatOutgoing: 4000,

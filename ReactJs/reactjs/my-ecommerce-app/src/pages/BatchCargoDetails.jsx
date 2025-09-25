@@ -88,13 +88,31 @@ const BatchCargoDetails = () => {
     );
   }
 
+  // Map status to display text and color
+  const getStatusDisplay = (status) => {
+    switch (status) {
+      case 'UNFINISHED':
+        return { text: 'В процессе', color: 'text-yellow-300' };
+      case 'FINISHED':
+        return { text: 'Завершён', color: 'text-emerald-300' };
+      case 'ARRIVED_IN_MINSK':
+        return { text: 'Груз в Минске', color: 'text-blue-300' };
+      case 'COMPLETED':
+        return { text: 'Груз доставлен', color: 'text-green-300' };
+      default:
+        return { text: status, color: 'text-gray-300' };
+    }
+  };
+
+  const statusDisplay = getStatusDisplay(batchCargo.status);
+
   return (
     <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg shadow-2xl p-8 relative overflow-hidden min-h-screen">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none" />
       <div className="relative">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-[var(--accent-color)]">
-            Груз #{batchCargo.id} ({batchCargo.status === 'UNFINISHED' ? 'В процессе' : 'Завершён'})
+          <h2 className={`text-3xl font-bold ${statusDisplay.color}`}>
+            Груз #{batchCargo.id} ({statusDisplay.text})
           </h2>
         </div>
         <p className="text-gray-300 mb-4">

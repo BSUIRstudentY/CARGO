@@ -8,6 +8,7 @@ import com.example.demo.Entities.User;
 import com.example.demo.Repositories.ProductRepository;
 import com.example.demo.Repositories.ProductReviewRepository;
 import com.example.demo.Repositories.UserRepository;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -61,13 +62,17 @@ public class ProductReviewService {
         return result;
     }
 
+    @Transactional
     public Page<ProductReviewDTO> getReviewsByProductId(String productId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<ProductReview> reviewPage = reviewRepository.findByProductId(productId, pageable);
+
         return reviewPage.map(review -> {
+
             ProductReviewDTO dto = new ProductReviewDTO();
             dto.setId(review.getId());
             dto.setProductId(review.getProduct().getId());
+
             dto.setUserEmail(review.getUser().getEmail());
             dto.setUsername(review.getUser().getUsername());
             dto.setComment(review.getComment());

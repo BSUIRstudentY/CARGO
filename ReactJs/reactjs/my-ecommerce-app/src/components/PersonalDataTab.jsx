@@ -126,7 +126,7 @@ const PersonalDataTab = ({ setError }) => {
   }, [verificationCode, setError]);
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl h-[70vh] overflow-y-auto scrollbar-hide">
+    <div className="w-full p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl">
       {/* Status Message */}
       <AnimatePresence>
         {statusMessage && (
@@ -161,31 +161,31 @@ const PersonalDataTab = ({ setError }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-8 flex items-center gap-3"
+        className="mb-6 flex items-center gap-3"
       >
         <UserIcon className="w-8 h-8 text-cyan-400" />
-        <h2 className="text-3xl font-bold text-white tracking-tight">Личный кабинет</h2>
+        <h2 className="text-2xl font-bold text-white tracking-tight">Личный кабинет</h2>
       </motion.div>
       {/* User Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 mb-6 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
+        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-4 mb-4 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
       >
-        <div className="flex flex-col sm:flex-row items-center gap-6">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="relative">
             <img
               src={userData.avatarUrl}
               alt="User Avatar"
-              className="w-32 h-32 rounded-full border-4 border-cyan-400/30 shadow-lg object-cover ring-2 ring-cyan-400/50"
+              className="w-24 h-24 rounded-full border-4 border-cyan-400/30 shadow-lg object-cover ring-2 ring-cyan-400/50"
             />
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-emerald-400/20 opacity-50" />
           </div>
-          <div className="text-center sm:text-left space-y-2">
-            <h3 className="text-2xl font-semibold text-white">{userData.username || 'Гость'}</h3>
-            <p className="text-gray-300 text-base">{userData.company || 'Компания не указана'}</p>
-            <p className="text-sm text-cyan-400">Роль: {userData.role || 'Не указана'}</p>
+          <div className="text-center sm:text-left space-y-1">
+            <h3 className="text-xl font-semibold text-white">{userData.username || 'Гость'}</h3>
+            <p className="text-sm text-gray-300">{userData.company || 'Компания не указана'}</p>
+            <p className="text-xs text-cyan-400">Роль: {userData.role || 'Не указана'}</p>
           </div>
         </div>
       </motion.div>
@@ -194,16 +194,16 @@ const PersonalDataTab = ({ setError }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 mb-6 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
+        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-4 mb-4 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
       >
-        <h3 className="text-lg font-semibold text-white mb-4">Контактная информация</h3>
-        <div className="space-y-4">
+        <h3 className="text-base font-semibold text-white mb-3">Контактная информация</h3>
+        <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-300">Email</label>
+            <label className="block text-xs font-medium text-gray-300">Email</label>
             <div className="flex items-center justify-between">
-              <p className="text-base text-white">{userData.email || 'user@example.com'}</p>
+              <p className="text-sm text-white">{userData.email || 'user@example.com'}</p>
               <div className="flex items-center gap-2">
-                <p className={`text-sm ${userData.emailVerified ? 'text-green-400' : 'text-red-400'}`}>
+                <p className={`text-xs ${userData.emailVerified ? 'text-green-400' : 'text-red-400'}`}>
                   {userData.emailVerified ? 'Верифицирован' : 'Не верифицирован'}
                 </p>
                 {!userData.emailVerified && (
@@ -212,7 +212,7 @@ const PersonalDataTab = ({ setError }) => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleRequestVerification('email')}
                     disabled={isVerificationLoading.email}
-                    className={`px-3 py-1 rounded-lg text-sm text-white transition duration-300 ${
+                    className={`px-2 py-1 rounded-lg text-xs text-white transition duration-300 ${
                       isVerificationLoading.email ? 'bg-gray-500' : 'bg-cyan-400 hover:bg-cyan-500'
                     }`}
                   >
@@ -223,11 +223,11 @@ const PersonalDataTab = ({ setError }) => {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300">Телефон</label>
+            <label className="block text-xs font-medium text-gray-300">Телефон</label>
             <div className="flex items-center justify-between">
-              <p className="text-base text-white">{userData.phone || 'Не указан'}</p>
+              <p className="text-sm text-white">{userData.phone || 'Не указан'}</p>
               <div className="flex items-center gap-2">
-                <p className={`text-sm ${userData.phoneVerified ? 'text-green-400' : 'text-red-400'}`}>
+                <p className={`text-xs ${userData.phoneVerified ? 'text-green-400' : 'text-red-400'}`}>
                   {userData.phoneVerified ? 'Верифицирован' : 'Не верифицирован'}
                 </p>
                 {!userData.phoneVerified && (
@@ -236,7 +236,7 @@ const PersonalDataTab = ({ setError }) => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleRequestVerification('phone')}
                     disabled={isVerificationLoading.phone}
-                    className={`px-3 py-1 rounded-lg text-sm text-white transition duration-300 ${
+                    className={`px-2 py-1 rounded-lg text-xs text-white transition duration-300 ${
                       isVerificationLoading.phone ? 'bg-gray-500' : 'bg-cyan-400 hover:bg-cyan-500'
                     }`}
                   >
@@ -253,22 +253,22 @@ const PersonalDataTab = ({ setError }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 mb-6 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
+        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-4 mb-4 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
       >
-        <h3 className="text-lg font-semibold text-white mb-4">Финансовая информация</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <h3 className="text-base font-semibold text-white mb-3">Финансовая информация</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-300">Баланс</label>
+            <label className="block text-xs font-medium text-gray-300">Баланс</label>
             <div className="flex items-center gap-2">
-              <CurrencyDollarIcon className="w-5 h-5 text-cyan-400" />
-              <p className="text-base text-white">{userData.balance?.toFixed(2) || '0.00'} BYN</p>
+              <CurrencyDollarIcon className="w-4 h-4 text-cyan-400" />
+              <p className="text-sm text-white">{userData.balance?.toFixed(2) || '0.00'} BYN</p>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300">Потрачено</label>
+            <label className="block text-xs font-medium text-gray-300">Потрачено</label>
             <div className="flex items-center gap-2">
-              <CurrencyDollarIcon className="w-5 h-5 text-cyan-400" />
-              <p className="text-base text-white">{userData.moneySpent?.toFixed(2) || '0.00'} BYN</p>
+              <CurrencyDollarIcon className="w-4 h-4 text-cyan-400" />
+              <p className="text-sm text-white">{userData.moneySpent?.toFixed(2) || '0.00'} BYN</p>
             </div>
           </div>
         </div>
@@ -278,22 +278,22 @@ const PersonalDataTab = ({ setError }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.4 }}
-        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 mb-6 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
+        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-4 mb-4 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
       >
-        <h3 className="text-lg font-semibold text-white mb-4">Реферальная программа</h3>
-        <div className="space-y-4">
+        <h3 className="text-base font-semibold text-white mb-3">Реферальная программа</h3>
+        <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-300">Реферальный код</label>
+            <label className="block text-xs font-medium text-gray-300">Реферальный код</label>
             <div className="flex items-center gap-2">
-              <TagIcon className="w-5 h-5 text-cyan-400" />
-              <p className="text-base text-white">{userData.referralCode || 'Не указан'}</p>
+              <TagIcon className="w-4 h-4 text-cyan-400" />
+              <p className="text-sm text-white">{userData.referralCode || 'Не указан'}</p>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300">Количество рефералов</label>
+            <label className="block text-xs font-medium text-gray-300">Количество рефералов</label>
             <div className="flex items-center gap-2">
-              <UsersIcon className="w-5 h-5 text-cyan-400" />
-              <p className="text-base text-white">{userData.referralCount || 0}</p>
+              <UsersIcon className="w-4 h-4 text-cyan-400" />
+              <p className="text-sm text-white">{userData.referralCount || 0}</p>
             </div>
           </div>
         </div>
@@ -303,14 +303,14 @@ const PersonalDataTab = ({ setError }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.5 }}
-        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
+        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-4 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
       >
-        <h3 className="text-lg font-semibold text-white mb-4">Настройки безопасности и уведомлений</h3>
-        <div className="space-y-4">
+        <h3 className="text-base font-semibold text-white mb-3">Настройки безопасности и уведомлений</h3>
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BellIcon className="w-5 h-5 text-cyan-400" />
-              <label className="text-sm text-gray-300">Уведомления по email</label>
+              <BellIcon className="w-4 h-4 text-cyan-400" />
+              <label className="text-xs text-gray-300">Уведомления по email</label>
             </div>
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -323,14 +323,14 @@ const PersonalDataTab = ({ setError }) => {
                 className="sr-only peer"
                 disabled={isLoading}
               />
-              <div className="w-11 h-6 bg-gray-700 rounded-full peer-checked:bg-cyan-400/50 transition duration-300"></div>
-              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-5 transition duration-300"></div>
+              <div className="w-10 h-5 bg-gray-700 rounded-full peer-checked:bg-cyan-400/50 transition duration-300"></div>
+              <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full peer-checked:translate-x-5 transition duration-300"></div>
             </motion.div>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <KeyIcon className="w-5 h-5 text-cyan-400" />
-              <label className="text-sm text-gray-300">Двухфакторная аутентификация</label>
+              <KeyIcon className="w-4 h-4 text-cyan-400" />
+              <label className="text-xs text-gray-300">Двухфакторная аутентификация</label>
             </div>
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -343,8 +343,8 @@ const PersonalDataTab = ({ setError }) => {
                 className="sr-only peer"
                 disabled={isLoading}
               />
-              <div className="w-11 h-6 bg-gray-700 rounded-full peer-checked:bg-cyan-400/50 transition duration-300"></div>
-              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-5 transition duration-300"></div>
+              <div className="w-10 h-5 bg-gray-700 rounded-full peer-checked:bg-cyan-400/50 transition duration-300"></div>
+              <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full peer-checked:translate-x-5 transition duration-300"></div>
             </motion.div>
           </div>
         </div>
@@ -363,25 +363,25 @@ const PersonalDataTab = ({ setError }) => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="bg-gray-800/90 backdrop-blur-lg rounded-xl p-6 w-full max-w-xs border border-cyan-400/20 shadow-lg"
+              className="bg-gray-800/90 backdrop-blur-lg rounded-xl p-4 w-full max-w-xs border border-cyan-400/20 shadow-lg"
             >
-              <h3 className="text-lg font-semibold text-white mb-4">
+              <h3 className="text-base font-semibold text-white mb-3">
                 Верификация {showVerificationModal === 'email' ? 'Email' : 'Телефона'}
               </h3>
               <input
                 type="text"
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)}
-                className="w-full p-3 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300"
+                className="w-full p-2 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300 text-sm"
                 placeholder="Введите код"
               />
-              <div className="flex gap-3 mt-4">
+              <div className="flex gap-2 mt-3">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleConfirmVerification(showVerificationModal)}
                   disabled={isLoading}
-                  className="flex-1 py-2 bg-cyan-400 text-white rounded-lg hover:bg-cyan-500 transition duration-300 text-sm"
+                  className="flex-1 py-1 bg-cyan-400 text-white rounded-lg hover:bg-cyan-500 transition duration-300 text-xs"
                 >
                   Подтвердить
                 </motion.button>
@@ -390,7 +390,7 @@ const PersonalDataTab = ({ setError }) => {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowVerificationModal(null)}
                   disabled={isLoading}
-                  className="flex-1 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition duration-300 text-sm"
+                  className="flex-1 py-1 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition duration-300 text-xs"
                 >
                   Отмена
                 </motion.button>
