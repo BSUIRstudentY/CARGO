@@ -209,8 +209,8 @@ public class OrderController {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Заказ с ID " + id + " не найден"));
 
-        if (orderDetails.getTotalClientPrice() == null || orderDetails.getTotalClientPrice() <= 0) {
-            System.out.println("Validation failed: totalClientPrice is null or <= 0");
+        if (orderDetails.getTotalClientPrice() != null && orderDetails.getTotalClientPrice() < 0) {
+            System.out.println("Validation failed: totalClientPrice is negative");
             return ResponseEntity.badRequest().body(new ErrorResponse("Общая цена для клиента должна быть больше 0", 400));
         }
         if (orderDetails.getDeliveryAddress() == null || orderDetails.getDeliveryAddress().trim().isEmpty()) {
@@ -336,7 +336,7 @@ public class OrderController {
                 orderItem.setTrackingNumber(itemDTO.getTrackingNumber());
                 orderItem.setChinaDeliveryPrice(itemDTO.getChinaDeliveryPrice() != null ? itemDTO.getChinaDeliveryPrice() : 0.0f);
 
-                if (orderDetails.getTotalClientPrice() > 0 && !catalogRepository.existsByProductId(itemDTO.getProductId())) {
+                if (itemDTO.getProductId() != null && !catalogRepository.existsByProductId(itemDTO.getProductId())) {
                     Catalog catalog = new Catalog();
                     catalog.setProduct(product);
                     catalogRepository.save(catalog);
@@ -351,10 +351,12 @@ public class OrderController {
             for (OrderItem item : order.getItems()) {
                 if ("NOT_PURCHASED".equals(item.getPurchaseStatus()) && item.getPurchaseRefusalReason() != null) {
                     try {
+                        String productName = item.getProduct() != null ? item.getProduct().getName() :
+                                (item.getTrackingNumber() != null ? "Self-Pickup: " + item.getTrackingNumber() : "Unknown");
                         notificationService.sendOrderItemStatusChangeNotification(
                                 order.getUser(),
                                 order.getId(),
-                                item.getProduct().getName(),
+                                productName,
                                 item.getPurchaseRefusalReason()
                         );
                     } catch (Exception e) {
@@ -430,6 +432,64 @@ public class OrderController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    // Новый эндпоинт для создания заказа с трек-номерами
+    @PostMapping("/orders/self-pickup")
+    @Transactional
+    public ResponseEntity<OrderDTO> createSelfPickupOrder(@RequestBody SelfPickupOrderRequest request) {
+        String userEmail = getCurrentUserEmail();
+        if (userEmail == null) {
+            return ResponseEntity.status(403).body(null);
+        }
+
+        // Валидация входных данных
+        if (request.getTrackingNumbers() == null || request.getTrackingNumbers().isEmpty()) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        // Создание заказа
+        Order order = new Order();
+        order.setUser(user);
+        order.setOrderNumber(UUID.randomUUID().toString());
+        order.setDateCreated(new Timestamp(System.currentTimeMillis()));
+        order.setStatus("PENDING");
+        order.setTotalClientPrice(0.0f); // Пока 0, так как цены неизвестны
+        order.setDeliveryAddress(request.getDeliveryAddress());
+
+        // Создание OrderItem для каждого трек-номера
+        List<OrderItem> orderItems = request.getTrackingNumbers().stream()
+                .map(trackingNumber -> {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setOrder(order);
+                    orderItem.setTrackingNumber(trackingNumber);
+                    orderItem.setPurchaseStatus("PENDING");
+                    orderItem.setQuantity(1); // По умолчанию 1, так как товар неизвестен
+                    orderItem.setPriceAtTime(0.0f); // Цена неизвестна
+
+                    // Create placeholder product
+                    Product placeholder = new Product();
+                    placeholder.setName("Self-Pickup Item: " + trackingNumber);
+                    placeholder.setPrice(0.0f);
+                    placeholder.setUrl(null);
+                    placeholder.setImageUrl("https://placehold.co/128x128?text=Pending");
+                    placeholder.setDescription("Placeholder product for self-pickup order with tracking number: " + trackingNumber);
+                    productRepository.save(placeholder);
+                    orderItem.setProduct(placeholder);
+
+                    return orderItem;
+                })
+                .collect(Collectors.toList());
+
+        order.setItems(orderItems);
+        orderRepository.save(order);
+
+        OrderDTO orderDTO = mapToOrderDTO(order);
+        return ResponseEntity.ok(orderDTO);
+    }
+
+
     @GetMapping("/history/{id}")
     @Transactional(readOnly = true)
     public ResponseEntity<OrderHistoryDTO> getOrderHistoryById(@PathVariable Long id) {
@@ -497,30 +557,30 @@ public class OrderController {
         orderDTO.setDateCreated(order.getDateCreated());
         orderDTO.setStatus(order.getStatus());
         orderDTO.setTotalClientPrice(order.getTotalClientPrice());
-        orderDTO.setSupplierCost(order.getSupplierCost());
-        orderDTO.setCustomsDuty(order.getCustomsDuty());
-        orderDTO.setShippingCost(order.getShippingCost());
+        orderDTO.setSupplierCost(order.getSupplierCost() != null ? order.getSupplierCost() : 0.0f);
+        orderDTO.setCustomsDuty(order.getCustomsDuty() != null ? order.getCustomsDuty() : 0.0f);
+        orderDTO.setShippingCost(order.getShippingCost() != null ? order.getShippingCost() : 0.0f);
         orderDTO.setDeliveryAddress(order.getDeliveryAddress());
         orderDTO.setTrackingNumber(order.getTrackingNumber());
         orderDTO.setReasonRefusal(order.getReasonRefusal());
-        orderDTO.setInsurance(order.getInsurance());
+        orderDTO.setInsurance(order.getInsurance() != null ? order.getInsurance() : false);
         orderDTO.setDiscountType(order.getDiscountType());
-        orderDTO.setDiscountValue(order.getDiscountValue());
+        orderDTO.setDiscountValue(order.getDiscountValue() != null ? order.getDiscountValue() : 0.0f);
         orderDTO.setPromocode(order.getPromocode() != null ? order.getPromocode().getCode() : null);
-        orderDTO.setInsuranceCost(order.getInsuranceCost());
-        orderDTO.setUserDiscountApplied(order.getUserDiscountApplied());
+        orderDTO.setInsuranceCost(order.getInsuranceCost() != null ? order.getInsuranceCost() : 0.0f);
+        orderDTO.setUserDiscountApplied(order.getUserDiscountApplied() != null ? order.getUserDiscountApplied() : 0.0f);
 
         orderDTO.setItems(order.getItems().stream()
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
                     itemDTO.setId(item.getId());
-                    itemDTO.setProductId(item.getProduct().getId().toString());
-                    itemDTO.setProductName(item.getProduct().getName());
+                    itemDTO.setProductId(item.getProduct() != null ? item.getProduct().getId().toString() : null);
+                    itemDTO.setProductName(item.getProduct() != null ? item.getProduct().getName() : "Unknown");
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPriceAtTime(item.getPriceAtTime());
-                    itemDTO.setUrl(item.getProduct().getUrl());
-                    itemDTO.setImageUrl(item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
-                    itemDTO.setDescription(item.getProduct().getDescription());
+                    itemDTO.setUrl(item.getProduct() != null ? item.getProduct().getUrl() : null);
+                    itemDTO.setImageUrl(item.getProduct() != null && item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
+                    itemDTO.setDescription(item.getProduct() != null ? item.getProduct().getDescription() : null);
                     itemDTO.setSupplierPrice(item.getSupplierPrice());
                     itemDTO.setPurchaseStatus(item.getPurchaseStatus());
                     itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
@@ -622,6 +682,13 @@ public class OrderController {
         private Double price;
         private Integer quantity;
     }
+
+    @Data
+    static class SelfPickupOrderRequest {
+        private List<String> trackingNumbers;
+        private String deliveryAddress;
+    }
+
 
     @Data
     static class ErrorResponse {
