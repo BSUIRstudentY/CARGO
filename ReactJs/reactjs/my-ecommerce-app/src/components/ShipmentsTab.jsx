@@ -4,6 +4,34 @@ import Tilt from 'react-parallax-tilt';
 import { ClockIcon } from '@heroicons/react/24/solid';
 import api from '../api/axiosInstance';
 
+// Append global styles for consistency with OrderDetails.jsx
+const styles = `
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in-down {
+    animation: fadeInDown 0.6s ease-out;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`;
+const styleSheet = document.createElement('style');
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);
+
 const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
   const [orders, setOrders] = useState([]);
   const [page, setPage] = useState(1);
@@ -33,9 +61,9 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
           }
         },
         {
-          root: containerRef.current, // Use ShipmentsTab container as root
-          rootMargin: '100px', // Trigger 100px before bottom
-          threshold: 0.1, // Trigger when 10% of element is visible
+          root: containerRef.current,
+          rootMargin: '100px',
+          threshold: 0.1,
         }
       );
       observer.current.observe(node);
@@ -66,68 +94,123 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
   return (
     <div
       ref={containerRef}
-      className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-8 shadow-xl border border-gray-700/50 relative h-[70vh] overflow-y-auto scrollbar-hide"
+      className="h-[70vh] bg-primary rounded-2xl p-8 shadow-card border border-primary/50 relative overflow-y-auto scrollbar-hide"
+      style={{
+        '@media (max-width: 640px)': {
+          padding: '16px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        }
+      }}
     >
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
-        }
-      `}</style>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none" />
-      <h2 className="text-3xl font-bold text-[var(--accent-color)] mb-6 relative z-10">Мои отправления</h2>
-      {error && <p className="text-red-400 text-center mb-4">{error}</p>}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,37,73,0.3)_0%,transparent_70%)] pointer-events-none" />
+      <motion.h2
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-3xl font-bold font-display text-accent-primary mb-6 relative z-10 animate-fade-in-down break-words"
+        style={{
+          '@media (max-width: 640px)': {
+            fontSize: '24px',
+            marginBottom: '16px',
+            overflowWrap: 'break-word',
+            whiteSpace: 'normal',
+          }
+        }}
+      >
+        Мои отправления
+      </motion.h2>
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-center text-base font-medium font-sans relative z-10 break-words"
+          style={{
+            '@media (max-width: 640px)': {
+              padding: '12px',
+              fontSize: '14px',
+              borderRadius: '8px',
+              overflowWrap: 'break-word',
+              whiteSpace: 'normal',
+            }
+          }}
+        >
+          {error}
+        </motion.div>
+      )}
       {orders.length > 0 ? (
         <div className="grid gap-4">
           {orders.map((order, index) => {
-            // Calculate totalChinaDeliveryPrice for the order
             const totalChinaDeliveryPrice = order.items?.reduce((sum, item) => {
               return sum + ((item.chinaDeliveryPrice || 0) * (item.quantity || 1));
             }, 0) || 0;
             const totalOrderPrice = (order.totalClientPrice || 0) + totalChinaDeliveryPrice;
-
             return (
               <Tilt
                 key={order.id}
-                tiltMaxAngleX={10}
-                tiltMaxAngleY={10}
-                perspective={1000}
+                tiltMaxAngleX={8}
+                tiltMaxAngleY={8}
+                perspective={1200}
               >
                 <div ref={index === orders.length - 1 ? lastOrderElementRef : null}>
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="bg-gradient-to-b from-gray-700 to-gray-800 rounded-lg border border-gray-600 p-4 transition-all duration-300 hover:shadow-[0_0_15px_#10b981] cursor-pointer"
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+                    whileTap={{ scale: 0.97 }}
+                    className="bg-tertiary backdrop-blur-lg border border-primary/50 shadow-card hover:shadow-accent-primary/40 rounded-lg p-4 transition-all duration-300 cursor-pointer text-secondary hover:text-accent-primary relative z-10"
                     onClick={() => handleViewOrderDetails(order.id)}
+                    style={{
+                      '@media (max-width: 640px)': {
+                        padding: '12px',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                      }
+                    }}
                   >
-                    <p className="text-gray-300"><strong>Дата:</strong> {new Date(order.dateCreated).toLocaleDateString()}</p>
-                    <p className="text-gray-300"><strong>Номер:</strong> {order.orderNumber}</p>
-                    <p className="text-gray-300"><strong>Статус:</strong>
-                      <span className={order.status === 'PENDING' ? 'text-yellow-300' : 'text-emerald-300'}>
-                        {order.status === 'PENDING' ? ' Ожидает подтверждения' : ' Подтверждён'}
+                    <p className="text-base font-sans">
+                      <strong>Дата:</strong> {new Date(order.dateCreated).toLocaleDateString()}
+                    </p>
+                    <p className="text-base font-sans">
+                      <strong>Номер:</strong> {order.orderNumber}
+                    </p>
+                    <p className="text-base font-sans">
+                      <strong>Статус:</strong>{' '}
+                      <span className={order.status === 'PENDING' ? 'text-yellow-300' : 'text-green-300'}>
+                        {order.status === 'PENDING' ? 'Ожидает подтверждения' : 'Подтверждён'}
                       </span>
                     </p>
                     {totalOrderPrice > 0 && (
-                      <p className="text-gray-300"><strong>Стоимость:</strong> ¥{(order.totalClientPrice + totalChinaDeliveryPrice).toFixed(2)}</p>
+                      <p className="text-base font-sans">
+                        <strong>Стоимость:</strong> ¥{totalOrderPrice.toFixed(2)}
+                      </p>
                     )}
-                    {totalOrderPrice > 0 && order.status !== 'PAID' && (
-                      <button
+                    {totalOrderPrice > 0 && order.status === 'VERIFIED' && order.status !== 'PAID' && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={(e) => {
                           e.stopPropagation();
                           handlePay(order.id);
                         }}
-                        className="mt-2 px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition duration-300 transform hover:scale-105"
+                        className="mt-2 px-4 py-2 bg-accent-primary text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans shadow-card"
+                        style={{
+                          '@media (max-width: 640px)': {
+                            padding: '8px 12px',
+                            fontSize: '14px',
+                            borderRadius: '6px',
+                          }
+                        }}
                       >
                         Оплатить
-                      </button>
+                      </motion.button>
                     )}
                     {order.status === 'PAID' && (
-                      <p className="text-emerald-300 mt-2">Оплачено</p>
+                      <p className="text-green-300 mt-2 text-base font-sans">Оплачено</p>
                     )}
+                    
                   </motion.div>
                 </div>
               </Tilt>
@@ -135,12 +218,21 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
           })}
         </div>
       ) : (
-        !loading && <p className="text-center text-gray-400 text-lg relative z-10">У вас пока нет текущих отправлений.</p>
+        !loading && (
+          <p className="text-center text-secondary text-lg font-sans relative z-10">
+            У вас пока нет текущих отправлений.
+          </p>
+        )
       )}
       {loading && !isInitialLoad.current && (
-        <div className="text-center text-gray-400 mt-4">
-          <ClockIcon className="w-6 h-6 animate-spin mx-auto text-[var(--accent-color)]" />
-          <p>Загрузка...</p>
+        <div className="text-center text-secondary mt-4">
+          <ClockIcon className="w-6 h-6 animate-spin mx-auto text-accent-primary" style={{
+            '@media (max-width: 640px)': {
+              width: '20px',
+              height: '20px',
+            }
+          }} />
+          <p className="text-base font-sans">Загрузка...</p>
         </div>
       )}
     </div>

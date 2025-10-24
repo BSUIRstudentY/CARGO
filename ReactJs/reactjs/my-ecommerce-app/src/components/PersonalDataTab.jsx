@@ -1,7 +1,29 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Tilt from 'react-parallax-tilt';
 import api from '../api/axiosInstance';
 import { UserIcon, BellIcon, KeyIcon, CurrencyDollarIcon, UsersIcon, TagIcon } from '@heroicons/react/24/solid';
+
+// Append global styles for consistency with DeliveryPayment.jsx
+const styles = `
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in-down {
+    animation: fadeInDown 0.6s ease-out;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+`;
+const styleSheet = document.createElement('style');
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);
 
 const PersonalDataTab = ({ setError }) => {
   const [userData, setUserData] = useState({
@@ -126,7 +148,8 @@ const PersonalDataTab = ({ setError }) => {
   }, [verificationCode, setError]);
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl">
+    <div className="w-full p-4 sm:p-6 lg:p-8 bg-primary rounded-xl shadow-card border border-primary/50 relative">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,37,73,0.3)_0%,transparent_70%)] pointer-events-none" />
       {/* Status Message */}
       <AnimatePresence>
         {statusMessage && (
@@ -135,7 +158,7 @@ const PersonalDataTab = ({ setError }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className={`mb-6 p-4 rounded-lg text-center text-base font-medium ${
+            className={`mb-6 p-4 rounded-lg text-center text-base font-medium font-sans relative z-10 ${
               statusMessage.includes('Ошибка')
                 ? 'bg-red-500/20 border-red-500/50 text-red-400'
                 : 'bg-green-500/20 border-green-500/50 text-green-400'
@@ -153,202 +176,222 @@ const PersonalDataTab = ({ setError }) => {
           exit={{ opacity: 0 }}
           className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000]"
         >
-          <div className="animate-spin rounded-full h-10 w-10 border-t-3 border-cyan-400" />
+          <div className="animate-spin rounded-full h-10 w-10 border-t-3 border-accent-primary" />
         </motion.div>
       )}
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-6 flex items-center gap-3"
+        className="mb-6 flex items-center gap-3 relative z-10 animate-fade-in-down"
       >
-        <UserIcon className="w-8 h-8 text-cyan-400" />
-        <h2 className="text-2xl font-bold text-white tracking-tight">Личный кабинет</h2>
+        <UserIcon className="w-8 h-8 text-accent-primary" />
+        <h2 className="text-2xl font-bold font-display text-accent-primary tracking-tight">Личный кабинет</h2>
       </motion.div>
       {/* User Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-4 mb-4 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
-      >
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="relative">
-            <img
-              src={userData.avatarUrl}
-              alt="User Avatar"
-              className="w-24 h-24 rounded-full border-4 border-cyan-400/30 shadow-lg object-cover ring-2 ring-cyan-400/50"
-            />
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-emerald-400/20 opacity-50" />
+      <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+          whileTap={{ scale: 0.97 }}
+          className="bg-tertiary backdrop-blur-lg rounded-xl p-4 mb-4 border border-primary/50 shadow-card hover:shadow-accent-primary/40 transition-shadow duration-300 relative z-10"
+        >
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="relative">
+              <img
+                src={userData.avatarUrl}
+                alt="User Avatar"
+                className="w-24 h-24 rounded-full border-4 border-accent-primary/30 shadow-lg object-cover ring-2 ring-accent-primary/50"
+              />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent-primary/20 to-emerald-400/20 opacity-50" />
+            </div>
+            <div className="text-center sm:text-left space-y-1">
+              <h3 className="text-xl font-semibold font-sans text-accent-primary">{userData.username || 'Гость'}</h3>
+              <p className="text-sm text-secondary font-sans">{userData.company || 'Компания не указана'}</p>
+              <p className="text-xs text-accent-primary font-sans">Роль: {userData.role || 'Не указана'}</p>
+            </div>
           </div>
-          <div className="text-center sm:text-left space-y-1">
-            <h3 className="text-xl font-semibold text-white">{userData.username || 'Гость'}</h3>
-            <p className="text-sm text-gray-300">{userData.company || 'Компания не указана'}</p>
-            <p className="text-xs text-cyan-400">Роль: {userData.role || 'Не указана'}</p>
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </Tilt>
       {/* Contact Info Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-4 mb-4 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
-      >
-        <h3 className="text-base font-semibold text-white mb-3">Контактная информация</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-300">Email</label>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-white">{userData.email || 'user@example.com'}</p>
-              <div className="flex items-center gap-2">
-                <p className={`text-xs ${userData.emailVerified ? 'text-green-400' : 'text-red-400'}`}>
-                  {userData.emailVerified ? 'Верифицирован' : 'Не верифицирован'}
-                </p>
-                {!userData.emailVerified && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleRequestVerification('email')}
-                    disabled={isVerificationLoading.email}
-                    className={`px-2 py-1 rounded-lg text-xs text-white transition duration-300 ${
-                      isVerificationLoading.email ? 'bg-gray-500' : 'bg-cyan-400 hover:bg-cyan-500'
-                    }`}
-                  >
-                    {isVerificationLoading.email ? 'Отправка...' : 'Верифицировать'}
-                  </motion.button>
-                )}
+      <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+          whileTap={{ scale: 0.97 }}
+          className="bg-tertiary backdrop-blur-lg rounded-xl p-4 mb-4 border border-primary/50 shadow-card hover:shadow-accent-primary/40 transition-shadow duration-300 relative z-10"
+        >
+          <h3 className="text-base font-semibold font-sans text-accent-primary mb-3">Контактная информация</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-secondary font-sans">Email</label>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-secondary font-sans">{userData.email || 'user@example.com'}</p>
+                <div className="flex items-center gap-2">
+                  <p className={`text-xs font-sans ${userData.emailVerified ? 'text-green-400' : 'text-red-400'}`}>
+                    {userData.emailVerified ? 'Верифицирован' : 'Не верифицирован'}
+                  </p>
+                  {!userData.emailVerified && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleRequestVerification('email')}
+                      disabled={isVerificationLoading.email}
+                      className={`px-2 py-1 rounded-lg text-xs text-primary font-sans transition duration-300 ${
+                        isVerificationLoading.email ? 'bg-gray-500' : 'bg-accent-primary hover:bg-accent-primary/90'
+                      }`}
+                    >
+                      {isVerificationLoading.email ? 'Отправка...' : 'Верифицировать'}
+                    </motion.button>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-secondary font-sans">Телефон</label>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-secondary font-sans">{userData.phone || 'Не указан'}</p>
+                <div className="flex items-center gap-2">
+                  <p className={`text-xs font-sans ${userData.phoneVerified ? 'text-green-400' : 'text-red-400'}`}>
+                    {userData.phoneVerified ? 'Верифицирован' : 'Не верифицирован'}
+                  </p>
+                  {!userData.phoneVerified && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleRequestVerification('phone')}
+                      disabled={isVerificationLoading.phone}
+                      className={`px-2 py-1 rounded-lg text-xs text-primary font-sans transition duration-300 ${
+                        isVerificationLoading.phone ? 'bg-gray-500' : 'bg-accent-primary hover:bg-accent-primary/90'
+                      }`}
+                    >
+                      {isVerificationLoading.phone ? 'Отправка...' : 'Верифицировать'}
+                    </motion.button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-300">Телефон</label>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-white">{userData.phone || 'Не указан'}</p>
-              <div className="flex items-center gap-2">
-                <p className={`text-xs ${userData.phoneVerified ? 'text-green-400' : 'text-red-400'}`}>
-                  {userData.phoneVerified ? 'Верифицирован' : 'Не верифицирован'}
-                </p>
-                {!userData.phoneVerified && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleRequestVerification('phone')}
-                    disabled={isVerificationLoading.phone}
-                    className={`px-2 py-1 rounded-lg text-xs text-white transition duration-300 ${
-                      isVerificationLoading.phone ? 'bg-gray-500' : 'bg-cyan-400 hover:bg-cyan-500'
-                    }`}
-                  >
-                    {isVerificationLoading.phone ? 'Отправка...' : 'Верифицировать'}
-                  </motion.button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </Tilt>
       {/* Financial Info Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-4 mb-4 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
-      >
-        <h3 className="text-base font-semibold text-white mb-3">Финансовая информация</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-300">Баланс</label>
-            <div className="flex items-center gap-2">
-              <CurrencyDollarIcon className="w-4 h-4 text-cyan-400" />
-              <p className="text-sm text-white">{userData.balance?.toFixed(2) || '0.00'} BYN</p>
+      <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+          whileTap={{ scale: 0.97 }}
+          className="bg-tertiary backdrop-blur-lg rounded-xl p-4 mb-4 border border-primary/50 shadow-card hover:shadow-accent-primary/40 transition-shadow duration-300 relative z-10"
+        >
+          <h3 className="text-base font-semibold font-sans text-accent-primary mb-3">Финансовая информация</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-secondary font-sans">Баланс</label>
+              <div className="flex items-center gap-2">
+                <CurrencyDollarIcon className="w-4 h-4 text-accent-primary" />
+                <p className="text-sm text-secondary font-sans">{userData.balance?.toFixed(2) || '0.00'} BYN</p>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-secondary font-sans">Потрачено</label>
+              <div className="flex items-center gap-2">
+                <CurrencyDollarIcon className="w-4 h-4 text-accent-primary" />
+                <p className="text-sm text-secondary font-sans">{userData.moneySpent?.toFixed(2) || '0.00'} BYN</p>
+              </div>
             </div>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-300">Потрачено</label>
-            <div className="flex items-center gap-2">
-              <CurrencyDollarIcon className="w-4 h-4 text-cyan-400" />
-              <p className="text-sm text-white">{userData.moneySpent?.toFixed(2) || '0.00'} BYN</p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </Tilt>
       {/* Referral Info Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-4 mb-4 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
-      >
-        <h3 className="text-base font-semibold text-white mb-3">Реферальная программа</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-300">Реферальный код</label>
-            <div className="flex items-center gap-2">
-              <TagIcon className="w-4 h-4 text-cyan-400" />
-              <p className="text-sm text-white">{userData.referralCode || 'Не указан'}</p>
+      <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+          whileTap={{ scale: 0.97 }}
+          className="bg-tertiary backdrop-blur-lg rounded-xl p-4 mb-4 border border-primary/50 shadow-card hover:shadow-accent-primary/40 transition-shadow duration-300 relative z-10"
+        >
+          <h3 className="text-base font-semibold font-sans text-accent-primary mb-3">Реферальная программа</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-secondary font-sans">Реферальный код</label>
+              <div className="flex items-center gap-2">
+                <TagIcon className="w-4 h-4 text-accent-primary" />
+                <p className="text-sm text-secondary font-sans">{userData.referralCode || 'Не указан'}</p>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-secondary font-sans">Количество рефералов</label>
+              <div className="flex items-center gap-2">
+                <UsersIcon className="w-4 h-4 text-accent-primary" />
+                <p className="text-sm text-secondary font-sans">{userData.referralCount || 0}</p>
+              </div>
             </div>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-300">Количество рефералов</label>
-            <div className="flex items-center gap-2">
-              <UsersIcon className="w-4 h-4 text-cyan-400" />
-              <p className="text-sm text-white">{userData.referralCount || 0}</p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </Tilt>
       {/* Security Settings Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-        className="bg-gray-800/30 backdrop-blur-lg rounded-xl p-4 border border-gray-700/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300"
-      >
-        <h3 className="text-base font-semibold text-white mb-3">Настройки безопасности и уведомлений</h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BellIcon className="w-4 h-4 text-cyan-400" />
-              <label className="text-xs text-gray-300">Уведомления по email</label>
+      <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+          whileTap={{ scale: 0.97 }}
+          className="bg-tertiary backdrop-blur-lg rounded-xl p-4 border border-primary/50 shadow-card hover:shadow-accent-primary/40 transition-shadow duration-300 relative z-10"
+        >
+          <h3 className="text-base font-semibold font-sans text-accent-primary mb-3">Настройки безопасности и уведомлений</h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BellIcon className="w-4 h-4 text-accent-primary" />
+                <label className="text-xs text-secondary font-sans">Уведомления по email</label>
+              </div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="relative inline-flex items-center cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={userData.notificationsEnabled}
+                  onChange={() => handleNotificationToggle('email')}
+                  className="sr-only peer"
+                  disabled={isLoading}
+                />
+                <div className="w-10 h-5 bg-gray-700 rounded-full peer-checked:bg-accent-primary/50 transition duration-300"></div>
+                <div className="absolute left-1 top-1 w-3 h-3 bg-primary rounded-full peer-checked:translate-x-5 transition duration-300"></div>
+              </motion.div>
             </div>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="relative inline-flex items-center cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                checked={userData.notificationsEnabled}
-                onChange={() => handleNotificationToggle('email')}
-                className="sr-only peer"
-                disabled={isLoading}
-              />
-              <div className="w-10 h-5 bg-gray-700 rounded-full peer-checked:bg-cyan-400/50 transition duration-300"></div>
-              <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full peer-checked:translate-x-5 transition duration-300"></div>
-            </motion.div>
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <KeyIcon className="w-4 h-4 text-cyan-400" />
-              <label className="text-xs text-gray-300">Двухфакторная аутентификация</label>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <KeyIcon className="w-4 h-4 text-accent-primary" />
+                <label className="text-xs text-secondary font-sans">Двухфакторная аутентификация</label>
+              </div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="relative inline-flex items-center cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={userData.twoFactorEnabled}
+                  onChange={() => handleNotificationToggle('2fa')}
+                  className="sr-only peer"
+                  disabled={isLoading}
+                />
+                <div className="w-10 h-5 bg-gray-700 rounded-full peer-checked:bg-accent-primary/50 transition duration-300"></div>
+                <div className="absolute left-1 top-1 w-3 h-3 bg-primary rounded-full peer-checked:translate-x-5 transition duration-300"></div>
+              </motion.div>
             </div>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="relative inline-flex items-center cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                checked={userData.twoFactorEnabled}
-                onChange={() => handleNotificationToggle('2fa')}
-                className="sr-only peer"
-                disabled={isLoading}
-              />
-              <div className="w-10 h-5 bg-gray-700 rounded-full peer-checked:bg-cyan-400/50 transition duration-300"></div>
-              <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full peer-checked:translate-x-5 transition duration-300"></div>
-            </motion.div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </Tilt>
       {/* Verification Modal */}
       <AnimatePresence>
         {showVerificationModal && (
@@ -363,16 +406,16 @@ const PersonalDataTab = ({ setError }) => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="bg-gray-800/90 backdrop-blur-lg rounded-xl p-4 w-full max-w-xs border border-cyan-400/20 shadow-lg"
+              className="bg-tertiary backdrop-blur-lg rounded-xl p-4 w-full max-w-xs border border-primary/50 shadow-card"
             >
-              <h3 className="text-base font-semibold text-white mb-3">
+              <h3 className="text-base font-semibold font-sans text-accent-primary mb-3">
                 Верификация {showVerificationModal === 'email' ? 'Email' : 'Телефона'}
               </h3>
               <input
                 type="text"
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)}
-                className="w-full p-2 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300 text-sm"
+                className="w-full p-2 bg-tertiary text-secondary border border-primary/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary transition duration-300 text-sm font-sans"
                 placeholder="Введите код"
               />
               <div className="flex gap-2 mt-3">
@@ -381,7 +424,7 @@ const PersonalDataTab = ({ setError }) => {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleConfirmVerification(showVerificationModal)}
                   disabled={isLoading}
-                  className="flex-1 py-1 bg-cyan-400 text-white rounded-lg hover:bg-cyan-500 transition duration-300 text-xs"
+                  className="flex-1 py-1 bg-accent-primary text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-xs font-sans"
                 >
                   Подтвердить
                 </motion.button>
@@ -390,7 +433,7 @@ const PersonalDataTab = ({ setError }) => {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowVerificationModal(null)}
                   disabled={isLoading}
-                  className="flex-1 py-1 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition duration-300 text-xs"
+                  className="flex-1 py-1 bg-gray-700 text-secondary rounded-lg hover:bg-gray-600 transition duration-300 text-xs font-sans"
                 >
                   Отмена
                 </motion.button>

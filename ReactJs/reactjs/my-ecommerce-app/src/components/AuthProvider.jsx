@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api/axiosInstance';
 import { jwtDecode } from 'jwt-decode';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
@@ -13,6 +14,7 @@ export function AuthProvider({ children }) {
       role: localStorage.getItem('userRole') || null,
     },
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const validateAuth = async () => {
@@ -77,6 +79,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem('userName', username || '');
       localStorage.setItem('userRole', role);
       setAuthState({ isAuthenticated: true, user: { email: userEmail, username: username || '', role } });
+      navigate("/");
     } catch (error) {
       throw new Error('Login failed');
     }
@@ -102,6 +105,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem('userName', userName || username || '');
       localStorage.setItem('userRole', userRole);
       setAuthState({ isAuthenticated: true, user: { email: userEmail, username: userName || username || '', role: userRole } });
+      navigate("/");
     } catch (error) {
       throw new Error('Registration failed: ' + (error.response?.data?.message || error.message));
     }
@@ -123,6 +127,7 @@ export function AuthProvider({ children }) {
       localStorage.removeItem('userName');
       localStorage.removeItem('userRole');
       setAuthState({ isAuthenticated: false, user: { email: null, username: null, role: null } });
+      navigate("/");
     }
   };
 

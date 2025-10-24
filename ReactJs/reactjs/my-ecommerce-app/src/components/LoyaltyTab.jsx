@@ -23,7 +23,6 @@ const formatExpirationDate = (date) => {
 const getTimeRemaining = (expirationDate) => {
   if (!expirationDate) return '0 мин.';
   const [year, month, day, hour, minute, second, nano] = expirationDate;
-  // Convert Moscow time (UTC+3) to UTC by subtracting 3 hours
   const expirationUTC = new Date(Date.UTC(year, month - 1, day, hour - 3, minute, second, Math.floor(nano / 1000000)));
   const currentUTC = new Date();
   const diffMs = expirationUTC - currentUTC;
@@ -53,13 +52,15 @@ const faqData = [
 
 // Component for individual stat cards
 const StatCard = ({ children, className }) => (
-  <motion.div
-    className={`flex-1 min-w-[250px] bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-8 text-center shadow-xl backdrop-blur-sm border border-gray-700/50 transition-transform duration-300 hover:-translate-y-2 hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] ${className}`}
-    whileHover={{ y: -8, scale: 1.02 }}
-    whileTap={{ scale: 0.98 }}
-  >
-    {children}
-  </motion.div>
+  <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+    <motion.div
+      className={`flex-1 min-w-[250px] bg-tertiary rounded-2xl p-8 text-center shadow-card border border-primary hover:shadow-accent-primary/40 transition-shadow duration-300 relative overflow-hidden ${className}`}
+      whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+      whileTap={{ scale: 0.97 }}
+    >
+      {children}
+    </motion.div>
+  </Tilt>
 );
 
 // Component for individual quest cards
@@ -75,30 +76,32 @@ const QuestCard = ({ quest, onClaim, onShowDetails }) => {
   };
 
   return (
-    <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+    <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
       <motion.div
         onClick={() => onShowDetails(quest)}
-        className={`w-full max-w-md h-20 bg-gradient-to-b ${quest.completed ? 'from-[var(--accent-color)] to-emerald-600' : 'from-gray-700 to-gray-800'} rounded-lg border border-gray-600 p-4 transition-all duration-300 hover:shadow-[0_0_15px_#10b981] ${!quest.completed ? 'animate-glow' : ''} relative cursor-pointer`}
+        className={`w-full max-w-md h-20 bg-tertiary rounded-2xl border border-primary shadow-card hover:shadow-accent-primary/40 transition-shadow duration-300 relative overflow-hidden cursor-pointer`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4 }}
+        whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+        whileTap={{ scale: 0.97 }}
       >
-        <div className="flex flex-row items-center h-full gap-4">
-          <GiftIcon className="w-6 h-6 text-white" />
+        <div className="flex flex-row items-center h-full gap-4 p-4">
+          <GiftIcon className="w-6 h-6 text-accent-primary" />
           <div className="flex-1">
-            <p className="text-sm text-gray-300">
+            <p className="text-sm text-secondary">
               Прогресс: <span className="font-medium">{quest.currentValue}/{quest.targetValue}</span>
             </p>
           </div>
-          <div className="w-24 bg-gray-600 rounded-full h-2">
+          <div className="w-24 bg-gray-300/50 rounded-full h-2">
             <motion.div
-              className={`bg-gradient-to-r from-[var(--accent-color)] to-emerald-500 h-2 rounded-full ${!quest.completed ? 'animate-glow' : ''}`}
+              className="bg-accent-primary h-2 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${(quest.currentValue / quest.targetValue) * 100}%` }}
               transition={{ duration: 1, ease: 'easeInOut' }}
             />
           </div>
-          {quest.completed && <CheckCircleIcon className="absolute top-3 right-12 w-6 h-6 text-white" />}
+          {quest.completed && <CheckCircleIcon className="absolute top-3 right-12 w-6 h-6 text-accent-primary" />}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -106,7 +109,7 @@ const QuestCard = ({ quest, onClaim, onShowDetails }) => {
               onClaim(quest.id);
             }}
             disabled={!quest.completed}
-            className={`px-4 py-1 rounded-lg text-sm transition ${quest.completed ? 'bg-emerald-500 text-white hover:bg-emerald-400' : 'bg-gray-500 text-gray-300 cursor-not-allowed'}`}
+            className={`px-4 py-1 rounded-lg text-sm font-sans transition ${quest.completed ? 'bg-accent-primary text-primary hover:bg-accent-primary/90' : 'bg-gray-300/50 text-secondary cursor-not-allowed'}`}
           >
             {quest.completed ? 'Забрать' : 'Не завершено'}
           </button>
@@ -130,57 +133,65 @@ const QuestDetailsModal = ({ quest, getQuestName, getRewardTypeLabel, onClose })
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.8, opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-gray-700 rounded-xl p-8 max-w-lg w-[90%] max-h-[80vh] overflow-y-auto"
+      className="bg-tertiary rounded-2xl p-8 max-w-lg w-[90%] max-h-[80vh] overflow-y-auto no-scrollbar border border-primary shadow-card"
     >
-      <h3 className="text-2xl font-semibold text-white mb-4">{getQuestName(quest.questConditionType, quest.targetValue)}</h3>
-      <p className="text-gray-300 mb-4">
+      <h3 className="text-2xl font-bold font-display text-accent-primary mb-4">{getQuestName(quest.questConditionType, quest.targetValue)}</h3>
+      <p className="text-secondary mb-4 text-base">
         <strong>Тип квеста:</strong> {quest.questConditionType}
       </p>
-      <p className="text-gray-300 mb-4">
+      <p className="text-secondary mb-4 text-base">
         <strong>Награда:</strong> +{quest.reward}% ({getRewardTypeLabel(quest.rewardType)})
       </p>
-      <p className="text-gray-300 mb-4">
+      <p className="text-secondary mb-4 text-base">
         <strong>Прогресс:</strong> {quest.currentValue}/{quest.targetValue}
       </p>
-      <p className="text-gray-300 mb-4">
+      <p className="text-secondary mb-4 text-base">
         <strong>Статус:</strong> {quest.completed ? 'Выполнен' : 'Не выполнен'}
       </p>
-      <button
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={onClose}
-        className="w-full py-3 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition"
+        className="w-full py-3 bg-accent-primary text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans shadow-card"
       >
         Закрыть
-      </button>
+      </motion.button>
     </motion.div>
   </motion.div>
 );
 
 // Component for FAQ items
 const FaqItem = ({ faq, index, isOpen, toggle }) => (
-  <div>
-    <motion.button
-      animate={{ backgroundColor: isOpen ? '#374151' : '#1f2937' }}
-      transition={{ duration: 0.3 }}
-      onClick={() => toggle(index)}
-      className="flex justify-between items-center w-full p-4 rounded-lg cursor-pointer transition-colors"
+  <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+    <motion.div
+      className="bg-primary rounded-2xl shadow-card border border-primary hover:shadow-accent-primary/40 transition-shadow duration-300 relative overflow-hidden"
+      whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+      whileTap={{ scale: 0.97 }}
     >
-      <span className="text-lg text-white font-medium">{faq.question}</span>
-      <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-    </motion.button>
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.3 }}
-          className="p-4 bg-gray-700 rounded-lg mt-2"
-        >
-          <p className="text-gray-300">{faq.answer}</p>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  </div>
+      <motion.button
+        animate={{ backgroundColor: isOpen ? '#374151' : 'bg-primary' }}
+        transition={{ duration: 0.3 }}
+        onClick={() => toggle(index)}
+        className="flex justify-between items-center w-full p-4 rounded-lg cursor-pointer transition-colors"
+      >
+        <span className="text-lg text-primary font-medium font-display">{faq.question}</span>
+        <ChevronDownIcon className={`w-5 h-5 text-secondary transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </motion.button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="p-4 rounded-lg mt-2"
+          >
+            <p className="text-secondary text-base">{faq.answer}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  </Tilt>
 );
 
 // Main LoyaltyTab component
@@ -292,7 +303,7 @@ const LoyaltyTab = () => {
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#10b981', '#34d399', '#6ee7b7'],
+      colors: ['#ff2549', '#ffffff', '#6b7280'],
     });
     alert(`Награда за квест ${questId} успешно забрана! (Симуляция)`);
   };
@@ -326,24 +337,74 @@ const LoyaltyTab = () => {
   // Render loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <ArrowPathIcon className="w-12 h-12 text-[var(--accent-color)] animate-spin" />
+      <div className="flex items-center justify-center h-full bg-primary">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-accent-primary text-2xl bg-tertiary p-6 rounded-2xl border border-primary shadow-card hover:shadow-accent-primary/40 animate-pulse"
+        >
+          <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-accent-primary mx-auto mb-4" />
+          Загрузка...
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="h-[70vh] overflow-y-auto scrollbar-hide bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6 sm:p-12">
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
+    <div className="bg-primary text-primary font-sans py-12 px-4 sm:px-6 lg:px-8 h-[70vh] overflow-y-auto  no-scrollbar">
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar {
           display: none;
         }
-        .scrollbar-hide {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        @media (max-width: 640px) {
+          .mobile-tab-bar {
+            display: flex;
+            overflow-x: auto;
+            padding: 8px 0;
+            margin-bottom: 16px;
+            background: var(--bg-tertiary);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-primary);
+          }
+          .mobile-tab-button {
+            flex: 0 0 auto;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+          }
+          .mobile-tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 8px;
+            right: 8px;
+            height: 2px;
+            background-color: var(--accent-primary);
+          }
+          .mobile-content {
+            padding-bottom: 80px; /* Space for FAB */
+          }
+          .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 50;
+          }
+        }
+        @media (min-width: 641px) {
+          .mobile-tab-bar, .fab {
+            display: none;
+          }
         }
       `}</style>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto max-h-[calc(100vh-120px)] overflow-y-auto no-scrollbar">
         {/* Header Section */}
         <motion.header
           initial={{ opacity: 0, y: -50 }}
@@ -351,15 +412,19 @@ const LoyaltyTab = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-4xl font-bold text-[var(--accent-color)] mb-2">Система лояльности</h2>
-          <p className="text-lg text-gray-400">Получайте скидки и бонусы за выполнение квестов и приглашение друзей!</p>
-          <button
+          <h2 className="text-4xl font-bold font-display text-accent-primary tracking-tight animate-fade-in-down">
+            Система лояльности
+          </h2>
+          <p className="text-lg text-secondary mt-2">Получайте скидки и бонусы за выполнение квестов и приглашение друзей!</p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setShowTutorial(true)}
-            className="mt-4 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
+            className="mt-4 px-4 py-2 bg-accent-primary text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans flex items-center justify-center gap-2 shadow-card"
           >
-            <InformationCircleIcon className="w-5 h-5 inline mr-2" />
+            <InformationCircleIcon className="w-5 h-5" />
             Пройти обучение
-          </button>
+          </motion.button>
         </motion.header>
         {/* Error Message */}
         <AnimatePresence>
@@ -369,7 +434,7 @@ const LoyaltyTab = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
-              className="mb-8 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500"
+              className="mb-8 p-4 bg-red-500/30 border border-red-500/50 rounded-2xl text-red-300 text-center text-base font-medium font-sans shadow-card"
             >
               {error}
             </motion.div>
@@ -380,187 +445,236 @@ const LoyaltyTab = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-12 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl shadow-2xl p-8 flex flex-wrap gap-8 justify-center relative overflow-hidden"
+          className="mb-12"
         >
-          {/* Background Glow Effect */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none" />
-          {/* Total Discount with Breakdown */}
-          <StatCard className="relative">
-            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_0%,transparent_70%)] rounded-2xl pointer-events-none" />
-            <div className="relative w-64 h-64 mx-auto">
-              <svg className="w-full h-full" viewBox="0 0 36 36">
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="#444"
-                  strokeWidth="3"
-                />
-                {/* Permanent Discount Segment */}
-                <motion.path
-                  strokeDasharray={`${userData.discountPercent}, 100`}
-                  strokeDashoffset={0}
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="var(--accent-color)"
-                  strokeWidth="3"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: userData.discountPercent / 100 }}
-                  transition={{ duration: 1.5, ease: 'easeInOut' }}
-                />
-                {/* Temporary Discount Segment */}
-                <motion.path
-                  strokeDasharray={`${userData.temporaryDiscountPercent || 0}, 100`}
-                  strokeDashoffset={-userData.discountPercent}
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="#10b981"
-                  strokeWidth="3"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: (userData.temporaryDiscountPercent || 0) / 100 }}
-                  transition={{ duration: 1.5, ease: 'easeInOut', delay: 0.3 }}
-                />
-              </svg>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                <p className="text-5xl font-extrabold text-white drop-shadow-md">{userData.totalDiscount}%</p>
-                <p className="text-base font-medium text-gray-300 mt-2">Общая скидка</p>
-              </div>
-            </div>
-            <div className="mt-6 flex flex-col items-center gap-2">
-              <p className="text-sm font-medium text-gray-400 tracking-wide">
-                Постоянная: {userData.discountPercent}% (Действует бессрочно)
-              </p>
-              <p className="text-sm font-medium text-gray-400 tracking-wide">
-                Временная: {userData.temporaryDiscountPercent || 0}%
-                {userData.temporaryDiscountExpired ? '' : ' (Нет активной скидки)'}
-              </p>
-            </div>
-          </StatCard>
-          {/* Warning Message for Temporary Discount Expiration */}
-          {userData.temporaryDiscountPercent > 0 && userData.temporaryDiscountExpired && (
+          <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="w-full max-w-md bg-gradient-to-r from-red-600/80 to-orange-600/80 rounded-lg p-4 text-center border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.5)]"
+              className="bg-tertiary rounded-2xl shadow-card border border-primary hover:shadow-accent-primary/40 transition-shadow duration-300 relative overflow-hidden p-8"
+              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+              whileTap={{ scale: 0.97 }}
             >
-              <p className="text-white font-semibold text-sm">
-                Временная скидка истекает через: {getTimeRemaining(userData.temporaryDiscountExpired)}
-              </p>
-              <p className="text-white text-xs mt-2">
-                Внимание: все достижения в квестах обнулятся при истечении временной скидки!
-              </p>
+              <div className="flex items-center mb-4">
+                <GiftIcon className="w-8 h-8 text-accent-primary mr-2" />
+                <h3 className="text-2xl font-bold font-display text-accent-primary">Ваши скидки</h3>
+              </div>
+              <StatCard className="relative">
+                <div className="relative w-64 h-64 mx-auto">
+                  <svg className="w-full h-full" viewBox="0 0 36 36">
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="#e5e7eb"
+                      strokeWidth="3"
+                    />
+                    <motion.path
+                      strokeDasharray={`${userData.discountPercent}, 100`}
+                      strokeDashoffset={0}
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="#ff2549"
+                      strokeWidth="3"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: userData.discountPercent / 100 }}
+                      transition={{ duration: 1.5, ease: 'easeInOut' }}
+                    />
+                    <motion.path
+                      strokeDasharray={`${userData.temporaryDiscountPercent || 0}, 100`}
+                      strokeDashoffset={-userData.discountPercent}
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="#6b7280"
+                      strokeWidth="3"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: (userData.temporaryDiscountPercent || 0) / 100 }}
+                      transition={{ duration: 1.5, ease: 'easeInOut', delay: 0.3 }}
+                    />
+                  </svg>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                    <p className="text-5xl font-extrabold text-primary drop-shadow-md">{userData.totalDiscount}%</p>
+                    <p className="text-base font-medium text-secondary mt-2">Общая скидка</p>
+                  </div>
+                </div>
+                <div className="mt-6 flex flex-col items-center gap-2">
+                  <p className="text-sm font-medium text-secondary tracking-wide">
+                    Постоянная: {userData.discountPercent}% (Действует бессрочно)
+                  </p>
+                  <p className="text-sm font-medium text-secondary tracking-wide">
+                    Временная: {userData.temporaryDiscountPercent || 0}%
+                    {userData.temporaryDiscountExpired ? '' : ' (Нет активной скидки)'}
+                  </p>
+                </div>
+              </StatCard>
+              {userData.temporaryDiscountPercent > 0 && userData.temporaryDiscountExpired && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  className="w-full max-w-md bg-red-500/30 rounded-2xl p-4 text-center border border-red-500/50 shadow-card hover:shadow-red-500/50 mt-6"
+                >
+                  <p className="text-primary font-semibold text-sm">
+                    Временная скидка истекает через: {getTimeRemaining(userData.temporaryDiscountExpired)}
+                  </p>
+                  <p className="text-secondary text-xs mt-2">
+                    Внимание: все достижения в квестах обнулятся при истечении временной скидки!
+                  </p>
+                </motion.div>
+              )}
             </motion.div>
-          )}
+          </Tilt>
         </motion.section>
         {/* Quests Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="mb-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl shadow-2xl p-8"
+          className="mb-12"
         >
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-semibold text-white">Квесты</h3>
-            <button
-              onClick={() => setShowIncompleteOnly(!showIncompleteOnly)}
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
+          <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+            <motion.div
+              className="bg-tertiary rounded-2xl shadow-card border border-primary hover:shadow-accent-primary/40 transition-shadow duration-300 relative overflow-hidden p-8"
+              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+              whileTap={{ scale: 0.97 }}
             >
-              {showIncompleteOnly ? 'Показать все' : 'Только незавершенные'}
-            </button>
-          </div>
-          <div className="flex flex-col space-y-4 pt-6">
-            {questList}
-          </div>
+              <div className="flex items-center mb-4">
+                <GiftIcon className="w-8 h-8 text-accent-primary mr-2" />
+                <h3 className="text-2xl font-bold font-display text-accent-primary">Квесты</h3>
+              </div>
+              <div className="flex justify-end mb-6">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowIncompleteOnly(!showIncompleteOnly)}
+                  className="px-4 py-2 bg-accent-primary text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans shadow-card"
+                >
+                  {showIncompleteOnly ? 'Показать все' : 'Только незавершенные'}
+                </motion.button>
+              </div>
+              <div className="flex flex-col space-y-4">
+                {questList}
+              </div>
+            </motion.div>
+          </Tilt>
         </motion.section>
         {/* Referral Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="mb-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl shadow-2xl p-8"
+          className="mb-12"
         >
-          <h3 className="text-2xl font-semibold text-white mb-6">Приглашайте друзей</h3>
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <input
-              type="text"
-              value={referralCodeActivate}
-              onChange={e => setReferralCodeActivate(e.target.value)}
-              placeholder="Введите реферальный код"
-              className="flex-grow p-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition"
-            />
-            <button
-              onClick={handleActivateReferral}
-              className="px-6 py-3 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition transform hover:scale-105"
+          <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+            <motion.div
+              className="bg-tertiary rounded-2xl shadow-card border border-primary hover:shadow-accent-primary/40 transition-shadow duration-300 relative overflow-hidden p-8"
+              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+              whileTap={{ scale: 0.97 }}
             >
-              Активировать
-            </button>
-          </div>
-          {userData.referralCode && (
-            <div className="text-center">
-              <p className="text-lg text-white mb-2">Ваш реферальный код:</p>
-              <div className="flex items-center justify-center gap-4">
-                <p className="text-xl font-mono text-[var(--accent-color)] bg-gray-700 px-4 py-2 rounded-lg">
-                  {userData.referralCode}
-                </p>
-                <button
-                  onClick={copyReferralCode}
-                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
-                >
-                  {copied ? 'Скопировано!' : 'Копировать'}
-                </button>
-                <button
-                  onClick={shareReferralCode}
-                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
-                >
-                  <ShareIcon className="w-5 h-5 inline mr-2" />
-                  Поделиться
-                </button>
+              <div className="flex items-center mb-4">
+                <ShareIcon className="w-8 h-8 text-accent-primary mr-2" />
+                <h3 className="text-2xl font-bold font-display text-accent-primary">Приглашайте друзей</h3>
               </div>
-              <p className="text-sm text-gray-400 mt-2">
-                Поделитесь кодом с друзьями, чтобы они получили бонусы при регистрации!
-              </p>
-            </div>
-          )}
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <input
+                  type="text"
+                  value={referralCodeActivate}
+                  onChange={e => setReferralCodeActivate(e.target.value)}
+                  placeholder="Введите реферальный код"
+                  className="flex-grow p-3 bg-tertiary text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary transition duration-300"
+                />
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleActivateReferral}
+                  className="px-6 py-3 bg-accent-primary text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans shadow-card"
+                >
+                  Активировать
+                </motion.button>
+              </div>
+              {userData.referralCode && (
+                <div className="text-center">
+                  <p className="text-lg text-secondary mb-2">Ваш реферальный код:</p>
+                  <div className="flex items-center justify-center gap-4">
+                    <p className="text-xl font-mono text-accent-primary bg-tertiary px-4 py-2 rounded-lg border border-primary">
+                      {userData.referralCode}
+                    </p>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={copyReferralCode}
+                      className="px-4 py-2 bg-accent-primary text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans shadow-card"
+                    >
+                      {copied ? 'Скопировано!' : 'Копировать'}
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={shareReferralCode}
+                      className="px-4 py-2 bg-accent-primary text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans flex items-center justify-center gap-2 shadow-card"
+                    >
+                      <ShareIcon className="w-5 h-5" />
+                      Поделиться
+                    </motion.button>
+                  </div>
+                  <p className="text-sm text-secondary mt-2">
+                    Поделитесь кодом с друзьями, чтобы они получили бонусы при регистрации!
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          </Tilt>
         </motion.section>
         {/* Rewards History Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.8 }}
-          className="mb-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl shadow-2xl p-8"
+          className="mb-12"
         >
-          <h3 className="text-2xl font-semibold text-white mb-6">История наград</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto border-collapse">
-              <thead>
-                <tr className="bg-gray-700">
-                  <th className="px-4 py-2 text-left text-gray-300">Квест</th>
-                  <th className="px-4 py-2 text-left text-gray-300">Награда</th>
-                </tr>
-              </thead>
-              <tbody>
-                {quests.filter(quest => quest.completed).map(quest => (
-                  <tr key={quest.id} className="border-b border-gray-600">
-                    <td className="px-4 py-2 text-white">{quest.name}</td>
-                    <td className="px-4 py-2 text-white">+{quest.reward}% ({getRewardTypeLabel(quest.rewardType)})</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {quests.filter(quest => quest.completed).length === 0 && (
-              <p className="text-center text-gray-400 mt-4">Нет выполненных квестов.</p>
-            )}
-          </div>
+          <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+            <motion.div
+              className="bg-tertiary rounded-2xl shadow-card border border-primary hover:shadow-accent-primary/40 transition-shadow duration-300 relative overflow-hidden p-8"
+              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <div className="flex items-center mb-4">
+                <ArrowPathIcon className="w-8 h-8 text-accent-primary mr-2" />
+                <h3 className="text-2xl font-bold font-display text-accent-primary">История наград</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full table-auto border-collapse">
+                  <thead>
+                    <tr className="bg-tertiary">
+                      <th className="px-4 py-2 text-left text-secondary font-display">Квест</th>
+                      <th className="px-4 py-2 text-left text-secondary font-display">Награда</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {quests.filter(quest => quest.completed).map(quest => (
+                      <tr key={quest.id} className="border-b border-primary/50">
+                        <td className="px-4 py-2 text-secondary">{quest.name}</td>
+                        <td className="px-4 py-2 text-secondary">+{quest.reward}% ({getRewardTypeLabel(quest.rewardType)})</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {quests.filter(quest => quest.completed).length === 0 && (
+                  <p className="text-center text-secondary mt-4 text-base">Нет выполненных квестов.</p>
+                )}
+              </div>
+            </motion.div>
+          </Tilt>
         </motion.section>
         {/* FAQ Section */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1.0 }}
-          className="mb-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl shadow-2xl p-8"
+          className="mb-12"
         >
-          <h3 className="text-2xl font-semibold text-white mb-6">Часто задаваемые вопросы</h3>
-          <div className="space-y-4">
+          <div className="space-y-4 bg-primary">
+            <div className="flex items-center mb-4">
+              <InformationCircleIcon className="w-8 h-8 text-accent-primary mr-2" />
+              <h3 className="text-2xl font-bold font-display text-accent-primary">Часто задаваемые вопросы</h3>
+            </div>
             {faqData.map((faq, index) => (
               <FaqItem
                 key={index}
@@ -587,19 +701,21 @@ const LoyaltyTab = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="bg-gray-700 rounded-xl p-8 max-w-lg w-[90%] max-h-[80vh] overflow-y-auto"
+                className="bg-tertiary rounded-2xl p-8 max-w-lg w-[90%] max-h-[80vh] overflow-y-auto no-scrollbar border border-primary shadow-card"
               >
-                <h3 className="text-2xl font-semibold text-white mb-4">Добро пожаловать в систему лояльности!</h3>
-                <p className="text-gray-300 mb-4">1. <strong>Скидки:</strong> Просматривайте свои текущие постоянные и временные скидки.</p>
-                <p className="text-gray-300 mb-4">2. <strong>Квесты:</strong> Выполняйте задания, чтобы получить постоянные или временные скидки.</p>
-                <p className="text-gray-300 mb-4">3. <strong>Рефералы:</strong> Приглашайте друзей с помощью вашего уникального кода и получайте бонусы.</p>
-                <p className="text-gray-300 mb-4">4. <strong>История:</strong> Следите за своими наградами в разделе истории.</p>
-                <button
+                <h3 className="text-2xl font-bold font-display text-accent-primary mb-4">Добро пожаловать в систему лояльности!</h3>
+                <p className="text-secondary mb-4 text-base">1. <strong>Скидки:</strong> Просматривайте свои текущие постоянные и временные скидки.</p>
+                <p className="text-secondary mb-4 text-base">2. <strong>Квесты:</strong> Выполняйте задания, чтобы получить постоянные или временные скидки.</p>
+                <p className="text-secondary mb-4 text-base">3. <strong>Рефералы:</strong> Приглашайте друзей с помощью вашего уникального кода и получайте бонусы.</p>
+                <p className="text-secondary mb-4 text-base">4. <strong>История:</strong> Следите за своими наградами в разделе истории.</p>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setShowTutorial(false)}
-                  className="w-full py-3 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition"
+                  className="w-full py-3 bg-accent-primary text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans shadow-card"
                 >
                   Понятно
-                </button>
+                </motion.button>
               </motion.div>
             </motion.div>
           )}

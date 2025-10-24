@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCartIcon, DocumentCheckIcon, UserIcon, CreditCardIcon, TruckIcon } from '@heroicons/react/24/solid';
+import { motion } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
+import { ShoppingCartIcon, DocumentCheckIcon, UserIcon, CreditCardIcon, TruckIcon } from '@heroicons/react/24/solid';
 
-// Append global styles
+// Append global styles for consistency with OrderDetails.jsx
 const styles = `
   @keyframes fadeInDown {
     from { opacity: 0; transform: translateY(-20px); }
@@ -70,8 +70,8 @@ function OrderInstructions() {
             if (index !== -1) {
               const progressItems = progressRef.current.querySelectorAll('.progress-item');
               progressItems.forEach((item, i) => {
-                item.classList.toggle('bg-cyan-500', i === index);
-                item.classList.toggle('bg-gray-600', i !== index);
+                item.classList.toggle('bg-accent-primary', i === index);
+                item.classList.toggle('bg-primary/50', i !== index);
               });
             }
           }
@@ -90,25 +90,37 @@ function OrderInstructions() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-10 pointer-events-none"
-        style={{
-          backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
-          backgroundRepeat: 'repeat',
-        }}
-      />
+    <div className="min-h-screen bg-primary text-secondary py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,37,73,0.3)_0%,transparent_70%)] pointer-events-none" />
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.header
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
+          style={{
+            '@media (max-width: 640px)': {
+              marginBottom: '24px',
+              textAlign: 'center',
+            }
+          }}
         >
-          <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-emerald-500 tracking-tight animate-fade-in-down">
+          <h1 className="text-4xl md:text-5xl font-extrabold font-display text-accent-primary tracking-tight animate-fade-in-down break-words" style={{
+            '@media (max-width: 640px)': {
+              fontSize: '28px',
+              fontWeight: '800',
+              overflowWrap: 'break-word',
+              whiteSpace: 'normal',
+            }
+          }}>
             Инструкции по заказу
           </h1>
-          <p className="text-lg text-gray-300 mt-2">Пошаговое руководство по оформлению заказа на Fluvion</p>
+          <p className="text-lg text-secondary mt-2 font-sans" style={{
+            '@media (max-width: 640px)': {
+              fontSize: '14px',
+              marginTop: '8px',
+            }
+          }}>Пошаговое руководство по оформлению заказа на Fluvion</p>
         </motion.header>
 
         <motion.section
@@ -118,8 +130,15 @@ function OrderInstructions() {
           className="space-y-10"
         >
           <motion.div
-            className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-6 rounded-2xl shadow-lg border border-cyan-500/30 transition-shadow duration-300"
+            className="bg-tertiary p-6 rounded-2xl shadow-card border border-primary/50 transition-shadow duration-300 animate-slide-up"
             whileTap={{ scale: 0.97 }}
+            style={{
+              '@media (max-width: 640px)': {
+                padding: '16px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              }
+            }}
           >
             <div
               className="absolute inset-0 opacity-10 pointer-events-none"
@@ -129,10 +148,14 @@ function OrderInstructions() {
               }}
             />
             <div className="flex items-center mb-4">
-              <DocumentCheckIcon className="w-8 h-8 mr-2 text-cyan-400" />
-              <h2 className="text-2xl font-bold text-cyan-400">Как оформить заказ</h2>
+              <DocumentCheckIcon className="w-8 h-8 mr-2 text-accent-primary" />
+              <h2 className="text-2xl font-bold font-display text-accent-primary" style={{
+                '@media (max-width: 640px)': {
+                  fontSize: '20px',
+                }
+              }}>Как оформить заказ</h2>
             </div>
-            <p className="text-gray-300 mb-6 text-base">
+            <p className="text-secondary mb-6 text-base font-sans">
               На Fluvion мы сделали процесс заказа простым и удобным. Следуйте этим шагам, чтобы успешно оформить покупку товаров из Китая:
             </p>
             <div className="space-y-6">
@@ -142,19 +165,19 @@ function OrderInstructions() {
                   description: (
                     <>
                       Вы можете добавить товары двумя способами:
-                      <ul className="list-disc pl-5 mt-2 space-y-2 text-gray-300">
+                      <ul className="list-disc pl-5 mt-2 space-y-2 text-secondary font-sans">
                         <li>
                           <strong>Через каталог:</strong> Перейдите в раздел{' '}
-                          <span className="font-bold text-cyan-400">Каталог</span>, где представлены проверенные товары, ранее заказанные другими клиентами. Выберите товар, укажите параметры (например, размер, цвет, количество) и нажмите "Добавить в корзину".
+                          <span className="font-bold text-accent-primary">Каталог</span>, где представлены проверенные товары, ранее заказанные другими клиентами. Выберите товар, укажите параметры (например, размер, цвет, количество) и нажмите "Добавить в корзину".
                         </li>
                         <li>
                           <strong>Через терминал:</strong> Если нужного товара нет в каталоге, используйте{' '}
-                          <span className="font-bold text-cyan-400">Терминал</span>. Введите ссылку на товар (например, с AliExpress, Taobao), описание, количество, цвет, размер и другие параметры.
+                          <span className="font-bold text-accent-primary">Терминал</span>. Введите ссылку на товар (например, с AliExpress, Taobao), описание, количество, цвет, размер и другие параметры.
                         </li>
                       </ul>
                     </>
                   ),
-                  icon: <ShoppingCartIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <ShoppingCartIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Cargo+Package',
                 },
                 {
@@ -162,25 +185,25 @@ function OrderInstructions() {
                   description: (
                     <>
                       После добавления товаров перейдите в{' '}
-                      <span className="font-bold text-cyan-400">Корзину</span>. Здесь вы можете:
-                      <ul className="list-disc pl-5 mt-2 space-y-2 text-gray-300">
+                      <span className="font-bold text-accent-primary">Корзину</span>. Здесь вы можете:
+                      <ul className="list-disc pl-5 mt-2 space-y-2 text-secondary font-sans">
                         <li>Указать адрес доставки: выберите отделение Европочты для доставки.</li>
                         <li>Применить промокод: введите промокод для получения скидки, если он у вас есть.</li>
                         <li>Добавить страховку: выберите опцию страхования груза для защиты от возможных повреждений.</li>
                       </ul>
-                      <p className="mt-2 text-gray-300">
+                      <p className="mt-2 text-secondary font-sans">
                         После проверки деталей нажмите "Оформить заказ". Итоговая стоимость будет рассчитана с учётом цены товара, упаковки, доставки по Китаю, таможенных сборов и комиссии.
                       </p>
                     </>
                   ),
-                  icon: <ShoppingCartIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <ShoppingCartIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Cart',
                 },
                 {
                   title: 'Ожидание проверки администратором',
                   description:
                     'После оформления заказа он отправляется на проверку нашей команде. Администраторы проверяют корректность данных, наличие товара у поставщика и актуальность цен. Этот процесс занимает 1–2 рабочих дня. Вы получите уведомление по email или в личном кабинете о статусе проверки.',
-                  icon: <DocumentCheckIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <DocumentCheckIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Admin+Check',
                 },
                 {
@@ -188,17 +211,17 @@ function OrderInstructions() {
                   description: (
                     <>
                       После проверки администратором ваш заказ появится в разделе{' '}
-                      <span className="font-bold text-cyan-400">Профиль</span> во вкладке "Отправления". Здесь вы увидите итоговую информацию, включая корректировки (например, уточнение веса, габаритов или стоимости доставки по Китаю).
+                      <span className="font-bold text-accent-primary">Профиль</span> во вкладке "Отправления". Здесь вы увидите итоговую информацию, включая корректировки (например, уточнение веса, габаритов или стоимости доставки по Китаю).
                     </>
                   ),
-                  icon: <UserIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <UserIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Profile',
                 },
                 {
                   title: 'Оплата заказа',
                   description:
                     'После подтверждения заказа вы можете оплатить его через эквайринг Альфа-Банка. Мы принимаем банковские карты (Visa, Mastercard). Все платежи защищены 256-битным SSL-шифрованием. После оплаты заказ передаётся в логистику.',
-                  icon: <CreditCardIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <CreditCardIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Payment',
                 },
                 {
@@ -206,33 +229,40 @@ function OrderInstructions() {
                   description: (
                     <>
                       После оплаты заказ включается в ближайший сборный груз для транспортировки из Китая в Республику Беларусь через транспортную компанию Карго. Вы можете отслеживать статус транспортировки в разделе{' '}
-                      <span className="font-bold text-cyan-400">Отправления</span> в вашем профиле.
+                      <span className="font-bold text-accent-primary">Отправления</span> в вашем профиле.
                     </>
                   ),
-                  icon: <TruckIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Transport',
                 },
                 {
                   title: 'Отправка заказа Европочтой клиенту',
                   description:
                     'После прибытия заказа на склад в Минске он передаётся в Европочту для доставки в выбранное вами отделение. Вы получите уведомление с трек-номером и ориентировочным сроком доставки.',
-                  icon: <TruckIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Europochta',
                 },
                 {
                   title: 'Оплата полной доставки заказа',
                   description:
                     'При получении заказа в отделении Европочты вы оплачиваете полную стоимость доставки, которая включает транспортировку из Китая в Беларусь ($6 за кг) и услуги Европочты. Оплата производится через эквайринг Альфа-Банка или наличными в отделении.',
-                  icon: <CreditCardIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <CreditCardIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Final+Payment',
                 },
               ].map((step, index) => (
                 <Tilt key={index} tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
                   <motion.div
                     ref={(el) => (stepRefs.current[index] = el)}
-                    className="step-card bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-6 rounded-2xl border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/40 transition-shadow duration-300 mb-6"
-                    whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+                    className="step-card bg-tertiary p-6 rounded-2xl border border-primary/50 shadow-card hover:shadow-accent-primary/40 transition-shadow duration-300 mb-6"
+                    whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
                     whileTap={{ scale: 0.97 }}
+                    style={{
+                      '@media (max-width: 640px)': {
+                        padding: '16px',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                      }
+                    }}
                   >
                     <div
                       className="absolute inset-0 opacity-10 pointer-events-none"
@@ -245,14 +275,25 @@ function OrderInstructions() {
                       <img
                         src={step.image}
                         alt={step.title}
-                        className="w-16 h-16 mr-4 rounded-md filter grayscale image-hover"
+                        className="w-16 h-16 mr-4 rounded-md filter grayscale image-hover border border-primary/50"
+                        style={{
+                          '@media (max-width: 640px)': {
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '6px',
+                          }
+                        }}
                       />
                       <div>
                         <div className="flex items-center">
                           {step.icon}
-                          <h3 className="text-xl font-semibold text-cyan-400 ml-2">{step.title}</h3>
+                          <h3 className="text-xl font-semibold font-display text-accent-primary ml-2" style={{
+                            '@media (max-width: 640px)': {
+                              fontSize: '18px',
+                            }
+                          }}>{step.title}</h3>
                         </div>
-                        <p className="text-gray-300 text-base mt-2">{step.description}</p>
+                        <p className="text-secondary text-base mt-2 font-sans">{step.description}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -266,7 +307,16 @@ function OrderInstructions() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-4xl sm:text-5xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-emerald-500"
+              className="text-4xl sm:text-5xl font-bold font-display text-accent-primary mb-6 text-center break-words"
+              style={{
+                '@media (max-width: 640px)': {
+                  fontSize: '28px',
+                  fontWeight: '800',
+                  marginBottom: '16px',
+                  overflowWrap: 'break-word',
+                  whiteSpace: 'normal',
+                }
+              }}
             >
               Процесс заказа
             </motion.h2>
@@ -274,52 +324,58 @@ function OrderInstructions() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="text-center text-lg sm:text-xl mb-8 text-gray-300"
+              className="text-center text-lg sm:text-xl mb-8 text-secondary font-sans"
+              style={{
+                '@media (max-width: 640px)': {
+                  fontSize: '14px',
+                  marginBottom: '16px',
+                }
+              }}
             >
               <p>Пошаговое руководство по оформлению заказа на Fluvion</p>
             </motion.div>
             <div ref={progressRef} className="relative max-w-3xl mx-auto">
-              <div className="absolute left-1/2 transform -translate-x-1/2 w-1 bg-gray-600 h-full"></div>
+              <div className="absolute left-1/2 transform -translate-x-1/2 w-1 bg-primary/50 h-full"></div>
               {[
                 {
                   title: 'Добавление товара',
                   description: 'Выберите товары из каталога или добавьте через терминал, указав все детали.',
-                  icon: <ShoppingCartIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <ShoppingCartIcon className="w-8 h-8 text-accent-primary" />,
                 },
                 {
                   title: 'Оформление корзины',
                   description: 'Укажите отделение Европочты, примените промокод и выберите страховку.',
-                  icon: <ShoppingCartIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <ShoppingCartIcon className="w-8 h-8 text-accent-primary" />,
                 },
                 {
                   title: 'Проверка администратором',
                   description: 'Ожидайте подтверждения заказа в течение 1–2 рабочих дней.',
-                  icon: <DocumentCheckIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <DocumentCheckIcon className="w-8 h-8 text-accent-primary" />,
                 },
                 {
                   title: 'Просмотр заказа',
                   description: 'Проверьте итоговый заказ с учётом корректировок в профиле.',
-                  icon: <UserIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <UserIcon className="w-8 h-8 text-accent-primary" />,
                 },
                 {
                   title: 'Оплата заказа',
                   description: 'Оплатите заказ через эквайринг Альфа-Банка.',
-                  icon: <CreditCardIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <CreditCardIcon className="w-8 h-8 text-accent-primary" />,
                 },
                 {
                   title: 'Транспортировка в РБ',
                   description: 'Заказ включается в сборный груз и транспортируется в Беларусь.',
-                  icon: <TruckIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
                 },
                 {
                   title: 'Отправка Европочтой',
                   description: 'Заказ передаётся в Европочту для доставки в выбранное отделение.',
-                  icon: <TruckIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
                 },
                 {
                   title: 'Оплата доставки',
                   description: 'Оплатите доставку ($6/кг + услуги Европочты) при получении заказа.',
-                  icon: <CreditCardIcon className="w-8 h-8 text-cyan-400" />,
+                  icon: <CreditCardIcon className="w-8 h-8 text-accent-primary" />,
                 },
               ].map((step, index) => (
                 <Tilt key={index} tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
@@ -328,11 +384,18 @@ function OrderInstructions() {
                     initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
-                    whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+                    whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
                     whileTap={{ scale: 0.97 }}
                   >
                     <div
-                      className={`w-full pl-12 ${index % 2 === 0 ? 'pr-8' : 'pl-8 text-right'} bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-4 rounded-2xl shadow-lg border border-cyan-500/30 hover:shadow-cyan-500/40 transition-shadow duration-300`}
+                      className={`w-full pl-12 ${index % 2 === 0 ? 'pr-8' : 'pl-8 text-right'} bg-tertiary p-4 rounded-2xl shadow-card border border-primary/50 hover:shadow-accent-primary/40 transition-shadow duration-300`}
+                      style={{
+                        '@media (max-width: 640px)': {
+                          padding: '12px',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        }
+                      }}
                     >
                       <div
                         className="absolute inset-0 opacity-10 pointer-events-none"
@@ -346,21 +409,28 @@ function OrderInstructions() {
                           <>
                             <div className="flex items-center">
                               {step.icon}
-                              <h4 className="text-xl font-semibold text-cyan-400 ml-2">{step.title}</h4>
+                              <h4 className="text-xl font-semibold font-display text-accent-primary ml-2" style={{
+                                '@media (max-width: 640px)': {
+                                  fontSize: '16px',
+                                }
+                              }}>{step.title}</h4>
                             </div>
-                            <p className="text-gray-300 text-base">{step.description}</p>
+                            <p className="text-secondary text-base font-sans">{step.description}</p>
                           </>
                         ) : (
                           <>
-                            <p className="text-gray-300 text-base">{step.description}</p>
+                            <p className="text-secondary text-base font-sans">{step.description}</p>
                             <div className="flex items-center">
-                              <h4 className="text-xl font-semibold text-cyan-400 mr-2">{step.title}</h4>
+                              <h4 className="text-xl font-semibold font-display text-accent-primary mr-2" style={{
+                                '@media (max-width: 640px)': {
+                                  fontSize: '16px',
+                                }
+                              }}>{step.title}</h4>
                               {step.icon}
                             </div>
                           </>
                         )}
                       </div>
-                     
                     </div>
                   </motion.div>
                 </Tilt>
@@ -370,12 +440,19 @@ function OrderInstructions() {
 
           <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
             <motion.div
-              className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-8 rounded-2xl shadow-lg border border-cyan-500/30 hover:shadow-cyan-500/40 transition-shadow duration-300 text-center"
+              className="bg-tertiary p-8 rounded-2xl shadow-card border border-primary/50 hover:shadow-accent-primary/40 transition-shadow duration-300 text-center animate-slide-up"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
               whileTap={{ scale: 0.97 }}
+              style={{
+                '@media (max-width: 640px)': {
+                  padding: '16px',
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                }
+              }}
             >
               <div
                 className="absolute inset-0 opacity-10 pointer-events-none"
@@ -384,8 +461,12 @@ function OrderInstructions() {
                   backgroundRepeat: 'repeat',
                 }}
               />
-              <h2 className="text-3xl font-bold text-cyan-400 mb-4">Готовы начать?</h2>
-              <p className="text-gray-300 mb-6 text-base">
+              <h2 className="text-3xl font-bold font-display text-accent-primary mb-4" style={{
+                '@media (max-width: 640px)': {
+                  fontSize: '24px',
+                }
+              }}>Готовы начать?</h2>
+              <p className="text-secondary mb-6 text-base font-sans">
                 Оформите свой первый заказ прямо сейчас! Выберите товары из каталога, настройте заказ в терминале или проверьте статус в профиле.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -393,30 +474,66 @@ function OrderInstructions() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate('/catalog')}
-                  className={`animate-pulse bg-cyan-500 text-white px-6 py-3 rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 ${isActive('/catalog') ? 'ring-2 ring-offset-2 ring-cyan-500' : ''}`}
+                  className={`animate-pulse bg-accent-primary text-primary px-6 py-3 rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans flex items-center justify-center gap-2 ${isActive('/catalog') ? 'ring-2 ring-offset-2 ring-accent-primary' : ''}`}
                   aria-label="Перейти в Каталог"
+                  style={{
+                    '@media (max-width: 640px)': {
+                      padding: '10px 16px',
+                      fontSize: '14px',
+                      borderRadius: '6px',
+                    }
+                  }}
                 >
-                  <ShoppingCartIcon className="w-6 h-6" />
+                  <ShoppingCartIcon className="w-6 h-6" style={{
+                    '@media (max-width: 640px)': {
+                      width: '20px',
+                      height: '20px',
+                    }
+                  }} />
                   Каталог
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate('/terminal')}
-                  className={`animate-pulse bg-cyan-500 text-white px-6 py-3 rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 ${isActive('/terminal') ? 'ring-2 ring-offset-2 ring-cyan-500' : ''}`}
+                  className={`animate-pulse bg-accent-primary text-primary px-6 py-3 rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans flex items-center justify-center gap-2 ${isActive('/terminal') ? 'ring-2 ring-offset-2 ring-accent-primary' : ''}`}
                   aria-label="Перейти в Терминал"
+                  style={{
+                    '@media (max-width: 640px)': {
+                      padding: '10px 16px',
+                      fontSize: '14px',
+                      borderRadius: '6px',
+                    }
+                  }}
                 >
-                  <DocumentCheckIcon className="w-6 h-6" />
+                  <DocumentCheckIcon className="w-6 h-6" style={{
+                    '@media (max-width: 640px)': {
+                      width: '20px',
+                      height: '20px',
+                    }
+                  }} />
                   Терминал
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate('/profile')}
-                  className={`animate-pulse bg-cyan-500 text-white px-6 py-3 rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 ${isActive('/profile') ? 'ring-2 ring-offset-2 ring-cyan-500' : ''}`}
+                  className={`animate-pulse bg-accent-primary text-primary px-6 py-3 rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans flex items-center justify-center gap-2 ${isActive('/profile') ? 'ring-2 ring-offset-2 ring-accent-primary' : ''}`}
                   aria-label="Перейти в Профиль"
+                  style={{
+                    '@media (max-width: 640px)': {
+                      padding: '10px 16px',
+                      fontSize: '14px',
+                      borderRadius: '6px',
+                    }
+                  }}
                 >
-                  <UserIcon className="w-6 h-6" />
+                  <UserIcon className="w-6 h-6" style={{
+                    '@media (max-width: 640px)': {
+                      width: '20px',
+                      height: '20px',
+                    }
+                  }} />
                   Профиль
                 </motion.button>
               </div>

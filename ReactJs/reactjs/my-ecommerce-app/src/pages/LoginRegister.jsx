@@ -138,22 +138,51 @@ function LoginRegister() {
     }
   };
 
+  const handleForgotPassword = () => {
+    // Placeholder for future implementation
+    console.log('Forgot password clicked');
+  };
+
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
+    <section className="min-h-screen flex items-center justify-center bg-bg-primary p-4">
+      <style>
+        {`
+          .shimmer-border {
+            position: relative;
+            border: 2px solid transparent;
+            animation: shimmer 2s infinite linear;
+          }
+          .shimmer-border::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            background: linear-gradient(45deg, transparent, var(--accent-primary), transparent);
+            background-size: 200% 200%;
+            animation: shimmer-gradient 2s infinite linear;
+            z-index: -1;
+            border-radius: inherit;
+          }
+          @keyframes shimmer {
+            0% { border-color: rgba(232, 30, 45, 0.5); }
+            50% { border-color: var(--accent-primary); }
+            100% { border-color: rgba(232, 30, 45, 0.5); }
+          }
+          @keyframes shimmer-gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          }
+        `}
+      </style>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative max-w-lg w-full bg-gray-800/90 backdrop-blur-lg rounded-xl p-8 border border-cyan-400/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300 overflow-hidden"
+        className="relative max-w-lg w-full bg-bg-secondary/90 backdrop-blur-lg rounded-xl p-8 border border-accent-primary/20 shadow-modal hover:shadow-accent-primary/20 transition-shadow duration-300 overflow-hidden"
       >
-        {/* Decorative Background Pattern */}
-        <div
-          className="absolute inset-0 opacity-10 pointer-events-none"
-          style={{
-            backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.5"/%3E%3C/svg%3E')`,
-            backgroundRepeat: 'repeat',
-          }}
-        ></div>
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <motion.div
@@ -161,9 +190,9 @@ function LoginRegister() {
             animate={{ scale: 1 }}
             transition={{ duration: 0.3 }}
           >
-            <UserIcon className="w-10 h-10 text-cyan-400" />
+            <UserIcon className="w-10 h-10 text-accent-primary" />
           </motion.div>
-          <h2 className="text-4xl font-bold text-white tracking-tight">
+          <h2 className="text-4xl font-display font-bold text-text-primary tracking-tight">
             {isLogin ? 'Вход в FLUVION' : 'Регистрация в FLUVION'}
           </h2>
         </div>
@@ -173,7 +202,7 @@ function LoginRegister() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="mb-6 p-4 rounded-lg text-center text-base font-medium bg-red-500/20 border-red-500/50 text-red-400"
+            className="mb-6 p-4 rounded-lg text-center text-base font-medium bg-bg-accent/20 border border-accent-primary/50 text-accent-primary"
           >
             {error}
           </motion.div>
@@ -183,101 +212,114 @@ function LoginRegister() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 bg-black/70 flex items-center justify-center z-50 rounded-xl"
+            className="absolute inset-0 bg-bg-primary/70 flex items-center justify-center z-50 rounded-xl"
           >
-            <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-cyan-400" />
+            <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-accent-primary" />
           </motion.div>
         )}
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {!isLogin && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Логин</label>
+              <label className="block text-sm font-medium text-text-secondary mb-2">Логин</label>
               <div className="relative">
-                <UserIcon className="absolute top-3 left-3 w-6 h-6 text-cyan-400" />
+                <UserIcon className="absolute top-3 left-3 w-6 h-6 text-accent-primary" />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Введите ваш логин"
-                  className="w-full pl-12 pr-4 py-3 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300 text-base"
+                  className="w-full pl-12 pr-4 py-3 bg-white text-black border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary transition duration-300 text-base"
                   required
                 />
               </div>
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+            <label className="block text-sm font-medium text-text-secondary mb-2">Email</label>
             <div className="relative">
-              <UserIcon className="absolute top-3 left-3 w-6 h-6 text-cyan-400" />
+              <UserIcon className="absolute top-3 left-3 w-6 h-6 text-accent-primary" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Введите ваш email"
-                className="w-full pl-12 pr-4 py-3 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300 text-base"
+                className="w-full pl-12 pr-4 py-3 bg-white text-black border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary transition duration-300 text-base"
                 required
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Пароль</label>
+            <label className="block text-sm font-medium text-text-secondary mb-2">Пароль</label>
             <div className="relative">
-              <LockClosedIcon className="absolute top-3 left-3 w-6 h-6 text-cyan-400" />
+              <LockClosedIcon className="absolute top-3 left-3 w-6 h-6 text-accent-primary" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Введите пароль"
-                className="w-full pl-12 pr-4 py-3 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300 text-base"
+                className="w-full pl-12 pr-4 py-3 bg-white text-black border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary transition duration-300 text-base"
                 required
               />
             </div>
             {!isLogin && password && (
               <div className="mt-2 flex items-center gap-2">
-                <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-border-primary rounded-full overflow-hidden">
                   <div
                     className={`h-full transition-all duration-300 ${
                       passwordStrength.score === 0 ? 'w-0' :
-                      passwordStrength.score === 1 ? 'w-1/4 bg-red-500' :
-                      passwordStrength.score === 2 ? 'w-2/4 bg-yellow-500' :
-                      passwordStrength.score === 3 ? 'w-3/4 bg-cyan-500' :
+                      passwordStrength.score === 1 ? 'w-1/4 bg-accent-primary' :
+                      passwordStrength.score === 2 ? 'w-2/4 bg-accent-muted' :
+                      passwordStrength.score === 3 ? 'w-3/4 bg-accent-secondary' :
                       'w-full bg-green-500'
                     }`}
                   ></div>
                 </div>
-                <span className="text-sm text-gray-300">{passwordStrength.message}</span>
+                <span className="text-sm text-text-secondary">{passwordStrength.message}</span>
               </div>
             )}
           </div>
           {!isLogin && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Подтвердите пароль</label>
+              <label className="block text-sm font-medium text-text-secondary mb-2">Подтвердите пароль</label>
               <div className="relative">
-                <LockClosedIcon className="absolute top-3 left-3 w-6 h-6 text-cyan-400" />
+                <LockClosedIcon className="absolute top-3 left-3 w-6 h-6 text-accent-primary" />
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Повторите пароль"
-                  className="w-full pl-12 pr-4 py-3 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300 text-base"
+                  className="w-full pl-12 pr-4 py-3 bg-white text-black border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary transition duration-300 text-base"
                   required
                 />
               </div>
             </div>
           )}
+          {isLogin && (
+            <div className="text-right">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-sm text-accent-primary hover:underline"
+              >
+                Забыл пароль?
+              </motion.button>
+            </div>
+          )}
           {!isLogin && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Реферальный код (опционально)</label>
+              <label className="block text-sm font-medium text-text-secondary mb-2">Реферальный код (опционально)</label>
               <div className="flex gap-3">
                 <div className="relative flex-grow">
-                  <TagIcon className="absolute top-3 left-3 w-6 h-6 text-cyan-400" />
+                  <TagIcon className="absolute top-3 left-3 w-6 h-6 text-accent-primary" />
                   <input
                     type="text"
                     value={referralCode}
                     onChange={(e) => setReferralCode(e.target.value)}
                     placeholder="Введите реферальный код"
-                    className="w-full pl-12 pr-4 py-3 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300 text-base"
+                    className="w-full pl-12 pr-4 py-3 bg-white text-black border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary transition duration-300 text-base"
                   />
                 </div>
                 <motion.button
@@ -286,7 +328,7 @@ function LoginRegister() {
                   type="button"
                   onClick={handleApplyReferral}
                   disabled={isLoading}
-                  className="px-6 py-3 bg-cyan-400 text-white rounded-lg hover:bg-cyan-500 transition duration-300 text-sm font-medium"
+                  className="px-6 py-3 bg-accent-primary text-text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-sm font-medium disabled:bg-text-muted shimmer-border"
                 >
                   Применить
                 </motion.button>
@@ -296,7 +338,7 @@ function LoginRegister() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
-                  className={`mt-2 text-sm ${isReferralValid ? 'text-green-400' : 'text-red-400'}`}
+                  className={`mt-2 text-sm ${isReferralValid ? 'text-green-500' : 'text-accent-primary'}`}
                 >
                   {referralMessage}
                 </motion.p>
@@ -309,11 +351,11 @@ function LoginRegister() {
                 type="checkbox"
                 checked={termsAccepted}
                 onChange={(e) => setTermsAccepted(e.target.checked)}
-                className="w-5 h-5 bg-gray-900/50 border-gray-700/20 text-cyan-400 focus:ring-cyan-400 rounded"
+                className="w-5 h-5 bg-bg-tertiary/50 border-border-primary text-accent-primary focus:ring-accent-primary rounded"
               />
-              <label className="text-sm text-gray-300">
-                Я принимаю <a href="/user-agreement" className="text-cyan-400 hover:underline">условия использования</a> и{' '}
-                <a href="/privacy-policy" className="text-cyan-400 hover:underline">политику конфиденциальности</a>
+              <label className="text-sm text-text-secondary">
+                Я принимаю <a href="/user-agreement" className="text-accent-primary hover:underline">условия использования</a> и{' '}
+                <a href="/privacy-policy" className="text-accent-primary hover:underline">политику конфиденциальности</a>
               </label>
             </div>
           )}
@@ -322,7 +364,7 @@ function LoginRegister() {
             whileTap={{ scale: 0.95 }}
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 bg-cyan-400 text-white rounded-lg hover:bg-cyan-500 transition duration-300 text-base font-medium disabled:bg-gray-500"
+            className="w-full py-3 bg-accent-primary text-text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-medium disabled:bg-text-muted shimmer-border"
           >
             {isLogin ? 'Войти' : 'Зарегистрироваться'}
           </motion.button>
@@ -331,13 +373,13 @@ function LoginRegister() {
             whileTap={{ scale: 0.95 }}
             type="button"
             onClick={() => setIsLogin(!isLogin)}
-            className="w-full py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition duration-300 text-base font-medium"
+            className="w-full py-3 bg-bg-tertiary text-text-primary rounded-lg hover:bg-bg-tertiary/90 transition duration-300 text-base font-medium shimmer-border"
           >
             {isLogin ? 'Перейти к регистрации' : 'Перейти к входу'}
           </motion.button>
         </form>
         {/* Additional Info */}
-        <div className="mt-6 text-center text-gray-300 text-sm">
+        <div className="mt-6 text-center text-text-secondary text-sm">
           <p className="mb-2">Добро пожаловать в FLUVION!</p>
           <p>
             {isLogin
@@ -346,13 +388,13 @@ function LoginRegister() {
           </p>
         </div>
         {/* Social Login Placeholder */}
-        <div className="mt-6 border-t border-gray-700/20 pt-4">
-          <p className="text-center text-sm text-gray-300 mb-3">Или войдите через:</p>
+        <div className="mt-6 border-t border-border-primary pt-4">
+          <p className="text-center text-sm text-text-secondary mb-3">Или войдите через:</p>
           <div className="flex justify-center gap-4">
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="p-2 bg-gray-900/50 rounded-full hover:bg-gray-700/50 transition duration-300"
+              className="p-2 bg-bg-tertiary/50 rounded-full hover:bg-bg-tertiary/70 transition duration-300"
               disabled
             >
               <img src="/google-icon.svg" alt="Google" className="w-6 h-6" />
@@ -360,13 +402,13 @@ function LoginRegister() {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="p-2 bg-gray-900/50 rounded-full hover:bg-gray-700/50 transition duration-300"
+              className="p-2 bg-bg-tertiary/50 rounded-full hover:bg-bg-tertiary/70 transition duration-300"
               disabled
             >
               <img src="/facebook-icon.svg" alt="Facebook" className="w-6 h-6" />
             </motion.button>
           </div>
-          <p className="text-center text-xs text-gray-400 mt-2">Социальный вход скоро будет доступен</p>
+          <p className="text-center text-xs text-text-muted mt-2">Социальный вход скоро будет доступен</p>
         </div>
       </motion.div>
     </section>

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '../components/AuthProvider';
+import Tilt from 'react-parallax-tilt';
 import api from '../api/axiosInstance';
 
 const BatchCargoDetails = () => {
@@ -54,41 +55,50 @@ const BatchCargoDetails = () => {
 
   if (loading) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
-      >
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[var(--accent-color)]" />
-      </motion.div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-cyan-400 text-2xl bg-gray-800/80 p-6 rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/30"
+        >
+          <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-cyan-500 mx-auto mb-4" />
+          Загрузка...
+        </motion.div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="text-center text-red-500 p-8"
-      >
-        {error}
-      </motion.div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-red-300 text-2xl bg-red-500/30 p-6 rounded-lg border border-red-500/50 shadow-lg"
+        >
+          {error}
+        </motion.div>
+      </div>
     );
   }
 
   if (!batchCargo || batchCargo.orders.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="text-center text-gray-400 p-8"
-      >
-        Нет заказов для этого груза
-      </motion.div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-cyan-400 text-2xl bg-gray-800/80 p-6 rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/30"
+        >
+          Нет заказов для этого груза
+        </motion.div>
+      </div>
     );
   }
 
-  // Map status to display text and color
   const getStatusDisplay = (status) => {
     switch (status) {
       case 'UNFINISHED':
@@ -100,27 +110,26 @@ const BatchCargoDetails = () => {
       case 'COMPLETED':
         return { text: 'Груз доставлен', color: 'text-green-300' };
       default:
-        return { text: status, color: 'text-gray-300' };
+        return { text: status, color: 'text-cyan-400' };
     }
   };
 
   const statusDisplay = getStatusDisplay(batchCargo.status);
 
   return (
-    <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg shadow-2xl p-8 relative overflow-hidden min-h-screen">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none" />
-      <div className="relative">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className={`text-3xl font-bold ${statusDisplay.color}`}>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <motion.header
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-emerald-500 tracking-tight">
             Груз #{batchCargo.id} ({statusDisplay.text})
           </h2>
-        </div>
-        <p className="text-gray-300 mb-4">
-          Дата создания: {new Date(batchCargo.creationDate).toLocaleDateString()}
-        </p>
-        <p className="text-gray-300 mb-8">
-          Дата закупки: {new Date(batchCargo.purchaseDate).toLocaleDateString()}
-        </p>
+          <p className="text-lg text-gray-300 mt-2">Просмотрите информацию о вашем грузе</p>
+        </motion.header>
         <AnimatePresence>
           {error && (
             <motion.div
@@ -128,44 +137,87 @@ const BatchCargoDetails = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
-              className="mb-6 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-center"
+              className="mb-8 p-4 bg-red-500/30 border border-red-500/50 rounded-lg text-red-300 text-center text-base font-medium shadow-md"
             >
               {error}
             </motion.div>
           )}
         </AnimatePresence>
-        {/* Orders as Clickable Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {batchCargo.orders.map((order) => (
-            <motion.div
-              key={order.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-xl p-4 shadow-md border border-gray-700/50 cursor-pointer hover:bg-gray-700/90 transition duration-300"
-              onClick={() => navigate(`/batch-cargos/${batchId}/order/${order.id}`)}
-            >
-              <h3 className="text-xl font-semibold text-white">
-                Заказ #{order.orderNumber}
-              </h3>
-              <p className="text-sm text-gray-400 mt-2">
-                Статус: {order.status}
-              </p>
-              <p className="text-sm text-gray-400 mt-1">
-                Общая стоимость: {order.totalClientPrice} ₽
-              </p>
-            </motion.div>
-          ))}
-        </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => navigate('/profile')}
-          className="mt-8 px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition duration-300 flex items-center"
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-6 shadow-lg border border-cyan-500/30 mb-12 relative overflow-hidden"
         >
-          <ArrowLeftIcon className="w-5 h-5 mr-2" />
-          Назад к профилю
-        </motion.button>
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+              backgroundRepeat: 'repeat',
+            }}
+          />
+          <h3 className="text-2xl font-bold text-cyan-400 mb-4">Информация о грузе</h3>
+          <p className="text-gray-300 mb-4">
+            Дата создания: {new Date(batchCargo.creationDate).toLocaleDateString()}
+          </p>
+          <p className="text-gray-300 mb-4">
+            Дата закупки: {new Date(batchCargo.purchaseDate).toLocaleDateString()}
+          </p>
+        </motion.section>
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-6 shadow-lg border border-cyan-500/30 mb-12 relative overflow-hidden"
+        >
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+              backgroundRepeat: 'repeat',
+            }}
+          />
+          <h3 className="text-2xl font-bold text-cyan-400 mb-6">Заказы в грузе</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {batchCargo.orders.map((order, index) => (
+              <Tilt key={order.id} tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+                  whileTap={{ scale: 0.97 }}
+                  className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/40 p-4 transition-all duration-300 cursor-pointer text-gray-300"
+                  onClick={() => navigate(`/batch-cargos/${batchId}/order/${order.id}`)}
+                >
+                  <h3 className="text-xl font-semibold text-white">Заказ #{order.orderNumber}</h3>
+                  <p className="text-sm text-gray-300 mt-2">
+                    Статус: <span className={statusDisplay.color}>{order.status}</span>
+                  </p>
+                  <p className="text-sm text-gray-300 mt-1">
+                    Общая стоимость: {order.totalClientPrice} ₽
+                  </p>
+                </motion.div>
+              </Tilt>
+            ))}
+          </div>
+        </motion.section>
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="flex justify-center"
+        >
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/profile')}
+            className="px-6 py-3 bg-gray-700/80 text-white rounded-lg hover:bg-gray-600/80 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 shadow-sm"
+          >
+            <ArrowLeftIcon className="w-5 h-5" />
+            Назад к профилю
+          </motion.button>
+        </motion.section>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../components/CartContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosInstance';
@@ -6,8 +6,9 @@ import { useAuth } from '../components/AuthProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import Tilt from 'react-parallax-tilt';
+import PostOfficeSelect from '../components/PostOfficeSelect';
 
-// Append global styles
+// Append global styles (unchanged)
 const styles = `
   @keyframes fadeInDown {
     from { opacity: 0; transform: translateY(-20px); }
@@ -35,30 +36,6 @@ const styleSheet = document.createElement('style');
 styleSheet.textContent = styles;
 document.head.appendChild(styleSheet);
 
-function useDebounce(callback, delay) {
-  const [timeoutId, setTimeoutId] = useState(null);
-
-  const debouncedCallback = useCallback((...args) => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    const id = setTimeout(() => {
-      callback(...args);
-    }, delay);
-    setTimeoutId(id);
-  }, [callback, delay, timeoutId]);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [timeoutId]);
-
-  return debouncedCallback;
-}
-
 function CartPage() {
   const { cart, removeFromCart, updateQuantity, clearCart, confirmOrder, loading, error, setError, setCart } = useCart();
   const { user } = useAuth();
@@ -74,6 +51,7 @@ function CartPage() {
   const [localQuantities, setLocalQuantities] = useState({});
   const [userDiscountPercent, setUserDiscountPercent] = useState(0);
 
+  // Fetch cart data and user discount (unchanged)
   useEffect(() => {
     const fetchCartData = async () => {
       try {
@@ -136,6 +114,7 @@ function CartPage() {
     console.log('Cart contents:', cart);
   }, [cart]);
 
+  // Validate promocode (unchanged)
   const validatePromocode = async (code) => {
     const trimmedCode = code.trim();
     if (!trimmedCode) {
@@ -172,21 +151,22 @@ function CartPage() {
     }
   };
 
-  const debouncedValidatePromocode = useDebounce(validatePromocode, 500);
-
-  const handlePromoCodeChange = (e) => {
+  const handlePromoCodeChange = async (e) => {
     const newCode = e.target.value;
     setDiscountValue(0);
     setPromoError(null);
     setPromoApplied(false);
     setPromoCode(newCode);
-    debouncedValidatePromocode(newCode);
+    if (newCode) {
+      await validatePromocode(newCode);
+    }
   };
 
+  // Confirm order (unchanged)
   const handleConfirmOrder = async () => {
     console.log('Cart state in handleConfirmOrder:', cart);
     if (!deliveryAddress) {
-      setError('Пожалуйста, укажите адрес доставки');
+      setError('Пожалуйста, выберите отделение почты');
       return;
     }
     if (!cart || cart.length === 0) {
@@ -220,10 +200,8 @@ function CartPage() {
     const inputValue = localQuantities[productId] || 1;
     const cartItem = cart.find(item => item.productId === productId);
     if (!cartItem) return;
-
     const originalQuantity = cartItem.quantity;
     let newQuantity = inputValue;
-
     if (newQuantity !== originalQuantity) {
       console.log('Sending update for productId:', productId, 'quantity:', newQuantity);
       try {
@@ -253,7 +231,15 @@ function CartPage() {
   const finalTotal = Math.max(0, total - totalDiscount + insuranceCost);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div
+      className="min-h-screen text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
+      style={{
+        backgroundImage: "url('/cart.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
       <div
         className="absolute inset-0 opacity-10 pointer-events-none"
         style={{
@@ -268,11 +254,10 @@ function CartPage() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-emerald-500 tracking-tight animate-fade-in-down">
+          <h2 className="text-4xl font-bold text-accent-primary tracking-tight animate-fade-in-down">
             Ваша корзина
           </h2>
         </motion.header>
-
         <AnimatePresence>
           {loading && (
             <motion.div
@@ -280,7 +265,7 @@ function CartPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
-              className="mb-8 p-4 bg-gray-800/30 border border-cyan-500/50 rounded-lg text-white text-center text-base font-medium shadow-md animate-pulse"
+              className="mb-8 p-4 bg-black border border-accent-primary/30 rounded-lg text-white text-center text-base font-medium shadow-md animate-pulse"
             >
               Загрузка корзины...
             </motion.div>
@@ -291,7 +276,7 @@ function CartPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
-              className="mb-8 p-4 bg-red-500/30 border border-red-500/50 rounded-lg text-red-300 text-center text-base font-medium shadow-md"
+              className="mb-8 p-4 bg-black border border-accent-primary/30 rounded-lg text-red-400 text-center text-base font-medium shadow-md"
             >
               Ошибка: {error}
             </motion.div>
@@ -301,13 +286,12 @@ function CartPage() {
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
-              className="mb-8 p-4 bg-gray-800/30 border border-cyan-500/50 rounded-lg text-gray-300 text-center text-base font-medium shadow-md"
+              className="mb-8 p-4 bg-black border border-accent-primary/30 rounded-lg text-text-secondary text-center text-base font-medium shadow-md"
             >
               Корзина пуста
             </motion.div>
           )}
         </AnimatePresence>
-
         <motion.section
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -319,7 +303,7 @@ function CartPage() {
               {cart.map((item, index) => (
                 <Tilt key={item.productId} tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
                   <motion.div
-                    className="flex items-center bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-6 rounded-2xl border border-cyan-500/30 shadow-lg"
+                    className="flex items-center bg-black p-6 rounded-2xl border border-accent-primary/30 shadow-lg"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
@@ -332,7 +316,7 @@ function CartPage() {
                         backgroundRepeat: 'repeat',
                       }}
                     />
-                    <div className="w-28 h-28 mr-6 overflow-hidden rounded-lg border border-gray-600/20">
+                    <div className="w-28 h-28 mr-6 overflow-hidden rounded-lg border border-accent-primary/30">
                       {item.imageUrl ? (
                         <img
                           src={item.imageUrl}
@@ -344,14 +328,14 @@ function CartPage() {
                           }}
                         />
                       ) : (
-                        <div className="w-full h-full bg-gray-700/50 flex items-center justify-center rounded-lg text-gray-300 text-base">
+                        <div className="w-full h-full bg-black flex items-center justify-center rounded-lg text-text-secondary text-base">
                           Нет фото
                         </div>
                       )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-white truncate">{item.name}</h3>
-                      <p className="text-base text-cyan-400 font-medium mt-2">¥{item.price.toFixed(2)} x {localQuantities[item.productId] || item.quantity}</p>
+                      <h3 className="text-lg font-bold text-accent-primary truncate">{item.name}</h3>
+                      <p className="text-base text-text-secondary font-medium mt-2">¥{item.price.toFixed(2)} x {localQuantities[item.productId] || item.quantity}</p>
                     </div>
                     <div className="flex items-center space-x-4">
                       <input
@@ -361,13 +345,13 @@ function CartPage() {
                         onChange={(e) => handleQuantityChange(item.productId, e.target.value)}
                         onBlur={() => handleQuantityBlur(item.productId)}
                         onKeyPress={(e) => handleQuantityKeyPress(e, item.productId)}
-                        className="w-16 px-4 py-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        className="w-16 px-4 py-3 bg-black text-white border border-accent-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary"
                         disabled={loading}
                         aria-label={`Количество для ${item.name}`}
                       />
                       <motion.button
                         whileTap={{ scale: 0.95 }}
-                        className="px-6 py-3 bg-red-600 text-white rounded-lg text-base font-semibold shadow-sm"
+                        className="px-6 py-3 bg-accent-primary text-white rounded-lg text-base font-semibold shadow-sm"
                         onClick={() => removeFromCart(item.productId)}
                         disabled={loading}
                         aria-label={`Удалить ${item.name} из корзины`}
@@ -380,11 +364,10 @@ function CartPage() {
               ))}
             </div>
           )}
-
           {cart.length > 0 && (
             <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
               <motion.div
-                className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-8 rounded-2xl border border-cyan-500/30 shadow-lg animate-slide-up"
+                className="bg-black p-8 rounded-2xl border border-accent-primary/30 shadow-lg animate-slide-up"
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -399,19 +382,12 @@ function CartPage() {
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-base font-medium text-gray-300 mb-2" htmlFor="deliveryAddress">
-                      Адрес доставки *
-                    </label>
-                    <input
-                      id="deliveryAddress"
-                      type="text"
-                      value={deliveryAddress}
-                      onChange={(e) => setDeliveryAddress(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                      placeholder="Введите адрес доставки"
-                      aria-required="true"
+                    <PostOfficeSelect
+                      deliveryAddress={deliveryAddress}
+                      setDeliveryAddress={setDeliveryAddress}
+                      setError={setError}
                     />
-                    <label className="block text-base font-medium text-gray-300 mb-2 mt-4" htmlFor="promoCode">
+                    <label className="block text-base font-medium text-text-secondary mb-2 mt-4" htmlFor="promoCode">
                       Промокод
                     </label>
                     <input
@@ -419,7 +395,7 @@ function CartPage() {
                       type="text"
                       value={promoCode}
                       onChange={handlePromoCodeChange}
-                      className={`w-full px-4 py-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                      className={`w-full px-4 py-3 bg-black text-white border border-accent-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary ${
                         promoError ? 'border-red-500' : promoApplied ? 'border-green-500' : ''
                       }`}
                       placeholder="Введите промокод"
@@ -434,18 +410,18 @@ function CartPage() {
                           type="checkbox"
                           checked={insurance}
                           onChange={(e) => setInsurance(e.target.checked)}
-                          className="w-5 h-5 bg-gray-800/80 border border-cyan-500/30 rounded focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                          className="w-5 h-5 bg-black border border-accent-primary/30 rounded focus:outline-none focus:ring-2 focus:ring-accent-primary"
                         />
-                        <span className="text-base text-gray-300">Страховка груза (5%): +¥{insuranceCost.toFixed(2)}</span>
+                        <span className="text-base text-text-secondary">Страховка груза (5%): +¥{insuranceCost.toFixed(2)}</span>
                       </label>
                     </div>
-                    <p className="text-sm text-gray-300 mt-2">
+                    <p className="text-sm text-text-secondary mt-2">
                       * Оплата товаров производится в профиле. Заказ отправляется на подтверждение администратору.
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-cyan-400 mb-4">Итого: ¥{finalTotal.toFixed(2)}</p>
-                    <p className="text-base text-gray-300 mb-2">Сумма товаров: ¥{total.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-accent-primary mb-4">Итого: ¥{finalTotal.toFixed(2)}</p>
+                    <p className="text-base text-text-secondary mb-2">Сумма товаров: ¥{total.toFixed(2)}</p>
                     {userDiscount > 0 && (
                       <p className="text-base text-green-400 mb-2">Скидка пользователя ({userDiscountPercent}%): -¥{userDiscount.toFixed(2)}</p>
                     )}
@@ -458,12 +434,12 @@ function CartPage() {
                       <p className="text-base text-green-400 mb-2">Общая скидка: -¥{totalDiscount.toFixed(2)}</p>
                     )}
                     {insuranceCost > 0 && (
-                      <p className="text-base text-gray-300 mb-2">Страховка: +¥{insuranceCost.toFixed(2)}</p>
+                      <p className="text-base text-text-secondary mb-2">Страховка: +¥{insuranceCost.toFixed(2)}</p>
                     )}
                     <div className="flex justify-end space-x-4">
                       <motion.button
                         whileTap={{ scale: 0.95 }}
-                        className="px-6 py-3 bg-red-600 text-white rounded-lg text-base font-semibold shadow-sm"
+                        className="px-6 py-3 bg-accent-primary text-white rounded-lg text-base font-semibold shadow-sm"
                         onClick={clearCart}
                         disabled={loading}
                         aria-label="Очистить корзину"
@@ -472,7 +448,7 @@ function CartPage() {
                       </motion.button>
                       <motion.button
                         whileTap={{ scale: 0.95 }}
-                        className="px-6 py-3 bg-cyan-500 text-white rounded-lg text-base font-semibold shadow-sm"
+                        className="px-6 py-3 bg-accent-primary text-white rounded-lg text-base font-semibold shadow-sm"
                         onClick={() => setShowConfirm(true)}
                         disabled={loading || !deliveryAddress || cart.length === 0}
                         aria-label="Оформить заказ"
@@ -485,7 +461,6 @@ function CartPage() {
               </motion.div>
             </Tilt>
           )}
-
           {showConfirm && (
             <motion.div
               className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
@@ -496,7 +471,7 @@ function CartPage() {
             >
               <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
                 <motion.div
-                  className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-8 rounded-2xl border border-cyan-500/30 shadow-lg max-w-md w-full"
+                  className="bg-black p-8 rounded-2xl border border-accent-primary/30 shadow-lg max-w-md w-full"
                   initial={{ opacity: 0, y: 50 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
@@ -510,14 +485,14 @@ function CartPage() {
                     }}
                   />
                   <button
-                    className="absolute top-4 right-4 text-gray-300"
+                    className="absolute top-4 right-4 text-text-secondary"
                     onClick={() => setShowConfirm(false)}
                     aria-label="Закрыть подтверждение"
                   >
                     <XMarkIcon className="w-6 h-6" />
                   </button>
-                  <h3 className="text-2xl font-bold text-cyan-400 mb-6">Подтверждение заказа</h3>
-                  <p className="text-base text-gray-300 mb-2">Сумма товаров: ¥{total.toFixed(2)}</p>
+                  <h3 className="text-2xl font-bold text-accent-primary mb-6">Подтверждение заказа</h3>
+                  <p className="text-base text-text-secondary mb-2">Сумма товаров: ¥{total.toFixed(2)}</p>
                   {userDiscount > 0 && (
                     <p className="text-base text-green-400 mb-2">Скидка пользователя ({userDiscountPercent}%): -¥{userDiscount.toFixed(2)}</p>
                   )}
@@ -530,14 +505,14 @@ function CartPage() {
                     <p className="text-base text-green-400 mb-2">Общая скидка: -¥{totalDiscount.toFixed(2)}</p>
                   )}
                   {insuranceCost > 0 && (
-                    <p className="text-base text-gray-300 mb-2">Страховка (5%): +¥{insuranceCost.toFixed(2)}</p>
+                    <p className="text-base text-text-secondary mb-2">Страховка (5%): +¥{insuranceCost.toFixed(2)}</p>
                   )}
-                  <p className="text-base text-cyan-400 font-bold mb-2">Итого: ¥{finalTotal.toFixed(2)}</p>
-                  <p className="text-base text-gray-300 mb-2">Адрес: {deliveryAddress}</p>
+                  <p className="text-base text-accent-primary font-bold mb-2">Итого: ¥{finalTotal.toFixed(2)}</p>
+                  <p className="text-base text-text-secondary mb-2">Отделение: {deliveryAddress || 'Не выбрано'}</p>
                   <div className="flex justify-between space-x-4">
                     <motion.button
                       whileTap={{ scale: 0.95 }}
-                      className="flex-1 px-6 py-3 bg-cyan-500 text-white rounded-lg text-base font-semibold shadow-sm"
+                      className="flex-1 px-6 py-3 bg-accent-primary text-white rounded-lg text-base font-semibold shadow-sm"
                       onClick={handleConfirmOrder}
                       disabled={loading}
                       aria-label="Подтвердить заказ"
@@ -546,7 +521,7 @@ function CartPage() {
                     </motion.button>
                     <motion.button
                       whileTap={{ scale: 0.95 }}
-                      className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg text-base font-semibold shadow-sm"
+                      className="flex-1 px-6 py-3 bg-accent-primary text-white rounded-lg text-base font-semibold shadow-sm"
                       onClick={() => setShowConfirm(false)}
                       aria-label="Отменить подтверждение"
                     >

@@ -5,6 +5,34 @@ import { motion } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
 import { ClockIcon } from '@heroicons/react/24/solid';
 
+// Append global styles for consistency with DeliveryPayment.jsx
+const styles = `
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in-down {
+    animation: fadeInDown 0.6s ease-out;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`;
+const styleSheet = document.createElement('style');
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);
+
 // Define currency conversion rate (not used for display, kept for reference)
 const CNY_TO_BYN_RATE = 0.45;
 
@@ -93,24 +121,23 @@ const OrderHistoryTab = ({ handleOrderDetailsHistory, refresh }) => {
   return (
     <div
       ref={containerRef}
-      className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-8 shadow-xl border border-gray-700/50 relative h-[70vh] overflow-y-auto scrollbar-hide"
+      className="h-[70vh] bg-primary rounded-2xl p-8 shadow-card border border-primary/50 relative overflow-y-auto scrollbar-hide"
     >
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
-        }
-      `}</style>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none" />
-      <h2 className="text-3xl font-bold text-[var(--accent-color)] mb-6 relative z-10">История отправлений</h2>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,37,73,0.3)_0%,transparent_70%)] pointer-events-none" />
+      <motion.h2
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-3xl font-bold font-display text-accent-primary mb-6 relative z-10 animate-fade-in-down"
+      >
+        История отправлений
+      </motion.h2>
       {error && (
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
-          className="mb-6 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-center"
+          transition={{ duration: 0.3 }}
+          className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-center text-base font-medium font-sans relative z-10"
         >
           {error}
         </motion.div>
@@ -125,32 +152,34 @@ const OrderHistoryTab = ({ handleOrderDetailsHistory, refresh }) => {
             return (
               <Tilt
                 key={order.id}
-                tiltMaxAngleX={10}
-                tiltMaxAngleY={10}
-                perspective={1000}
+                tiltMaxAngleX={8}
+                tiltMaxAngleY={8}
+                perspective={1200}
               >
                 <div ref={index === orders.length - 1 ? lastOrderElementRef : null}>
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="bg-gradient-to-b from-gray-700 to-gray-800 rounded-lg border border-gray-600 p-4 transition-all duration-300 hover:shadow-[0_0_15px_#10b981] cursor-pointer"
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+                    whileTap={{ scale: 0.97 }}
+                    className="bg-tertiary backdrop-blur-lg border border-primary/50 shadow-card hover:shadow-accent-primary/40 rounded-lg p-4 transition-all duration-300 cursor-pointer text-secondary hover:text-accent-primary relative z-10 font-sans"
                     onClick={() => handleOrderDetailsHistory(order.id)}
                   >
-                    <p className="text-gray-300">
+                    <p className="text-base">
                       <strong>Дата:</strong>{' '}
                       {order.dateCreated
                         ? new Date(order.dateCreated).toLocaleDateString('ru-RU')
                         : 'Не указана'}
                     </p>
-                    <p className="text-gray-300">
+                    <p className="text-base">
                       <strong>Номер:</strong> {order.orderNumber || 'Не указан'}
                     </p>
-                    <p className="text-gray-300">
+                    <p className="text-base">
                       <strong>Статус:</strong>{' '}
                       <span className={statusDisplay.color}>{statusDisplay.text}</span>
                     </p>
-                    <p className="text-gray-300">
+                    <p className="text-base">
                       <strong>Стоимость:</strong> ¥{(order.totalClientPrice || 0).toFixed(2)}
                     </p>
                   </motion.div>
@@ -161,15 +190,15 @@ const OrderHistoryTab = ({ handleOrderDetailsHistory, refresh }) => {
         </div>
       ) : (
         !loading && (
-          <p className="text-center text-gray-400 text-lg relative z-10">
+          <p className="text-center text-secondary text-lg font-sans relative z-10">
             История отправлений пуста.
           </p>
         )
       )}
       {loading && !isInitialLoad.current && (
-        <div className="text-center text-gray-400 mt-4">
-          <ClockIcon className="w-6 h-6 animate-spin mx-auto text-[var(--accent-color)]" />
-          <p>Загрузка...</p>
+        <div className="text-center text-secondary mt-4">
+          <ClockIcon className="w-6 h-6 animate-spin mx-auto text-accent-primary" />
+          <p className="text-base font-sans">Загрузка...</p>
         </div>
       )}
     </div>

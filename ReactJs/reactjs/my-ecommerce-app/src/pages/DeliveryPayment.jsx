@@ -38,14 +38,7 @@ function DeliveryPayment() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-10 pointer-events-none"
-        style={{
-          backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
-          backgroundRepeat: 'repeat',
-        }}
-      />
+    <div className="min-h-screen bg-primary font-sans text-primary py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.header
           initial={{ opacity: 0, y: -50 }}
@@ -53,10 +46,10 @@ function DeliveryPayment() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-emerald-500 tracking-tight animate-fade-in-down">
+          <h1 className="text-4xl font-bold font-display text-accent-primary tracking-tight animate-fade-in-down">
             Доставка и оплата
           </h1>
-          <p className="text-lg text-gray-300 mt-2">Узнайте, как мы доставляем ваши заказы и принимаем платежи</p>
+          <p className="text-lg text-secondary mt-2">Узнайте, как мы доставляем ваши заказы и принимаем платежи</p>
         </motion.header>
 
         <motion.section
@@ -68,25 +61,18 @@ function DeliveryPayment() {
           {/* Способы оплаты */}
           <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
             <motion.div
-              className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-6 rounded-2xl shadow-lg border border-cyan-500/30 hover:shadow-cyan-500/40 transition-shadow duration-300 relative overflow-hidden"
-              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+              className="bg-tertiary p-6 rounded-2xl shadow-card border border-primary hover:shadow-accent-primary/40 transition-shadow duration-300 relative overflow-hidden"
+              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
               whileTap={{ scale: 0.97 }}
             >
-              <div
-                className="absolute inset-0 opacity-10 pointer-events-none"
-                style={{
-                  backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
-                  backgroundRepeat: 'repeat',
-                }}
-              />
               <div className="flex items-center mb-4">
-                <CreditCardIcon className="w-8 h-8 text-cyan-400 mr-2" />
-                <h2 className="text-2xl font-bold text-cyan-400">Способы оплаты</h2>
+                <CreditCardIcon className="w-8 h-8 text-accent-primary mr-2" />
+                <h2 className="text-2xl font-bold font-display text-accent-primary">Способы оплаты</h2>
               </div>
-              <p className="text-gray-300 mb-4 text-base">
+              <p className="text-secondary mb-4 text-base">
                 На сайте Fluvion мы предлагаем удобные и прозрачные способы оплаты. Итоговая стоимость заказа формируется из следующих компонентов:
               </p>
-              <ul className="list-disc pl-5 space-y-3 text-gray-300">
+              <ul className="list-disc pl-5 space-y-3 text-secondary">
                 <li>
                   <strong>Цена товара:</strong> Рассчитывается по актуальному курсу Альфа-Банка с добавлением сервисного сбора 10%. Курс обновляется ежедневно.
                 </li>
@@ -94,7 +80,7 @@ function DeliveryPayment() {
                   <strong>Упаковка:</strong> Стандартная упаковка — $3, для хрупких товаров — $5.
                 </li>
                 <li>
-                  <strong>Доставка по Китаю:</strong> Конечная стоимость отображается в <span className="font-bold text-cyan-400">Терминале</span> после проверки.
+                  <strong>Доставка по Китаю:</strong> Конечная стоимость отображается в <span className="font-bold text-accent-primary">Терминале</span> после проверки.
                 </li>
                 <li>
                   <strong>Таможенные платежи:</strong> Организуются через транспортную компанию Карго.
@@ -103,8 +89,8 @@ function DeliveryPayment() {
                   <strong>Комиссия компании:</strong> 10% от стоимости заказа за организацию закупки и поддержку.
                 </li>
               </ul>
-              <p className="text-gray-300 mt-4 text-base">
-                Оплата осуществляется через эквайринг Альфа-Банка с 256-битным SSL-шифрованием. Итоговая стоимость отображается в <span className="font-bold text-cyan-400">Профиле</span>.
+              <p className="text-secondary mt-4 text-base">
+                Оплата осуществляется через эквайринг Альфа-Банка с 256-битным SSL-шифрованием. Итоговая стоимость отображается в <span className="font-bold text-accent-primary">Профиле</span>.
               </p>
             </motion.div>
           </Tilt>
@@ -112,34 +98,27 @@ function DeliveryPayment() {
           {/* Способы доставки */}
           <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
             <motion.div
-              className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-6 rounded-2xl shadow-lg border border-cyan-500/30 hover:shadow-cyan-500/40 transition-shadow duration-300 relative overflow-hidden"
-              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+              className="bg-tertiary p-6 rounded-2xl shadow-card border border-primary hover:shadow-accent-primary/40 transition-shadow duration-300 relative overflow-hidden"
+              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
               whileTap={{ scale: 0.97 }}
             >
-              <div
-                className="absolute inset-0 opacity-10 pointer-events-none"
-                style={{
-                  backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
-                  backgroundRepeat: 'repeat',
-                }}
-              />
               <div className="flex items-center mb-4">
-                <TruckIcon className="w-8 h-8 text-cyan-400 mr-2" />
-                <h2 className="text-2xl font-bold text-cyan-400">Способы доставки</h2>
+                <TruckIcon className="w-8 h-8 text-accent-primary mr-2" />
+                <h2 className="text-2xl font-bold font-display text-accent-primary">Способы доставки</h2>
               </div>
-              <p className="text-gray-300 mb-4 text-base">
+              <p className="text-secondary mb-4 text-base">
                 Доставка осуществляется через Европочту после проверки товаров на складе в Минске.
               </p>
-              <ul className="list-disc pl-5 space-y-3 text-gray-300">
+              <ul className="list-disc pl-5 space-y-3 text-secondary">
                 <li>
-                  <strong>Доставка:</strong> Выберите отделение Европочты в <span className="font-bold text-cyan-400">Корзине</span>.
+                  <strong>Доставка:</strong> Выберите отделение Европочты в <span className="font-bold text-accent-primary">Корзине</span>.
                 </li>
                 <li>
                   <strong>Стоимость доставки:</strong> $6 за килограмм + услуги Европочты, зависящие от региона.
                 </li>
               </ul>
-              <p className="text-gray-300 mt-4 text-base">
-                После оформления вы получите трек-номер и срок доставки. Укажите пожелания в <span className="font-bold text-cyan-400">Терминале</span>.
+              <p className="text-secondary mt-4 text-base">
+                После оформления вы получите трек-номер и срок доставки. Укажите пожелания в <span className="font-bold text-accent-primary">Терминале</span>.
               </p>
             </motion.div>
           </Tilt>
@@ -147,33 +126,26 @@ function DeliveryPayment() {
           {/* Действия с заказами */}
           <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
             <motion.div
-              className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-6 rounded-2xl shadow-lg border border-cyan-500/30 hover:shadow-cyan-500/40 transition-shadow duration-300 relative overflow-hidden"
-              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+              className="bg-tertiary p-6 rounded-2xl shadow-card border border-primary hover:shadow-accent-primary/40 transition-shadow duration-300 relative overflow-hidden"
+              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
               whileTap={{ scale: 0.97 }}
             >
-              <div
-                className="absolute inset-0 opacity-10 pointer-events-none"
-                style={{
-                  backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
-                  backgroundRepeat: 'repeat',
-                }}
-              />
               <div className="flex items-center mb-4">
-                <DocumentCheckIcon className="w-8 h-8 text-cyan-400 mr-2" />
-                <h2 className="text-2xl font-bold text-cyan-400">Действия с заказами</h2>
+                <DocumentCheckIcon className="w-8 h-8 text-accent-primary mr-2" />
+                <h2 className="text-2xl font-bold font-display text-accent-primary">Действия с заказами</h2>
               </div>
-              <p className="text-gray-300 mb-4 text-base">
+              <p className="text-secondary mb-4 text-base">
                 Удобная система управления заказами на Fluvion упрощает процесс покупки и отслеживания.
               </p>
-              <ul className="list-disc pl-5 space-y-3 text-gray-300">
+              <ul className="list-disc pl-5 space-y-3 text-secondary">
                 <li>
-                  <strong>Оформление заказа:</strong> В <span className="font-bold text-cyan-400">Терминале</span> укажите характеристики товаров и ссылки.
+                  <strong>Оформление заказа:</strong> В <span className="font-bold text-accent-primary">Терминале</span> укажите характеристики товаров и ссылки.
                 </li>
                 <li>
                   <strong>Каталог:</strong> Проверенные товары с отзывами и гарантией качества.
                 </li>
                 <li>
-                  <strong>Отслеживание заказов:</strong> В разделе <span className="font-bold text-cyan-400">Отправления</span> следите за статусом выкупа и доставки.
+                  <strong>Отслеживание заказов:</strong> В разделе <span className="font-bold text-accent-primary">Отправления</span> следите за статусом выкупа и доставки.
                 </li>
               </ul>
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
@@ -181,7 +153,7 @@ function DeliveryPayment() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate('/catalog')}
-                  className={`px-6 py-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 shadow-sm ${isActive('/catalog') ? 'ring-2 ring-offset-2 ring-cyan-500' : ''}`}
+                  className={`px-6 py-3 bg-accent-primary text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans flex items-center justify-center gap-2 shadow-card ${isActive('/catalog') ? 'ring-2 ring-offset-2 ring-accent-primary' : ''}`}
                 >
                   <ShoppingCartIcon className="w-5 h-5" />
                   Перейти в Каталог
@@ -190,7 +162,7 @@ function DeliveryPayment() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate('/terminal')}
-                  className={`px-6 py-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 shadow-sm ${isActive('/terminal') ? 'ring-2 ring-offset-2 ring-cyan-500' : ''}`}
+                  className={`px-6 py-3 bg-accent-primary text-primary rounded-lg hover:bg-accent-primary/90 transition duration-300 text-base font-semibold font-sans flex items-center justify-center gap-2 shadow-card ${isActive('/terminal') ? 'ring-2 ring-offset-2 ring-accent-primary' : ''}`}
                 >
                   <DocumentCheckIcon className="w-5 h-5" />
                   Перейти в Терминал
@@ -202,25 +174,18 @@ function DeliveryPayment() {
           {/* Правила оплаты и безопасности */}
           <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
             <motion.div
-              className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-6 rounded-2xl shadow-lg border border-cyan-500/30 hover:shadow-cyan-500/40 transition-shadow duration-300 relative overflow-hidden"
-              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+              className="bg-tertiary p-6 rounded-2xl shadow-card border border-primary hover:shadow-accent-primary/40 transition-shadow duration-300 relative overflow-hidden"
+              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
               whileTap={{ scale: 0.97 }}
             >
-              <div
-                className="absolute inset-0 opacity-10 pointer-events-none"
-                style={{
-                  backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
-                  backgroundRepeat: 'repeat',
-                }}
-              />
               <div className="flex items-center mb-4">
-                <CreditCardIcon className="w-8 h-8 text-cyan-400 mr-2" />
-                <h2 className="text-2xl font-bold text-cyan-400">Правила оплаты и безопасность</h2>
+                <CreditCardIcon className="w-8 h-8 text-accent-primary mr-2" />
+                <h2 className="text-2xl font-bold font-display text-accent-primary">Правила оплаты и безопасность</h2>
               </div>
-              <p className="text-gray-300 text-base">
+              <p className="text-secondary text-base">
                 Безопасность ваших данных — наш приоритет. Оплата осуществляется через эквайринг Альфа-Банка:
               </p>
-              <ul className="list-disc pl-5 mt-2 space-y-3 text-gray-300">
+              <ul className="list-disc pl-5 mt-2 space-y-3 text-secondary">
                 <li>
                   <strong>Банковские карты:</strong> Принимаем Visa и Mastercard с 256-битным SSL-шифрованием и 3D-Secure.
                 </li>
@@ -231,42 +196,35 @@ function DeliveryPayment() {
           {/* Правила возврата */}
           <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
             <motion.div
-              className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 p-6 rounded-2xl shadow-lg border border-cyan-500/30 hover:shadow-cyan-500/40 transition-shadow duration-300 relative overflow-hidden"
-              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+              className="bg-tertiary p-6 rounded-2xl shadow-card border border-primary hover:shadow-accent-primary/40 transition-shadow duration-300 relative overflow-hidden"
+              whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
               whileTap={{ scale: 0.97 }}
             >
-              <div
-                className="absolute inset-0 opacity-10 pointer-events-none"
-                style={{
-                  backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
-                  backgroundRepeat: 'repeat',
-                }}
-              />
               <div className="flex items-center mb-4">
-                <ArrowPathIcon className="w-8 h-8 text-cyan-400 mr-2" />
-                <h2 className="text-2xl font-bold text-cyan-400">Правила возврата</h2>
+                <ArrowPathIcon className="w-8 h-8 text-accent-primary mr-2" />
+                <h2 className="text-2xl font-bold font-display text-accent-primary">Правила возврата</h2>
               </div>
-              <p className="text-gray-300 text-base">
+              <p className="text-secondary text-base">
                 На сайте Fluvion действуют следующие правила возврата:
               </p>
-              <ul className="list-disc pl-5 mt-2 space-y-3 text-gray-300">
+              <ul className="list-disc pl-5 mt-2 space-y-3 text-secondary">
                 <li>
                   <strong>Отсутствие возврата:</strong> Убедитесь в выборе товара перед оплатой.
                 </li>
                 <li>
-                  <strong>Ответственность за качество:</strong> За товары из <span className="font-bold text-cyan-400">Терминала</span> ответственность лежит на покупателе. Для <span className="font-bold text-cyan-400">Каталога</span> ориентируйтесь на отзывы.
+                  <strong>Ответственность за качество:</strong> За товары из <span className="font-bold text-accent-primary">Терминала</span> ответственность лежит на покупателе. Для <span className="font-bold text-accent-primary">Каталога</span> ориентируйтесь на отзывы.
                 </li>
                 <li>
                   <strong>Компенсация:</strong> Возможна при браке, если выбрана страховка груза.
                 </li>
               </ul>
-              <p className="text-gray-300 mt-4 text-base">
+              <p className="text-secondary mt-4 text-base">
                 Свяжитесь с поддержкой по email{' '}
-                <a href="mailto:support@fluvion.com" className="text-cyan-400 hover:underline">
+                <a href="mailto:support@fluvion.com" className="text-accent-primary hover:underline">
                   support@fluvion.com
                 </a>{' '}
                 или телефону{' '}
-                <a href="tel:+375291234567" className="text-cyan-400 hover:underline">
+                <a href="tel:+375291234567" className="text-accent-primary hover:underline">
                   +375 29 123-45-67
                 </a>. Поддержка доступна 24/7.
               </p>
