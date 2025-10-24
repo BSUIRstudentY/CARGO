@@ -5,7 +5,7 @@ import { QueryClient } from '@tanstack/react-query';
 const queryClient = new QueryClient();
 
 const api = axios.create({
-  baseURL: 'https://fluvion.by/api',
+  baseURL: 'http://localhost:8080/api',
   headers: {
     'Content-Type': 'application/json',
   },

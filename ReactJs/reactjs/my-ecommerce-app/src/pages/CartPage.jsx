@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../components/CartContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosInstance';
@@ -6,6 +7,7 @@ import { useAuth } from '../components/AuthProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import Tilt from 'react-parallax-tilt';
+import PostOfficeSelect from '../components/PostOfficeSelect';
 
 // Append global styles
 const styles = `
@@ -35,30 +37,6 @@ const styleSheet = document.createElement('style');
 styleSheet.textContent = styles;
 document.head.appendChild(styleSheet);
 
-function useDebounce(callback, delay) {
-  const [timeoutId, setTimeoutId] = useState(null);
-
-  const debouncedCallback = useCallback((...args) => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    const id = setTimeout(() => {
-      callback(...args);
-    }, delay);
-    setTimeoutId(id);
-  }, [callback, delay, timeoutId]);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [timeoutId]);
-
-  return debouncedCallback;
-}
-
 function CartPage() {
   const { cart, removeFromCart, updateQuantity, clearCart, confirmOrder, loading, error, setError, setCart } = useCart();
   const { user } = useAuth();
@@ -74,6 +52,7 @@ function CartPage() {
   const [localQuantities, setLocalQuantities] = useState({});
   const [userDiscountPercent, setUserDiscountPercent] = useState(0);
 
+  // Fetch cart data and user discount
   useEffect(() => {
     const fetchCartData = async () => {
       try {
@@ -136,6 +115,7 @@ function CartPage() {
     console.log('Cart contents:', cart);
   }, [cart]);
 
+  // Validate promocode
   const validatePromocode = async (code) => {
     const trimmedCode = code.trim();
     if (!trimmedCode) {
@@ -172,21 +152,22 @@ function CartPage() {
     }
   };
 
-  const debouncedValidatePromocode = useDebounce(validatePromocode, 500);
-
-  const handlePromoCodeChange = (e) => {
+  const handlePromoCodeChange = async (e) => {
     const newCode = e.target.value;
     setDiscountValue(0);
     setPromoError(null);
     setPromoApplied(false);
     setPromoCode(newCode);
-    debouncedValidatePromocode(newCode);
+    if (newCode) {
+      await validatePromocode(newCode);
+    }
   };
 
+  // Confirm order
   const handleConfirmOrder = async () => {
     console.log('Cart state in handleConfirmOrder:', cart);
     if (!deliveryAddress) {
-      setError('Пожалуйста, укажите адрес доставки');
+      setError('Пожалуйста, выберите отделение почты');
       return;
     }
     if (!cart || cart.length === 0) {
@@ -220,10 +201,8 @@ function CartPage() {
     const inputValue = localQuantities[productId] || 1;
     const cartItem = cart.find(item => item.productId === productId);
     if (!cartItem) return;
-
     const originalQuantity = cartItem.quantity;
     let newQuantity = inputValue;
-
     if (newQuantity !== originalQuantity) {
       console.log('Sending update for productId:', productId, 'quantity:', newQuantity);
       try {
@@ -272,7 +251,6 @@ function CartPage() {
             Ваша корзина
           </h2>
         </motion.header>
-
         <AnimatePresence>
           {loading && (
             <motion.div
@@ -307,7 +285,6 @@ function CartPage() {
             </motion.div>
           )}
         </AnimatePresence>
-
         <motion.section
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -380,7 +357,6 @@ function CartPage() {
               ))}
             </div>
           )}
-
           {cart.length > 0 && (
             <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
               <motion.div
@@ -399,17 +375,10 @@ function CartPage() {
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-base font-medium text-gray-300 mb-2" htmlFor="deliveryAddress">
-                      Адрес доставки *
-                    </label>
-                    <input
-                      id="deliveryAddress"
-                      type="text"
-                      value={deliveryAddress}
-                      onChange={(e) => setDeliveryAddress(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                      placeholder="Введите адрес доставки"
-                      aria-required="true"
+                    <PostOfficeSelect
+                      deliveryAddress={deliveryAddress}
+                      setDeliveryAddress={setDeliveryAddress}
+                      setError={setError}
                     />
                     <label className="block text-base font-medium text-gray-300 mb-2 mt-4" htmlFor="promoCode">
                       Промокод
@@ -485,7 +454,6 @@ function CartPage() {
               </motion.div>
             </Tilt>
           )}
-
           {showConfirm && (
             <motion.div
               className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
@@ -533,7 +501,7 @@ function CartPage() {
                     <p className="text-base text-gray-300 mb-2">Страховка (5%): +¥{insuranceCost.toFixed(2)}</p>
                   )}
                   <p className="text-base text-cyan-400 font-bold mb-2">Итого: ¥{finalTotal.toFixed(2)}</p>
-                  <p className="text-base text-gray-300 mb-2">Адрес: {deliveryAddress}</p>
+                  <p className="text-base text-gray-300 mb-2">Отделение: {deliveryAddress || 'Не выбрано'}</p>
                   <div className="flex justify-between space-x-4">
                     <motion.button
                       whileTap={{ scale: 0.95 }}

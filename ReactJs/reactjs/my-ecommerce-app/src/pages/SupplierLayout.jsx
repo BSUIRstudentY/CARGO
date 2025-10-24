@@ -1,32 +1,101 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Outlet, useNavigate, Route, Routes, Navigate } from 'react-router-dom';
-import Header from './Header';
-import MultiTerminal from './MultiTerminal';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import { useAuth } from '../components/AuthProvider';
+import {
+  HomeIcon,
+  ShoppingBagIcon,
+  ComputerDesktopIcon,
+  ShoppingCartIcon,
+  CalculatorIcon,
+  UserIcon,
+  BellIcon,
+  TruckIcon,
+  ClipboardDocumentListIcon, // Corrected import
+  QuestionMarkCircleIcon,
+  WrenchScrewdriverIcon,
+  InformationCircleIcon,
+  PhoneIcon,
+  StarIcon,
+  ArrowRightOnRectangleIcon,
+  Bars3Icon,
+  XMarkIcon,
+  CurrencyDollarIcon,
+} from '@heroicons/react/24/solid';
 import Footer from './Footer';
-import Catalog from './Catalog';
-import Home from './Home';
-import DeliveryPayment from './DeliveryPayment';
-import FAQSection from './FAQSection';
-import SupportPage from './SupportPage';
-import TicketChatPage from './TicketChatPage';
-import Reviews from './Reviews';
-import CostCalculator from './CostCalculator';
-import PublicOffer from './PublicOffer';
-import PrivacyPolicy from '../components/PrivacyPolicy';
-import UserAgreement from '../components/UserAgreement';
-import LoginRegister from './LoginRegister';
-import { HomeIcon, ShoppingBagIcon, CalculatorIcon, TruckIcon, CurrencyDollarIcon, QuestionMarkCircleIcon, WrenchScrewdriverIcon, StarIcon, LockClosedIcon, ComputerDesktopIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
-import Profile from './Profile';
-import Rate from './Rate';
 
-function GuestLayout() {
+// Placeholder components (to be replaced with actual implementations)
+const SupplierDashboard = () => (
+  <section id="supplier-dashboard" className="mb-12">
+    <h2 className="text-3xl sm:text-4xl font-bold text-center text-[var(--accent-color)]">Панель управления поставщика</h2>
+    <p className="text-center text-lg sm:text-xl text-gray-300">
+      Добро пожаловать в вашу панель управления. Здесь вы можете управлять грузами, заказами и отзывами.
+    </p>
+  </section>
+);
+
+const SupplierCargos = () => (
+  <section id="supplier-cargos" className="mb-12">
+    <h2 className="text-3xl sm:text-4xl font-bold text-center text-[var(--accent-color)]">Грузы</h2>
+    <p className="text-center text-lg sm:text-xl text-gray-300">
+      Управляйте вашими грузами здесь.
+    </p>
+  </section>
+);
+
+const SupplierOrders = () => (
+  <section id="supplier-orders" className="mb-12">
+    <h2 className="text-3xl sm:text-4xl font-bold text-center text-[var(--accent-color)]">Заказы</h2>
+    <p className="text-center text-lg sm:text-xl text-gray-300">
+      Просматривайте и управляйте заказами.
+    </p>
+  </section>
+);
+
+const SupplierProfile = () => (
+  <section id="supplier-profile" className="mb-12">
+    <h2 className="text-3xl sm:text-4xl font-bold text-center text-[var(--accent-color)]">Профиль</h2>
+    <p className="text-center text-lg sm:text-xl text-gray-300">
+      Обновите информацию о вашем профиле поставщика.
+    </p>
+  </section>
+);
+
+const SupplierNotifications = () => (
+  <section id="supplier-notifications" className="mb-12">
+    <h2 className="text-3xl sm:text-4xl font-bold text-center text-[var(--accent-color)]">Уведомления</h2>
+    <p className="text-center text-lg sm:text-xl text-gray-300">
+      Просматривайте ваши уведомления.
+    </p>
+  </section>
+);
+
+const SupplierSupport = () => (
+  <section id="supplier-support" className="mb-12">
+    <h2 className="text-3xl sm:text-4xl font-bold text-center text-[var(--accent-color)]">Поддержка</h2>
+    <p className="text-center text-lg sm:text-xl text-gray-300">
+      Свяжитесь с нашей службой поддержки.
+    </p>
+  </section>
+);
+
+const SupplierReviews = () => (
+  <section id="supplier-reviews" className="mb-12">
+    <h2 className="text-3xl sm:text-4xl font-bold text-center text-[var(--accent-color)]">Отзывы</h2>
+    <p className="text-center text-lg sm:text-xl text-gray-300">
+      Просматривайте отзывы о ваших услугах.
+    </p>
+  </section>
+);
+
+function SupplierLayout() {
   const [backgroundColor, setBackgroundColor] = useState(() => localStorage.getItem('backgroundColor') || '#2F2F2F');
   const [accentColor, setAccentColor] = useState(() => localStorage.getItem('accentColor') || '#FF5722');
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarFullyClosed, setIsSidebarFullyClosed] = useState(true);
-  const [openDropdown, setOpenDropdown] = useState(null);
   const sidebarRef = useRef(null);
 
   useEffect(() => {
@@ -40,7 +109,6 @@ function GuestLayout() {
     const handleClickOutside = (event) => {
       if (isSidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
         setIsSidebarOpen(false);
-        setOpenDropdown(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -60,30 +128,21 @@ function GuestLayout() {
   }, [isSidebarOpen]);
 
   const navItems = [
-    { path: '/', label: 'Главная', icon: <HomeIcon className="w-5 h-5 text-cyan-400" /> },
-    { path: '/catalog', label: 'Каталог', icon: <ShoppingBagIcon className="w-5 h-5 text-orange-400" />, highlight: true },
-    { path: '/terminal', label: 'Терминал', icon: <ComputerDesktopIcon className="w-5 h-5 text-orange-400" />, highlight: true },
-    { path: '/rates', label: 'Курс', icon: <CurrencyDollarIcon className="w-5 h-5 text-orange-400" />, highlight: true },
-    { path: '/calculator', label: 'Калькулятор', icon: <CalculatorIcon className="w-5 h-5 text-cyan-400" /> },
-    { path: '/delivery-payment', label: 'Доставка и оплата', icon: <TruckIcon className="w-5 h-5 text-cyan-400" /> },
-    { path: '/faq', label: 'FAQ', icon: <QuestionMarkCircleIcon className="w-5 h-5 text-cyan-400" /> },
-    { path: '/support', label: 'Поддержка', icon: <WrenchScrewdriverIcon className="w-5 h-5 text-cyan-400" /> },
-    { path: '/reviews', label: 'Отзывы', icon: <StarIcon className="w-5 h-5 text-cyan-400" /> },
-    { path: '/login', label: 'Вход/Регистрация', icon: <LockClosedIcon className="w-5 h-5 text-green-400" />, loginHighlight: true },
+    { path: '/supplier-dashboard', label: 'Дашборд', icon: <HomeIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/supplier-cargos', label: 'Грузы', icon: <TruckIcon className="w-5 h-5 text-orange-400" />, highlight: true },
+    { path: '/supplier-orders', label: 'Заказы', icon: <ShoppingBagIcon className="w-5 h-5 text-orange-400" />, highlight: true },
+    { path: '/supplier-profile', label: 'Профиль', icon: <UserIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/supplier-notifications', label: 'Уведомления', icon: <BellIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/supplier-support', label: 'Поддержка', icon: <WrenchScrewdriverIcon className="w-5 h-5 text-cyan-400" /> },
+    { path: '/supplier-reviews', label: 'Отзывы', icon: <StarIcon className="w-5 h-5 text-cyan-400" /> },
   ];
-
-  const toggleDropdown = (index) => {
-    setOpenDropdown(openDropdown === index ? null : index);
-  };
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
-    if (isSidebarOpen) setOpenDropdown(null);
   };
 
   const closeSidebar = () => {
     setIsSidebarOpen(false);
-    setOpenDropdown(null);
   };
 
   return (
@@ -201,7 +260,7 @@ function GuestLayout() {
               </h2>
             </div>
             <nav>
-              <ul className="space-y-1">
+              <ul className="space-y-2">
                 {navItems.map((item, index) => (
                   <li key={item.path}>
                     <motion.div
@@ -213,94 +272,62 @@ function GuestLayout() {
                     >
                       <button
                         onClick={() => {
-                          if (item.subItems) {
-                            toggleDropdown(index);
-                          } else {
-                            navigate(item.path);
-                            closeSidebar();
-                          }
+                          navigate(item.path);
+                          closeSidebar();
                         }}
                         className={`w-full text-left px-4 py-3 rounded-lg ${
-                          item.loginHighlight
-                            ? 'bg-gray-900/30 backdrop-blur-lg border border-green-400/20 shadow-lg hover:shadow-green-400/20 text-green-300 hover:text-green-100'
-                            : item.highlight
+                          item.highlight
                             ? 'bg-orange-900/30 backdrop-blur-lg border border-orange-400/20 shadow-lg hover:shadow-orange-400/20 text-orange-400 hover:text-orange-200'
                             : 'bg-gray-900/30 backdrop-blur-lg border border-cyan-400/20 shadow-lg hover:shadow-cyan-400/20 text-cyan-400 hover:text-cyan-200'
-                        } transition-all duration-300 flex items-center justify-between`}
+                        } transition-all duration-300 flex items-center`}
                       >
-                        <div className="flex items-center gap-2">
-                          {React.cloneElement(item.icon, {
-                            className: `w-5 h-5 ${item.highlight ? 'text-orange-400' : item.loginHighlight ? 'text-green-400' : 'text-cyan-400'}`,
-                          })}
-                          <span>{item.label}</span>
-                        </div>
-                        {item.subItems && (
-                          <span>
-                            <svg
-                              className={`w-4 h-4 ${item.highlight ? 'text-orange-400' : 'text-cyan-400'}`}
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </span>
-                        )}
+                        <span className="mr-2">{item.icon}</span>
+                        <span>{item.label}</span>
                       </button>
                     </motion.div>
-                    {openDropdown === index && item.subItems && (
-                      <ul className="ml-6 space-y-1 mt-1">
-                        {item.subItems.map((subItem, subIndex) => (
-                          <li key={subItem.path}>
-                            <motion.div
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.3, delay: subIndex * 0.05 }}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              <button
-                                onClick={() => {
-                                  navigate(subItem.path);
-                                  closeSidebar();
-                                }}
-                                className="w-full text-left px-4 py-2 rounded-lg bg-gray-800/30 backdrop-blur-lg border border-cyan-400/20 shadow-lg hover:shadow-cyan-400/20 transition-all duration-300 flex items-center gap-2 text-cyan-400 hover:text-cyan-200 text-sm"
-                              >
-                                {React.cloneElement(subItem.icon, {
-                                  className: 'w-4 h-4 text-cyan-400',
-                                })}
-                                {subItem.label}
-                              </button>
-                            </motion.div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
                   </li>
                 ))}
               </ul>
             </nav>
           </div>
+          <div className="relative">
+            <div className={`car-animation ${isSidebarOpen ? 'active' : ''} w-24 h-12 absolute bottom-16 left-2`}>
+              <img
+                src="/car.png"
+                alt="Cargo Truck"
+                className="car w-full h-full object-contain filter invert brightness-200 z-50"
+              />
+              <div className="dust z-40"></div>
+            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <button
+                onClick={logout}
+                className="w-full mt-6 px-4 py-3 rounded-lg bg-red-600 text-white border border-red-400/20 shadow-lg hover:shadow-red-400/20 transition-all duration-300"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <ArrowRightOnRectangleIcon className="w-5 h-5 text-cyan-400" />
+                  <span>Выйти</span>
+                </div>
+              </button>
+            </motion.div>
+          </div>
         </div>
       </aside>
       <main className="main-content flex-1 pt-16 p-6 relative z-10">
         <Routes>
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/catalog" element={<Catalog />} />
-          <Route path="/terminal" element={<MultiTerminal />} />
-          <Route path="/calculator" element={<CostCalculator />} />
-          <Route path="/delivery-payment" element={<DeliveryPayment />} />
-          <Route path="/faq" element={<FAQSection />} />
-          <Route path="/support" element={<Navigate to="/login" replace />} />
-          <Route path="/ticket/:ticketId/chat" element={<TicketChatPage />} />
-          <Route path="/reviews" element={<Reviews />} />
-          <Route path="/login" element={<LoginRegister />} />
-          <Route path="/public-offer" element={<PublicOffer />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/user-agreement" element={<UserAgreement />} />
-          <Route path="/rates" element={<Rate/>} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
+          <Route path="/supplier-cargos" element={<SupplierCargos />} />
+          <Route path="/supplier-orders" element={<SupplierOrders />} />
+          <Route path="/supplier-profile" element={<SupplierProfile />} />
+          <Route path="/supplier-notifications" element={<SupplierNotifications />} />
+          <Route path="/supplier-support" element={<SupplierSupport />} />
+          <Route path="/supplier-reviews" element={<SupplierReviews />} />
         </Routes>
       </main>
       <Footer />
@@ -308,4 +335,4 @@ function GuestLayout() {
   );
 }
 
-export default GuestLayout;
+export default SupplierLayout;

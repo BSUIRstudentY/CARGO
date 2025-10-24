@@ -33,9 +33,9 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
           }
         },
         {
-          root: containerRef.current, // Use ShipmentsTab container as root
-          rootMargin: '100px', // Trigger 100px before bottom
-          threshold: 0.1, // Trigger when 10% of element is visible
+          root: containerRef.current,
+          rootMargin: '100px',
+          threshold: 0.1,
         }
       );
       observer.current.observe(node);
@@ -73,22 +73,29 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
           display: none;
         }
         .scrollbar-hide {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none" />
-      <h2 className="text-3xl font-bold text-[var(--accent-color)] mb-6 relative z-10">Мои отправления</h2>
-      {error && <p className="text-red-400 text-center mb-4">{error}</p>}
+      <h2 className="text-3xl font-bold text-cyan-400 mb-6 relative z-10">Мои отправления</h2>
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-center text-base font-medium relative z-10"
+        >
+          {error}
+        </motion.div>
+      )}
       {orders.length > 0 ? (
         <div className="grid gap-4">
           {orders.map((order, index) => {
-            // Calculate totalChinaDeliveryPrice for the order
             const totalChinaDeliveryPrice = order.items?.reduce((sum, item) => {
               return sum + ((item.chinaDeliveryPrice || 0) * (item.quantity || 1));
             }, 0) || 0;
             const totalOrderPrice = (order.totalClientPrice || 0) + totalChinaDeliveryPrice;
-
             return (
               <Tilt
                 key={order.id}
@@ -100,30 +107,35 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="bg-gradient-to-b from-gray-700 to-gray-800 rounded-lg border border-gray-600 p-4 transition-all duration-300 hover:shadow-[0_0_15px_#10b981] cursor-pointer"
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="bg-gray-900/30 backdrop-blur-lg border border-cyan-400/20 shadow-lg hover:shadow-cyan-400/20 rounded-lg p-4 transition-all duration-300 cursor-pointer text-cyan-400 hover:text-cyan-200 relative z-10"
                     onClick={() => handleViewOrderDetails(order.id)}
                   >
-                    <p className="text-gray-300"><strong>Дата:</strong> {new Date(order.dateCreated).toLocaleDateString()}</p>
-                    <p className="text-gray-300"><strong>Номер:</strong> {order.orderNumber}</p>
-                    <p className="text-gray-300"><strong>Статус:</strong>
+                    <p><strong>Дата:</strong> {new Date(order.dateCreated).toLocaleDateString()}</p>
+                    <p><strong>Номер:</strong> {order.orderNumber}</p>
+                    <p>
+                      <strong>Статус:</strong>{' '}
                       <span className={order.status === 'PENDING' ? 'text-yellow-300' : 'text-emerald-300'}>
-                        {order.status === 'PENDING' ? ' Ожидает подтверждения' : ' Подтверждён'}
+                        {order.status === 'PENDING' ? 'Ожидает подтверждения' : 'Подтверждён'}
                       </span>
                     </p>
                     {totalOrderPrice > 0 && (
-                      <p className="text-gray-300"><strong>Стоимость:</strong> ¥{(order.totalClientPrice + totalChinaDeliveryPrice).toFixed(2)}</p>
+                      <p><strong>Стоимость:</strong> ¥{totalOrderPrice.toFixed(2)}</p>
                     )}
                     {totalOrderPrice > 0 && order.status !== 'PAID' && (
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={(e) => {
                           e.stopPropagation();
                           handlePay(order.id);
                         }}
-                        className="mt-2 px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition duration-300 transform hover:scale-105"
+                        className="mt-2 px-4 py-2 bg-cyan-900/30 border border-cyan-400/20 shadow-lg hover:shadow-cyan-400/20 text-cyan-400 hover:text-cyan-200 rounded-lg transition-all duration-300"
                       >
                         Оплатить
-                      </button>
+                      </motion.button>
                     )}
                     {order.status === 'PAID' && (
                       <p className="text-emerald-300 mt-2">Оплачено</p>
@@ -135,11 +147,15 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
           })}
         </div>
       ) : (
-        !loading && <p className="text-center text-gray-400 text-lg relative z-10">У вас пока нет текущих отправлений.</p>
+        !loading && (
+          <p className="text-center text-gray-400 text-lg relative z-10">
+            У вас пока нет текущих отправлений.
+          </p>
+        )
       )}
       {loading && !isInitialLoad.current && (
         <div className="text-center text-gray-400 mt-4">
-          <ClockIcon className="w-6 h-6 animate-spin mx-auto text-[var(--accent-color)]" />
+          <ClockIcon className="w-6 h-6 animate-spin mx-auto text-orange-400" />
           <p>Загрузка...</p>
         </div>
       )}

@@ -1,27 +1,32 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuth } from '../components/AuthProvider';
 import api from '../api/axiosInstance';
-import { UserIcon, LockClosedIcon, TagIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
+import { useAuth } from '../components/AuthProvider';
+import { UserIcon, LockClosedIcon, TagIcon } from '@heroicons/react/24/solid';
 
 function LoginRegister() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [description, setDescription] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [address, setAddress] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [isReferralValid, setIsReferralValid] = useState(false);
   const [referralMessage, setReferralMessage] = useState('');
   const [isLogin, setIsLogin] = useState(true);
+  const [role, setRole] = useState('USER'); // USER или CARGO
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, message: '' });
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const { login, registerUser, registerSupplier } = useAuth();
   const navigate = useNavigate();
-  const { login, register } = useAuth();
 
-  // Password strength checker
   const checkPasswordStrength = (password) => {
     let score = 0;
     let message = '';
@@ -66,7 +71,7 @@ function LoginRegister() {
     }
     setIsLoading(true);
     try {
-      const res = await api.get('/auth/validate-referral', { params: { code: referralCode } });
+      const res = await api.get('/api/auth/validate-referral', { params: { code: referralCode } });
       if (res.data === true) {
         setIsReferralValid(true);
         setReferralMessage('Реферальный код действителен!');
@@ -89,7 +94,6 @@ function LoginRegister() {
     e.preventDefault();
     setError('');
 
-    // Validation
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError('Введите действительный email');
       return;
@@ -111,7 +115,7 @@ function LoginRegister() {
         setError('Введите логин');
         return;
       }
-      if (referralCode && !isReferralValid) {
+      if (referralCode && !isReferralValid && role === 'USER') {
         setError('Пожалуйста, примените действительный реферальный код или оставьте поле пустым');
         return;
       }
@@ -119,19 +123,30 @@ function LoginRegister() {
         setError('Пожалуйста, примите условия использования');
         return;
       }
+      if (role === 'CARGO') {
+        if (!companyName) {
+          setError('Введите название компании');
+          return;
+        }
+      }
     }
 
     setIsLoading(true);
     try {
       if (isLogin) {
-        await login(email, password);
+        await login(email, password, role);
       } else {
-        await register(username, email, password, referralCode);
+        if (role === 'CARGO') {
+          await registerSupplier(username, email, password, companyName, description, websiteUrl, address);
+        } else {
+          await registerUser(username, email, password, isReferralValid ? referralCode : '');
+        }
       }
       setError('');
-      // Navigation handled by App.jsx
     } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || 'Ошибка аутентификации';
+      const errorMsg = error.message.includes('Invalid password') ? 'Неверный пароль' :
+                       error.message.includes('not found') ? 'Пользователь или поставщик не найден' :
+                       error.response?.data?.message || error.message || 'Ошибка аутентификации';
       setError(errorMsg);
     } finally {
       setIsLoading(false);
@@ -139,22 +154,14 @@ function LoginRegister() {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
+    <section className="min-h-screen flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="relative max-w-lg w-full bg-gray-800/90 backdrop-blur-lg rounded-xl p-8 border border-cyan-400/20 shadow-lg hover:shadow-cyan-400/20 transition-shadow duration-300 overflow-hidden"
       >
-        {/* Decorative Background Pattern */}
-        <div
-          className="absolute inset-0 opacity-10 pointer-events-none"
-          style={{
-            backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.5"/%3E%3C/svg%3E')`,
-            backgroundRepeat: 'repeat',
-          }}
-        ></div>
-        {/* Header */}
+        <div className="absolute inset-0 pointer-events-none"></div>
         <div className="flex items-center gap-3 mb-8">
           <motion.div
             initial={{ scale: 0.8 }}
@@ -167,7 +174,6 @@ function LoginRegister() {
             {isLogin ? 'Вход в FLUVION' : 'Регистрация в FLUVION'}
           </h2>
         </div>
-        {/* Error Message */}
         {error && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -178,7 +184,6 @@ function LoginRegister() {
             {error}
           </motion.div>
         )}
-        {/* Loading Overlay */}
         {isLoading && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -188,8 +193,23 @@ function LoginRegister() {
             <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-cyan-400" />
           </motion.div>
         )}
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="flex gap-4 mb-6">
+            <button
+              type="button"
+              onClick={() => setRole('USER')}
+              className={`flex-1 py-2 text-white font-medium rounded-none ${role === 'USER' ? 'bg-gray-500' : 'bg-gray-600'} hover:bg-gray-500 transition duration-300`}
+            >
+              Пользователь
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('CARGO')}
+              className={`flex-1 py-2 text-white font-medium rounded-none ${role === 'CARGO' ? 'bg-gray-500' : 'bg-gray-600'} hover:bg-gray-500 transition duration-300`}
+            >
+              Поставщик
+            </button>
+          </div>
           {!isLogin && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Логин</label>
@@ -266,7 +286,7 @@ function LoginRegister() {
               </div>
             </div>
           )}
-          {!isLogin && (
+          {!isLogin && role === 'USER' && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Реферальный код (опционально)</label>
               <div className="flex gap-3">
@@ -303,6 +323,51 @@ function LoginRegister() {
               )}
             </div>
           )}
+          {!isLogin && role === 'CARGO' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Название компании</label>
+                <input
+                  type="text"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  placeholder="Введите название компании"
+                  className="w-full px-4 py-3 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300 text-base"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Описание</label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Введите описание компании"
+                  className="w-full px-4 py-3 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300 text-base"
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">URL веб-сайта</label>
+                <input
+                  type="url"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  placeholder="Введите URL веб-сайта (опционально)"
+                  className="w-full px-4 py-3 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300 text-base"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Адрес</label>
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Введите адрес компании (опционально)"
+                  className="w-full px-4 py-3 bg-gray-900/50 text-white border border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-300 text-base"
+                />
+              </div>
+            </>
+          )}
           {!isLogin && (
             <div className="flex items-center gap-2">
               <input
@@ -336,7 +401,6 @@ function LoginRegister() {
             {isLogin ? 'Перейти к регистрации' : 'Перейти к входу'}
           </motion.button>
         </form>
-        {/* Additional Info */}
         <div className="mt-6 text-center text-gray-300 text-sm">
           <p className="mb-2">Добро пожаловать в FLUVION!</p>
           <p>
@@ -345,7 +409,6 @@ function LoginRegister() {
               : 'Уже есть аккаунт? Войдите для доступа к вашему профилю.'}
           </p>
         </div>
-        {/* Social Login Placeholder */}
         <div className="mt-6 border-t border-gray-700/20 pt-4">
           <p className="text-center text-sm text-gray-300 mb-3">Или войдите через:</p>
           <div className="flex justify-center gap-4">

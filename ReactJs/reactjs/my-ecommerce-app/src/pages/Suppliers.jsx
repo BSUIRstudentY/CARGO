@@ -1,28 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../components/AuthProvider'; // Добавляем для аутентификации
 import api from '../api/axiosInstance';
-import { useCart } from '../components/CartContext';
-import { ShoppingCartIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, UserPlusIcon } from '@heroicons/react/24/solid'; // Добавляем UserPlusIcon
 import { motion, AnimatePresence } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
 import Slider from 'rc-slider';
-import confetti from 'canvas-confetti';
 import 'rc-slider/assets/index.css';
 
-function Catalog() {
-  const [products, setProducts] = useState([]);
+function Suppliers() {
+  const [suppliers, setSuppliers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(1000);
-  const [sortBy, setSortBy] = useState('price_asc');
+  const [minRating, setMinRating] = useState(0);
+  const [maxRating, setMaxRating] = useState(5);
+  const [sortBy, setSortBy] = useState('rating_asc');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const { addSingleToCart, cart, catalogProducts, loading: cartLoading, error: cartError } = useCart();
+  const [subscriptions, setSubscriptions] = useState(new Map()); // Map<supplierId, boolean>
+  const [subscribing, setSubscribing] = useState(new Map()); // Map<supplierId, boolean> для загрузки
+  const { isAuthenticated, user } = useAuth(); // Получаем аутентификацию
   const navigate = useNavigate();
-  const productsPerPage = 20;
+  const suppliersPerPage = 20;
 
   useEffect(() => {
     const handleResize = () => {
@@ -36,41 +37,80 @@ function Catalog() {
   }, []);
 
   useEffect(() => {
-    fetchProducts();
+    fetchSuppliers();
+    if (isAuthenticated && user) {
+      fetchSubscriptions();
+    }
   }, [currentPage, sortBy]);
 
-  const fetchProducts = async () => {
+  const fetchSuppliers = async () => {
     setLoading(true);
     try {
       const params = {
         page: currentPage - 1,
-        size: productsPerPage,
+        size: suppliersPerPage,
         searchTerm: searchTerm || undefined,
-        minPrice: minPrice > 0 ? minPrice : undefined,
-        maxPrice: maxPrice < 1000 ? maxPrice : undefined,
+        minRating: minRating > 0 ? minRating : undefined,
+        maxRating: maxRating < 5 ? maxRating : undefined,
         sortBy: sortBy || undefined,
       };
-      const response = await api.get('/products', { params });
+      const response = await api.get('/suppliers', { params });
       const { content, totalPages } = response.data;
-      setProducts(content || []);
+      setSuppliers(content || []);
       setTotalPages(totalPages || 1);
-      if (!content || content.length === 0) {
-        setProducts(catalogProducts.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage));
-        setTotalPages(Math.ceil(catalogProducts.length / productsPerPage));
-      }
     } catch (error) {
       setError(error.response?.data?.message || error.message);
-      setProducts(catalogProducts.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage));
-      setTotalPages(Math.ceil(catalogProducts.length / productsPerPage));
+      setSuppliers([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSubscriptions = async () => {
+    try {
+      const response = await api.get(`/users/${user.id}/subscriptions`);
+      const subMap = new Map();
+      response.data.forEach(sub => subMap.set(sub.supplierId, true));
+      setSubscriptions(subMap);
+    } catch (error) {
+      console.error('Ошибка загрузки подписок:', error);
+    }
+  };
+
+  const handleSubscribe = async (supplierId) => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    setSubscribing(prev => new Map(prev).set(supplierId, true));
+    try {
+      if (subscriptions.get(supplierId)) {
+        await api.delete(`/users/${user.id}/subscriptions/suppliers/${supplierId}`);
+        setSubscriptions(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(supplierId);
+          return newMap;
+        });
+      } else {
+        await api.post(`/users/${user.id}/subscriptions/suppliers/${supplierId}`);
+        setSubscriptions(prev => new Map(prev).set(supplierId, true));
+      }
+    } catch (error) {
+      setError(error.response?.data?.message || 'Ошибка подписки');
+    } finally {
+      setSubscribing(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(supplierId);
+        return newMap;
+      });
     }
   };
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' || e.type === 'click') {
       setCurrentPage(1);
-      fetchProducts();
+      fetchSuppliers();
     }
   };
 
@@ -85,56 +125,49 @@ function Catalog() {
     setCurrentPage(1);
   };
 
-  const handleViewProduct = (productId) => {
-    if (productId) {
-      navigate(`/product/${productId}`);
+  const handleViewSupplier = (supplierId) => {
+    if (supplierId) {
+      navigate(`/supplier/${supplierId}`);
     } else {
-      setError('Неверный ID товара');
+      setError('Неверный ID поставщика');
     }
   };
 
-  const handleAddToCart = async (product) => {
-    if (!product || !product.id) {
-      setError('Неверный товар: отсутствует ID');
-      return;
-    }
-    try {
-      const existingItem = cart.find((item) => item.id === product.id);
-      if (existingItem) {
-        await addSingleToCart({ ...existingItem, quantity: existingItem.quantity + 1 });
-      } else {
-        await addSingleToCart({ ...product, quantity: 1 });
+  const getVisiblePages = () => {
+    const pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
       }
-      confetti({
-        particleCount: isMobile ? 50 : 100,
-        spread: isMobile ? 60 : 70,
-        origin: { y: 0.6 },
-        colors: ['#0891b2', '#0ea5e9', '#38bdf8'],
-      });
-    } catch (error) {
-      setError('Ошибка добавления в корзину: ' + (error.response?.data?.message || error.message));
-      if (error.response?.status === 403) {
-        navigate('/login');
-      }
+      return pages;
     }
+
+    if (currentPage <= 3) {
+      pages.push(1, 2, 3, null, totalPages);
+    } else if (currentPage >= totalPages - 2) {
+      pages.push(1, null, totalPages - 2, totalPages - 1, totalPages);
+    } else {
+      pages.push(1, null, currentPage - 1, currentPage, currentPage + 1, null, totalPages);
+    }
+    return pages;
   };
 
   const mobileLayout = (
-    <section id="catalog" className="mobile-catalog">
+    <section id="suppliers" className="mobile-suppliers">
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="mobile-catalog-header"
+        className="mobile-suppliers-header"
       >
-        <h2>Каталог товаров</h2>
-        <p>Товары из Китая</p>
+        <h2>Каталог поставщиков</h2>
+        <p>Поставщики грузов из Китая</p>
       </motion.header>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
-        className="mobile-catalog-controls"
+        className="mobile-suppliers-controls"
       >
         <div className="mobile-search-container">
           <MagnifyingGlassIcon className="mobile-search-icon" />
@@ -155,25 +188,25 @@ function Catalog() {
             Искать
           </motion.button>
         </div>
-        <div className="mobile-price-filter">
-          <label>Цена (¥)</label>
+        <div className="mobile-rating-filter">
+          <label>Рейтинг</label>
           <Slider
             range
-            value={[minPrice, maxPrice]}
+            value={[minRating, maxRating]}
             onChange={([min, max]) => {
-              setMinPrice(min);
-              setMaxPrice(max);
+              setMinRating(min);
+              setMaxRating(max);
               setCurrentPage(1);
-              fetchProducts();
+              fetchSuppliers();
             }}
             min={0}
-            max={1000}
-            step={10}
+            max={5}
+            step={0.5}
             className="custom-slider"
           />
-          <div className="mobile-price-range">
-            <span>¥{minPrice}</span>
-            <span>¥{maxPrice}</span>
+          <div className="mobile-rating-range">
+            <span>{minRating}</span>
+            <span>{maxRating}</span>
           </div>
         </div>
         <select
@@ -181,23 +214,13 @@ function Catalog() {
           onChange={handleSortChange}
           className="mobile-sort-select"
         >
-          <option value="price_asc">Цена: по возрастанию</option>
-          <option value="price_desc">Цена: по убыванию</option>
-          <option value="sales_desc">Продажи: по убыванию</option>
+          <option value="rating_asc">Рейтинг: по возрастанию</option>
+          <option value="rating_desc">Рейтинг: по убыванию</option>
+          <option value="review_count_desc">Отзывы: по убыванию</option>
         </select>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => navigate('/cart')}
-          className="mobile-cart-button"
-          disabled={cartLoading}
-        >
-          <ShoppingCartIcon className="mobile-cart-icon" />
-          Корзина ({cart ? cart.length : 0})
-        </motion.button>
       </motion.div>
       <AnimatePresence>
-        {(error || cartError) && (
+        {error && (
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -205,7 +228,7 @@ function Catalog() {
             transition={{ duration: 0.3 }}
             className="mobile-error"
           >
-            {error || cartError}
+            {error}
           </motion.div>
         )}
       </AnimatePresence>
@@ -224,64 +247,69 @@ function Catalog() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3 }}
-        className="mobile-product-grid"
+        className="mobile-supplier-grid"
       >
-        {products.length > 0 ? (
-          products.map((product, index) => (
-            <motion.div
-              key={product.id}
-              className="mobile-product-card"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              whileHover={{ y: -5 }}
-            >
-              {product.imageUrl ? (
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="mobile-product-image"
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/80x80?text=Нет+фото';
-                  }}
-                />
-              ) : (
-                <div className="mobile-product-placeholder">
-                  Нет фото
+        {suppliers.length > 0 ? (
+          suppliers.map((supplier, index) => {
+            const isSubscribed = subscriptions.get(supplier.id);
+            const isSubLoading = subscribing.get(supplier.id);
+            return (
+              <motion.div
+                key={supplier.id || `supplier-${index}`}
+                className="mobile-supplier-card"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                whileHover={{ y: -5 }}
+              >
+                {supplier.imageUrl ? (
+                  <img
+                    src={supplier.imageUrl}
+                    alt={supplier.companyName}
+                    className="mobile-supplier-image"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/80x80?text=Нет+фото';
+                    }}
+                  />
+                ) : (
+                  <div className="mobile-supplier-placeholder">
+                    Нет фото
+                  </div>
+                )}
+                <div className="mobile-supplier-details">
+                  <h4 className="mobile-supplier-name">{supplier.companyName}</h4>
+                  <span className="mobile-supplier-subscribers">Подписчиков: {supplier.subscriberCount || 0}</span>
+                  <span className="mobile-supplier-rating">Рейтинг: {supplier.rating?.toFixed(1) || '0.0'}</span>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleSubscribe(supplier.id)}
+                    disabled={isSubLoading}
+                    className={`mobile-subscribe-button ${isSubscribed ? 'subscribed' : ''}`}
+                  >
+                    <UserPlusIcon className="mobile-subscribe-icon" />
+                    {isSubscribed ? 'Подписан' : 'Подписаться'}
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleViewSupplier(supplier.id)}
+                    className="mobile-view-details"
+                  >
+                    Подробнее
+                  </motion.button>
                 </div>
-              )}
-              <div className="mobile-product-details">
-                <h4 className="mobile-product-name">{product.name}</h4>
-                <span className="mobile-product-price">¥{product.price?.toFixed(2) || '0.00'}</span>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleAddToCart(product)}
-                  className="mobile-add-to-cart"
-                  disabled={cartLoading}
-                >
-                  <ShoppingCartIcon className="mobile-cart-icon" />
-                  В корзину
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleViewProduct(product.id)}
-                  className="mobile-view-details"
-                >
-                  Подробнее
-                </motion.button>
-              </div>
-            </motion.div>
-          ))
+              </motion.div>
+            );
+          })
         ) : (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="mobile-no-products"
+            className="mobile-no-suppliers"
           >
-            Товары не найдены
+            Поставщики не найдены
           </motion.div>
         )}
       </motion.section>
@@ -333,15 +361,15 @@ function Catalog() {
   );
 
   const desktopLayout = (
-    <section id="catalog" className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 container mx-auto px-4 py-8">
+    <section id="suppliers" className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 container mx-auto px-4 py-8">
       <motion.header
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="text-center mb-8"
       >
-        <h2 className="text-4xl font-bold text-white tracking-tight">Каталог товаров</h2>
-        <p className="text-lg text-gray-300 mt-2">Выберите товары из Китая для добавления в корзину</p>
+        <h2 className="text-4xl font-bold text-white tracking-tight">Каталог поставщиков</h2>
+        <p className="text-lg text-gray-300 mt-2">Выберите поставщиков грузов из Китая</p>
       </motion.header>
       <motion.div
         initial={{ opacity: 0, y: 50 }}
@@ -354,7 +382,7 @@ function Catalog() {
             <MagnifyingGlassIcon className="absolute top-3 left-3 w-6 h-6 text-cyan-500" />
             <input
               type="text"
-              placeholder="Поиск по названию..."
+              placeholder="Поиск по названию компании..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={handleSearch}
@@ -371,24 +399,24 @@ function Catalog() {
           </motion.button>
         </div>
         <div className="w-full md:w-1/4">
-          <label className="block text-sm font-medium text-gray-200 mb-2">Цена (¥)</label>
+          <label className="block text-sm font-medium text-gray-200 mb-2">Рейтинг</label>
           <Slider
             range
-            value={[minPrice, maxPrice]}
+            value={[minRating, maxRating]}
             onChange={([min, max]) => {
-              setMinPrice(min);
-              setMaxPrice(max);
+              setMinRating(min);
+              setMaxRating(max);
               setCurrentPage(1);
-              fetchProducts();
+              fetchSuppliers();
             }}
             min={0}
-            max={1000}
-            step={10}
+            max={5}
+            step={0.5}
             className="custom-slider"
           />
           <div className="flex justify-between mt-2 text-sm text-gray-300">
-            <span>Min: ¥{minPrice}</span>
-            <span>Max: ¥{maxPrice}</span>
+            <span>Min: {minRating}</span>
+            <span>Max: {maxRating}</span>
           </div>
         </div>
         <select
@@ -399,23 +427,13 @@ function Catalog() {
             backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23d1d5db' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
           }}
         >
-          <option value="price_asc">Цена: по возрастанию</option>
-          <option value="price_desc">Цена: по убыванию</option>
-          <option value="sales_desc">Продажи: по убыванию</option>
+          <option value="rating_asc">Рейтинг: по возрастанию</option>
+          <option value="rating_desc">Рейтинг: по убыванию</option>
+          <option value="review_count_desc">Отзывы: по убыванию</option>
         </select>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => navigate('/cart')}
-          className="w-full md:w-1/6 py-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 shadow-md"
-          disabled={cartLoading}
-        >
-          <ShoppingCartIcon className="w-5 h-5" />
-          Корзина ({cart ? cart.length : 0})
-        </motion.button>
       </motion.div>
       <AnimatePresence>
-        {(error || cartError) && (
+        {error && (
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -423,7 +441,7 @@ function Catalog() {
             transition={{ duration: 0.3 }}
             className="mb-8 p-4 bg-red-500/30 border border-red-500/50 rounded-lg text-red-300 text-center text-base font-medium shadow-md"
           >
-            {error || cartError}
+            {error}
           </motion.div>
         )}
       </AnimatePresence>
@@ -445,67 +463,82 @@ function Catalog() {
         className="mb-8"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {products.length > 0 ? (
-            products.map((product, index) => (
-              <Tilt key={product.id} tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
-                <motion.div
-                  className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-4 border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/40 transition-shadow duration-300 relative overflow-hidden"
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <div
-                    className="absolute inset-0 opacity-10 pointer-events-none"
-                    style={{
-                      backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
-                      backgroundRepeat: 'repeat',
-                    }}
-                  ></div>
-                  <div className="relative">
-                    {product.imageUrl ? (
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-48 object-cover rounded-lg border border-gray-600/20"
-                        onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/128x128?text=Нет+фото';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-48 bg-gray-700/50 rounded-lg flex items-center justify-center text-gray-300 text-sm border border-gray-600/20">
-                        Изображение отсутствует
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h4 className="text-lg font-bold text-white mb-2 line-clamp-1">{product.name}</h4>
-                    <div>
-                      <span className="text-green-400 font-semibold text-base">¥{product.price?.toFixed(2) || '0.00'}</span>
+          {suppliers.length > 0 ? (
+            suppliers.map((supplier, index) => {
+              const isSubscribed = subscriptions.get(supplier.id);
+              const isSubLoading = subscribing.get(supplier.id);
+              return (
+                <Tilt key={supplier.id || `supplier-${index}`} tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+                  <motion.div
+                    className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-4 border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/40 transition-shadow duration-300 relative overflow-hidden"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <div
+                      className="absolute inset-0 opacity-10 pointer-events-none"
+                      style={{
+                        backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                        backgroundRepeat: 'repeat',
+                      }}
+                    ></div>
+                    <div className="relative">
+                      {supplier.imageUrl ? (
+                        <img
+                          src={supplier.imageUrl}
+                          alt={supplier.companyName}
+                          className="w-full h-48 object-cover rounded-lg border border-gray-600/20"
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/128x128?text=Нет+фото';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-48 bg-gray-700/50 rounded-lg flex items-center justify-center text-gray-300 text-sm border border-gray-600/20">
+                          Изображение отсутствует
+                        </div>
+                      )}
                     </div>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleAddToCart(product)}
-                      className="mt-4 w-full py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 shadow-sm"
-                      disabled={cartLoading}
-                    >
-                      <ShoppingCartIcon className="w-5 h-5" />
-                      Добавить в корзину
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleViewProduct(product.id)}
-                      className="mt-2 w-full py-2 bg-gray-700/80 text-white rounded-lg hover:bg-gray-600/80 transition duration-300 text-base font-semibold shadow-sm"
-                    >
-                      Подробнее
-                    </motion.button>
-                  </div>
-                </motion.div>
-              </Tilt>
-            ))
+                    <div className="p-4">
+                      <h4 className="text-lg font-bold text-white mb-2 line-clamp-1">{supplier.companyName}</h4>
+                      <div className="mb-2">
+                        <span className="text-gray-300 text-sm">Подписчиков: {supplier.subscriberCount || 0}</span>
+                      </div>
+                      <div className="mb-4">
+                        <span className="text-yellow-400 font-semibold text-base">Рейтинг: {supplier.rating?.toFixed(1) || '0.0'}</span>
+                      </div>
+                     
+                      {supplier.isVerified && (
+                        <span className="inline-block px-2 py-1 text-xs font-semibold bg-green-500 text-white rounded-full mb-4">
+                          Verified
+                        </span>
+                      )}
+                      <div className="flex gap-2 mb-2">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleSubscribe(supplier.id)}
+                          disabled={isSubLoading}
+                          className={`flex-1 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm ${isSubscribed ? 'bg-green-500 text-white' : 'bg-cyan-500 text-white'} hover:opacity-80 disabled:opacity-50`}
+                        >
+                          <UserPlusIcon className="w-4 h-4" />
+                          {isSubscribed ? 'Подписан' : 'Подписаться'}
+                        </motion.button>
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleViewSupplier(supplier.id)}
+                        className="w-full py-2 bg-gray-700/80 text-white rounded-lg hover:bg-gray-600/80 transition duration-300 text-base font-semibold shadow-sm"
+                      >
+                        Подробнее
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                </Tilt>
+              );
+            })
           ) : (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -513,7 +546,7 @@ function Catalog() {
               transition={{ duration: 0.3 }}
               className="text-center text-gray-300 col-span-full text-lg bg-gray-800/80 p-6 rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/30"
             >
-              Товары не найдены
+              Поставщики не найдены
             </motion.div>
           )}
         </div>
@@ -536,14 +569,16 @@ function Catalog() {
           >
             Назад
           </motion.button>
-          {Array.from({ length: totalPages }, (_, i) => {
-            const pageNum = i + 1;
+          {getVisiblePages().map((pageNum, index) => {
+            if (pageNum === null) {
+              return (
+                <span key={`ellipsis-${index}`} className="px-4 py-2 text-gray-300 text-sm self-center">
+                  ...
+                </span>
+              );
+            }
             const isActive = currentPage === pageNum;
-            const showPage =
-              pageNum === 1 ||
-              pageNum === totalPages ||
-              (pageNum >= currentPage - 1 && pageNum <= currentPage + 1);
-            return showPage ? (
+            return (
               <motion.button
                 key={pageNum}
                 whileHover={{ scale: 1.05 }}
@@ -556,11 +591,8 @@ function Catalog() {
               >
                 {pageNum}
               </motion.button>
-            ) : null;
+            );
           })}
-          {totalPages > 3 && currentPage + 2 < totalPages && (
-            <span className="px-4 py-2 text-gray-300 text-sm">...</span>
-          )}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -580,33 +612,32 @@ function Catalog() {
   return (
     <>
       {isMobile ? mobileLayout : desktopLayout}
-      <script src="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.js"></script>
     </>
   );
 }
 
 const styles = `
-  /* Mobile Styles */
-  .mobile-catalog {
+  /* Mobile Styles for Suppliers - обновлены для новых элементов */
+  .mobile-suppliers {
     min-height: 100vh;
     background: linear-gradient(to bottom, #111827, #1f2937);
     padding: 16px 8px;
   }
-  .mobile-catalog-header {
+  .mobile-suppliers-header {
     text-align: center;
     margin-bottom: 16px;
   }
-  .mobile-catalog-header h2 {
+  .mobile-suppliers-header h2 {
     font-size: 1.5rem;
     font-weight: bold;
     color: #ffffff;
   }
-  .mobile-catalog-header p {
+  .mobile-suppliers-header p {
     font-size: 0.875rem;
     color: #d1d5db;
     margin-top: 4px;
   }
-  .mobile-catalog-controls {
+  .mobile-suppliers-controls {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -647,10 +678,10 @@ const styles = `
     font-weight: 500;
     margin-top: 8px;
   }
-  .mobile-price-filter {
+  .mobile-rating-filter {
     margin-top: 8px;
   }
-  .mobile-price-filter label {
+  .mobile-rating-filter label {
     display: block;
     font-size: 0.75rem;
     color: #d1d5db;
@@ -667,7 +698,7 @@ const styles = `
   .custom-slider .rc-slider-handle:hover {
     box-shadow: 0 0 6px rgba(6, 182, 212, 0.8);
   }
-  .mobile-price-range {
+  .mobile-rating-range {
     display: flex;
     justify-content: space-between;
     margin-top: 4px;
@@ -692,23 +723,6 @@ const styles = `
   .mobile-sort-select:focus {
     border-color: #06b6d4;
     box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.5);
-  }
-  .mobile-cart-button {
-    width: 100%;
-    padding: 8px;
-    background-color: #06b6d4;
-    color: #ffffff;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
-  .mobile-cart-icon {
-    width: 16px;
-    height: 16px;
   }
   .mobile-error {
     margin-bottom: 16px;
@@ -743,37 +757,37 @@ const styles = `
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
-  .mobile-product-grid {
+  .mobile-supplier-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
     margin-bottom: 16px;
   }
   @media (max-width: 480px) {
-    .mobile-product-grid {
+    .mobile-supplier-grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
   @media (max-width: 320px) {
-    .mobile-product-grid {
+    .mobile-supplier-grid {
       grid-template-columns: 1fr;
     }
   }
-  .mobile-product-card {
+  .mobile-supplier-card {
     background: linear-gradient(to bottom right, rgba(31, 41, 55, 0.9), rgba(17, 24, 39, 0.9));
     border: 1px solid rgba(6, 182, 212, 0.3);
     border-radius: 8px;
     padding: 8px;
     overflow: hidden;
   }
-  .mobile-product-image {
+  .mobile-supplier-image {
     width: 100%;
     height: 80px;
     object-fit: cover;
     border-radius: 4px;
     border: 1px solid rgba(75, 85, 99, 0.2);
   }
-  .mobile-product-placeholder {
+  .mobile-supplier-placeholder {
     width: 100%;
     height: 80px;
     background-color: rgba(75, 85, 99, 0.5);
@@ -785,10 +799,10 @@ const styles = `
     font-size: 0.75rem;
     border: 1px solid rgba(75, 85, 99, 0.2);
   }
-  .mobile-product-details {
+  .mobile-supplier-details {
     padding: 8px;
   }
-  .mobile-product-name {
+  .mobile-supplier-name {
     font-size: 0.75rem;
     font-weight: 600;
     color: #ffffff;
@@ -800,14 +814,55 @@ const styles = `
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
   }
-  .mobile-product-price {
+  .mobile-supplier-subscribers {
+    display: block;
+    font-size: 0.75rem;
+    color: #d1d5db;
+    margin-bottom: 4px;
+  }
+  .mobile-supplier-rating {
     display: block;
     font-size: 0.75rem;
     font-weight: 500;
-    color: #34d399;
-    margin-bottom: 12px;
+    color: #facc15;
+    margin-bottom: 4px;
   }
-  .mobile-add-to-cart, .mobile-view-details {
+  .mobile-supplier-reviews {
+    display: block;
+    font-size: 0.75rem;
+    color: #d1d5db;
+    margin-bottom: 8px;
+  }
+  .mobile-subscribe-button {
+    width: 100%;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .mobile-subscribe-button.subscribed {
+    background-color: #10b981;
+    color: #ffffff;
+  }
+  .mobile-subscribe-button:not(.subscribed) {
+    background-color: #06b6d4;
+    color: #ffffff;
+  }
+  .mobile-subscribe-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .mobile-subscribe-icon {
+    width: 12px;
+    height: 12px;
+  }
+  .mobile-view-details {
     width: 100%;
     padding: 6px;
     border-radius: 4px;
@@ -817,21 +872,10 @@ const styles = `
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  .mobile-add-to-cart {
-    background-color: #06b6d4;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    margin-bottom: 4px;
-  }
-  .mobile-view-details {
     background-color: rgba(75, 85, 99, 0.8);
     color: #ffffff;
   }
-  .mobile-no-products {
+  .mobile-no-suppliers {
     grid-column: 1 / -1;
     text-align: center;
     color: #d1d5db;
@@ -873,4 +917,4 @@ const styleSheet = document.createElement('style');
 styleSheet.textContent = styles;
 document.head.appendChild(styleSheet);
 
-export default Catalog;
+export default Suppliers;

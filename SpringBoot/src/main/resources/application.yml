@@ -46,7 +46,7 @@ spring:
       properties:
         spring.json.trusted.packages: com.example.demo.Entities, com.example.demo.POJO
   datasource:
-    url: jdbc:mysql://mysql:3306/CargoDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/CargoDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: fluvion_user
     password: 1206_1105timaZ
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -67,3 +67,20 @@ server:
 jwt:
   secret: your-very-secure-secret-key-32-chars-long
   expiration: 86400000
+  
+
+
+
+alpha-access_token: 00bd3a31-9867-37b0-beed-e342411ee840
+alpha-client-id: bgYbca9Agsn16fmMqfTUGSMjNR0a
+alpha-client-secret: vu_8EE_P7r16QjFAC05fhGY4aNMa
+
+
+
+eupost:
+  api:
+    url: https://api.eurotorg.by:10352/Json
+  service:
+    number: 134C9258-5EC7-4C29-B1E4-5A385385AE8F
+  login: 693299414_Kovalevsky
+  password: JLOHVQET4U12O1F

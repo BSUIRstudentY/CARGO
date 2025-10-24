@@ -23,7 +23,6 @@ const formatExpirationDate = (date) => {
 const getTimeRemaining = (expirationDate) => {
   if (!expirationDate) return '0 мин.';
   const [year, month, day, hour, minute, second, nano] = expirationDate;
-  // Convert Moscow time (UTC+3) to UTC by subtracting 3 hours
   const expirationUTC = new Date(Date.UTC(year, month - 1, day, hour - 3, minute, second, Math.floor(nano / 1000000)));
   const currentUTC = new Date();
   const diffMs = expirationUTC - currentUTC;
@@ -54,10 +53,17 @@ const faqData = [
 // Component for individual stat cards
 const StatCard = ({ children, className }) => (
   <motion.div
-    className={`flex-1 min-w-[250px] bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-8 text-center shadow-xl backdrop-blur-sm border border-gray-700/50 transition-transform duration-300 hover:-translate-y-2 hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] ${className}`}
-    whileHover={{ y: -8, scale: 1.02 }}
-    whileTap={{ scale: 0.98 }}
+    className={`flex-1 min-w-[250px] bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-8 text-center shadow-lg border border-cyan-500/30 transition-shadow duration-300 hover:shadow-cyan-500/40 relative overflow-hidden ${className}`}
+    whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+    whileTap={{ scale: 0.97 }}
   >
+    <div
+      className="absolute inset-0 opacity-10 pointer-events-none"
+      style={{
+        backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+        backgroundRepeat: 'repeat',
+      }}
+    />
     {children}
   </motion.div>
 );
@@ -75,13 +81,15 @@ const QuestCard = ({ quest, onClaim, onShowDetails }) => {
   };
 
   return (
-    <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10} perspective={1000}>
+    <Tilt tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
       <motion.div
         onClick={() => onShowDetails(quest)}
-        className={`w-full max-w-md h-20 bg-gradient-to-b ${quest.completed ? 'from-[var(--accent-color)] to-emerald-600' : 'from-gray-700 to-gray-800'} rounded-lg border border-gray-600 p-4 transition-all duration-300 hover:shadow-[0_0_15px_#10b981] ${!quest.completed ? 'animate-glow' : ''} relative cursor-pointer`}
+        className={`w-full max-w-md h-20 bg-gradient-to-br ${quest.completed ? 'from-cyan-500 to-emerald-500' : 'from-gray-800/90 to-gray-700/90'} rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/40 p-4 transition-all duration-300 relative cursor-pointer`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4 }}
+        whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+        whileTap={{ scale: 0.97 }}
       >
         <div className="flex flex-row items-center h-full gap-4">
           <GiftIcon className="w-6 h-6 text-white" />
@@ -92,7 +100,7 @@ const QuestCard = ({ quest, onClaim, onShowDetails }) => {
           </div>
           <div className="w-24 bg-gray-600 rounded-full h-2">
             <motion.div
-              className={`bg-gradient-to-r from-[var(--accent-color)] to-emerald-500 h-2 rounded-full ${!quest.completed ? 'animate-glow' : ''}`}
+              className="bg-gradient-to-r from-cyan-500 to-emerald-500 h-2 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${(quest.currentValue / quest.targetValue) * 100}%` }}
               transition={{ duration: 1, ease: 'easeInOut' }}
@@ -106,7 +114,7 @@ const QuestCard = ({ quest, onClaim, onShowDetails }) => {
               onClaim(quest.id);
             }}
             disabled={!quest.completed}
-            className={`px-4 py-1 rounded-lg text-sm transition ${quest.completed ? 'bg-emerald-500 text-white hover:bg-emerald-400' : 'bg-gray-500 text-gray-300 cursor-not-allowed'}`}
+            className={`px-4 py-1 rounded-lg text-sm transition ${quest.completed ? 'bg-cyan-500 text-white hover:bg-cyan-600' : 'bg-gray-700/80 text-gray-300 cursor-not-allowed'}`}
           >
             {quest.completed ? 'Забрать' : 'Не завершено'}
           </button>
@@ -130,9 +138,9 @@ const QuestDetailsModal = ({ quest, getQuestName, getRewardTypeLabel, onClose })
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.8, opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-gray-700 rounded-xl p-8 max-w-lg w-[90%] max-h-[80vh] overflow-y-auto"
+      className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-8 max-w-lg w-[90%] max-h-[80vh] overflow-y-auto border border-cyan-500/30 shadow-lg"
     >
-      <h3 className="text-2xl font-semibold text-white mb-4">{getQuestName(quest.questConditionType, quest.targetValue)}</h3>
+      <h3 className="text-2xl font-semibold text-cyan-400 mb-4">{getQuestName(quest.questConditionType, quest.targetValue)}</h3>
       <p className="text-gray-300 mb-4">
         <strong>Тип квеста:</strong> {quest.questConditionType}
       </p>
@@ -145,12 +153,14 @@ const QuestDetailsModal = ({ quest, getQuestName, getRewardTypeLabel, onClose })
       <p className="text-gray-300 mb-4">
         <strong>Статус:</strong> {quest.completed ? 'Выполнен' : 'Не выполнен'}
       </p>
-      <button
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={onClose}
-        className="w-full py-3 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition"
+        className="w-full py-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold shadow-sm"
       >
         Закрыть
-      </button>
+      </motion.button>
     </motion.div>
   </motion.div>
 );
@@ -162,10 +172,10 @@ const FaqItem = ({ faq, index, isOpen, toggle }) => (
       animate={{ backgroundColor: isOpen ? '#374151' : '#1f2937' }}
       transition={{ duration: 0.3 }}
       onClick={() => toggle(index)}
-      className="flex justify-between items-center w-full p-4 rounded-lg cursor-pointer transition-colors"
+      className="flex justify-between items-center w-full p-4 rounded-lg cursor-pointer transition-colors bg-gradient-to-br from-gray-800/90 to-gray-700/90 border border-cyan-500/30"
     >
       <span className="text-lg text-white font-medium">{faq.question}</span>
-      <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      <ChevronDownIcon className={`w-5 h-5 text-gray-300 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
     </motion.button>
     <AnimatePresence>
       {isOpen && (
@@ -174,7 +184,7 @@ const FaqItem = ({ faq, index, isOpen, toggle }) => (
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.3 }}
-          className="p-4 bg-gray-700 rounded-lg mt-2"
+          className="p-4 bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-lg mt-2 border border-cyan-500/30"
         >
           <p className="text-gray-300">{faq.answer}</p>
         </motion.div>
@@ -292,7 +302,7 @@ const LoyaltyTab = () => {
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#10b981', '#34d399', '#6ee7b7'],
+      colors: ['#06b6d4', '#0ea5e9', '#38bdf8'],
     });
     alert(`Награда за квест ${questId} успешно забрана! (Симуляция)`);
   };
@@ -326,21 +336,29 @@ const LoyaltyTab = () => {
   // Render loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <ArrowPathIcon className="w-12 h-12 text-[var(--accent-color)] animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-cyan-400 text-2xl bg-gray-800/80 p-6 rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/30"
+        >
+          <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-cyan-500 mx-auto mb-4" />
+          Загрузка...
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="h-[70vh] overflow-y-auto scrollbar-hide bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6 sm:p-12">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8">
       <style jsx>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
         .scrollbar-hide {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
       <div className="max-w-7xl mx-auto">
@@ -351,15 +369,19 @@ const LoyaltyTab = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-4xl font-bold text-[var(--accent-color)] mb-2">Система лояльности</h2>
-          <p className="text-lg text-gray-400">Получайте скидки и бонусы за выполнение квестов и приглашение друзей!</p>
-          <button
+          <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-emerald-500 tracking-tight">
+            Система лояльности
+          </h2>
+          <p className="text-lg text-gray-300 mt-2">Получайте скидки и бонусы за выполнение квестов и приглашение друзей!</p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setShowTutorial(true)}
-            className="mt-4 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
+            className="mt-4 px-4 py-2 bg-gray-700/80 text-white rounded-lg hover:bg-gray-600/80 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 shadow-sm mx-auto"
           >
-            <InformationCircleIcon className="w-5 h-5 inline mr-2" />
+            <InformationCircleIcon className="w-5 h-5" />
             Пройти обучение
-          </button>
+          </motion.button>
         </motion.header>
         {/* Error Message */}
         <AnimatePresence>
@@ -369,7 +391,7 @@ const LoyaltyTab = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
-              className="mb-8 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500"
+              className="mb-8 p-4 bg-red-500/30 border border-red-500/50 rounded-lg text-red-300 text-center text-base font-medium shadow-md"
             >
               {error}
             </motion.div>
@@ -380,13 +402,17 @@ const LoyaltyTab = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-12 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl shadow-2xl p-8 flex flex-wrap gap-8 justify-center relative overflow-hidden"
+          className="mb-12 bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl shadow-lg border border-cyan-500/30 p-8 flex flex-wrap gap-8 justify-center relative overflow-hidden"
         >
-          {/* Background Glow Effect */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none" />
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+              backgroundRepeat: 'repeat',
+            }}
+          />
           {/* Total Discount with Breakdown */}
           <StatCard className="relative">
-            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_0%,transparent_70%)] rounded-2xl pointer-events-none" />
             <div className="relative w-64 h-64 mx-auto">
               <svg className="w-full h-full" viewBox="0 0 36 36">
                 <path
@@ -395,19 +421,17 @@ const LoyaltyTab = () => {
                   stroke="#444"
                   strokeWidth="3"
                 />
-                {/* Permanent Discount Segment */}
                 <motion.path
                   strokeDasharray={`${userData.discountPercent}, 100`}
                   strokeDashoffset={0}
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none"
-                  stroke="var(--accent-color)"
+                  stroke="#06b6d4"
                   strokeWidth="3"
                   initial={{ pathLength: 0 }}
                   animate={{ pathLength: userData.discountPercent / 100 }}
                   transition={{ duration: 1.5, ease: 'easeInOut' }}
                 />
-                {/* Temporary Discount Segment */}
                 <motion.path
                   strokeDasharray={`${userData.temporaryDiscountPercent || 0}, 100`}
                   strokeDashoffset={-userData.discountPercent}
@@ -426,10 +450,10 @@ const LoyaltyTab = () => {
               </div>
             </div>
             <div className="mt-6 flex flex-col items-center gap-2">
-              <p className="text-sm font-medium text-gray-400 tracking-wide">
+              <p className="text-sm font-medium text-gray-300 tracking-wide">
                 Постоянная: {userData.discountPercent}% (Действует бессрочно)
               </p>
-              <p className="text-sm font-medium text-gray-400 tracking-wide">
+              <p className="text-sm font-medium text-gray-300 tracking-wide">
                 Временная: {userData.temporaryDiscountPercent || 0}%
                 {userData.temporaryDiscountExpired ? '' : ' (Нет активной скидки)'}
               </p>
@@ -441,7 +465,7 @@ const LoyaltyTab = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="w-full max-w-md bg-gradient-to-r from-red-600/80 to-orange-600/80 rounded-lg p-4 text-center border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.5)]"
+              className="w-full max-w-md bg-gradient-to-r from-red-600/80 to-orange-600/80 rounded-lg p-4 text-center border border-red-500/50 shadow-lg hover:shadow-red-500/50"
             >
               <p className="text-white font-semibold text-sm">
                 Временная скидка истекает через: {getTimeRemaining(userData.temporaryDiscountExpired)}
@@ -457,16 +481,25 @@ const LoyaltyTab = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="mb-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl shadow-2xl p-8"
+          className="mb-12 bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl shadow-lg border border-cyan-500/30 p-8 relative overflow-hidden"
         >
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+              backgroundRepeat: 'repeat',
+            }}
+          />
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-semibold text-white">Квесты</h3>
-            <button
+            <h3 className="text-2xl font-bold text-cyan-400">Квесты</h3>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setShowIncompleteOnly(!showIncompleteOnly)}
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
+              className="px-4 py-2 bg-gray-700/80 text-white rounded-lg hover:bg-gray-600/80 transition duration-300 text-base font-semibold shadow-sm"
             >
               {showIncompleteOnly ? 'Показать все' : 'Только незавершенные'}
-            </button>
+            </motion.button>
           </div>
           <div className="flex flex-col space-y-4 pt-6">
             {questList}
@@ -477,46 +510,59 @@ const LoyaltyTab = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="mb-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl shadow-2xl p-8"
+          className="mb-12 bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl shadow-lg border border-cyan-500/30 p-8 relative overflow-hidden"
         >
-          <h3 className="text-2xl font-semibold text-white mb-6">Приглашайте друзей</h3>
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+              backgroundRepeat: 'repeat',
+            }}
+          />
+          <h3 className="text-2xl font-bold text-cyan-400 mb-6">Приглашайте друзей</h3>
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <input
               type="text"
               value={referralCodeActivate}
               onChange={e => setReferralCodeActivate(e.target.value)}
               placeholder="Введите реферальный код"
-              className="flex-grow p-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition"
+              className="flex-grow p-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300"
             />
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={handleActivateReferral}
-              className="px-6 py-3 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition transform hover:scale-105"
+              className="px-6 py-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold shadow-sm"
             >
               Активировать
-            </button>
+            </motion.button>
           </div>
           {userData.referralCode && (
             <div className="text-center">
-              <p className="text-lg text-white mb-2">Ваш реферальный код:</p>
+              <p className="text-lg text-gray-300 mb-2">Ваш реферальный код:</p>
               <div className="flex items-center justify-center gap-4">
-                <p className="text-xl font-mono text-[var(--accent-color)] bg-gray-700 px-4 py-2 rounded-lg">
+                <p className="text-xl font-mono text-cyan-400 bg-gray-800/80 px-4 py-2 rounded-lg border border-cyan-500/30">
                   {userData.referralCode}
                 </p>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={copyReferralCode}
-                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
+                  className="px-4 py-2 bg-gray-700/80 text-white rounded-lg hover:bg-gray-600/80 transition duration-300 text-base font-semibold shadow-sm"
                 >
                   {copied ? 'Скопировано!' : 'Копировать'}
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={shareReferralCode}
-                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
+                  className="px-4 py-2 bg-gray-700/80 text-white rounded-lg hover:bg-gray-600/80 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 shadow-sm"
                 >
-                  <ShareIcon className="w-5 h-5 inline mr-2" />
+                  <ShareIcon className="w-5 h-5" />
                   Поделиться
-                </button>
+                </motion.button>
               </div>
-              <p className="text-sm text-gray-400 mt-2">
+              <p className="text-sm text-gray-300 mt-2">
                 Поделитесь кодом с друзьями, чтобы они получили бонусы при регистрации!
               </p>
             </div>
@@ -527,13 +573,20 @@ const LoyaltyTab = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.8 }}
-          className="mb-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl shadow-2xl p-8"
+          className="mb-12 bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl shadow-lg border border-cyan-500/30 p-8 relative overflow-hidden"
         >
-          <h3 className="text-2xl font-semibold text-white mb-6">История наград</h3>
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+              backgroundRepeat: 'repeat',
+            }}
+          />
+          <h3 className="text-2xl font-bold text-cyan-400 mb-6">История наград</h3>
           <div className="overflow-x-auto">
             <table className="w-full table-auto border-collapse">
               <thead>
-                <tr className="bg-gray-700">
+                <tr className="bg-gray-800/80">
                   <th className="px-4 py-2 text-left text-gray-300">Квест</th>
                   <th className="px-4 py-2 text-left text-gray-300">Награда</th>
                 </tr>
@@ -541,14 +594,14 @@ const LoyaltyTab = () => {
               <tbody>
                 {quests.filter(quest => quest.completed).map(quest => (
                   <tr key={quest.id} className="border-b border-gray-600">
-                    <td className="px-4 py-2 text-white">{quest.name}</td>
-                    <td className="px-4 py-2 text-white">+{quest.reward}% ({getRewardTypeLabel(quest.rewardType)})</td>
+                    <td className="px-4 py-2 text-gray-300">{quest.name}</td>
+                    <td className="px-4 py-2 text-gray-300">+{quest.reward}% ({getRewardTypeLabel(quest.rewardType)})</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             {quests.filter(quest => quest.completed).length === 0 && (
-              <p className="text-center text-gray-400 mt-4">Нет выполненных квестов.</p>
+              <p className="text-center text-gray-300 mt-4">Нет выполненных квестов.</p>
             )}
           </div>
         </motion.section>
@@ -557,9 +610,16 @@ const LoyaltyTab = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1.0 }}
-          className="mb-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl shadow-2xl p-8"
+          className="mb-12 bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl shadow-lg border border-cyan-500/30 p-8 relative overflow-hidden"
         >
-          <h3 className="text-2xl font-semibold text-white mb-6">Часто задаваемые вопросы</h3>
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+              backgroundRepeat: 'repeat',
+            }}
+          />
+          <h3 className="text-2xl font-bold text-cyan-400 mb-6">Часто задаваемые вопросы</h3>
           <div className="space-y-4">
             {faqData.map((faq, index) => (
               <FaqItem
@@ -587,19 +647,21 @@ const LoyaltyTab = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="bg-gray-700 rounded-xl p-8 max-w-lg w-[90%] max-h-[80vh] overflow-y-auto"
+                className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-8 max-w-lg w-[90%] max-h-[80vh] overflow-y-auto border border-cyan-500/30 shadow-lg"
               >
-                <h3 className="text-2xl font-semibold text-white mb-4">Добро пожаловать в систему лояльности!</h3>
+                <h3 className="text-2xl font-semibold text-cyan-400 mb-4">Добро пожаловать в систему лояльности!</h3>
                 <p className="text-gray-300 mb-4">1. <strong>Скидки:</strong> Просматривайте свои текущие постоянные и временные скидки.</p>
                 <p className="text-gray-300 mb-4">2. <strong>Квесты:</strong> Выполняйте задания, чтобы получить постоянные или временные скидки.</p>
                 <p className="text-gray-300 mb-4">3. <strong>Рефералы:</strong> Приглашайте друзей с помощью вашего уникального кода и получайте бонусы.</p>
                 <p className="text-gray-300 mb-4">4. <strong>История:</strong> Следите за своими наградами в разделе истории.</p>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setShowTutorial(false)}
-                  className="w-full py-3 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition"
+                  className="w-full py-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-base font-semibold shadow-sm"
                 >
                   Понятно
-                </button>
+                </motion.button>
               </motion.div>
             </motion.div>
           )}

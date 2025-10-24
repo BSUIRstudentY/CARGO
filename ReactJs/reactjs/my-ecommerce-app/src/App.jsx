@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,6 +15,7 @@ import CartPage from './pages/CartPage';
 import AdminLayout from './pages/AdminLayout';
 import AppLayout from './pages/AppLayout';
 import GuestLayout from './pages/GuestLayout';
+import SupplierLayout from './pages/SupplierLayout'; // Import SupplierLayout
 import Footer from './pages/Footer';
 import './styles.css';
 
@@ -93,6 +95,8 @@ function AppContent() {
       {isAuthenticated ? (
         user?.role === 'ADMIN' ? (
           <AdminLayout />
+        ) : user?.role === 'CARGO' ? (
+          <SupplierLayout />
         ) : (
           <AppLayout />
         )

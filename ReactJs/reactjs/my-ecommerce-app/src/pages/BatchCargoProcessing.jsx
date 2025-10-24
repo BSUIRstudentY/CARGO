@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import api from '../api/axiosInstance';
+import Tilt from 'react-parallax-tilt';
 
 const BatchCargoProcessing = () => {
   const { batchId, orderId } = useParams();
@@ -49,57 +50,74 @@ const BatchCargoProcessing = () => {
 
   if (loading) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
-      >
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[var(--accent-color)]" />
-      </motion.div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-cyan-400 text-2xl bg-gray-800/80 p-6 rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/30"
+        >
+          <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-cyan-500 mx-auto mb-4" />
+          {language === 'ru' ? 'Загрузка...' : '加载中...'}
+        </motion.div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="text-center text-red-500 p-8"
-      >
-        {error}
-      </motion.div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-red-300 text-2xl bg-red-500/30 p-6 rounded-lg border border-red-500/50 shadow-lg"
+        >
+          {error}
+        </motion.div>
+      </div>
     );
   }
 
   if (!order) {
     return (
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="text-center text-gray-400 p-8"
-      >
-        {language === 'ru' ? 'Заказ не найден' : '未找到订单'}
-      </motion.div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-cyan-400 text-2xl bg-gray-800/80 p-6 rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/30"
+        >
+          {language === 'ru' ? 'Заказ не найден' : '未找到订单'}
+        </motion.div>
+      </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg shadow-2xl p-8 relative overflow-hidden min-h-screen">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.3)_0%,transparent_70%)] pointer-events-none" />
-      <div className="relative">
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center">
-            <h2 className="text-3xl font-bold text-[var(--accent-color)]">
-              {language === 'ru' ? `Обработка заказа #${order.orderNumber}` : `处理订单 #${order.orderNumber}`}
-            </h2>
-          </div>
-          <button
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <motion.header
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-emerald-500 tracking-tight">
+            {language === 'ru' ? `Обработка заказа #${order.orderNumber}` : `处理订单 #${order.orderNumber}`}
+          </h2>
+          <p className="text-lg text-gray-300 mt-2">
+            {language === 'ru' ? 'Просмотрите информацию о вашем заказе' : '查看您的订单信息'}
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={toggleLanguage}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition duration-300 transform hover:scale-105"
+            className="mt-4 px-4 py-2 bg-gray-700/80 text-white rounded-lg hover:bg-gray-600/80 transition duration-300 text-base font-semibold shadow-sm"
           >
             {language === 'ru' ? '中文' : 'Русский'}
-          </button>
-        </div>
+          </motion.button>
+        </motion.header>
         <AnimatePresence>
           {error && (
             <motion.div
@@ -107,56 +125,119 @@ const BatchCargoProcessing = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
-              className="mb-6 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-center"
+              className="mb-8 p-4 bg-red-500/30 border border-red-500/50 rounded-lg text-red-300 text-center text-base font-medium shadow-md"
             >
               {error}
             </motion.div>
           )}
         </AnimatePresence>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6">
-          {order.items.map((item, index) => (
-            <motion.div
-              key={item.id || `item-${index}`}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl p-6 shadow-xl border border-gray-700/50"
-            >
-              <div className="flex flex-col gap-4">
-                {order.totalClientPrice > 0 ? (
-                  <>
-                    <img
-                      src={item.imageUrl || 'https://via.placeholder.com/150'}
-                      alt={item.productName || 'Product'}
-                      className="w-full h-48 rounded-lg border-4 border-[var(--accent-color)] shadow-lg object-cover"
-                    />
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl p-6 shadow-lg border border-cyan-500/30 mb-12 relative overflow-hidden"
+        >
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+              backgroundRepeat: 'repeat',
+            }}
+          />
+          <h3 className="text-2xl font-bold text-cyan-400 mb-6">
+            {language === 'ru' ? 'Товары в заказе' : '订单中的商品'}
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {order.items.map((item, index) => (
+              <Tilt key={item.id || `item-${index}`} tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}
+                  whileTap={{ scale: 0.97 }}
+                  className="bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/40 p-4 transition-all duration-300 text-gray-300"
+                >
+                  {order.totalClientPrice > 0 ? (
+                    <>
+                      <img
+                        src={item.imageUrl || 'https://via.placeholder.com/150'}
+                        alt={item.productName || (language === 'ru' ? 'Товар' : '商品')}
+                        className="w-full h-48 rounded-lg border border-cyan-500/30 shadow-lg object-cover transform hover:scale-105 transition duration-300"
+                      />
+                      <div className="mt-4">
+                        <h3 className="text-xl font-semibold text-cyan-400">
+                          {item.productName || (language === 'ru' ? 'Без названия' : '无名称')}
+                        </h3>
+                        <p className="text-sm text-gray-300 mt-2">
+                          <span className="font-medium">{language === 'ru' ? 'Товар: ' : '商品: '}</span>
+                          {item.productName || (language === 'ru' ? 'Неизвестно' : '未知')}
+                        </p>
+                        {item.trackingNumber && (
+                          <p className="text-sm text-gray-300">
+                            <span className="font-medium">{language === 'ru' ? 'Трек-номер: ' : '追踪号码: '}</span>
+                            {item.trackingNumber}
+                          </p>
+                        )}
+                        <p className="text-sm text-gray-300">
+                          <span className="font-medium">{language === 'ru' ? 'Цена: ' : '价格: '}</span>
+                          ¥{(item.priceAtTime || 0).toFixed(2)} x {item.quantity || 1}
+                        </p>
+                        <p className="text-sm text-gray-300">
+                          <span className="font-medium">{language === 'ru' ? 'Статус: ' : '状态: '}</span>
+                          <span
+                            className={
+                              item.purchaseStatus === 'PURCHASED'
+                                ? 'text-emerald-300'
+                                : item.purchaseStatus === 'NOT_PURCHASED'
+                                ? 'text-red-300'
+                                : 'text-yellow-300'
+                            }
+                          >
+                            {item.purchaseStatus === 'PURCHASED'
+                              ? (language === 'ru' ? 'Выкуплен' : '已购买')
+                              : item.purchaseStatus === 'NOT_PURCHASED'
+                              ? (language === 'ru' ? 'Не выкуплен' : '未购买')
+                              : (language === 'ru' ? 'Ожидает' : '待处理')}
+                          </span>
+                        </p>
+                        {item.purchaseStatus === 'NOT_PURCHASED' && item.purchaseRefusalReason && (
+                          <p className="text-sm text-red-300">
+                            <span className="font-medium">{language === 'ru' ? 'Причина отказа: ' : '拒绝原因: '}</span>
+                            {item.purchaseRefusalReason}
+                          </p>
+                        )}
+                        <p className="text-sm text-gray-300">
+                          <span className="font-medium">{language === 'ru' ? 'ID товара: ' : '商品ID: '}</span>
+                          {item.id || (language === 'ru' ? 'Не определён' : '未定义')}
+                        </p>
+                        <div className="w-full bg-gray-600 rounded-full h-2 mt-3">
+                          <motion.div
+                            className="bg-gradient-to-r from-cyan-500 to-emerald-500 h-2 rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: '100%' }}
+                            transition={{ duration: 1, ease: 'easeInOut' }}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  ) : (
                     <div>
-                      <h3 className="text-xl font-semibold text-[var(--accent-color)]">
-                        {item.productName || (language === 'ru' ? 'Без названия' : '无名称')}
-                      </h3>
-                      <p className="text-sm text-gray-400 mt-2">
-                        <span className="font-medium">{language === 'ru' ? 'Товар: ' : '商品: '}</span>
-                        {item.productName || (language === 'ru' ? 'Неизвестно' : '未知')}
-                      </p>
                       {item.trackingNumber && (
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-gray-300">
                           <span className="font-medium">{language === 'ru' ? 'Трек-номер: ' : '追踪号码: '}</span>
                           {item.trackingNumber}
                         </p>
                       )}
-                      <p className="text-sm text-gray-400">
-                        <span className="font-medium">{language === 'ru' ? 'Цена: ' : '价格: '}</span>
-                        ¥{(item.priceAtTime || 0).toFixed(2)} x {item.quantity || 1}
-                      </p>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-sm text-gray-300">
                         <span className="font-medium">{language === 'ru' ? 'Статус: ' : '状态: '}</span>
                         <span
                           className={
                             item.purchaseStatus === 'PURCHASED'
-                              ? 'text-green-500'
+                              ? 'text-emerald-300'
                               : item.purchaseStatus === 'NOT_PURCHASED'
-                              ? 'text-red-500'
-                              : 'text-yellow-500'
+                              ? 'text-red-300'
+                              : 'text-yellow-300'
                           }
                         >
                           {item.purchaseStatus === 'PURCHASED'
@@ -167,64 +248,42 @@ const BatchCargoProcessing = () => {
                         </span>
                       </p>
                       {item.purchaseStatus === 'NOT_PURCHASED' && item.purchaseRefusalReason && (
-                        <p className="text-sm text-red-500">
+                        <p className="text-sm text-red-300">
                           <span className="font-medium">{language === 'ru' ? 'Причина отказа: ' : '拒绝原因: '}</span>
                           {item.purchaseRefusalReason}
                         </p>
                       )}
-                      <p className="text-sm text-gray-400">
-                        <span className="font-medium">{language === 'ru' ? 'ID товара: ' : '商品ID: '}</span>
-                        {item.id || (language === 'ru' ? 'Не определён' : '未定义')}
-                      </p>
+                      <div className="w-full bg-gray-600 rounded-full h-2 mt-3">
+                        <motion.div
+                          className="bg-gradient-to-r from-cyan-500 to-emerald-500 h-2 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: '100%' }}
+                          transition={{ duration: 1, ease: 'easeInOut' }}
+                        />
+                      </div>
                     </div>
-                  </>
-                ) : (
-                  <div>
-                    {item.trackingNumber && (
-                      <p className="text-sm text-gray-400">
-                        <span className="font-medium">{language === 'ru' ? 'Трек-номер: ' : '追踪号码: '}</span>
-                        {item.trackingNumber}
-                      </p>
-                    )}
-                    <p className="text-sm text-gray-400">
-                      <span className="font-medium">{language === 'ru' ? 'Статус: ' : '状态: '}</span>
-                      <span
-                        className={
-                          item.purchaseStatus === 'PURCHASED'
-                            ? 'text-green-500'
-                            : item.purchaseStatus === 'NOT_PURCHASED'
-                            ? 'text-red-500'
-                            : 'text-yellow-500'
-                        }
-                      >
-                        {item.purchaseStatus === 'PURCHASED'
-                          ? (language === 'ru' ? 'Выкуплен' : '已购买')
-                          : item.purchaseStatus === 'NOT_PURCHASED'
-                          ? (language === 'ru' ? 'Не выкуплен' : '未购买')
-                          : (language === 'ru' ? 'Ожидает' : '待处理')}
-                      </span>
-                    </p>
-                    {item.purchaseStatus === 'NOT_PURCHASED' && item.purchaseRefusalReason && (
-                      <p className="text-sm text-red-500">
-                        <span className="font-medium">{language === 'ru' ? 'Причина отказа: ' : '拒绝原因: '}</span>
-                        {item.purchaseRefusalReason}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => navigate(`/batch-cargo-details/${batchId}`)}
-          className="mt-8 px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition duration-300 flex items-center"
+                  )}
+                </motion.div>
+              </Tilt>
+            ))}
+          </div>
+        </motion.section>
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="flex justify-center"
         >
-          <ArrowLeftIcon className="w-5 h-5 mr-2" />
-          {language === 'ru' ? 'Назад к сборному грузу' : '返回批量货物'}
-        </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate(`/batch-cargo-details/${batchId}`)}
+            className="px-6 py-3 bg-gray-700/80 text-white rounded-lg hover:bg-gray-600/80 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 shadow-sm"
+          >
+            <ArrowLeftIcon className="w-5 h-5" />
+            {language === 'ru' ? 'Назад к сборному грузу' : '返回批量货物'}
+          </motion.button>
+        </motion.section>
       </div>
     </div>
   );

@@ -61,7 +61,7 @@ const ReferralTab = () => {
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#10b981', '#34d399', '#6ee7b7'],
+        colors: ['#06b6d4', '#0ea5e9', '#38bdf8'],
       });
       // Refresh user data and referrals
       const userResponse = await api.get('/referrals/user');
@@ -104,7 +104,7 @@ const ReferralTab = () => {
         particleCount: 50,
         spread: 50,
         origin: { y: 0.6 },
-        colors: ['#10b981', '#34d399'],
+        colors: ['#06b6d4', '#0ea5e9', '#38bdf8'],
       });
     }).catch(() => setError('Ошибка при копировании текста'));
   };
@@ -112,21 +112,29 @@ const ReferralTab = () => {
   // Render loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <ArrowPathIcon className="w-12 h-12 text-[var(--accent-color)] animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-cyan-400 text-2xl bg-gray-800/80 p-6 rounded-lg border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/30"
+        >
+          <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-cyan-500 mx-auto mb-4" />
+          Загрузка...
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="h-[70vh] overflow-y-auto scrollbar-hide bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6 sm:p-12">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8">
       <style jsx>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
         .scrollbar-hide {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
       <div className="max-w-7xl mx-auto">
@@ -137,8 +145,10 @@ const ReferralTab = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-4xl font-bold text-[var(--accent-color)] mb-2">Реферальная программа</h2>
-          <p className="text-lg text-gray-400">Приглашайте друзей и получайте бонусы за их регистрацию!</p>
+          <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-emerald-500 tracking-tight">
+            Реферальная программа
+          </h2>
+          <p className="text-lg text-gray-300 mt-2">Приглашайте друзей и получайте бонусы за их регистрацию!</p>
         </motion.header>
         {/* Error Message */}
         <AnimatePresence>
@@ -148,7 +158,7 @@ const ReferralTab = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
-              className="mb-8 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500"
+              className="mb-8 p-4 bg-red-500/30 border border-red-500/50 rounded-lg text-red-300 text-center text-base font-medium shadow-md"
             >
               {error}
             </motion.div>
@@ -159,30 +169,39 @@ const ReferralTab = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl shadow-2xl p-8"
+          className="mb-12 bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl shadow-lg border border-cyan-500/30 p-8 relative overflow-hidden"
         >
-          <h3 className="text-2xl font-semibold text-white mb-6">Ваш реферальный код</h3>
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+              backgroundRepeat: 'repeat',
+            }}
+          />
+          <h3 className="text-2xl font-bold text-cyan-400 mb-6">Ваш реферальный код</h3>
           {userData.referralCode ? (
             <div className="text-center">
-              <p className="text-lg text-white mb-4">Поделитесь этим кодом с друзьями:</p>
+              <p className="text-lg text-gray-300 mb-4">Поделитесь этим кодом с друзьями:</p>
               <div className="flex items-center justify-center gap-4 mb-4">
-                <p className="text-xl font-mono text-[var(--accent-color)] bg-gray-700 px-4 py-2 rounded-lg">
+                <p className="text-xl font-mono text-cyan-400 bg-gray-800/80 px-4 py-2 rounded-lg border border-cyan-500/30">
                   {userData.referralCode}
                 </p>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={copyReferralText}
-                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition flex items-center"
+                  className="px-4 py-2 bg-gray-700/80 text-white rounded-lg hover:bg-gray-600/80 transition duration-300 text-base font-semibold flex items-center justify-center gap-2 shadow-sm"
                 >
-                  <ClipboardIcon className="w-5 h-5 mr-2" />
+                  <ClipboardIcon className="w-5 h-5" />
                   {copied ? 'Скопировано!' : 'Пригласить друга'}
-                </button>
+                </motion.button>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-300">
                 Нажмите "Пригласить друга" для копирования текста с вашим кодом и ссылкой на регистрацию.
               </p>
             </div>
           ) : (
-            <p className="text-center text-gray-400">Реферальный код отсутствует. Выполните квесты, чтобы получить код!</p>
+            <p className="text-center text-gray-300">Реферальный код отсутствует. Выполните квесты, чтобы получить код!</p>
           )}
         </motion.section>
         {/* Activate Referral Section */}
@@ -190,26 +209,37 @@ const ReferralTab = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="mb-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl shadow-2xl p-8"
+          className="mb-12 bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl shadow-lg border border-cyan-500/30 p-8 relative overflow-hidden"
         >
-          <h3 className="text-2xl font-semibold text-white mb-6">Активировать реферальный код</h3>
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+              backgroundRepeat: 'repeat',
+            }}
+          />
+          <h3 className="text-2xl font-bold text-cyan-400 mb-6">Активировать реферальный код</h3>
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <input
               type="text"
               value={referralCodeActivate}
               onChange={e => setReferralCodeActivate(e.target.value)}
               placeholder="Введите реферальный код друга"
-              className="flex-grow p-3 bg-gray-900 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition"
+              className="flex-grow p-3 bg-gray-800/80 text-white border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300"
             />
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={handleActivateReferral}
               disabled={activating}
-              className={`px-6 py-3 rounded-lg text-white ${activating ? 'bg-gray-600' : 'bg-[var(--accent-color)] hover:bg-opacity-90'} transition transform hover:scale-105`}
+              className={`px-6 py-3 rounded-lg text-white text-base font-semibold shadow-sm ${
+                activating ? 'bg-gray-600/80' : 'bg-cyan-500 hover:bg-cyan-600'
+              } transition duration-300`}
             >
               {activating ? 'Активация...' : 'Активировать'}
-            </button>
+            </motion.button>
           </div>
-          <p className="text-sm text-gray-400 text-center">
+          <p className="text-sm text-gray-300 text-center">
             Введите код друга, чтобы получить бонусы за регистрацию.
           </p>
         </motion.section>
@@ -218,14 +248,21 @@ const ReferralTab = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="mb-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl shadow-2xl p-8"
+          className="mb-12 bg-gradient-to-br from-gray-800/90 to-gray-700/90 rounded-2xl shadow-lg border border-cyan-500/30 p-8 relative overflow-hidden"
         >
-          <h3 className="text-2xl font-semibold text-white mb-6">Ваши рефералы</h3>
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+              backgroundRepeat: 'repeat',
+            }}
+          />
+          <h3 className="text-2xl font-bold text-cyan-400 mb-6">Ваши рефералы</h3>
           {referrals.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full table-auto border-collapse">
                 <thead>
-                  <tr className="bg-gray-700">
+                  <tr className="bg-gray-800/80">
                     <th className="px-4 py-2 text-left text-gray-300">Имя пользователя</th>
                     <th className="px-4 py-2 text-left text-gray-300">Дата регистрации</th>
                   </tr>
@@ -233,15 +270,15 @@ const ReferralTab = () => {
                 <tbody>
                   {referrals.map((referral, index) => (
                     <tr key={index} className="border-b border-gray-600">
-                      <td className="px-4 py-2 text-white">{referral.username || 'Аноним'}</td>
-                      <td className="px-4 py-2 text-white">{new Date(referral.createdAt).toLocaleDateString('ru-RU')}</td>
+                      <td className="px-4 py-2 text-gray-300">{referral.username || 'Аноним'}</td>
+                      <td className="px-4 py-2 text-gray-300">{new Date(referral.createdAt).toLocaleDateString('ru-RU')}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <p className="text-center text-gray-400">У вас пока нет рефералов. Приглашайте друзей, чтобы они появились!</p>
+            <p className="text-center text-gray-300">У вас пока нет рефералов. Приглашайте друзей, чтобы они появились!</p>
           )}
         </motion.section>
       </div>
