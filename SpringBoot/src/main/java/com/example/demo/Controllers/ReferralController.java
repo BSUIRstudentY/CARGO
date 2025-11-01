@@ -107,7 +107,7 @@ public class ReferralController {
         userService.saveUser(referrer);
         QuestEvent questEvent = new QuestEvent(referrer.getEmail(), QuestConditionType.INVITE);
         kafkaTemplate.send("quest", questEvent);
-        logger.info("Referral activated for user: " + email + ", referrer: " + referrer.getEmail());
+
 
         return ResponseEntity.ok("Referral activated successfully");
     }

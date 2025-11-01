@@ -95,9 +95,11 @@ function AppContent() {
           <AdminLayout />
         ) : (
           <AppLayout />
+          
         )
       ) : (
         <GuestLayout />
+        
       )}
     </>
   );

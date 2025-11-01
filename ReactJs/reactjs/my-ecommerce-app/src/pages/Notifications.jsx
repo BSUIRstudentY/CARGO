@@ -197,6 +197,14 @@ const Notifications = () => {
     { value: 'unread', label: 'Непрочитанные' },
   ];
 
+  // Helper function to safely format date
+  const safeFormatDate = (timestamp) => {
+    if (!timestamp) return 'Дата не указана';
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return 'Неверная дата';
+    return formatDistanceToNow(date, { addSuffix: true, locale: ru });
+  };
+
   return (
     <div className="min-h-screen bg-primary font-sans text-primary py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
@@ -318,7 +326,7 @@ const Notifications = () => {
                         <h4 className="text-lg font-semibold font-display text-accent-primary">{notification.title}</h4>
                         <p className="text-secondary">{notification.message}</p>
                         <p className="text-secondary text-sm">
-                          {notification.createdAt ? formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: ru }) : 'Дата не указана'}
+                          {safeFormatDate(notification.createdAt)}
                         </p>
                       </div>
                     </div>

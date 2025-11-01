@@ -21,6 +21,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -33,6 +35,7 @@ public class SecurityConfiguration {
     private UserDetailsService userDetailsService;
 
     private static final String[] WHITE_LIST_URL = {
+            "/api/telegram",
             "/api/auth/**",
             "/api/products",
             "/api/cluster",
@@ -63,7 +66,8 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://fluvion.by", "http://localhost:5173"));
+        configuration.setAllowedOriginPatterns(List.of("*"));
+        // configuration.setAllowedOrigins(List.of("*")); //"https://fluvion.by", "http://localhost:5173"
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

@@ -65,6 +65,7 @@ public class Order {
     @JoinColumn(name = "batch_cargo_id")
     private BatchCargo batchCargo;
 
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<OrderItem> items;

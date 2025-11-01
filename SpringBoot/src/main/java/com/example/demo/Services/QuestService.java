@@ -26,6 +26,7 @@ public class QuestService {
 
     @KafkaListener(topics = "quest", groupId = "notification-group")
     public void handleEvent(QuestEvent questEvent) {
+
         User user = userRepository.findByEmail(questEvent.getUserEmail()).get();
         List<Quest> quests = questRepo.findByQuestConditionType(questEvent.getQuestConditionType());
 

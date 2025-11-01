@@ -5,13 +5,16 @@ import { QueryClient } from '@tanstack/react-query';
 const queryClient = new QueryClient();
 
 const api = axios.create({
-  baseURL: 'https://fluvion.by/api',
+  
+  baseURL: 'http://localhost:8080/api',
+
+  
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor — добавляем токен
+// Request interceptor — добавляем токен https://fluvion.by/api
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');

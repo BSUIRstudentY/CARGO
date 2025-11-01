@@ -120,7 +120,7 @@ function OrderInstructions() {
               fontSize: '14px',
               marginTop: '8px',
             }
-          }}>Пошаговое руководство по оформлению заказа на Fluvion</p>
+          }}>Пошаговое руководство по оформлению доставки товаров из Китая на Fluvion</p>
         </motion.header>
 
         <motion.section
@@ -153,10 +153,10 @@ function OrderInstructions() {
                 '@media (max-width: 640px)': {
                   fontSize: '20px',
                 }
-              }}>Как оформить заказ</h2>
+              }}>Товары из Китая под ключ</h2>
             </div>
             <p className="text-secondary mb-6 text-base font-sans">
-              На Fluvion мы сделали процесс заказа простым и удобным. Следуйте этим шагам, чтобы успешно оформить покупку товаров из Китая:
+              На Fluvion процесс заказа доставки товаров из Китая под ключ прост и удобен. Следуйте этим шагам, чтобы оформить заказ:
             </p>
             <div className="space-y-6">
               {[
@@ -167,12 +167,10 @@ function OrderInstructions() {
                       Вы можете добавить товары двумя способами:
                       <ul className="list-disc pl-5 mt-2 space-y-2 text-secondary font-sans">
                         <li>
-                          <strong>Через каталог:</strong> Перейдите в раздел{' '}
-                          <span className="font-bold text-accent-primary">Каталог</span>, где представлены проверенные товары, ранее заказанные другими клиентами. Выберите товар, укажите параметры (например, размер, цвет, количество) и нажмите "Добавить в корзину".
+                          <strong>Через каталог:</strong> Перейдите в раздел <span className="font-bold text-accent-primary">Каталог</span>, где представлены проверенные товары от поставщиков. Выберите товар, укажите параметры (например, размер, цвет, количество) и нажмите "Добавить в корзину".
                         </li>
                         <li>
-                          <strong>Через терминал:</strong> Если нужного товара нет в каталоге, используйте{' '}
-                          <span className="font-bold text-accent-primary">Терминал</span>. Введите ссылку на товар (например, с AliExpress, Taobao), описание, количество, цвет, размер и другие параметры.
+                          <strong>Через терминал:</strong> Если нужного товара нет в каталоге, используйте <span className="font-bold text-accent-primary">Терминал</span>. Введите ссылку на товар (например, с AliExpress, Taobao), описание, количество, цвет, размер и другие параметры.
                         </li>
                       </ul>
                     </>
@@ -184,10 +182,9 @@ function OrderInstructions() {
                   title: 'Оформление корзины',
                   description: (
                     <>
-                      После добавления товаров перейдите в{' '}
-                      <span className="font-bold text-accent-primary">Корзину</span>. Здесь вы можете:
+                      После добавления товаров перейдите в <span className="font-bold text-accent-primary">Корзину</span>. Здесь вы можете:
                       <ul className="list-disc pl-5 mt-2 space-y-2 text-secondary font-sans">
-                        <li>Указать адрес доставки: выберите отделение Европочты для доставки.</li>
+                        <li>Указать адрес доставки: выберите отделение Европочты для доставки по РБ.</li>
                         <li>Применить промокод: введите промокод для получения скидки, если он у вас есть.</li>
                         <li>Добавить страховку: выберите опцию страхования груза для защиты от возможных повреждений.</li>
                       </ul>
@@ -201,58 +198,198 @@ function OrderInstructions() {
                 },
                 {
                   title: 'Ожидание проверки администратором',
-                  description:
-                    'После оформления заказа он отправляется на проверку нашей команде. Администраторы проверяют корректность данных, наличие товара у поставщика и актуальность цен. Этот процесс занимает 1–2 рабочих дня. Вы получите уведомление по email или в личном кабинете о статусе проверки.',
+                  description: (
+                    <>
+                      После оформления заказа он отправляется на проверку нашей команде. Администраторы проверяют корректность данных, наличие товара у поставщика и актуальность цен. Этот процесс занимает 1–2 рабочих дня. Вы получите уведомление по email или в <span className="font-bold text-accent-primary">Профиле</span> о статусе проверки.
+                    </>
+                  ),
                   icon: <DocumentCheckIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Admin+Check',
                 },
                 {
-                  title: 'Просмотр заказа в профиле',
+                  title: 'Просмотр и оплата заказа',
                   description: (
                     <>
-                      После проверки администратором ваш заказ появится в разделе{' '}
-                      <span className="font-bold text-accent-primary">Профиль</span> во вкладке "Отправления". Здесь вы увидите итоговую информацию, включая корректировки (например, уточнение веса, габаритов или стоимости доставки по Китаю).
+                      После проверки администратором заказ появится в разделе <span className="font-bold text-accent-primary">Профиль</span> во вкладке "Отправления". Здесь вы увидите итоговую стоимость, включая цену товара, доставку из Китая в Беларусь ($6/кг), упаковку, таможенные сборы и комиссию. Оплатите заказ через эквайринг Альфа-Банка (Visa, Mastercard) в течение 3 дней. Платежи защищены 256-битным SSL-шифрованием. После оплаты заказ передаётся в логистику.
                     </>
                   ),
-                  icon: <UserIcon className="w-8 h-8 text-accent-primary" />,
-                  image: 'https://via.placeholder.com/150?text=Profile',
-                },
-                {
-                  title: 'Оплата заказа',
-                  description:
-                    'После подтверждения заказа вы можете оплатить его через эквайринг Альфа-Банка. Мы принимаем банковские карты (Visa, Mastercard). Все платежи защищены 256-битным SSL-шифрованием. После оплаты заказ передаётся в логистику.',
                   icon: <CreditCardIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Payment',
                 },
                 {
-                  title: 'Ожидание транспортировки заказа в РБ',
+                  title: 'Транспортировка в РБ',
                   description: (
                     <>
-                      После оплаты заказ включается в ближайший сборный груз для транспортировки из Китая в Республику Беларусь через транспортную компанию Карго. Вы можете отслеживать статус транспортировки в разделе{' '}
-                      <span className="font-bold text-accent-primary">Отправления</span> в вашем профиле.
+                      После оплаты заказ включается в ближайший сборный груз для транспортировки из Китая в Республику Беларусь через транспортную компанию Карго (18–35 дней). Отслеживайте статус в разделе <span className="font-bold text-accent-primary">Отправления</span> в вашем профиле.
                     </>
                   ),
                   icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Transport',
                 },
                 {
-                  title: 'Отправка заказа Европочтой клиенту',
-                  description:
-                    'После прибытия заказа на склад в Минске он передаётся в Европочту для доставки в выбранное вами отделение. Вы получите уведомление с трек-номером и ориентировочным сроком доставки.',
+                  title: 'Отправка Европочтой',
+                  description: 'После прибытия заказа на склад в Минске он передаётся в Европочту для доставки в выбранное вами отделение (2–5 дней). Вы получите уведомление с трек-номером и ориентировочным сроком доставки.',
                   icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Europochta',
                 },
                 {
-                  title: 'Оплата полной доставки заказа',
-                  description:
-                    'При получении заказа в отделении Европочты вы оплачиваете полную стоимость доставки, которая включает транспортировку из Китая в Беларусь ($6 за кг) и услуги Европочты. Оплата производится через эквайринг Альфа-Банка или наличными в отделении.',
+                  title: 'Оплата доставки по РБ',
+                  description: 'При получении заказа в отделении Европочты вы оплачиваете только стоимость доставки по Республике Беларусь по тарифам Европочты. Оплата производится наличными или через эквайринг в отделении.',
                   icon: <CreditCardIcon className="w-8 h-8 text-accent-primary" />,
                   image: 'https://via.placeholder.com/150?text=Final+Payment',
+                },
+                {
+                  title: 'Получение заказа',
+                  description: (
+                    <>
+                      Заберите товары в указанном отделении Европочты после оплаты местной доставки. Убедитесь, что товары соответствуют заказу, и оставьте отзыв в <span className="font-bold text-accent-primary">Профиле</span>.
+                    </>
+                  ),
+                  icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
+                  image: 'https://via.placeholder.com/150?text=Receipt',
                 },
               ].map((step, index) => (
                 <Tilt key={index} tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
                   <motion.div
                     ref={(el) => (stepRefs.current[index] = el)}
+                    className="step-card bg-tertiary p-6 rounded-2xl border border-primary/50 shadow-card hover:shadow-accent-primary/40 transition-shadow duration-300 mb-6"
+                    whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
+                    whileTap={{ scale: 0.97 }}
+                    style={{
+                      '@media (max-width: 640px)': {
+                        padding: '16px',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                      }
+                    }}
+                  >
+                    <div
+                      className="absolute inset-0 opacity-10 pointer-events-none"
+                      style={{
+                        backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                        backgroundRepeat: 'repeat',
+                      }}
+                    />
+                    <div className="flex items-start">
+                      <img
+                        src={step.image}
+                        alt={step.title}
+                        className="w-16 h-16 mr-4 rounded-md filter grayscale image-hover border border-primary/50"
+                        style={{
+                          '@media (max-width: 640px)': {
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '6px',
+                          }
+                        }}
+                      />
+                      <div>
+                        <div className="flex items-center">
+                          {step.icon}
+                          <h3 className="text-xl font-semibold font-display text-accent-primary ml-2" style={{
+                            '@media (max-width: 640px)': {
+                              fontSize: '18px',
+                            }
+                          }}>{step.title}</h3>
+                        </div>
+                        <p className="text-secondary text-base mt-2 font-sans">{step.description}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </Tilt>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Self-Purchase Section */}
+          <motion.div
+            className="bg-tertiary p-6 rounded-2xl shadow-card border border-primary/50 transition-shadow duration-300 animate-slide-up mt-12"
+            whileTap={{ scale: 0.97 }}
+            style={{
+              '@media (max-width: 640px)': {
+                padding: '16px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              }
+            }}
+          >
+            <div
+              className="absolute inset-0 opacity-10 pointer-events-none"
+              style={{
+                backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="none"%3E%3Cpath d="M0 0h50v50H0z" fill="none"/%3E%3Cpath d="M10 10h30v30H10z" stroke="%23ffffff" stroke-width="2" stroke-opacity="0.3"/%3E%3C/svg%3E')`,
+                backgroundRepeat: 'repeat',
+              }}
+            />
+            <div className="flex items-center mb-4">
+              <UserIcon className="w-8 h-8 mr-2 text-accent-primary" />
+              <h2 className="text-2xl font-bold font-display text-accent-primary" style={{
+                '@media (max-width: 640px)': {
+                  fontSize: '20px',
+                }
+              }}>Самовыкуп</h2>
+            </div>
+            <p className="text-secondary mb-6 text-base font-sans">
+              Если вы самостоятельно приобрели товары на китайских площадках и отправили их на наш склад в Китае, следуйте этим шагам для организации доставки:
+            </p>
+            <div className="space-y-6">
+              {[
+                {
+                  title: 'Самостоятельная покупка и отправка',
+                  description: 'Купите товары на китайских площадках (например, AliExpress, Taobao) и отправьте их на наш китайский склад, указанный в Карго. Убедитесь, что товары упакованы правильно.',
+                  icon: <ShoppingCartIcon className="w-8 h-8 text-accent-primary" />,
+                  image: 'https://via.placeholder.com/150?text=Self-Purchase',
+                },
+                {
+                  title: 'Оформление доставки в профиле',
+                  description: (
+                    <>
+                      Перейдите в раздел <span className="font-bold text-accent-primary">Профиль</span> во вкладке "Отправления". Укажите детали отправки (номер трека, вес, габариты), выберите отделение Европочты и добавьте страховку, если нужно.
+                    </>
+                  ),
+                  icon: <UserIcon className="w-8 h-8 text-accent-primary" />,
+                  image: 'https://via.placeholder.com/150?text=Profile',
+                },
+                {
+                  title: 'Оплата доставки',
+                  description: 'Оплатите стоимость доставки из Китая в Беларусь ($6/кг) через эквайринг Альфа-Банка в профиле. После оплаты заказ передаётся в логистику.',
+                  icon: <CreditCardIcon className="w-8 h-8 text-accent-primary" />,
+                  image: 'https://via.placeholder.com/150?text=Payment',
+                },
+                {
+                  title: 'Транспортировка в РБ',
+                  description: (
+                    <>
+                      Заказ включается в сборный груз и транспортируется в Беларусь через Карго (18–35 дней). Отслеживайте статус в разделе <span className="font-bold text-accent-primary">Отправления</span>.
+                    </>
+                  ),
+                  icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
+                  image: 'https://via.placeholder.com/150?text=Transport',
+                },
+                {
+                  title: 'Отправка Европочтой',
+                  description: 'После прибытия на склад в Минске заказ передаётся в Европочту для доставки в выбранное отделение (2–5 дней). Получите трек-номер.',
+                  icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
+                  image: 'https://via.placeholder.com/150?text=Europochta',
+                },
+                {
+                  title: 'Оплата доставки по РБ',
+                  description: 'При получении оплатите только доставку по РБ по тарифам Европочты наличными или через эквайринг в отделении.',
+                  icon: <CreditCardIcon className="w-8 h-8 text-accent-primary" />,
+                  image: 'https://via.placeholder.com/150?text=Final+Payment',
+                },
+                {
+                  title: 'Получение заказа',
+                  description: (
+                    <>
+                      Заберите товары в указанном отделении Европочты после оплаты местной доставки. Убедитесь, что товары соответствуют, и оставьте отзыв в <span className="font-bold text-accent-primary">Профиле</span>.
+                    </>
+                  ),
+                  icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
+                  image: 'https://via.placeholder.com/150?text=Receipt',
+                },
+              ].map((step, index) => (
+                <Tilt key={index} tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
+                  <motion.div
                     className="step-card bg-tertiary p-6 rounded-2xl border border-primary/50 shadow-card hover:shadow-accent-primary/40 transition-shadow duration-300 mb-6"
                     whileHover={{ y: -10, scale: 1.03, boxShadow: '0 10px 20px rgba(255, 37, 73, 0.3)' }}
                     whileTap={{ scale: 0.97 }}
@@ -318,7 +455,7 @@ function OrderInstructions() {
                 }
               }}
             >
-              Процесс заказа
+              Процесс доставки
             </motion.h2>
             <motion.div
               initial={{ opacity: 0, y: 50 }}
@@ -332,7 +469,7 @@ function OrderInstructions() {
                 }
               }}
             >
-              <p>Пошаговое руководство по оформлению заказа на Fluvion</p>
+              <p>Пошаговое руководство по оформлению доставки товаров из Китая под ключ на Fluvion</p>
             </motion.div>
             <div ref={progressRef} className="relative max-w-3xl mx-auto">
               <div className="absolute left-1/2 transform -translate-x-1/2 w-1 bg-primary/50 h-full"></div>
@@ -353,29 +490,29 @@ function OrderInstructions() {
                   icon: <DocumentCheckIcon className="w-8 h-8 text-accent-primary" />,
                 },
                 {
-                  title: 'Просмотр заказа',
-                  description: 'Проверьте итоговый заказ с учётом корректировок в профиле.',
-                  icon: <UserIcon className="w-8 h-8 text-accent-primary" />,
-                },
-                {
-                  title: 'Оплата заказа',
-                  description: 'Оплатите заказ через эквайринг Альфа-Банка.',
+                  title: 'Просмотр и оплата',
+                  description: 'Оплатите полную стоимость (товар, доставка из Китая, сборы) в профиле.',
                   icon: <CreditCardIcon className="w-8 h-8 text-accent-primary" />,
                 },
                 {
                   title: 'Транспортировка в РБ',
-                  description: 'Заказ включается в сборный груз и транспортируется в Беларусь.',
+                  description: 'Заказ транспортируется в Беларусь через Карго (18–35 дней).',
                   icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
                 },
                 {
                   title: 'Отправка Европочтой',
-                  description: 'Заказ передаётся в Европочту для доставки в выбранное отделение.',
+                  description: 'Заказ доставляется в отделение Европочты (2–5 дней).',
                   icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
                 },
                 {
-                  title: 'Оплата доставки',
-                  description: 'Оплатите доставку ($6/кг + услуги Европочты) при получении заказа.',
+                  title: 'Оплата доставки по РБ',
+                  description: 'Оплатите доставку по тарифам Европочты при получении.',
                   icon: <CreditCardIcon className="w-8 h-8 text-accent-primary" />,
+                },
+                {
+                  title: 'Получение заказа',
+                  description: 'Заберите товары в отделении Европочты после оплаты местной доставки.',
+                  icon: <TruckIcon className="w-8 h-8 text-accent-primary" />,
                 },
               ].map((step, index) => (
                 <Tilt key={index} tiltMaxAngleX={8} tiltMaxAngleY={8} perspective={1200}>
@@ -467,7 +604,7 @@ function OrderInstructions() {
                 }
               }}>Готовы начать?</h2>
               <p className="text-secondary mb-6 text-base font-sans">
-                Оформите свой первый заказ прямо сейчас! Выберите товары из каталога, настройте заказ в терминале или проверьте статус в профиле.
+                Оформите доставку товаров из Китая под ключ или через самовыкуп прямо сейчас! Выберите товары из каталога, настройте заказ в терминале или проверьте статус в профиле.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <motion.button

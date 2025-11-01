@@ -48,6 +48,7 @@ public class BatchCargoController {
     @Autowired
     public BatchCargoController(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("http://localhost:8080/api").build();
+
     }
 
     @GetMapping("/unfinished")

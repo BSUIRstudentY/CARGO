@@ -1,6 +1,3 @@
-// Home.jsx - Full-Page Layout with Theme Applied
-// Uses Tailwind classes with the new theme for consistent styling.
-// Full-page: Sections stack to fill viewport, with sticky header and smooth scrolling.
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -13,460 +10,553 @@ const Home = () => {
     setIsImageVisible(true);
   }, []);
 
-  const handleSiteClick = (url) => {
-    window.open(url, '_blank');
-  };
-
   return (
     <>
-      {/* Full-Page Container - Dark Theme */}
       <div className="min-h-screen bg-bg-primary text-text-primary font-sans">
-       
-
-        {/* Hero Section - Full-Width, Reverse on LG like Delta */}
-        <section 
-  className="hero pt-24 pb-16 relative min-h-screen flex items-center justify-center"
-  style={{
-    backgroundImage: `url(/main.png)`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat'
-  }}
->
-  <div className="container-xl mx-auto px-4 w-full max-w-7xl relative z-10">
-    <div className="bg-bg-secondary/40 backdrop-blur-md rounded-2xl p-8 shadow-card">
-      <div className="flex flex-col lg:flex-row-reverse items-center justify-center">
-        <div className="col-lg-6 mb-8 lg:mb-0 flex justify-center mx-auto">
-          <img 
-            src="/logo.png" 
-            alt="Fluvion Logo" 
-            className="w-64 h-64 object-contain animate-float"
-          />
-        </div>
-        <div className="col-lg-6 order-2 order-lg-1 d-flex flex-column justify-content-center text-left">
-        <h1 className="text-5xl lg:text-6xl font-display font-bold mb-4 text-accent-primary">
-          FLUVION
-        </h1>
-        <p className="lead text-lg text-text-secondary mb-6 max-w-prose mx-auto lg:mx-0">
-          Ваш путь к лучшим товарам из Китая. Наслаждайтесь качеством и удобством с каждым заказом.
-        </p>
-        <div className="flex flex-column flex-md-row gap-4 justify-start">
-          <button
-            onClick={() => navigate('/catalog')}
-            className="bg-accent-primary text-text-primary px-8 py-3 rounded-md hover:bg-accent-primary/90 transition duration-300 text-base font-medium"
-          >
-            Перейти в каталог
-          </button>
-          <button
-            onClick={() => navigate('/terminal')}
-            className="bg-transparent border-2 border-accent-primary text-accent-primary px-8 py-3 rounded-md hover:bg-accent-primary hover:text-text-primary transition duration-300 text-base font-medium"
-          >
-            Попробовать терминал
-          </button>
-        </div>
-      </div>
-      </div>
-    </div>
-  </div>
-</section>
+        {/* Hero Section */}
+        <section
+          className="hero pt-24 pb-16 relative min-h-screen flex items-center justify-center"
+          style={{
+            backgroundImage: `url(/main.png)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        >
+          <div className="container-xl mx-auto px-4 w-full max-w-7xl relative z-10">
+            <div className="bg-bg-secondary/40 backdrop-blur-md rounded-2xl p-8 shadow-card">
+              <div className="flex flex-col lg:flex-row-reverse items-center justify-center">
+                <div className="col-lg-6 mb-8 lg:mb-0 flex justify-center mx-auto">
+                  <img
+                    src="/logo.png"
+                    alt="Fluvion Logo"
+                    className="w-64 h-64 object-contain animate-float"
+                  />
+                </div>
+                <div className="col-lg-6 order-2 order-lg-1 d-flex flex-column justify-content-center text-left">
+                  <h1 className="text-5xl lg:text-6xl font-display font-bold mb-4 text-accent-primary">
+                    Доставка из Китая под ключ
+                  </h1>
+                  <p className="lead text-lg text-text-secondary mb-6 max-w-prose mx-auto lg:mx-0">
+                    С <span className="text-accent-primary">FLUVION</span> заказывайте товары из Китая без хлопот: от выбора в Каталоге или Терминале до доставки в Беларусь за 18–35 дней по цене $6/кг. Надежно, просто, с гарантией!
+                  </p>
+                  <div className="flex flex-column flex-md-row gap-4 justify-start">
+                    <button
+                      onClick={() => navigate('/catalog')}
+                      className="bg-accent-primary text-text-primary px-8 py-3 rounded-md hover:bg-accent-primary/90 transition duration-300 text-base font-medium"
+                    >
+                      Перейти в каталог
+                    </button>
+                    <button
+                      onClick={() => navigate('/terminal')}
+                      className="bg-transparent border-2 border-accent-primary text-accent-primary px-8 py-3 rounded-md hover:bg-accent-primary hover:text-text-primary transition duration-300 text-base font-medium"
+                    >
+                      Заказать товар
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* About Section */}
         <section id="about" className="py-16 bg-bg-secondary">
           <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center justify-items-center">
               <div className="order-2 lg:order-1 flex justify-center">
-                <div className={`rounded-xl overflow-hidden ${isImageVisible ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500 shadow-card`}>
+                <div
+                  className={`rounded-xl overflow-hidden ${
+                    isImageVisible ? 'opacity-100' : 'opacity-0'
+                  } transition-opacity duration-500 shadow-card`}
+                >
                   <img
                     src="/220.png"
-                    alt="Fluvion Team"
+                    alt="Fluvion Delivery"
                     className="w-full h-64 lg:h-80 object-cover"
                   />
                 </div>
               </div>
               <div className="order-1 lg:order-2 flex justify-center">
-              <div className="text-center max-w-prose">
-                <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">О нашей компании</h2>
-                <p className="text-lg text-text-secondary mb-6">
-                  <span className="text-accent-primary">FLUVION</span> специализируется на поставках качественных товаров из Китая, предлагая широкий ассортимент электроники, аксессуаров и товаров для дома. Мы гордимся своим уникальным терминалом для удобных покупок и надежной доставкой, обеспечивая лучшие цены и поддержку клиентов 24/7. Начните прямо сейчас!
-                </p>
+                <div className="text-center max-w-prose">
+                  <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">
+                    О доставке под ключ
+                  </h2>
+                  <p className="text-lg text-text-secondary mb-6">
+                    <span className="text-accent-primary">FLUVION</span> берёт на себя весь процесс: выбор товаров через <span className="font-bold text-accent-primary">Каталог</span> или <span className="font-bold text-accent-primary">Терминал</span>, проверка на складе в Китае, доставка Карго (18–35 дней) и Европочтой по РБ (2–5 дней). Мы упрощаем таможню, обеспечиваем страховку и поддержку 24/7. Подробности в{' '}
+                    <a href="/public-offer" className="text-accent-primary underline">
+                      Публичной оферте
+                    </a>.
+                  </p>
+                </div>
               </div>
-            </div>
             </div>
           </div>
         </section>
 
-        {/* Why Choose Us Section - Matches Delta Structure */}
+        {/* Advantages Section */}
         <section id="features" className="py-16 bg-section-gradient">
-  <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
-   
-    <div className="advantages__title mb-8 text-2xl lg:text-3xl font-display font-bold text-accent-primary">
-      Преимущества и гарантии <span className="text-accent-primary">FLUVION</span>
+          <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
+            <div className="advantages__title mb-8 text-2xl lg:text-3xl font-display font-bold text-accent-primary">
+              Преимущества доставки с <span className="text-accent-primary">FLUVION</span>
+            </div>
+            <div className="advantages__list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="advantages__item-wrap">
+                <div className="advantages__item">
+                  <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">
+                    Быстрая доставка
+                  </div>
+                  <div className="advantages__item-img mb-4">
+                    <img src="time.svg" alt="time" className="w-12 h-12" />
+                  </div>
+                  <div className="advantages__item-about text-text-secondary">
+                    Доставка из Китая за 18–35 дней через Карго
+                  </div>
+                </div>
+              </div>
+              <div className="advantages__item-wrap">
+                <div className="advantages__item">
+                  <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">
+                    Фиксированная цена
+                  </div>
+                  <div className="advantages__item-img mb-4">
+                    <img src="price.svg" alt="price" className="w-12 h-12" />
+                  </div>
+                  <div className="advantages__item-about text-text-secondary">
+                    $6 за кг + тарифы Европочты, без скрытых платежей
+                  </div>
+                </div>
+              </div>
+              <div className="advantages__item-wrap">
+                <div className="advantages__item">
+                  <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">
+                    Страховка груза
+                  </div>
+                  <div className="advantages__item-img mb-4">
+                    <img src="warranty.svg" alt="warranty" className="w-12 h-12" />
+                  </div>
+                  <div className="advantages__item-about text-text-secondary">
+                    Компенсация при повреждении застрахованного груза
+                  </div>
+                </div>
+              </div>
+              <div className="advantages__item-wrap">
+                <div className="advantages__item">
+                  <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">
+                    Проверка товаров
+                  </div>
+                  <div className="advantages__item-img mb-4">
+                    <img src="cloud.svg" alt="cloud" className="w-12 h-12" />
+                  </div>
+                  <div className="advantages__item-about text-text-secondary">
+                    Проверка целостности и качества (от $5)
+                  </div>
+                </div>
+              </div>
+              <div className="advantages__item-wrap">
+                <div className="advantages__item">
+                  <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">
+                    Упрощённая таможня
+                  </div>
+                  <div className="advantages__item-img mb-4">
+                    <img src="flexibility.svg" alt="flexibility" className="w-12 h-12" />
+                  </div>
+                  <div className="advantages__item-about text-text-secondary">
+                    Помощь с таможенными процедурами
+                  </div>
+                </div>
+              </div>
+              <div className="advantages__item-wrap">
+                <div className="advantages__item">
+                  <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">
+                    Отслеживание
+                  </div>
+                  <div className="advantages__item-img mb-4">
+                    <img src="professionalism.svg" alt="professionalism" className="w-12 h-12" />
+                  </div>
+                  <div className="advantages__item-about text-text-secondary">
+                    Трек-номер и уведомления в Профиле
+                  </div>
+                </div>
+              </div>
+              <div className="advantages__item-wrap">
+                <div className="advantages__item">
+                  <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">
+                    Прозрачная оплата
+                  </div>
+                  <div className="advantages__item-img mb-4">
+                    <img src="management.svg" alt="management" className="w-12 h-12" />
+                  </div>
+                  <div className="advantages__item-about text-text-secondary">
+                    Оплата через Альфа-Банк (Visa, Mastercard)
+                  </div>
+                </div>
+              </div>
+              <div className="advantages__item-wrap">
+                <div className="advantages__item">
+                  <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">
+                    Опыт
+                  </div>
+                  <div className="advantages__item-img mb-4">
+                    <img src="experience.svg" alt="experience" className="w-12 h-12" />
+                  </div>
+                  <div className="advantages__item-about text-text-secondary">
+                    Более 5 лет успешной доставки из Китая
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <style jsx>{`
+            * {
+              text-decoration: none;
+              color: #f5f9ff;
+              box-sizing: border-box;
+              font-family: Montserrat, sans-serif;
+              font-size: 16px;
+              line-height: 125%;
+              font-weight: 500;
+            }
+            .advantages__item {
+              width: 100%;
+              padding: 24px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              gap: 24px 0;
+              height: 100%;
+              border-radius: 6px;
+              box-shadow: 0 12px 29px -5px #0000006b;
+              background: #121212;
+              z-index: 2;
+              position: relative;
+              transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .advantages__item:hover {
+              transform: translateY(-5px);
+              box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+            }
+            .advantages__item-title {
+              font-family: Montserrat, sans-serif;
+              font-size: 16px;
+              line-height: 125%;
+              font-weight: 500;
+              color: #f5f9ff;
+              text-decoration: none;
+            }
+            .advantages__item-about {
+              font-family: Montserrat, sans-serif;
+              font-size: 16px;
+              line-height: 125%;
+              font-weight: 500;
+              color: #f5f9ff;
+              text-decoration: none;
+              text-align: center;
+            }
+            .advantages__item-wrap {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              padding: 1px;
+              height: 100%;
+              border-radius: 6px;
+              box-shadow: 0 12px 29px -5px rgba(0, 0, 0, 0.42);
+              position: relative;
+              overflow: hidden;
+            }
+            .advantages__item-wrap:before {
+              content: "";
+              position: absolute;
+              display: block;
+              background: linear-gradient(
+                340deg,
+                rgb(8, 8, 8) 0%,
+                rgb(255, 37, 73) 50%,
+                rgb(8, 8, 8) 80%
+              );
+              width: 100%;
+              height: 110%;
+              z-index: 1;
+            }
+            .advantages__item-wrap:nth-child(3):before {
+              background: linear-gradient(
+                -45deg,
+                rgb(8, 8, 8) 20%,
+                rgb(255, 37, 73) 50%,
+                rgb(8, 8, 8) 80%
+              );
+            }
+            .advantages__item-wrap:hover:before {
+              animation: rotate-gradient linear 5s normal infinite;
+            }
+            @keyframes rotate-gradient {
+              0% {
+                transform: rotate(0deg);
+                width: 100%;
+              }
+              50% {
+                transform: rotate(180deg);
+                width: 200%;
+              }
+              100% {
+                transform: rotate(360deg);
+                width: 100%;
+              }
+            }
+          `}</style>
+        </section>
+
+        {/* Services Section */}
+        <section id="services" className="py-16 bg-bg-primary">
+          <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
+            <h2 className="text-3xl lg:text-4xl font-display font-bold mb-8 text-accent-primary">
+              Услуги доставки под ключ
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="services__item-wrap">
+                <div className="services__item">
+                  <div className="services__item-title text-xl font-semibold mb-4 text-text-primary">
+                    Доставка под ключ
+                  </div>
+                  <div className="services__item-info text-text-secondary text-center">
+                    <div className="services__item-price mb-2 text-accent-primary">
+                      Цена от $6 за кг
+                    </div>
+                    <div className="services__item-term">
+                      Срок 18–35 дней (Карго) + 2–5 дней (Европочта)
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="services__item-wrap">
+                <div className="services__item">
+                  <div className="services__item-title text-xl font-semibold mb-4 text-text-primary">
+                    Проверка и упаковка
+                  </div>
+                  <div className="services__item-info text-text-secondary text-center">
+                    <div className="services__item-price mb-2 text-accent-primary">
+                      Проверка от $5, упаковка от $3
+                    </div>
+                    <div className="services__item-term">Срок от 1 дня</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <style jsx>{`
+            * {
+              text-decoration: none;
+              color: #f5f9ff;
+              box-sizing: border-box;
+              font-family: Montserrat, sans-serif;
+              font-size: 16px;
+              line-height: 125%;
+              font-weight: 500;
+            }
+            .services__item {
+              width: 100%;
+              padding: 24px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              gap: 24px 0;
+              height: 100%;
+              border-radius: 6px;
+              box-shadow: 0 12px 29px -5px #0000006b;
+              background: #121212;
+              z-index: 2;
+              position: relative;
+              transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .services__item:hover {
+              transform: translateY(-5px);
+              box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+            }
+            .services__item-title {
+              font-family: Montserrat, sans-serif;
+              font-size: 16px;
+              line-height: 125%;
+              font-weight: 500;
+              color: #f5f9ff;
+              text-decoration: none;
+            }
+            .services__item-info {
+              font-family: Montserrat, sans-serif;
+              font-size: 16px;
+              line-height: 125%;
+              font-weight: 500;
+              color: #f5f9ff;
+              text-decoration: none;
+              text-align: center;
+            }
+            .services__item-wrap {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              padding: 1px;
+              height: 100%;
+              border-radius: 6px;
+              box-shadow: 0 12px 29px -5px rgba(0, 0, 0, 0.42);
+              position: relative;
+              overflow: hidden;
+            }
+            .services__item-wrap:before {
+              content: "";
+              position: absolute;
+              display: block;
+              background: linear-gradient(
+                340deg,
+                rgb(8, 8, 8) 0%,
+                rgb(255, 37, 73) 50%,
+                rgb(8, 8, 8) 80%
+              );
+              width: 100%;
+              height: 110%;
+              z-index: 1;
+            }
+            .services__item-wrap:nth-child(2):before {
+              background: linear-gradient(
+                -45deg,
+                rgb(8, 8, 8) 20%,
+                rgb(255, 37, 73) 50%,
+                rgb(8, 8, 8) 80%
+              );
+            }
+            .services__item-wrap:hover:before {
+              animation: rotate-gradient linear 5s normal infinite;
+            }
+            @keyframes rotate-gradient {
+              0% {
+                transform: rotate(0deg);
+                width: 100%;
+              }
+              50% {
+                transform: rotate(180deg);
+                width: 200%;
+              }
+              100% {
+                transform: rotate(360deg);
+                width: 100%;
+              }
+            }
+          `}</style>
+        </section>
+
+  {/* History Section */}
+  <section id="history" className="py-16 bg-bg-primary">
+    <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
+      <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">
+        Этапы развития доставки
+      </h2>
+      <p className="text-lg text-text-secondary mb-8 max-w-2xl mx-auto">
+        <span className="text-accent-primary">FLUVION</span> развивается поэтапно, чтобы сделать доставку из Китая под ключ доступной и удобной для каждого клиента.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+        <div className="text-center">
+          <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
+            <span className="text-2xl font-bold text-accent-primary">1</span>
+          </div>
+          <h4 className="text-xl font-semibold mb-2 text-text-primary">
+            Формирование команды
+          </h4>
+          <p className="text-text-muted">
+            Сбор экспертов по логистике и закупкам из Китая.
+          </p>
+        </div>
+        <div className="text-center">
+          <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
+            <span className="text-2xl font-bold text-accent-primary">2</span>
+          </div>
+          <h4 className="text-xl font-semibold mb-2 text-text-primary">
+            Внедрение Терминала
+          </h4>
+          <p className="text-text-muted">
+            Создание инструмента для индивидуальных заказов и поиска товаров.
+          </p>
+        </div>
+        <div className="text-center">
+          <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
+            <span className="text-2xl font-bold text-accent-primary">3</span>
+          </div>
+          <h4 className="text-xl font-semibold mb-2 text-text-primary">
+          Партнёрство с Европочтой
+          </h4>
+          <p className="text-text-muted">
+            Интеграция для быстрой и надёжной доставки по РБ.
+          </p>
+        </div>
+        <div className="text-center">
+          <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
+            <span className="text-2xl font-bold text-accent-primary">4</span>
+          </div>
+          <h4 className="text-xl font-semibold mb-2 text-text-primary">
+            Оптимизация логистики
+          </h4>
+          <p className="text-text-muted">
+            Разработка маршрутов для доставки за 18–35 дней.
+          </p>
+        </div>
+        <div className="text-center">
+          <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
+            <span className="text-2xl font-bold text-accent-primary">5</span>
+          </div>
+          <h4 className="text-xl font-semibold mb-2 text-text-primary">
+          Услуги проверки
+          </h4>
+          <p className="text-text-muted">
+            Введение контроля качества товаров на складе в Китае.
+          </p>
+        </div>
+        <div className="text-center">
+          <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
+            <span className="text-2xl font-bold text-accent-primary">6</span>
+          </div>
+          <h4 className="text-xl font-semibold mb-2 text-text-primary">
+          Рост и инновации
+          </h4>
+          <p className="text-text-muted">
+            Внедрение технологий для автоматизации и масштабирования.
+          </p>
+        </div>
+      </div>
     </div>
-    <div className="advantages__list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-      <div className="advantages__item-wrap">
-        <div className="advantages__item">
-          <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">Сроки</div>
-          <div className="advantages__item-img mb-4">
-            <img src="time.svg" alt="time" className="w-12 h-12" />
-          </div>
-          <div className="advantages__item-about text-text-secondary">Доставка из Китая точно в срок</div>
+  </section>
+
+  {/* Statistics Section */}
+<section id="stats" className="py-16 bg-bg-secondary">
+  <div className="container-xl mx-auto px-4 w-full max-w-7xl">
+    <div className="bg-bg-tertiary rounded-lg p-6 sm:p-10 shadow-card mx-auto max-w-4xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center justify-items-center">
+        <div>
+          <h3 className="text-4xl font-bold text-text-primary">1000+</h3>
+          <p className="text-text-muted">
+            Товаров из Китая, с опытом доставки нашей команды в{' '}
+            <span className="text-accent-primary">FLUVION</span>
+          </p>
         </div>
-      </div>
-      <div className="advantages__item-wrap">
-        <div className="advantages__item">
-          <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">Цены</div>
-          <div className="advantages__item-img mb-4">
-            <img src="price.svg" alt="price" className="w-12 h-12" />
-          </div>
-          <div className="advantages__item-about text-text-secondary">Фиксированные цены, которые не увеличиваются</div>
+        <div>
+          <h3 className="text-4xl font-bold text-text-primary">90%</h3>
+          <p className="text-text-muted">Клиентов рекомендуют нас</p>
         </div>
-      </div>
-      <div className="advantages__item-wrap">
-        <div className="advantages__item">
-          <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">Гарантии</div>
-          <div className="advantages__item-img mb-4">
-            <img src="warranty.svg" alt="warranty" className="w-12 h-12" />
-          </div>
-          <div className="advantages__item-about text-text-secondary">Гарантия сохранности груза</div>
+        <div>
+          <h3 className="text-4xl font-bold text-text-primary">5</h3>
+          <p className="text-text-muted">Складов-партнёров в Китае</p>
         </div>
-      </div>
-      <div className="advantages__item-wrap">
-        <div className="advantages__item">
-          <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">Хранение</div>
-          <div className="advantages__item-img mb-4">
-            <img src="cloud.svg" alt="cloud" className="w-12 h-12" />
-          </div>
-          <div className="advantages__item-about text-text-secondary">Бесплатное хранение</div>
-        </div>
-      </div>
-      <div className="advantages__item-wrap">
-        <div className="advantages__item">
-          <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">Гибкость</div>
-          <div className="advantages__item-img mb-4">
-            <img src="flexibility.svg" alt="flexibility" className="w-12 h-12" />
-          </div>
-          <div className="advantages__item-about text-text-secondary">Возможность отсрочки платежа</div>
-        </div>
-      </div>
-      <div className="advantages__item-wrap">
-        <div className="advantages__item">
-          <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">Профессионализм</div>
-          <div className="advantages__item-img mb-4">
-            <img src="professionalism.svg" alt="professionalism" className="w-12 h-12" />
-          </div>
-          <div className="advantages__item-about text-text-secondary">Помогаем решить вопросы с таможней</div>
-        </div>
-      </div>
-      <div className="advantages__item-wrap">
-        <div className="advantages__item">
-          <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">Менеджмент</div>
-          <div className="advantages__item-img mb-4">
-            <img src="management.svg" alt="management" className="w-12 h-12" />
-          </div>
-          <div className="advantages__item-about text-text-secondary">Обратная связь и отслеживание груза</div>
-        </div>
-      </div>
-      <div className="advantages__item-wrap">
-        <div className="advantages__item">
-          <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">Опыт</div>
-          <div className="advantages__item-img mb-4">
-            <img src="experience.svg" alt="experience" className="w-12 h-12" />
-          </div>
-          <div className="advantages__item-about text-text-secondary">Наша компания работает более 10 лет на рынке</div>
+        <div>
+          <h3 className="text-4xl font-bold text-text-primary">24/7</h3>
+          <p className="text-text-muted">Поддержка клиентов</p>
         </div>
       </div>
     </div>
   </div>
-  <style jsx>{`
-    * {
-      text-decoration: none;
-      color: #f5f9ff;
-      box-sizing: border-box;
-      font-family: Montserrat, sans-serif;
-      font-size: 16px;
-      line-height: 125%;
-      font-weight: 500;
-    }
-    .advantages__item {
-      width: 100%;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 24px 0;
-      height: 100%;
-      border-radius: 6px;
-      box-shadow: 0 12px 29px -5px #0000006b;
-      background: #121212;
-      z-index: 2;
-      position: relative;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .advantages__item:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
-    }
-    .advantages__item-title {
-      font-family: Montserrat, sans-serif;
-      font-size: 16px;
-      line-height: 125%;
-      font-weight: 500;
-      color: #f5f9ff;
-      text-decoration: none;
-    }
-    .advantages__item-about {
-      font-family: Montserrat, sans-serif;
-      font-size: 16px;
-      line-height: 125%;
-      font-weight: 500;
-      color: #f5f9ff;
-      text-decoration: none;
-      text-align: center;
-    }
-    .advantages__item-wrap {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 1px;
-      height: 100%;
-      border-radius: 6px;
-      box-shadow: 0 12px 29px -5px rgba(0, 0, 0, 0.42);
-      position: relative;
-      overflow: hidden;
-    }
-    .advantages__item-wrap:before {
-      content: "";
-      position: absolute;
-      display: block;
-      background: linear-gradient(340deg, rgb(8, 8, 8) 0%, rgb(255, 37, 73) 50%, rgb(8, 8, 8) 80%);
-      width: 100%;
-      height: 110%;
-      z-index: 1;
-    }
-    .advantages__item-wrap:nth-child(3):before {
-      background: linear-gradient(-45deg, rgb(8, 8, 8) 20%, rgb(255, 37, 73) 50%, rgb(8, 8, 8) 80%);
-    }
-    .advantages__item-wrap:hover:before {
-      animation: rotate-gradient linear 5s normal infinite;
-    }
-    @keyframes rotate-gradient {
-      0% {
-        transform: rotate(0deg);
-        width: 100%;
-      }
-      50% {
-        transform: rotate(180deg);
-        width: 200%;
-      }
-      100% {
-        transform: rotate(360deg);
-        width: 100%;
-      }
-    }
-  `}</style>
-  </section>
-
-        {/* Services Section */}
-          <section id="services" className="py-16 bg-bg-primary">
-            <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
-              <h2 className="text-3xl lg:text-4xl font-display font-bold mb-8 text-accent-primary">Наши услуги</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="services__item-wrap">
-                  <div className="services__item">
-                    <div className="services__item-title text-xl font-semibold mb-4 text-text-primary">Быстрая автодоставка</div>
-                    <div className="services__item-info text-text-secondary text-center">
-                      <div className="services__item-price mb-2 text-accent-primary">Цена от 6$ за кг!</div>
-                      <div className="services__item-term">Срок от 10 дней</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="services__item-wrap">
-                  <div className="services__item">
-                    <div className="services__item-title text-xl font-semibold mb-4 text-text-primary">Упаковка</div>
-                    <div className="services__item-info text-text-secondary text-center">
-                      <div className="services__item-price mb-2 text-accent-primary">Цена от 3$ за единицу!</div>
-                      <div className="services__item-term">Срок от 1 дня</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <style jsx>{`
-              * {
-                text-decoration: none;
-                color: #f5f9ff;
-                box-sizing: border-box;
-                font-family: Montserrat, sans-serif;
-                font-size: 16px;
-                line-height: 125%;
-                font-weight: 500;
-              }
-              .services__item {
-                width: 100%;
-                padding: 24px;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                gap: 24px 0;
-                height: 100%;
-                border-radius: 6px;
-                box-shadow: 0 12px 29px -5px #0000006b;
-                background: #121212;
-                z-index: 2;
-                position: relative;
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-              }
-              .services__item:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
-              }
-              .services__item-title {
-                font-family: Montserrat, sans-serif;
-                font-size: 16px;
-                line-height: 125%;
-                font-weight: 500;
-                color: #f5f9ff;
-                text-decoration: none;
-              }
-              .services__item-info {
-                font-family: Montserrat, sans-serif;
-                font-size: 16px;
-                line-height: 125%;
-                font-weight: 500;
-                color: #f5f9ff;
-                text-decoration: none;
-                text-align: center;
-              }
-              .services__item-wrap {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 1px;
-                height: 100%;
-                border-radius: 6px;
-                box-shadow: 0 12px 29px -5px rgba(0, 0, 0, 0.42);
-                position: relative;
-                overflow: hidden;
-              }
-              .services__item-wrap:before {
-                content: "";
-                position: absolute;
-                display: block;
-                background: linear-gradient(340deg, rgb(8, 8, 8) 0%, rgb(255, 37, 73) 50%, rgb(8, 8, 8) 80%);
-                width: 100%;
-                height: 110%;
-                z-index: 1;
-              }
-              .services__item-wrap:nth-child(2):before {
-                background: linear-gradient(-45deg, rgb(8, 8, 8) 20%, rgb(255, 37, 73) 50%, rgb(8, 8, 8) 80%);
-              }
-              .services__item-wrap:hover:before {
-                animation: rotate-gradient linear 5s normal infinite;
-              }
-              @keyframes rotate-gradient {
-                0% {
-                  transform: rotate(0deg);
-                  width: 100%;
-                }
-                50% {
-                  transform: rotate(180deg);
-                  width: 200%;
-                }
-                100% {
-                  transform: rotate(360deg);
-                  width: 100%;
-                }
-              }
-            `}</style>
-          </section>
-
-        {/* History Section */}
-        <section id="history" className="py-16 bg-bg-primary">
-          <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
-            <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">Наша история развития</h2>
-            <p className="text-lg text-text-secondary mb-8 max-w-2xl mx-auto">
-              <span className="text-accent-primary">FLUVION</span> начал свой путь в 2020 году, стремясь упростить покупки из Китая для каждого.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-              <div className="text-center">
-                <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
-                  <span className="text-2xl font-bold text-accent-primary">1</span>
-                </div>
-                <h4 className="text-xl font-semibold mb-2 text-text-primary">2020 — Начало пути</h4>
-                <p className="text-text-muted">Запуск платформы для закупок из Китая.</p>
-              </div>
-              {/* Repeat for other timeline items with consistent classes */}
-              <div className="text-center">
-                <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
-                  <span className="text-2xl font-bold text-accent-primary">2</span>
-                </div>
-                <h4 className="text-xl font-semibold mb-2 text-text-primary">2021 — Уникальный терминал</h4>
-                <p className="text-text-muted">Внедрение инновационного терминала для покупок.</p>
-              </div>
-              <div className="text-center">
-                <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
-                  <span className="text-2xl font-bold text-accent-primary">3</span>
-                </div>
-                <h4 className="text-xl font-semibold mb-2 text-text-primary">2022 — Расширение ассортимента</h4>
-                <p className="text-text-muted">Добавление тысяч новых товаров в каталог.</p>
-              </div>
-              <div className="text-center">
-                <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
-                  <span className="text-2xl font-bold text-accent-primary">4</span>
-                </div>
-                <h4 className="text-xl font-semibold mb-2 text-text-primary">2023 — Улучшение доставки</h4>
-                <p className="text-text-muted">Оптимизация логистики для быстрой доставки.</p>
-              </div>
-              <div className="text-center">
-                <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
-                  <span className="text-2xl font-bold text-accent-primary">5</span>
-                </div>
-                <h4 className="text-xl font-semibold mb-2 text-text-primary">2024 — Поддержка клиентов</h4>
-                <p className="text-text-muted">Запуск 24/7 службы поддержки.</p>
-              </div>
-              <div className="text-center">
-                <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
-                  <span className="text-2xl font-bold text-accent-primary">6</span>
-                </div>
-                <h4 className="text-xl font-semibold mb-2 text-text-primary">2025 — Рост и инновации</h4>
-                <p className="text-text-muted">Продолжение развития с новыми технологиями.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Statistics Section */}
-        <section id="stats" className="py-16 bg-bg-secondary">
-          <div className="container-xl mx-auto px-4 w-full max-w-7xl">
-            <div className="bg-bg-tertiary rounded-lg p-6 sm:p-10 shadow-card mx-auto max-w-4xl">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center justify-items-center">
-                <div>
-                  <h3 className="text-4xl font-bold text-text-primary">50,000</h3>
-                  <p className="text-text-muted">Клиентов <span className="text-accent-primary">FLUVION</span></p>
-                </div>
-                <div>
-                  <h3 className="text-4xl font-bold text-text-primary">75%</h3>
-                  <p className="text-text-muted">Довольных покупателей</p>
-                </div>
-                <div>
-                  <h3 className="text-4xl font-bold text-text-primary">30</h3>
-                  <p className="text-text-muted">Профессионалов в команде</p>
-                </div>
-                <div>
-                  <h3 className="text-4xl font-bold text-text-primary">24/7</h3>
-                  <p className="text-text-muted">Техническая поддержка</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+</section>
 
 
-        {/* Блок с сайтами закупки */}
+                {/* Блок с сайтами закупки */}
       <div className="container py-8 py-md-12">
-        <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center">Где мы закупаем товары</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center">Одни из сайтов, где мы закупаем товары</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="text-center">
             <img
@@ -530,13 +620,14 @@ const Home = () => {
           </div>
         </div>
       </div>
-        
 
-        
+
         {/* Map Section */}
         <section className="py-16 bg-bg-secondary">
           <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
-            <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">Наша локация</h2>
+            <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">
+              Наша локация
+            </h2>
             <iframe
               src="https://yandex.ru/map-widget/v1/?um=constructor%3A0e4a8b7a7b7b7b7b7b7b7b7b7b7b7b7b&source=constructor"
               width="100%"
@@ -548,8 +639,11 @@ const Home = () => {
         </section>
       </div>
 
-      {/* Scroll to Top Button - Like Delta */}
-      <a href="#" className="fixed bottom-6 right-6 bg-accent-primary text-text-primary p-3 rounded-full shadow-card hover:bg-accent-primary/90 transition duration-300 hidden md:block">
+      {/* Scroll to Top Button */}
+      <a
+        href="#"
+        className="fixed bottom-6 right-6 bg-accent-primary text-text-primary p-3 rounded-full shadow-card hover:bg-accent-primary/90 transition duration-300 hidden md:block"
+      >
         <i className="bi bi-arrow-up-short"></i>
       </a>
     </>
@@ -557,5 +651,5 @@ const Home = () => {
 };
 
 export default Home;
-       
-        
+
+

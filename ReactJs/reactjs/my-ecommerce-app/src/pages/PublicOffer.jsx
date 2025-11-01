@@ -25,7 +25,7 @@ function PublicOffer() {
                   Публичная оферта
                 </h1>
                 <p className="lead text-lg text-text-secondary mb-6 max-w-prose mx-auto">
-                  Условия предоставления посреднических услуг по заказу и доставке товаров из Китая
+                  Условия предоставления услуг по доставке товаров из Китая "под ключ" через сайт Fluvion
                 </p>
               </div>
             </div>
@@ -45,7 +45,7 @@ function PublicOffer() {
                 <div className="text-left max-w-prose">
                   <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">1. Общие положения</h2>
                   <p className="text-lg text-text-secondary mb-6">
-                    Настоящий документ является публичной офертой индивидуального предпринимателя Ковалевского Ярослава Андреевича (далее — Посредник) в соответствии со статьями 405 и 407 Гражданского кодекса Республики Беларусь. Оферта адресована неопределенному кругу физических и юридических лиц (далее — Заказчик) и содержит все существенные условия договора на оказание посреднических услуг по заказу и доставке товаров из Китая через сайт Fluvion (www.fluvion.by). Оформление заказа через разделы <span className="font-bold text-accent-primary">Каталог</span>, <span className="font-bold text-accent-primary">Терминал</span> или <span className="font-bold text-accent-primary">Корзина</span> на сайте, либо оплата услуг является полным и безоговорочным акцептом условий настоящей оферты.
+                    Настоящий документ является публичной офертой индивидуального предпринимателя Ковалевского Ярослава Андреевича (далее — Исполнитель) в соответствии со статьями 405 и 407 Гражданского кодекса Республики Беларусь. Оферта адресована неопределенному кругу физических и юридических лиц (далее — Заказчик) и содержит все существенные условия договора на оказание услуг по доставке товаров из Китая "под ключ" через сайт Fluvion (www.fluvion.by). Услуги включают поиск поставщиков, организацию транспортировки, оформление документов и информационное сопровождение. Оформление заказа через разделы <span className="font-bold text-accent-primary">Каталог</span>, <span className="font-bold text-accent-primary">Терминал</span> или <span className="font-bold text-accent-primary">Корзина</span> на сайте, либо оплата услуг является полным и безоговорочным акцептом условий настоящей оферты.
                   </p>
                   <p className="text-lg text-text-secondary">
                     Дополнительные сведения о процессе заказа, доставки и оплаты приведены в разделах{' '}
@@ -77,11 +77,13 @@ function PublicOffer() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
               <div className="advantages__item-wrap">
                 <div className="advantages__item">
-                  <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">Обязанности Посредника</div>
+                  <div className="advantages__item-title text-xl font-semibold mb-4 text-text-primary">Обязанности Исполнителя</div>
                   <div className="advantages__item-img mb-4">
-                    <ShoppingCartIcon className="w-12 h-12 text-accent-primary" />
+                    <TruckIcon className="w-12 h-12 text-accent-primary" />
                   </div>
-                  <div className="advantages__item-about text-text-secondary">Оказать услуги по заказу товара и организации доставки из Китая, включая базовую проверку упаковки и координацию логистики через Карго.</div>
+                  <div className="advantages__item-about text-text-secondary">
+                    Организовать доставку товаров из Китая "под ключ", включая поиск поставщиков, координацию транспортировки, оформление документов и предоставление информации о статусе доставки.
+                  </div>
                 </div>
               </div>
               <div className="advantages__item-wrap">
@@ -90,7 +92,9 @@ function PublicOffer() {
                   <div className="advantages__item-img mb-4">
                     <ShoppingCartIcon className="w-12 h-12 text-accent-primary" />
                   </div>
-                  <div className="advantages__item-about text-text-secondary">Предоставить достоверные данные о товаре и доставке, оплатить услуги в установленном порядке. Дополнительная проверка качества — от $5.</div>
+                  <div className="advantages__item-about text-text-secondary">
+                    Предоставить достоверные данные о товаре и доставке через сайт, оплатить услуги в установленном порядке. Дополнительная проверка качества — от $5.
+                  </div>
                 </div>
               </div>
             </div>
@@ -180,7 +184,7 @@ function PublicOffer() {
         <section id="cost" className="py-16 bg-bg-primary">
           <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
             <h2 className="text-3xl lg:text-4xl font-display font-bold mb-8 text-accent-primary">3. Стоимость и порядок оплаты</h2>
-            <p className="text-lg text-text-secondary mb-6">Стоимость услуг Посредника включает:</p>
+            <p className="text-lg text-text-secondary mb-6">Стоимость услуг Исполнителя включает:</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="services__item-wrap">
                 <div className="services__item">
@@ -202,7 +206,7 @@ function PublicOffer() {
               </div>
               <div className="services__item-wrap md:col-span-2">
                 <div className="services__item">
-                  <div className="services__item-title text-xl font-semibold mb-4 text-text-primary">Упаковка и Европочта</div>
+                  <div className="services__item-title text-xl font-semibold mb-4 text-text-primary">Упаковка и доставка Европочтой</div>
                   <div className="services__item-info text-text-secondary text-center">
                     <div className="services__item-price mb-2 text-accent-primary">$3 стандарт / $5 хрупкие</div>
                     <div className="services__item-term">Услуги Европочты: 2–5 дней, зависит от региона</div>
@@ -211,7 +215,7 @@ function PublicOffer() {
               </div>
             </div>
             <p className="text-lg text-text-secondary mt-8 max-w-prose mx-auto">
-              Итоговая стоимость отображается в <span className="font-bold text-accent-primary">Профиле</span>. Оплата через эквайринг Альфа-Банка в 3 дня. Доставка оплачивается при получении. Защищено SSL.
+              Итоговая стоимость отображается в <span className="font-bold text-accent-primary">Профиле</span>. Оплата через эквайринг Альфа-Банка в течение 3 дней. Доставка оплачивается при получении. Защищено SSL.
             </p>
           </div>
           <style jsx>{`
@@ -305,13 +309,13 @@ function PublicOffer() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 justify-items-center">
               <div className="text-left">
                 <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
-                  <span className="text-2xl font-bold text-accent-primary">Посредник</span>
+                  <span className="text-2xl font-bold text-accent-primary">Исполнитель</span>
                 </div>
                 <h4 className="text-xl font-semibold mb-2 text-text-primary">Обязуется</h4>
                 <ul className="text-text-muted space-y-2">
-                  <li>Заказать товар и организовать доставку.</li>
-                  <li>Провести базовую проверку (качество — за доплату от $5).</li>
-                  <li>Передать груз Карго и уведомить о статусе в <span className="font-bold text-accent-primary">Профиле</span>.</li>
+                  <li>Организовать доставку товаров из Китая, включая поиск поставщиков и координацию логистики.</li>
+                  <li>Оформить необходимые транспортные и таможенные документы.</li>
+                  <li>Предоставить информацию о статусе доставки в <span className="font-bold text-accent-primary">Профиле</span>.</li>
                 </ul>
               </div>
               <div className="text-left">
@@ -320,11 +324,11 @@ function PublicOffer() {
                 </div>
                 <h4 className="text-xl font-semibold mb-2 text-text-primary">Обязуется</h4>
                 <ul className="text-text-muted space-y-2">
-                  <li>Предоставить достоверные данные.</li>
-                  <li>Оплатить в 3 дня через Альфа-Банк.</li>
-                  <li>Проверить заказ в <span className="font-bold text-accent-primary">Профиле</span> и оплатить доставку.</li>
+                  <li>Предоставить достоверные данные о товаре и доставке через сайт.</li>
+                  <li>Оплатить услуги в течение 3 дней через эквайринг Альфа-Банка.</li>
+                  <li>Проверить статус заказа в <span className="font-bold text-accent-primary">Профиле</span> и оплатить доставку при получении.</li>
                 </ul>
-                <p className="text-text-muted mt-4">Посредник не отвечает за качество без доп. проверки и задержки перевозчика.</p>
+                <p className="text-text-muted mt-4">Исполнитель не отвечает за качество товаров или задержки перевозчиков.</p>
               </div>
             </div>
           </div>
@@ -335,25 +339,25 @@ function PublicOffer() {
           <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
             <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">5. Условия доставки</h2>
             <p className="text-lg text-text-secondary mb-8 max-w-2xl mx-auto">
-              Доставка в два этапа с отслеживанием в <span className="font-bold text-accent-primary">Профиле</span>.
+              Доставка осуществляется в два этапа с отслеживанием в <span className="font-bold text-accent-primary">Профиле</span>.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-items-center">
               <div className="text-center">
                 <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
                   <TruckIcon className="w-8 h-8 text-accent-primary" />
                 </div>
-                <h4 className="text-xl font-semibold mb-2 text-text-primary">Международная</h4>
-                <p className="text-text-muted">Через Карго в Минск (18–35 дней, $6/кг)</p>
+                <h4 className="text-xl font-semibold mb-2 text-text-primary">Международная доставка</h4>
+                <p className="text-text-muted">Из Китая в Минск через Карго (18–35 дней, $6/кг).</p>
               </div>
               <div className="text-center">
                 <div className="inline-block bg-bg-tertiary rounded-full p-4 mb-4">
                   <TruckIcon className="w-8 h-8 text-accent-primary" />
                 </div>
-                <h4 className="text-xl font-semibold mb-2 text-text-primary">Внутренняя</h4>
-                <p className="text-text-muted">Через Европочту (2–5 дней, зависит от региона)</p>
+                <h4 className="text-xl font-semibold mb-2 text-text-primary">Внутренняя доставка</h4>
+                <p className="text-text-muted">По РБ через Европочту (2–5 дней, зависит от региона).</p>
               </div>
             </div>
-            <p className="text-text-muted mt-4">Ответственность за груз после передачи — перевозчик.</p>
+            <p className="text-text-muted mt-4">Ответственность за груз после передачи лежит на перевозчике.</p>
           </div>
         </section>
 
@@ -361,19 +365,19 @@ function PublicOffer() {
         <section id="returns" className="py-16 bg-bg-secondary">
           <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
             <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">6. Правила возврата и претензии</h2>
-            <p className="text-lg text-text-secondary mb-6">Возврат невозможен после оплаты. Ориентируйтесь на отзывы в <span className="font-bold text-accent-primary">Каталоге</span>.</p>
+            <p className="text-lg text-text-secondary mb-6">Возврат невозможен после оплаты. Ориентируйтесь на описание товаров в <span className="font-bold text-accent-primary">Каталоге</span>.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="text-left">
-                <h4 className="text-xl font-semibold mb-2 text-text-primary">Претензии по качеству</h4>
+                <h4 className="text-xl font-semibold mb-2 text-text-primary">Претензии по доставке</h4>
                 <ul className="text-text-muted space-y-2">
-                  <li>Повреждение по вине Посредника (со страховкой): компенсация в 7 дней.</li>
-                  <li>Вина поставщика: содействие в претензии.</li>
-                  <li>Срок: 15 дней. Email: <a href="mailto:support@fluvion.by" className="text-accent-primary">support@fluvion.by</a>, Тел: <a href="tel:+375291234567" className="text-accent-primary">+375 29 123-45-67</a>.</li>
+                  <li>Повреждение по вине Исполнителя (со страховкой): компенсация в течение 7 дней.</li>
+                  <li>Вина поставщика или перевозчика: содействие в претензии.</li>
+                  <li>Срок подачи претензии: 15 дней. Email: <a href="mailto:support@fluvion.by" className="text-accent-primary">support@fluvion.by</a>, Тел: <a href="tel:+375291234567" className="text-accent-primary">+375 29 123-45-67</a>.</li>
                 </ul>
               </div>
               <div className="text-left">
                 <ArrowPathIcon className="w-12 h-12 text-accent-primary mb-4" />
-                <p className="text-text-muted">Укажите номер заказа и описание проблемы.</p>
+                <p className="text-text-muted">Укажите номер заказа и описание проблемы через форму на сайте или email.</p>
               </div>
             </div>
           </div>
@@ -384,7 +388,7 @@ function PublicOffer() {
           <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
             <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">7. Конфиденциальность</h2>
             <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-              Согласие на обработку данных (ФИО, телефон, email, адрес) по Закону РБ № 99-З. Данные для заказа, не передаются третьим лицам (кроме доставки).
+              Согласие на обработку персональных данных (ФИО, телефон, email, адрес) в соответствии с Законом РБ № 99-З. Данные используются для организации доставки и не передаются третьим лицам, кроме перевозчиков.
             </p>
             <LockClosedIcon className="w-16 h-16 text-accent-primary mx-auto mt-6" />
           </div>
@@ -395,18 +399,18 @@ function PublicOffer() {
           <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
             <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">8. Срок действия и юрисдикция</h2>
             <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-              Действует с публикации на www.fluvion.by. Изменения — с публикации. Споры по законодательству РБ. Место: г. Солигорск.
+              Оферта действует с момента публикации на www.fluvion.by. Изменения вступают в силу с момента публикации. Споры разрешаются по законодательству РБ в суде по месту регистрации Исполнителя (г. Солигорск).
             </p>
             <ScaleIcon className="w-16 h-16 text-accent-primary mx-auto mt-6" />
           </div>
         </section>
 
-        {/* Mediator Details Section - Like Stats */}
+        {/* Executor Details Section - Like Stats */}
         <section id="details" className="py-16 bg-bg-primary">
           <div className="container-xl mx-auto px-4 w-full max-w-7xl">
             <div className="bg-bg-tertiary rounded-lg p-6 sm:p-10 shadow-card mx-auto max-w-4xl">
               <div className="text-center mb-6">
-                <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">9. Реквизиты Посредника</h2>
+                <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">9. Реквизиты Исполнителя</h2>
                 <UserIcon className="w-16 h-16 text-accent-primary mx-auto mb-4" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
@@ -441,9 +445,9 @@ function PublicOffer() {
         {/* CTA Section */}
         <section className="py-16 bg-bg-secondary">
           <div className="container-xl mx-auto px-4 w-full max-w-7xl text-center">
-            <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">Готовы оформить заказ?</h2>
+            <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 text-accent-primary">Готовы оформить доставку?</h2>
             <p className="text-lg text-text-secondary mb-8 max-w-prose mx-auto">
-              Ознакомьтесь с процессом заказа и начните закупку товаров из Китая прямо сейчас!
+              Ознакомьтесь с процессом заказа и начните доставку товаров из Китая прямо сейчас!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
@@ -467,7 +471,7 @@ function PublicOffer() {
         {/* Footer */}
         <footer className="py-8 bg-bg-primary text-center text-text-muted text-sm">
           <p>© 2025 Fluvion. Все права защищены.</p>
-          <p className="mt-1 text-accent-primary">Обновлено: 20.10.2025</p>
+          <p className="mt-1 text-accent-primary">Обновлено: 24.10.2025</p>
         </footer>
       </div>
 

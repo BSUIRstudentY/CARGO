@@ -1,6 +1,5 @@
 package com.example.demo.Services;
 
-
 import com.example.demo.Entities.User;
 import com.example.demo.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +17,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())
-                .password(user.getPassword())
-                .roles(user.getRole()) // Adjust roles as needed
-                .build();
+        return user;  // Возвращаем User напрямую (implements UserDetails)
     }
 }

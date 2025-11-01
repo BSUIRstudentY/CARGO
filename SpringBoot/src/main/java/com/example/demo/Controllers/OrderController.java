@@ -19,6 +19,7 @@ import lombok.Data;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -52,6 +53,53 @@ public class OrderController {
 
     public OrderController(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
+    }
+
+    // Новый эндпоинт для создания заказа с трек-номерами
+    @PostMapping("/orders/self-pickup")
+    @Transactional
+    public ResponseEntity<OrderDTO> createSelfPickupOrder(@RequestBody SelfPickupOrderRequest request) {
+        String userEmail = getCurrentUserEmail();
+        if (userEmail == null) {
+            return ResponseEntity.status(403).body(null);
+        }
+
+        // Валидация входных данных
+        if (request.getTrackingNumbers() == null || request.getTrackingNumbers().isEmpty()) {
+            return ResponseEntity.badRequest().body(new OrderDTO());
+        }
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        // Создание заказа
+        Order order = new Order();
+        order.setUser(user);
+        order.setOrderNumber(UUID.randomUUID().toString());
+        order.setDateCreated(new Timestamp(System.currentTimeMillis()));
+        order.setStatus("PENDING");
+        order.setTotalClientPrice(0.0f); // Пока 0, так как цены неизвестны
+        order.setDeliveryAddress(request.getDeliveryAddress());
+
+        // Создание OrderItem для каждого трек-номера
+        List<OrderItem> orderItems = request.getTrackingNumbers().stream()
+                .map(trackingNumber -> {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setOrder(order);
+                    orderItem.setTrackingNumber(trackingNumber);
+                    orderItem.setPurchaseStatus("PENDING");
+                    orderItem.setQuantity(1); // По умолчанию 1, так как товар неизвестен
+                    orderItem.setPriceAtTime(0.0f); // Цена неизвестна
+                    // Поле product временно null, так как товар неизвестен
+                    return orderItem;
+                })
+                .collect(Collectors.toList());
+
+        order.setItems(orderItems);
+        orderRepository.save(order);
+
+        OrderDTO orderDTO = mapToOrderDTO(order);
+        return ResponseEntity.ok(orderDTO);
     }
 
     @PostMapping("/orders")
@@ -302,41 +350,40 @@ public class OrderController {
         }
         if (orderDetails.getItems() != null) {
             for (OrderItemDTO itemDTO : orderDetails.getItems()) {
-                if (itemDTO.getProductId() == null) {
-                    System.out.println("Validation failed: productId is null for item " + itemDTO);
-                    return ResponseEntity.badRequest().body(new ErrorResponse("Product ID cannot be null for order item", 400));
+                Product product = null;
+                // Для самовыкупа productId может быть null
+                if (itemDTO.getProductId() != null) {
+                    product = productRepository.findById(itemDTO.getProductId())
+                            .orElseThrow(() -> new RuntimeException("Product with ID " + itemDTO.getProductId() + " not found"));
+                    // Обновление данных продукта
+                    if (itemDTO.getProductName() != null && !itemDTO.getProductName().equals(product.getName())) {
+                        product.setName(itemDTO.getProductName());
+                    }
+                    if (itemDTO.getUrl() != null && !itemDTO.getUrl().equals(product.getUrl())) {
+                        product.setUrl(itemDTO.getUrl());
+                    }
+                    if (itemDTO.getImageUrl() != null && !itemDTO.getImageUrl().equals(product.getImageUrl())) {
+                        product.setImageUrl(itemDTO.getImageUrl());
+                    }
+                    if (itemDTO.getDescription() != null && !itemDTO.getDescription().equals(product.getDescription())) {
+                        product.setDescription(itemDTO.getDescription());
+                    }
+                    productRepository.save(product);
                 }
-
-                Product product = productRepository.findById(String.valueOf(UUID.fromString(itemDTO.getProductId())))
-                        .orElseThrow(() -> new RuntimeException("Product with ID " + itemDTO.getProductId() + " not found"));
-
-                // Обновление данных продукта
-                if (itemDTO.getProductName() != null && !itemDTO.getProductName().equals(product.getName())) {
-                    product.setName(itemDTO.getProductName());
-                }
-                if (itemDTO.getUrl() != null && !itemDTO.getUrl().equals(product.getUrl())) {
-                    product.setUrl(itemDTO.getUrl());
-                }
-                if (itemDTO.getImageUrl() != null && !itemDTO.getImageUrl().equals(product.getImageUrl())) {
-                    product.setImageUrl(itemDTO.getImageUrl());
-                }
-                if (itemDTO.getDescription() != null && !itemDTO.getDescription().equals(product.getDescription())) {
-                    product.setDescription(itemDTO.getDescription());
-                }
-                productRepository.save(product);
 
                 OrderItem orderItem = new OrderItem();
                 orderItem.setOrder(order);
                 orderItem.setProduct(product);
                 orderItem.setQuantity(itemDTO.getQuantity() != null ? itemDTO.getQuantity() : 1);
-                orderItem.setPriceAtTime(itemDTO.getPriceAtTime() != null ? itemDTO.getPriceAtTime() : product.getPrice());
+                orderItem.setPriceAtTime(itemDTO.getPriceAtTime() != null ? itemDTO.getPriceAtTime() : (product != null ? product.getPrice() : 0.0f));
                 orderItem.setSupplierPrice(itemDTO.getSupplierPrice() != null ? itemDTO.getSupplierPrice() : 0.0f);
                 orderItem.setPurchaseStatus(itemDTO.getPurchaseStatus() != null ? itemDTO.getPurchaseStatus() : "PENDING");
                 orderItem.setPurchaseRefusalReason(itemDTO.getPurchaseRefusalReason());
                 orderItem.setTrackingNumber(itemDTO.getTrackingNumber());
                 orderItem.setChinaDeliveryPrice(itemDTO.getChinaDeliveryPrice() != null ? itemDTO.getChinaDeliveryPrice() : 0.0f);
 
-                if (orderDetails.getTotalClientPrice() > 0 && !catalogRepository.existsByProductId(itemDTO.getProductId())) {
+                // Добавление в каталог только если product не null
+                if (orderDetails.getTotalClientPrice() > 0 && product != null && !catalogRepository.existsByProductId(itemDTO.getProductId())) {
                     Catalog catalog = new Catalog();
                     catalog.setProduct(product);
                     catalogRepository.save(catalog);
@@ -354,11 +401,11 @@ public class OrderController {
                         notificationService.sendOrderItemStatusChangeNotification(
                                 order.getUser(),
                                 order.getId(),
-                                item.getProduct().getName(),
+                                item.getProduct() != null ? item.getProduct().getName() : "Unknown Product",
                                 item.getPurchaseRefusalReason()
                         );
                     } catch (Exception e) {
-                        System.out.println("Failed to send item notification for " + item.getProduct().getName() + ": " + e.getMessage());
+                        System.out.println("Failed to send item notification: " + e.getMessage());
                     }
                 }
             }
@@ -430,6 +477,7 @@ public class OrderController {
         return ResponseEntity.ok(responseDTO);
     }
 
+
     @GetMapping("/history/{id}")
     @Transactional(readOnly = true)
     public ResponseEntity<OrderHistoryDTO> getOrderHistoryById(@PathVariable Long id) {
@@ -470,13 +518,21 @@ public class OrderController {
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
                     itemDTO.setId(item.getId());
-                    itemDTO.setProductId(item.getProduct().getId().toString());
-                    itemDTO.setProductName(item.getProduct().getName());
+                    if (item.getProduct() != null) {
+                        itemDTO.setProductId(item.getProduct().getId());
+                        itemDTO.setProductName(item.getProduct().getName());
+                        itemDTO.setUrl(item.getProduct().getUrl());
+                        itemDTO.setImageUrl(item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
+                        itemDTO.setDescription(item.getProduct().getDescription());
+                    } else {
+                        itemDTO.setProductId(null);
+                        itemDTO.setProductName("Unknown Product");
+                        itemDTO.setUrl(null);
+                        itemDTO.setImageUrl("https://placehold.co/128x128?text=No+Image");
+                        itemDTO.setDescription(null);
+                    }
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPriceAtTime(item.getPriceAtTime());
-                    itemDTO.setUrl(item.getProduct().getUrl());
-                    itemDTO.setImageUrl(item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
-                    itemDTO.setDescription(item.getProduct().getDescription());
                     itemDTO.setSupplierPrice(item.getSupplierPrice());
                     itemDTO.setPurchaseStatus(item.getPurchaseStatus());
                     itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
@@ -514,13 +570,22 @@ public class OrderController {
                 .map(item -> {
                     OrderItemDTO itemDTO = new OrderItemDTO();
                     itemDTO.setId(item.getId());
-                    itemDTO.setProductId(item.getProduct().getId().toString());
-                    itemDTO.setProductName(item.getProduct().getName());
+                    // Обработка null product
+                    if (item.getProduct() != null) {
+                        itemDTO.setProductId(item.getProduct().getId());
+                        itemDTO.setProductName(item.getProduct().getName());
+                        itemDTO.setUrl(item.getProduct().getUrl());
+                        itemDTO.setImageUrl(item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
+                        itemDTO.setDescription(item.getProduct().getDescription());
+                    } else {
+                        itemDTO.setProductId(null);
+                        itemDTO.setProductName("Unknown Product");
+                        itemDTO.setUrl(null);
+                        itemDTO.setImageUrl("https://placehold.co/128x128?text=No+Image");
+                        itemDTO.setDescription(null);
+                    }
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPriceAtTime(item.getPriceAtTime());
-                    itemDTO.setUrl(item.getProduct().getUrl());
-                    itemDTO.setImageUrl(item.getProduct().getImageUrl() != null ? item.getProduct().getImageUrl() : "https://placehold.co/128x128?text=No+Image");
-                    itemDTO.setDescription(item.getProduct().getDescription());
                     itemDTO.setSupplierPrice(item.getSupplierPrice());
                     itemDTO.setPurchaseStatus(item.getPurchaseStatus());
                     itemDTO.setPurchaseRefusalReason(item.getPurchaseRefusalReason());
@@ -552,6 +617,12 @@ public class OrderController {
         private Boolean insurance;
         private String discountType;
         private Float discountValue;
+    }
+
+    @Data
+    static class SelfPickupOrderRequest {
+        private List<String> trackingNumbers;
+        private String deliveryAddress;
     }
 
     @Data

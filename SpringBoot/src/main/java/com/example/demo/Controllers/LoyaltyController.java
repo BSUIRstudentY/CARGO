@@ -111,6 +111,7 @@ public class LoyaltyController {
             dto.setRewardType(quest.getRewardType());
             dto.setTargetValue(quest.getTargetValue());
             dto.setReward(quest.getReward());
+            dto.setDescription(quest.getDescription());
 
             QuestProgress progress = userProgress.stream()
                     .filter(p -> p.getQuest().getId().equals(quest.getId()))

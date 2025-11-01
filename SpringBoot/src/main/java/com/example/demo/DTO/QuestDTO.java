@@ -14,4 +14,5 @@ public class QuestDTO {
     private float reward;
     private int currentValue;
     private boolean completed;
+    private String description;
 }

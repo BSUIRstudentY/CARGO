@@ -19,6 +19,7 @@ public class Quest {
     private Long id;
 
     private String name;
+    private String description;
     private QuestConditionType questConditionType; // например, "INVITE"
     private int targetValue;      // например, 5
     private RewardType rewardType;
