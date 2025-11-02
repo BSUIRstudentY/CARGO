@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "canvas-confetti": "^1.9.3",
+    "framer-motion": "^12.23.12",
+    "react-parallax-tilt": "^1.7.307"
+  }
+}
