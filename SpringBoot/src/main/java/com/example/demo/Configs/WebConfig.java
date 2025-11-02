@@ -20,7 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .resourceChain(true)  // Включает ETag + Last-Modified
                 .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
     }
-//penis
+//penis big penis
         // Опционально: отдельно для assets (если они версионированы)
         // registry.addResourceHandler("/assets/**")
         //         .addResourceLocations("classpath:/static/assets/")
