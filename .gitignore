@@ -1,2 +1,16 @@
 target/
 SpringBoot/target/
+
+# SSH Keys
+id_ed25519
+id_ed25519.pub
+id_rsa
+id_rsa.pub
+*.pem
+*.key
+
+# SQLite Database
+*.sqlite
+*.sqlite3
+*.db
+Spring Boot/data/
