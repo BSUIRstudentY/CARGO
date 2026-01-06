@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:sqlite::memory:
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    show-sql: false
+  cache:
+    type: simple
+  mail:
+    host: localhost
+    port: 587
+    username: test@test.com
+    password: test
+
+jwt:
+  secret: test-secret-key-for-integration-tests-minimum-32-chars-long
+  expiration: 86400000
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.hibernate: WARN
+    com.example.demo: DEBUG
+
+
+
+

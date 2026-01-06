@@ -1,45 +1,99 @@
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Config/SecurityConfig.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Config/WebConfig.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Controller/CategoryController.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Controller/Class/Email.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Controller/Class/LoginRequest.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Controller/Class/Price.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Controller/Class/Profile.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Controller/Class/SignupRequest.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Controller/OrderController.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Controller/ProductController.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Controller/PromotionController.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Controller/ReviewController.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Controller/Stock.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Controller/UserController.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/DemoApplication.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Dto/OrderResponse.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Entity/Category.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Entity/Order.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Entity/OrderItem.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Entity/Product.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Entity/Promotion.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Entity/Review.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Entity/User.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Repository/CategoryRepository.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Repository/OrderItemRepository.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Repository/OrderRepository.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Repository/ProductRepository.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Repository/PromotionRepository.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Repository/ReviewRepository.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Repository/UserRepository.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Services/CategoryService.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Services/GmailSenderService.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Services/OrderService.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Services/ProductService.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Services/PromotionService.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Services/RecommendationService.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Services/ReviewService.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Services/UserDetailsImpl.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Services/UserDetailsServiceImpl.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/Services/UserService.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/jwt/AuthEntryPointJwt.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/jwt/AuthTokenFilter.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/jwt/JwtResponse.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/jwt/JwtUtils.java
-/home/absolute/YarikAndTimoshikAndMaksik/Spring Boot/src/main/java/com/example/demo/jwt/MessageResponse.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Components/ContextHolder.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Components/LocalDateTimeArraySerializer.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/AsyncConfig.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/CacheConfig.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/GlobalExceptionHandler.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/JacksonConfig.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/SecurityConfiguration.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/WebClientConfig.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/WebSocketConfig.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/AdminStatsController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/AuthController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/BatchCargoController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/BePaidController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/CartController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/CatalogController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/ChatController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/EupostApiController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/LoyaltyController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/NewsController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/NotificationController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/OrderController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/OrderHistoryController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/ProductController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/ProductReviewController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/PromocodeController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/QuestController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/ReferralController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/ReviewController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/TelegramController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/TicketController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/UserController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/VerificationController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/DTO/CartItemDTO.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/DTO/ProductReviewDTO.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/DTO/QuestDTO.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/DTO/UserDTO.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/DemoApplication.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/BatchCargo.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Cart.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/CartItem.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Catalog.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/ChatMessage.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/DiscountType.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/News.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Notification.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Order.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/OrderHistory.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/OrderItem.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Product.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/ProductReview.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Promocode.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Quest.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/QuestConditionType.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/QuestProgress.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Review.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/RewardType.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Ticket.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/TicketStatus.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Transaction.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/User.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Filters/SessionCreationFilter.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/POJO/OrderStatusEvent.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/POJO/QuestEvent.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/POJO/SupportMessageEvent.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/BatchCargoRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/CartRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/CatalogRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/ChatMessageRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/NewsRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/NotificationRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/OrderHistoryRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/OrderItemRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/OrderRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/ProductRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/ProductReviewRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/PromocodeRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/QuestProgressRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/QuestRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/ReviewRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/TicketRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/TransactionRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/UserRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/AuthService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/ChatService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/ClusteringService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/CustomUserDetailsService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/GmailSenderService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/NewsService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/NotificationService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/OrderService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/ProductReviewService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/QuestService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/ReviewService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/TicketService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/UserActivityService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/UserService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/VerificationService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/jwt/AuthTokenFilter.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/jwt/JwtUtil.java
