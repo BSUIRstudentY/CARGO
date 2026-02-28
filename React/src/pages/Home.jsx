@@ -572,9 +572,18 @@ const Home = () => {
         </div>
       </section>
 
-      {/* TIGHT SPACING */}
-      <section className="py-12 px-4 md:py-24 md:px-6">
-        <div className="container mx-auto max-w-7xl space-y-12 px-0 md:space-y-40 md:px-6 lg:space-y-48">
+      {/* Секция после горизонтальной прокрутки — заполняем пробел заголовком и контентом */}
+      <section className="pt-6 pb-12 px-4 md:pt-12 md:pb-24 md:px-6">
+        <div className="container mx-auto max-w-7xl px-0 md:px-6">
+          <div className="mb-12 text-center md:mb-24 lg:mb-32">
+            <h2 className="font-cabinet text-2xl font-extrabold md:text-4xl lg:text-5xl xl:text-6xl" style={{ color: GOLD }}>
+              Почему выбирают нас
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-[#A3A3A3] md:mt-6 md:text-lg lg:text-xl">
+              Прозрачные условия, фиксированные ставки и полный цикл доставки из Китая под ключ.
+            </p>
+          </div>
+          <div className="space-y-12 md:space-y-40 lg:space-y-48">
           {ADVANTAGES.map((adv, i) => {
             const Icon = adv.icon;
             return (
@@ -594,6 +603,7 @@ const Home = () => {
               </div>
             );
           })}
+          </div>
         </div>
       </section>
 
