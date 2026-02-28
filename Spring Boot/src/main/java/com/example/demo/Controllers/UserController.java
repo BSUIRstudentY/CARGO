@@ -47,8 +47,8 @@ public class UserController {
 
         UserDTO userDTO = new UserDTO();
         userDTO.setEmail(user.getEmail());
-        userDTO.setUsername(user.getUsername());
-        userDTO.setPhone(user.getPhone());
+        // Используем прямое поле username, так как getUsername() переопределен для UserDetails
+        userDTO.setUsername(user.getDisplayUsername());
         userDTO.setRole(user.getRole());
         userDTO.setReferralCode(user.getReferralCode());
         userDTO.setReferralCount(user.getReferralCount());
@@ -60,7 +60,6 @@ public class UserController {
         userDTO.setNotificationsEnabled(user.getNotificationsEnabled());
         userDTO.setAvatarUrl(user.getAvatarUrl());
         userDTO.setEmailVerified(user.getEmailVerified());
-        userDTO.setPhoneVerified(user.getPhoneVerified());
 
         return ResponseEntity.ok(userDTO);
     }
@@ -99,9 +98,6 @@ public class UserController {
         }
         if (updates.containsKey("email")) {
             user.setEmail((String) updates.get("email"));
-        }
-        if (updates.containsKey("phone")) {
-            user.setPhone((String) updates.get("phone"));
         }
         if (updates.containsKey("avatarUrl")) {
             user.setAvatarUrl((String) updates.get("avatarUrl"));

@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 public class UserDTO {
     private String email;
     private String username;
-    private String phone;
     private String company;
     private Float totalDiscount;
     private Float discountPercent;
@@ -21,9 +20,7 @@ public class UserDTO {
     private Boolean twoFactorEnabled;
     private String avatarUrl;
     private Boolean emailVerified;
-    private Boolean phoneVerified;
     private String role;
-    private Float balance;
     private Integer referralCount;
     private Double moneySpent;
 
@@ -42,14 +39,6 @@ public class UserDTO {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public String getCompany() {
@@ -132,28 +121,12 @@ public class UserDTO {
         this.emailVerified = emailVerified;
     }
 
-    public Boolean getPhoneVerified() {
-        return phoneVerified;
-    }
-
-    public void setPhoneVerified(Boolean phoneVerified) {
-        this.phoneVerified = phoneVerified;
-    }
-
     public String getRole() {
         return role;
     }
 
     public void setRole(String role) {
         this.role = role;
-    }
-
-    public Float getBalance() {
-        return balance;
-    }
-
-    public void setBalance(Float balance) {
-        this.balance = balance;
     }
 
     public Integer getReferralCount() {

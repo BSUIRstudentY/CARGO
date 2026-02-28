@@ -106,17 +106,4 @@ public class VerificationController {
         }
     }
 
-    @PostMapping("/request-phone")
-    public ResponseEntity<String> requestPhoneVerification(HttpServletRequest httpRequest) {
-        logger.info("Authorization header for request-phone: {}", httpRequest.getHeader("Authorization"));
-        // Implement phone verification logic here (e.g., SMS service integration)
-        return ResponseEntity.ok("Код верификации отправлен на телефон");
-    }
-
-    @PostMapping("/confirm-phone")
-    public ResponseEntity<String> confirmPhoneVerification(@RequestParam String code, HttpServletRequest httpRequest) {
-        logger.info("Authorization header for confirm-phone: {}", httpRequest.getHeader("Authorization"));
-        // Implement phone verification confirmation logic here
-        return ResponseEntity.ok("Телефон успешно верифицирован");
-    }
 }

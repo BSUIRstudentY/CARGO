@@ -73,20 +73,52 @@ public class Order {
     @Min(value = 0, message = "Shipping cost must be non-negative")
     private Float shippingCost;
 
-    @Column(name = "insurance_cost")
-    @Min(value = 0, message = "Insurance cost must be non-negative")
-    private Float insuranceCost;
+    @Column(name = "shipping_rate_fixed")
+    private Double shippingRateFixed; // Зафиксированный курс доставки (USD за кг) на момент оплаты
 
     @Column(name = "insurance")
     private Boolean insurance = false;
+    
+    /**
+     * Calculates insurance cost dynamically (5% of base price).
+     * This is a computed field and is NOT stored in the database.
+     * @return insurance cost (5% of base price) if insurance is enabled, 0 otherwise
+     */
+    @Transient
+    public Float getInsuranceCost() {
+        if (insurance == null || !insurance) {
+            return 0.0f;
+        }
+        
+        // Calculate base price from items
+        float basePrice = 0.0f;
+        if (items != null && !items.isEmpty()) {
+            basePrice = (float) items.stream()
+                    .mapToDouble(item -> (item.getPriceAtTime() != null ? item.getPriceAtTime() : 0.0f) 
+                            * (item.getQuantity() != null ? item.getQuantity() : 1))
+                    .sum();
+        }
+        
+        // If no items, try to calculate from totalClientPrice (reverse calculation)
+        if (basePrice <= 0 && totalClientPrice != null && totalClientPrice > 0) {
+            // Try to reverse calculate: totalClientPrice = basePrice - discounts + insurance
+            float userDiscount = userDiscountApplied != null ? userDiscountApplied : 0.0f;
+            float promoDiscount = discountApplied != null ? discountApplied : 0.0f;
+            float totalDiscount = userDiscount + promoDiscount;
+            // Approximate base price (this is not perfect but better than 0)
+            basePrice = totalClientPrice + totalDiscount;
+        }
+        
+        if (basePrice > 0) {
+            return basePrice * 0.05f;
+        }
+        
+        return 0.0f;
+    }
 
     // Payment fields
     @Column(name = "payment_method", length = 50)
-    private String paymentMethod; // BALANCE_ONLY, NO_BALANCE, BALANCE_PARTIAL
-
-    @Column(name = "balance_amount")
-    @Min(value = 0, message = "Balance amount must be non-negative")
-    private Float balanceAmount; // Сумма, оплаченная с баланса
+    private String paymentMethod; // NO_BALANCE (обычная оплата)
 
     // Discount fields
     @Column(name = "discount_applied")
@@ -108,6 +140,22 @@ public class Order {
     @Column(name = "delivery_address", length = 500)
     @Size(max = 500, message = "Delivery address must not exceed 500 characters")
     private String deliveryAddress;
+
+    @Column(name = "phone", length = 50)
+    @Size(max = 50, message = "Phone number must not exceed 50 characters")
+    private String phone; // Номер телефона клиента, указанный при оформлении заказа
+
+    @Column(name = "last_name", length = 100)
+    @Size(max = 100, message = "Last name must not exceed 100 characters")
+    private String lastName; // Фамилия клиента
+
+    @Column(name = "first_name", length = 100)
+    @Size(max = 100, message = "First name must not exceed 100 characters")
+    private String firstName; // Имя клиента
+
+    @Column(name = "middle_name", length = 100)
+    @Size(max = 100, message = "Middle name must not exceed 100 characters")
+    private String middleName; // Отчество клиента
 
     @Column(name = "tracking_number", length = 100)
     @Size(max = 100, message = "Tracking number must not exceed 100 characters")

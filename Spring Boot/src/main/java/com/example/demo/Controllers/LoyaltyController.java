@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -73,7 +74,7 @@ public class LoyaltyController {
 
         UserDTO userDTO = new UserDTO();
         userDTO.setEmail(user.getEmail());
-        userDTO.setUsername(user.getUsername());
+        userDTO.setUsername(user.getDisplayUsername()); // Используем реальное имя пользователя
         userDTO.setTotalDiscount(user.getTotalDiscount());
         userDTO.setDiscountPercent(user.getDiscountPercent());
         userDTO.setTemporaryDiscountPercent(user.getTemporaryDiscountPercent());
@@ -85,7 +86,7 @@ public class LoyaltyController {
 
     // Get list of quests and user progress
     @GetMapping("/quests")
-    @Transactional
+    @Transactional(readOnly = true)
     public ResponseEntity<List<QuestDTO>> getUserQuests() {
         String email = getCurrentUserEmail();
         if (email == null) {
@@ -103,6 +104,11 @@ public class LoyaltyController {
         logger.info("Retrieved " + allQuests.size() + " quests for user: " + email);
         List<QuestProgress> userProgress = questProgressRepository.findByUser(user);
 
+        // Создаем карту существующих прогрессов для быстрого поиска
+        final Map<Long, QuestProgress> progressMap = userProgress.stream()
+                .collect(Collectors.toMap(p -> p.getQuest().getId(), p -> p));
+
+        // Создаем DTO для всех квестов
         List<QuestDTO> questDTOs = allQuests.stream().map(quest -> {
             QuestDTO dto = new QuestDTO();
             dto.setId(quest.getId());
@@ -113,18 +119,14 @@ public class LoyaltyController {
             dto.setReward(quest.getReward());
             dto.setDescription(quest.getDescription());
 
-            QuestProgress progress = userProgress.stream()
-                    .filter(p -> p.getQuest().getId().equals(quest.getId()))
-                    .findFirst()
-                    .orElseGet(() -> {
-                        QuestProgress newProgress = new QuestProgress(user, quest, 0, false, null);
-                        questProgressRepository.save(newProgress);
-                        logger.info("Created new QuestProgress for quest ID: " + quest.getId() + ", user: " + email);
-                        return newProgress;
-                    });
-
-            dto.setCurrentValue(progress.getCurrentValue());
-            dto.setCompleted(progress.isCompleted());
+            QuestProgress progress = progressMap.get(quest.getId());
+            if (progress != null) {
+                dto.setCurrentValue(progress.getCurrentValue());
+                dto.setCompleted(progress.isCompleted());
+            } else {
+                dto.setCurrentValue(0);
+                dto.setCompleted(false);
+            }
 
             return dto;
         }).collect(Collectors.toList());
@@ -132,6 +134,7 @@ public class LoyaltyController {
         logger.info("Returning " + questDTOs.size() + " QuestDTOs for user: " + email);
         return ResponseEntity.ok(questDTOs);
     }
+
 
     // Activate referral code
     @PostMapping("/activate-referral")

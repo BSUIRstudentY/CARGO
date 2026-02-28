@@ -58,8 +58,8 @@ const Footer = ({ id }) => {
         />
       </div>
       
-      <div className="container mx-auto px-4 py-16 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+      <div className="container mx-auto px-4 py-10 sm:py-16 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
           {/* О компании */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -67,16 +67,16 @@ const Footer = ({ id }) => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <div className="flex items-center gap-3 mb-6">
-              <TruckIcon className="w-8 h-8 text-[#00f0ff]" />
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <TruckIcon className="w-6 h-6 sm:w-8 sm:h-8 text-[#00f0ff]" />
+              <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
                 Fluvion
               </h3>
             </div>
-            <p className="text-[#9ca3af] mb-4 leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#9ca3af] mb-3 sm:mb-4 leading-relaxed">
               Доставка товаров из Китая в Беларусь под ключ. Надежно, быстро, с гарантией.
             </p>
-            <div className="flex flex-col gap-2 text-sm text-[#9ca3af]">
+            <div className="flex flex-col gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#9ca3af]">
               <div className="flex items-center gap-2">
                 <PhoneIcon className="w-4 h-4" />
                 <a href="tel:+375336540611" className="hover:text-[#00f0ff] transition-colors">+375 33 654-06-11</a>
@@ -99,8 +99,8 @@ const Footer = ({ id }) => {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <h4 className="text-lg font-semibold text-[#e5e7eb] mb-6">Информация</h4>
-            <ul className="space-y-3">
+            <h4 className="text-base sm:text-lg font-semibold text-[#e5e7eb] mb-4 sm:mb-6">Информация</h4>
+            <ul className="space-y-2 sm:space-y-3">
               {infoLinks.map((link, index) => {
                 const Icon = link.icon;
                 return (
@@ -110,7 +110,7 @@ const Footer = ({ id }) => {
                       className="flex items-center gap-2 text-[#9ca3af] hover:text-[#00f0ff] transition-colors duration-300 group"
                     >
                       <Icon className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                      <span>{link.label}</span>
+                      <span className="text-xs sm:text-sm">{link.label}</span>
                     </Link>
                   </li>
                 );
@@ -125,8 +125,8 @@ const Footer = ({ id }) => {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h4 className="text-lg font-semibold text-[#e5e7eb] mb-6">Преимущества</h4>
-            <div className="grid grid-cols-1 gap-3">
+            <h4 className="text-base sm:text-lg font-semibold text-[#e5e7eb] mb-4 sm:mb-6">Преимущества</h4>
+            <div className="grid grid-cols-1 gap-2 sm:gap-3">
               {advantages.map((advantage, index) => {
                 const Icon = advantage.icon;
                 const accentColors = ['#00f0ff', '#a78bfa', '#10b981', '#00f0ff', '#a78bfa', '#10b981'];
@@ -146,7 +146,7 @@ const Footer = ({ id }) => {
                     >
                       <Icon className="w-5 h-5" style={{ color: accentColor }} />
                     </div>
-                    <span className="text-[#9ca3af] text-sm">{advantage.text}</span>
+                    <span className="text-[#9ca3af] text-xs sm:text-sm">{advantage.text}</span>
                   </motion.div>
                 );
               })}
@@ -160,8 +160,8 @@ const Footer = ({ id }) => {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <h4 className="text-lg font-semibold text-[#e5e7eb] mb-6">Контакты</h4>
-            <div className="p-4 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)]">
+            <h4 className="text-base sm:text-lg font-semibold text-[#e5e7eb] mb-4 sm:mb-6">Контакты</h4>
+            <div className="p-3 sm:p-4 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)]">
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <MapPinIcon className="w-5 h-5 text-[#00f0ff] mt-1 flex-shrink-0" />
@@ -210,7 +210,7 @@ const Footer = ({ id }) => {
                 <p className="text-[#e5e7eb] font-medium">Официальное наименование:</p>
                 <p>Индивидуальный предприниматель Ковалевский Ярослав Андреевич</p>
                 <p className="text-[#e5e7eb] font-medium mt-4">УНП:</p>
-                <p>693414299</p>
+                <p>693299414</p>
                 <p className="text-[#e5e7eb] font-medium mt-4">Дата государственной регистрации:</p>
                 <p>16.06.2025</p>
               </div>

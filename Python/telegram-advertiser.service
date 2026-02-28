@@ -1,0 +1,35 @@
+[Unit]
+Description=Telegram Advertiser Bot
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/root/telegram_advertiser
+
+# Если используете виртуальное окружение, раскомментируйте эту строку:
+# ExecStart=/root/telegram_advertiser/telegram_advertiser_env/bin/python3 /root/telegram_advertiser/telegram_advertiser.py
+
+# Если НЕ используете виртуальное окружение, используйте эту строку:
+ExecStart=/usr/bin/python3 /root/telegram_advertiser/telegram_advertiser.py
+
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Если используете venv, раскомментируйте эту строку:
+# Environment="PATH=/root/telegram_advertiser/telegram_advertiser_env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# Если НЕ используете venv, используйте эту строку:
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+
+

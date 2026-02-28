@@ -1,0 +1,198 @@
+@import './styles/animations.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Unified design system CSS variables.
+ * Ensures consistent theming across the entire application.
+ */
+:root {
+  /* Background colors */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #2F2F2F;
+  --bg-card: #1f1f1f;
+  --bg-hover: #2a2a2a;
+  
+  /* Primary accent colors */
+  --accent-primary: #e81e2d;
+  --accent-primary-light: #ff4757;
+  --accent-primary-dark: #c1121f;
+  --accent-primary-hover: #d91a2a;
+  
+  /* Secondary accent colors */
+  --accent-secondary: #407CFF;
+  --accent-secondary-light: #5a8fff;
+  --accent-secondary-dark: #2e5fcc;
+  --accent-secondary-hover: #4d7fff;
+  
+  /* Tertiary accent */
+  --accent-muted: #FF5722;
+  
+  /* Text colors */
+  --text-primary: #ffffff;
+  --text-secondary: #cdcdcd;
+  --text-muted: #808080;
+  --text-disabled: #555555;
+  
+  /* Border colors */
+  --border-primary: #333333;
+  --border-secondary: #404040;
+  --border-hover: #555555;
+  
+  /* Status colors */
+  --color-success: #4caf50;
+  --color-error: #f44336;
+  --color-warning: #ff9800;
+  --color-info: #2196f3;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-primary: rgba(0, 0, 0, 0.5);
+  
+  /* Transitions */
+  --transition-fast: 150ms;
+  --transition-normal: 300ms;
+  --transition-slow: 500ms;
+}
+
+/* Base styles for consistent typography */
+@layer base {
+  body {
+    @apply bg-[var(--bg-primary)] text-[var(--text-primary)] font-sans antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+  
+  /* Consistent button styles */
+  button {
+    @apply transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  /* Consistent input styles */
+  input, textarea, select {
+    @apply transition-all duration-300 focus:outline-none;
+  }
+
+  /* Все выпадающие списки: тёмный фон и светлый текст (не белый на белом) */
+  select {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-primary);
+  }
+  /* Опции в выпадающем списке — тёмный фон, иначе в браузере белый список */
+  select option,
+  select optgroup {
+    background-color: #1a1a1a;
+    color: #e5e7eb;
+  }
+  select:focus {
+    outline: none;
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 0 2px rgba(64, 124, 255, 0.25);
+  }
+  
+  /* Consistent link styles */
+  a {
+    @apply transition-colors duration-300;
+  }
+}
+
+/* Component utilities for consistent styling */
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 rounded-lg font-medium bg-[var(--accent-primary)] text-white;
+    @apply hover:bg-[var(--accent-primary-hover)] focus:ring-[var(--accent-primary)];
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 rounded-lg font-medium bg-[var(--accent-secondary)] text-white;
+    @apply hover:bg-[var(--accent-secondary-hover)] focus:ring-[var(--accent-secondary)];
+  }
+  
+  .btn-outline {
+    @apply px-4 py-2 rounded-lg font-medium border-2 border-[var(--border-primary)] text-white;
+    @apply hover:bg-[var(--bg-hover)] hover:border-[var(--border-hover)];
+  }
+  
+  .card {
+    @apply bg-[var(--bg-card)] rounded-lg border border-[var(--border-primary)] p-6;
+    @apply shadow-lg hover:border-[var(--border-hover)] transition-all duration-300;
+  }
+  
+  .input-base {
+    @apply w-full px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-lg;
+    @apply text-white placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent-secondary)];
+    @apply focus:border-transparent transition-all;
+  }
+
+  /* Выпадающие списки: тёмный фон и опции (если базовых стилей мало) */
+  .select-dark,
+  select.select-dark {
+    background-color: #1a1a1a !important;
+    color: #e5e7eb !important;
+    border-color: #333333;
+  }
+  .select-dark option,
+  select.select-dark option {
+    background-color: #1a1a1a !important;
+    color: #e5e7eb !important;
+  }
+}
+
+/* Hide scrollbars but keep scroll functionality */
+@layer utilities {
+  .scrollbar-hide {
+    /* Firefox */
+    scrollbar-width: none;
+    /* Safari and Chrome */
+    -ms-overflow-style: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .no-scrollbar {
+    /* Firefox */
+    scrollbar-width: none;
+    /* Safari and Chrome */
+    -ms-overflow-style: none;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* iOS Safari safe area support */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Mobile-specific padding for iOS Safari bottom bar */
+  @supports (padding: max(0px)) {
+    .pb-safe {
+      padding-bottom: max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom)));
+    }
+
+    .mb-safe {
+      margin-bottom: max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom)));
+    }
+
+    .bottom-safe {
+      bottom: max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom)));
+    }
+  }
+}

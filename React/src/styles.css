@@ -1,0 +1,258 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Анимация машины и пыли */
+.car-animation {
+    @apply absolute bottom-16 left-2 w-24 h-12 opacity-0 z-40;
+}
+
+.car-animation.active {
+    @apply opacity-100;
+    animation: carMoveIn 1s ease-out forwards;
+}
+
+.car-animation:not(.active) {
+    @apply opacity-0;
+    animation: carMoveOut 1s ease-in forwards, fadeOut 0.5s ease-in 1s forwards;
+}
+
+.car {
+    @apply w-full h-full object-contain z-50;
+}
+
+.car-animation.active .car {
+    animation: carVibrate 0.1s linear infinite;
+}
+
+@keyframes carMoveIn {
+    0% {
+        transform: translateX(-4rem);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes carMoveOut {
+    0% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(8rem); /* Move forward */
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes carVibrate {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+.dust {
+    @apply absolute bottom-2 left-[-1rem] w-0 h-5 bg-[radial-gradient(circle,rgba(150,150,150,0.8)_0%,transparent_70%)] opacity-0 z-40;
+}
+
+.car-animation.active .dust {
+    animation: dustSpread 1.5s ease-out 0.3s forwards;
+}
+
+.car-animation:not(.active) .dust {
+    animation: dustMoveOut 1s ease-in forwards, dustFadeOut 0.5s ease-in 1s forwards;
+}
+
+@keyframes dustSpread {
+    0% {
+        width: 0;
+        opacity: 0;
+    }
+    50% {
+        width: 6rem;
+        opacity: 0.8;
+    }
+    100% {
+        width: 9rem;
+        opacity: 0;
+    }
+}
+
+@keyframes dustMoveOut {
+    0% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(4rem); /* Move with car */
+        opacity: 1;
+    }
+}
+
+@keyframes dustFadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Основные стили для центрирования контента */
+.wrapper {
+    @apply w-full mx-auto px-4;
+}
+
+.container {
+    @apply max-w-5xl mx-auto px-4;
+}
+
+.section-frame {
+    @apply relative overflow-hidden;
+}
+
+.mask-bg {
+    @apply relative z-10;
+}
+
+.img-mask {
+    @apply relative overflow-hidden rounded-lg;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 1024px) {
+    .container {
+        @apply px-2;
+    }
+
+    .wrapper {
+        @apply px-2;
+    }
+
+    aside {
+        @apply fixed top-0 left-0 h-full z-30;
+    }
+
+    main {
+        @apply pt-0;
+    }
+}
+
+
+
+/* Существующие стили остаются, добавляем анимацию для изображения */
+.animate-image-in {
+    animation: fadeInScale 1s ease-out forwards;
+  }
+  
+  .animate-image-out {
+    animation: fadeOutScale 1s ease-out forwards;
+  }
+  
+  @keyframes fadeInScale {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+  
+  @keyframes fadeOutScale {
+    0% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.8) translateY(20px);
+    }
+  }
+  
+  /* Стили для улучшения дизайна блока */
+  .img-mask {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem; /* Увеличенный радиус для современного вида */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Лёгкая тень для выделения */
+  }
+  
+  .img-mask img {
+    transition: transform 0.3s ease-in-out; /* Плавное масштабирование при наведении */
+  }
+  
+  .img-mask:hover img {
+    transform: scale(1.1); /* Увеличение при наведении на десктопе */
+  }
+  
+  /* Стили для текста и кнопок */
+  .order-1 lg:order-2 {
+    padding: 1rem; /* Добавлено пространство для баланса */
+    max-width: 100%;
+    text-align: center;
+  }
+  
+  .order-1 lg:order-2 h2 {
+    margin-bottom: 1.5rem; /* Увеличенный отступ для заголовка */
+  }
+  
+  .order-1 lg:order-2 p {
+    margin-bottom: 2rem; /* Увеличенный отступ для текста */
+  }
+  
+  .order-1 lg:order-2 .flex {
+    gap: 1.5rem; /* Увеличенный отступ между кнопками */
+  }
+  
+  @media (min-width: 1024px) {
+    .order-1 lg:order-2 {
+      text-align: left;
+      padding-left: 2rem; /* Асимметрия для десктопов */
+    }
+  }
+  
+  /* Существующие стили для центрирования и других элементов */
+  .wrapper {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .container {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .section-frame {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .mask-bg {
+    position: relative;
+    z-index: 1;
+  }
+
+
+  

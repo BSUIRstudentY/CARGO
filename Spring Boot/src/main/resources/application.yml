@@ -40,12 +40,14 @@ spring:
           timeout: 5000
           writetimeout: 5000
   datasource:
-    url: jdbc:sqlite:${DB_PATH:./data/cargodb.sqlite}
-    username: sa
-    password: ""
-    driver-class-name: org.sqlite.JDBC
+    # Используем MySQL если указаны переменные окружения, иначе SQLite
+    # SQLite файл: ./data/cargo.sqlite (относительно рабочей директории, где запускается Spring Boot)
+    url: ${SPRING_DATASOURCE_URL:jdbc:sqlite:${DB_PATH:./data/cargo.sqlite}?busy_timeout=30000}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:sa}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:}}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:${DB_DRIVER:org.sqlite.JDBC}}
     hikari:
-      maximum-pool-size: 4
+      maximum-pool-size: 5
       minimum-idle: 1
       connection-timeout: 30000
       idle-timeout: 600000
@@ -53,8 +55,8 @@ spring:
       leak-detection-threshold: 60000
   jpa:
     hibernate:
-      ddl-auto: update   # Можно поставить create для первого запуска, потом update
-    database-platform: org.hibernate.community.dialect.SQLiteDialect
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}   # Можно поставить create для первого запуска, потом update
+    database-platform: ${HIBERNATE_DIALECT:org.hibernate.community.dialect.SQLiteDialect}
     show-sql: false
     properties:
       hibernate:
@@ -84,9 +86,16 @@ jwt:
   expiration: 86400000
 
 # === bePaid Payment Gateway ===
+# Для проверки вебхуков (Content-Signature): в ЛК bePaid взять публичный ключ магазина (PEM)
+# и вставить сюда. Иначе вебхуки принимаются только по Basic Auth (Shop ID + Secret key).
 bepaid:
   shop-id: 33276
   secret-key: 7129e87495f7bb387ed05351dcccaa8631e883d8b2e936e07f3b10e2f04e659b
+  # Публичный RSA-ключ магазина из ЛК bePaid (проверка Content-Signature вебхуков)
+  public-key: |
+    -----BEGIN PUBLIC KEY-----
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp8liOiJ+abM/v9kgyhaJ4likpvr6fsMr5Tiu+08bz8WAtn+CdrDQXQjs1H4hluzvzouzGUDQKFcvbBd28EhKGOZtkKMlA/yhIbpPt/CnritF6Oz/1mqs6gxrITqn3MDBkHbhc0tPoqvTX+UByhfOTBXQAa6Pk5qq5t2Dc0uQuJlVD02ztt7SYnVQ9AWi8lTKWzsFk0oMGbcVGLgQPO2Wyg77If4/CkhgKFYI61ovyHlgDXuo3kP9oJaianP8klsMIBi5Na9d3BuVv4hY7prR4UOwSpFpgte29/hQWGEZ0DyEmOGz1R0IDrRSc6FbLt6aa5AV/nw0bAciYm6PJVZHKQIDAQAB
+    -----END PUBLIC KEY-----
   checkout-url: https://checkout.bepaid.by/ctp/api/checkouts
   return-url: https://fluvion.by/thanks
   fail-url: https://fluvion.by/badResponse
@@ -103,6 +112,8 @@ eupost:
   password: JLOHVQET4U12O1F
 
 # === CORS ===
+# Настройки CORS для веб и мобильных приложений
+# Для мобильного приложения добавьте exp://* или конкретный IP адрес
 app:
   cors:
-    allowed-origins: http://localhost:5173,https://fluvion.by
+    allowed-origins: http://localhost:5173,https://fluvion.by,exp://*

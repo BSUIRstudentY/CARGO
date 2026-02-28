@@ -8,6 +8,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,23 @@ public class EupostApiController {
         try {
             fetchJwtToken();
             return ResponseEntity.ok(Map.of("jwt", jwtToken));
+        } catch (ResourceAccessException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof UnknownHostException) {
+                logger.error("Cannot resolve hostname for Eupost API: {}", apiUrl, e);
+                return ResponseEntity.status(503).body(Map.of(
+                    "error", "Service unavailable",
+                    "message", "Unable to connect to delivery service. Please check your internet connection or try again later.",
+                    "details", "Hostname cannot be resolved: " + (cause.getMessage() != null ? cause.getMessage() : "api.eurotorg.by")
+                ));
+            } else {
+                logger.error("Network error connecting to Eupost API: {}", e.getMessage(), e);
+                return ResponseEntity.status(503).body(Map.of(
+                    "error", "Service unavailable",
+                    "message", "Unable to connect to delivery service. Please try again later.",
+                    "details", e.getMessage() != null ? e.getMessage() : "Network connection error"
+                ));
+            }
         } catch (HttpClientErrorException e) {
             return handleError(e);
         } catch (Exception e) {
@@ -128,6 +147,23 @@ public class EupostApiController {
             // Возвращаем успешный ответ
             return ResponseEntity.ok(responseBody);
 
+        } catch (ResourceAccessException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof UnknownHostException) {
+                logger.error("Cannot resolve hostname for Eupost API: {}", apiUrl, e);
+                return ResponseEntity.status(503).body(Map.of(
+                    "error", "Service unavailable",
+                    "message", "Unable to connect to delivery service. Please check your internet connection or try again later.",
+                    "details", "Hostname cannot be resolved: " + (cause.getMessage() != null ? cause.getMessage() : "api.eurotorg.by")
+                ));
+            } else {
+                logger.error("Network error connecting to Eupost API: {}", e.getMessage(), e);
+                return ResponseEntity.status(503).body(Map.of(
+                    "error", "Service unavailable",
+                    "message", "Unable to connect to delivery service. Please try again later.",
+                    "details", e.getMessage() != null ? e.getMessage() : "Network connection error"
+                ));
+            }
         } catch (HttpClientErrorException e) {
             logger.error("HTTP error occurred: {}", e.getResponseBodyAsString(), e);
             if (e.getResponseBodyAsString().contains("неправильный Jwt") ||
@@ -204,6 +240,23 @@ public class EupostApiController {
 
             Map<String, Object> responseBody = mapper.readValue(response.getBody(), Map.class);
             return ResponseEntity.ok(responseBody);
+        } catch (ResourceAccessException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof UnknownHostException) {
+                logger.error("Cannot resolve hostname for Eupost API: {}", apiUrl, e);
+                return ResponseEntity.status(503).body(Map.of(
+                    "error", "Service unavailable",
+                    "message", "Unable to connect to delivery service. Please check your internet connection or try again later.",
+                    "details", "Hostname cannot be resolved: " + (cause.getMessage() != null ? cause.getMessage() : "api.eurotorg.by")
+                ));
+            } else {
+                logger.error("Network error connecting to Eupost API: {}", e.getMessage(), e);
+                return ResponseEntity.status(503).body(Map.of(
+                    "error", "Service unavailable",
+                    "message", "Unable to connect to delivery service. Please try again later.",
+                    "details", e.getMessage() != null ? e.getMessage() : "Network connection error"
+                ));
+            }
         } catch (HttpClientErrorException e) {
             if (e.getResponseBodyAsString().contains("неправильный Jwt") || e.getResponseBodyAsString().contains("не введен/неправильный Jwt")) {
                 try {
@@ -244,19 +297,33 @@ public class EupostApiController {
         headers.set("Content-Type", "application/json");
 
         HttpEntity<String> request = new HttpEntity<>(requestBody.toString(), headers);
-        ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, request, String.class);
+        
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, request, String.class);
 
-        Map<String, Object> responseBody = mapper.readValue(response.getBody(), Map.class);
-        if (responseBody != null && responseBody.containsKey("Table")) {
-            Map<String, Object> table = ((List<Map<String, Object>>) responseBody.get("Table")).get(0);
-            if (table.containsKey("JWT")) {
-                jwtToken = (String) table.get("JWT");
-                logger.info("JWT token successfully fetched.");
+            Map<String, Object> responseBody = mapper.readValue(response.getBody(), Map.class);
+            if (responseBody != null && responseBody.containsKey("Table")) {
+                Map<String, Object> table = ((List<Map<String, Object>>) responseBody.get("Table")).get(0);
+                if (table.containsKey("JWT")) {
+                    jwtToken = (String) table.get("JWT");
+                    logger.info("JWT token successfully fetched.");
+                } else {
+                    throw new RuntimeException("JWT not found in response");
+                }
             } else {
-                throw new RuntimeException("JWT not found in response");
+                throw new RuntimeException("Invalid response from API");
             }
-        } else {
-            throw new RuntimeException("Invalid response from API");
+        } catch (ResourceAccessException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof UnknownHostException) {
+                logger.error("Cannot resolve hostname when fetching JWT token: {}", apiUrl, e);
+                throw new RuntimeException("Cannot connect to delivery service API. Hostname cannot be resolved: " + 
+                    (cause.getMessage() != null ? cause.getMessage() : "api.eurotorg.by"), e);
+            } else {
+                logger.error("Network error when fetching JWT token: {}", e.getMessage(), e);
+                throw new RuntimeException("Network error connecting to delivery service API: " + 
+                    (e.getMessage() != null ? e.getMessage() : "Connection failed"), e);
+            }
         }
     }
 

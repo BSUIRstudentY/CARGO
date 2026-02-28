@@ -1,11 +1,15 @@
 package com.example.demo.Controllers;
 
 import com.example.demo.Entities.Order;
+import com.example.demo.Entities.QuestConditionType;
 import com.example.demo.Entities.Transaction;
 import com.example.demo.Entities.User;
+import com.example.demo.POJO.QuestEvent;
 import com.example.demo.Repositories.OrderRepository;
 import com.example.demo.Repositories.TransactionRepository;
 import com.example.demo.Repositories.UserRepository;
+import com.example.demo.Services.ExchangeRateService;
+import com.example.demo.Services.QuestService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +28,10 @@ import org.springframework.web.client.RestTemplate;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -37,6 +45,12 @@ public class BePaidController {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    
+    @Autowired
+    private QuestService questService;
+    
+    @Autowired
+    private ExchangeRateService exchangeRateService;
 
     @Value("${bepaid.shop-id}")
     private String shopId;
@@ -66,6 +80,12 @@ public class BePaidController {
 
     @Value("${bepaid.test-mode:true}")
     private boolean testMode;
+
+    /** RSA публичный ключ магазина из личного кабинета bePaid для проверки Content-Signature вебхуков (PEM). */
+    @Value("${bepaid.public-key:}")
+    private String publicKeyPem;
+
+    private volatile PublicKey rsaPublicKey;
 
     @Autowired
     public BePaidController(RestTemplate restTemplate,
@@ -118,11 +138,19 @@ public class BePaidController {
         logger.info("Payment amount conversion: {} CNY -> {} BYN (rate: {}) for order {}", 
                 amountCNY, amountBYN, CNY_TO_BYN_RATE, request.getOrderId());
 
-        // Проверяем, нужно ли вообще оплачивать (если оплата с баланса, возможно доплата = 0)
+        // Фиксируем курс доставки при создании платежа
+        if (order.getShippingRateFixed() == null) {
+            Double currentShippingRate = exchangeRateService.getCurrentShippingRate();
+            order.setShippingRateFixed(currentShippingRate);
+            orderRepository.save(order);
+            logger.info("Fixed shipping rate for order {}: {} USD/kg", request.getOrderId(), currentShippingRate);
+        }
+
+        // Проверяем, нужно ли вообще оплачивать (если сумма = 0)
         if (amountBYN <= 0) {
             logger.info("Payment amount is 0 for order {}, marking as PAID", request.getOrderId());
-            order.setStatus("PAID");
-            orderRepository.save(order);
+            // Используем processSuccessfulPayment для обработки квестов
+            processSuccessfulPayment(order);
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "status", "PAID",
@@ -206,8 +234,8 @@ public class BePaidController {
         if (user != null) {
             Map<String, Object> customer = new HashMap<>();
             customer.put("email", user.getEmail());
-            if (user.getPhone() != null && !user.getPhone().isEmpty()) {
-                customer.put("phone", user.getPhone());
+            if (order.getPhone() != null && !order.getPhone().isEmpty()) {
+                customer.put("phone", order.getPhone());
             }
             checkout.put("customer", customer);
         }
@@ -300,15 +328,19 @@ public class BePaidController {
     // Обработка успешного платежа: обновление статуса и обновление потраченных средств
     @Transactional
     private void processSuccessfulPayment(Order order) {
-        if (!"PAID".equals(order.getStatus())) {
+        boolean wasNotPaid = !"PAID".equals(order.getStatus());
+        
+        if (wasNotPaid) {
             order.setStatus("PAID");
             orderRepository.save(order);
             logger.info("Order {} marked as PAID", order.getId());
+        }
 
-            // Обновляем потраченные средства пользователя
-            User user = order.getUser();
-            if (user != null && order.getTotalClientPrice() != null) {
-                // Добавляем общую сумму заказа к потраченным средствам
+        // Обновляем потраченные средства пользователя и обрабатываем квесты (даже если заказ уже был PAID)
+        User user = order.getUser();
+        if (user != null && order.getTotalClientPrice() != null) {
+            // Обновляем потраченные средства только если заказ только что был оплачен
+            if (wasNotPaid) {
                 double currentMoneySpent = user.getMoneySpent() != null ? user.getMoneySpent() : 0.0;
                 double orderTotal = order.getTotalClientPrice().doubleValue();
                 user.setMoneySpent(currentMoneySpent + orderTotal);
@@ -317,24 +349,46 @@ public class BePaidController {
                 logger.info("Updated moneySpent for user {}: added {} CNY (total: {} CNY)", 
                     user.getEmail(), orderTotal, user.getMoneySpent());
             }
+            
+            // Квесты обрабатываем асинхронно после коммита, чтобы не держать транзакцию вебхука и не блокировать SQLite
+            String userEmail = user.getEmail();
+            if (wasNotPaid) {
+                questService.handleEventAsync(new QuestEvent(userEmail, QuestConditionType.PURCHASE));
+                questService.handleEventAsync(new QuestEvent(userEmail, QuestConditionType.QUANTITY_ORDER));
+                questService.handleEventAsync(new QuestEvent(userEmail, QuestConditionType.SPENT));
+                logger.info("Quest events scheduled async for user {}: PURCHASE, QUANTITY_ORDER, SPENT", userEmail);
+            } else {
+                questService.handleEventAsync(new QuestEvent(userEmail, QuestConditionType.SPENT));
+            }
         }
     }
 
     // Webhook — находит транзакцию по tracking_id → получает заказ → обновляет статус заказа
+    // bePaid: Content-Signature = RSA-подпись (проверка публичным ключом), авторизация — Basic (Shop ID + Secret Key)
     @PostMapping("/webhook")
     @Transactional
     public ResponseEntity<String> handleWebhook(HttpServletRequest httpRequest,
                                                 @RequestBody String rawBody) {
-        // Проверка подписи — ОБЯЗАТЕЛЬНО!
-        String signature = httpRequest.getHeader("X-API-Signature");
-        if (signature == null || signature.trim().isEmpty()) {
-            logger.warn("Webhook received without signature header");
-            return ResponseEntity.status(400).body("Missing signature");
+        logWebhookHeaders(httpRequest, rawBody);
+
+        String signature = firstNonEmpty(
+                httpRequest.getHeader("X-API-Signature"),
+                httpRequest.getHeader("X-Signature"),
+                httpRequest.getHeader("Content-Signature"));
+        boolean signatureValid = false;
+        if (signature != null && !signature.trim().isEmpty()) {
+            signatureValid = verifySignature(rawBody, signature);
+            if (signatureValid) {
+                logger.info("Webhook verified via Content-Signature (RSA)");
+            }
         }
-        
-        if (!verifySignature(rawBody, signature)) {
-            logger.warn("Webhook signature verification failed");
-            return ResponseEntity.status(400).body("Invalid signature");
+        if (!signatureValid && verifyWebhookBasicAuth(httpRequest)) {
+            signatureValid = true;
+            logger.info("Webhook verified via Basic Auth");
+        }
+        if (!signatureValid) {
+            logger.warn("Webhook received without valid signature or Basic Auth");
+            return ResponseEntity.status(400).body("Missing or invalid signature");
         }
 
         try {
@@ -399,6 +453,7 @@ public class BePaidController {
 
     // Проверка статуса — ДЁРГАЕТ bePaid напрямую! (даже если webhook не пришёл)
     @GetMapping("/check")
+    @Transactional
     public ResponseEntity<Map<String, Object>> checkStatus(@RequestParam Long orderId) {
         Optional<Order> optOrder = orderRepository.findById(orderId);
         if (optOrder.isEmpty()) {
@@ -462,9 +517,10 @@ public class BePaidController {
             }
         }
 
-        // 3. Если нашли хоть одну успешную — обновляем заказ
+        // 3. Если нашли хоть одну успешную — обновляем заказ (order в той же транзакции, User подгрузится при обращении)
         if (hasSuccess) {
             processSuccessfulPayment(order);
+            logger.info("Payment check: order {} confirmed PAID via bePaid API", order.getId());
         }
 
         return ResponseEntity.ok(Map.of(
@@ -474,36 +530,111 @@ public class BePaidController {
         ));
     }
 
-    // Проверка подписи
+    /** Логируем заголовки webhook (без секретов) для отладки bePaid */
+    private void logWebhookHeaders(HttpServletRequest httpRequest, String rawBody) {
+        String auth = httpRequest.getHeader("Authorization");
+        String apiSig = httpRequest.getHeader("X-API-Signature");
+        String xSig = httpRequest.getHeader("X-Signature");
+        String contentSig = httpRequest.getHeader("Content-Signature");
+        logger.info("Webhook request: Authorization={}, X-API-Signature length={}, X-Signature length={}, Content-Signature length={}, body length={}",
+                auth != null ? "present" : "absent",
+                apiSig != null ? apiSig.length() : 0,
+                xSig != null ? xSig.length() : 0,
+                contentSig != null ? contentSig.length() : 0,
+                rawBody != null ? rawBody.length() : 0);
+        String sig = firstNonEmpty(apiSig, xSig, contentSig);
+        if (sig != null && !sig.isEmpty()) {
+            String preview = sig.length() > 50 ? sig.substring(0, 50) + "..." : sig;
+            logger.info("Webhook signature format: prefix='{}', total length={}",
+                    sig.contains("=") ? sig.substring(0, Math.min(sig.indexOf('=') + 1, sig.length())) : "(no equals)",
+                    sig.length());
+        }
+    }
+
+    /**
+     * Проверка подписи вебхука по документации bePaid.
+     * Content-Signature — RSA-подпись (закрытый ключ у bePaid), проверяем публичным ключом магазина.
+     * Хэш: SHA256, тело — в том виде, как получено (без сериализации/десериализации JSON).
+     */
     private boolean verifySignature(String payload, String header) {
+        if (payload == null) {
+            logger.warn("Webhook payload is null");
+            return false;
+        }
+        PublicKey pubKey = getRsaPublicKey();
+        if (pubKey == null) {
+            logger.debug("bePaid public key not configured, Content-Signature verification skipped (use Basic Auth)");
+            return false;
+        }
+        String trimmed = header.trim();
+        if (trimmed.isEmpty()) {
+            return false;
+        }
         try {
-            if (secretKey == null || secretKey.trim().isEmpty()) {
-                logger.error("bePaid secret key is not configured");
+            // Убираем префикс sha256= если есть; иначе вся строка — base64 подпись
+            String base64Sig = trimmed.toLowerCase().startsWith("sha256=")
+                    ? trimmed.substring(7).trim()
+                    : trimmed;
+            byte[] signatureBytes = Base64.getDecoder().decode(base64Sig);
+            if (signatureBytes == null || signatureBytes.length == 0) {
+                logger.warn("Webhook signature decode failed (empty or invalid base64)");
                 return false;
             }
-            
-            String[] parts = header.split("=", 2);
-            if (parts.length != 2 || !"sha256".equals(parts[0])) {
-                logger.warn("Invalid signature format: expected 'sha256=<hash>'");
-                return false;
+
+            Signature sig = Signature.getInstance("SHA256withRSA");
+            sig.initVerify(pubKey);
+            sig.update(payload.getBytes(StandardCharsets.UTF_8));
+            boolean ok = sig.verify(signatureBytes);
+            if (ok) {
+                logger.debug("Webhook Content-Signature verified (RSA)");
+            } else {
+                logger.debug("Webhook Content-Signature verification failed (RSA verify returned false)");
             }
-            
-            Mac mac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec key = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            mac.init(key);
-            byte[] hashBytes = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
-            String calculatedHash = Base64.getEncoder().encodeToString(hashBytes);
-            
-            // Use constant-time comparison to prevent timing attacks
-            return constantTimeEquals(calculatedHash, parts[1]);
+            return ok;
         } catch (Exception e) {
-            logger.error("Error verifying signature: {}", e.getMessage(), e);
+            logger.warn("Webhook signature verification error: {}", e.getMessage());
             return false;
         }
     }
-    
-    // Constant-time string comparison to prevent timing attacks
-    private boolean constantTimeEquals(String a, String b) {
+
+    /** Ленивая инициализация RSA публичного ключа из PEM (bepaid.public-key). */
+    private PublicKey getRsaPublicKey() {
+        if (rsaPublicKey != null) {
+            return rsaPublicKey;
+        }
+        if (publicKeyPem == null || publicKeyPem.trim().isEmpty()) {
+            return null;
+        }
+        synchronized (this) {
+            if (rsaPublicKey != null) {
+                return rsaPublicKey;
+            }
+            try {
+                String pem = publicKeyPem
+                        .replace("-----BEGIN PUBLIC KEY-----", "")
+                        .replace("-----END PUBLIC KEY-----", "")
+                        .replaceAll("\\s", "");
+                if (pem.isEmpty()) {
+                    logger.warn("bePaid public key PEM is empty after stripping headers");
+                    return null;
+                }
+                byte[] keyBytes = Base64.getDecoder().decode(pem);
+                X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+                rsaPublicKey = KeyFactory.getInstance("RSA").generatePublic(spec);
+                logger.info("bePaid RSA public key loaded for webhook verification");
+                return rsaPublicKey;
+            } catch (Exception e) {
+                logger.error("Failed to load bePaid public key: {}", e.getMessage(), e);
+                return null;
+            }
+        }
+    }
+
+    /** Сравнение строк с постоянным временем (защита от timing-атак при проверке Basic Auth). */
+    private static boolean constantTimeEquals(String a, String b) {
+        if (a == null || b == null) {
+            return a == b;
+        }
         if (a.length() != b.length()) {
             return false;
         }
@@ -512,6 +643,40 @@ public class BePaidController {
             result |= a.charAt(i) ^ b.charAt(i);
         }
         return result == 0;
+    }
+
+    /** Первое непустое значение из строк, иначе null */
+    private static String firstNonEmpty(String... values) {
+        for (String v : values) {
+            if (v != null && !v.trim().isEmpty()) return v;
+        }
+        return null;
+    }
+
+    /**
+     * Проверка webhook через HTTP Basic Auth (Shop ID + Secret Key).
+     * bePaid по документации может отправлять уведомления с Basic Auth вместо заголовка подписи.
+     */
+    private boolean verifyWebhookBasicAuth(HttpServletRequest httpRequest) {
+        if (shopId == null || secretKey == null || shopId.trim().isEmpty() || secretKey.trim().isEmpty()) {
+            return false;
+        }
+        String auth = httpRequest.getHeader("Authorization");
+        if (auth == null || !auth.startsWith("Basic ")) {
+            return false;
+        }
+        try {
+            String encoded = auth.substring(6).trim();
+            String decoded = new String(Base64.getDecoder().decode(encoded), StandardCharsets.UTF_8);
+            int colon = decoded.indexOf(':');
+            if (colon <= 0) return false;
+            String receivedShopId = decoded.substring(0, colon);
+            String receivedSecret = decoded.substring(colon + 1);
+            return constantTimeEquals(shopId, receivedShopId) && constantTimeEquals(secretKey, receivedSecret);
+        } catch (IllegalArgumentException e) {
+            logger.debug("Webhook Basic Auth decode failed: {}", e.getMessage());
+            return false;
+        }
     }
 
     // DTO with validation

@@ -1,0 +1,61 @@
+# robots.txt для Fluvion
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /profile/
+Disallow: /cart/
+Disallow: /order-details/
+Disallow: /ticket/
+Disallow: /notifications/
+
+# Разрешаем индексацию основных страниц
+Allow: /
+Allow: /catalog
+Allow: /terminal
+Allow: /calculator
+Allow: /delivery-payment
+Allow: /faq
+Allow: /support
+Allow: /reviews
+Allow: /news
+Allow: /rates
+Allow: /public-offer
+Allow: /privacy-policy
+Allow: /user-agreement
+
+# Sitemap
+Sitemap: https://fluvion.by/sitemap.xml
+
+# Crawl-delay (опционально, для снижения нагрузки)
+Crawl-delay: 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -10,6 +10,8 @@ import com.example.demo.Repositories.UserRepository;
 import com.example.demo.Services.UserService;
 import lombok.Data;
 import jakarta.persistence.EntityManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/cart")
 public class CartController {
+
+    private static final Logger logger = LoggerFactory.getLogger(CartController.class);
 
     @Autowired
     private CartRepository cartRepository;
@@ -274,6 +278,20 @@ public class CartController {
             // Step 3: Get user and verify discount
             User user = userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+            
+            // Валидация номера телефона
+            if (request.getPhone() == null || request.getPhone().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new OrderResponse("Укажите номер телефона"));
+            }
+            
+            // Валидация ФИО
+            if (request.getLastName() == null || request.getLastName().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new OrderResponse("Укажите фамилию"));
+            }
+            if (request.getFirstName() == null || request.getFirstName().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new OrderResponse("Укажите имя"));
+            }
+            
             user.verifyDiscount();
 
             // Step 4: Create order
@@ -326,47 +344,22 @@ public class CartController {
             // Set order details
             float finalTotal = totalClientPrice - totalDiscountAmount + insuranceCost;
             order.setTotalClientPrice(finalTotal);
+            order.setPhone(request.getPhone());
+            order.setLastName(request.getLastName());
+            order.setFirstName(request.getFirstName());
+            order.setMiddleName(request.getMiddleName());
+            
+            // Log order data for debugging
+            logger.info("Creating order with data - Phone: {}, LastName: {}, FirstName: {}, MiddleName: {}", 
+                request.getPhone(), request.getLastName(), request.getFirstName(), request.getMiddleName());
             order.setUserDiscountApplied(userDiscountAmount);
             order.setDiscountApplied(promocodeDiscountAmount);
-            order.setInsuranceCost(insuranceCost);
+            order.setInsurance(request.isInsurance());
+            // insuranceCost вычисляется динамически через getInsuranceCost(), не сохраняется в БД
             order.setDeliveryAddress(deliveryAddress);
 
-            // Step 5: Handle payment method and balance reservation
-            String paymentMethod = request.getPaymentMethod() != null ? request.getPaymentMethod() : "NO_BALANCE";
-            float balanceToReserve = 0.0f;
-            float availableBalance = user.getBalance() - (user.getReservedBalance() != null ? user.getReservedBalance() : 0.0f);
-
-            if ("BALANCE_ONLY".equals(paymentMethod)) {
-                // Полная оплата с баланса
-                if (availableBalance < finalTotal) {
-                    return ResponseEntity.badRequest().body(new OrderResponse("Недостаточно средств на балансе. Доступно: ¥" + availableBalance + ", требуется: ¥" + finalTotal));
-                }
-                balanceToReserve = finalTotal;
-                order.setBalanceAmount(finalTotal);
-            } else if ("BALANCE_PARTIAL".equals(paymentMethod)) {
-                // Частичная оплата с баланса
-                float requestedBalanceAmount = request.getBalanceAmount() != null ? request.getBalanceAmount() : 0.0f;
-                if (requestedBalanceAmount <= 0 || requestedBalanceAmount > finalTotal) {
-                    return ResponseEntity.badRequest().body(new OrderResponse("Неверная сумма для оплаты с баланса"));
-                }
-                if (availableBalance < requestedBalanceAmount) {
-                    return ResponseEntity.badRequest().body(new OrderResponse("Недостаточно средств на балансе. Доступно: ¥" + availableBalance + ", требуется: ¥" + requestedBalanceAmount));
-                }
-                balanceToReserve = requestedBalanceAmount;
-                order.setBalanceAmount(requestedBalanceAmount);
-            } else {
-                // NO_BALANCE - оплата не с баланса
-                order.setBalanceAmount(0.0f);
-            }
-
-            order.setPaymentMethod(paymentMethod);
-
-            // Резервируем средства на балансе
-            if (balanceToReserve > 0) {
-                float currentReserved = user.getReservedBalance() != null ? user.getReservedBalance() : 0.0f;
-                user.setReservedBalance(currentReserved + balanceToReserve);
-                userRepository.save(user);
-            }
+            // Step 5: Set payment method (always NO_BALANCE, payment through BePaid)
+            order.setPaymentMethod("NO_BALANCE");
 
             // Step 6: Create and link OrderItems
             List<OrderItem> orderItems = cart.getItems().stream()
@@ -404,9 +397,8 @@ public class CartController {
             response.setTotalClientPrice(order.getTotalClientPrice());
             response.setUserDiscountApplied(order.getUserDiscountApplied());
             response.setDiscountApplied(order.getDiscountApplied());
-            response.setInsuranceCost(order.getInsuranceCost());
+            response.setInsuranceCost(order.getInsuranceCost()); // Вычисляется динамически
             response.setPaymentMethod(order.getPaymentMethod());
-            response.setBalanceAmount(order.getBalanceAmount());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new OrderResponse("Ошибка обработки заказа: " + e.getMessage()));
@@ -425,12 +417,15 @@ class CartItemRequest {
 
 class SubmitOrderRequest {
     private String deliveryAddress;
+    private String phone;
+    private String lastName;
+    private String firstName;
+    private String middleName;
     private String promocode;
     private boolean insurance;
     private String discountType;
     private Float discountValue;
-    private String paymentMethod; // BALANCE_ONLY, NO_BALANCE, BALANCE_PARTIAL
-    private Float balanceAmount; // Сумма для оплаты с баланса (для BALANCE_PARTIAL)
+    private String paymentMethod; // NO_BALANCE (обычная оплата)
     private String packaging; // Тип упаковки
 
     // Constructors
@@ -440,6 +435,22 @@ class SubmitOrderRequest {
     // Getters
     public String getDeliveryAddress() {
         return deliveryAddress;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getMiddleName() {
+        return middleName;
     }
 
     public String getPromocode() {
@@ -462,10 +473,6 @@ class SubmitOrderRequest {
         return paymentMethod;
     }
 
-    public Float getBalanceAmount() {
-        return balanceAmount;
-    }
-
     public String getPackaging() {
         return packaging;
     }
@@ -473,6 +480,22 @@ class SubmitOrderRequest {
     // Setters
     public void setDeliveryAddress(String deliveryAddress) {
         this.deliveryAddress = deliveryAddress;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
     }
 
     public void setPromocode(String promocode) {
@@ -495,10 +518,6 @@ class SubmitOrderRequest {
         this.paymentMethod = paymentMethod;
     }
 
-    public void setBalanceAmount(Float balanceAmount) {
-        this.balanceAmount = balanceAmount;
-    }
-
     public void setPackaging(String packaging) {
         this.packaging = packaging;
     }
@@ -512,8 +531,7 @@ class OrderResponse {
     private Float userDiscountApplied; // Added for user-specific discount
     private Float discountApplied; // Promocode discount only
     private Float insuranceCost;
-    private String paymentMethod; // BALANCE_ONLY, NO_BALANCE, BALANCE_PARTIAL
-    private Float balanceAmount; // Сумма, оплаченная с баланса
+    private String paymentMethod; // NO_BALANCE (обычная оплата)
 
     public OrderResponse() {}
 

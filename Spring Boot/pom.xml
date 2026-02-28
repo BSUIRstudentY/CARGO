@@ -135,6 +135,12 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<!-- Apache HttpClient для настройки SSL -->
+		<dependency>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>com.github.haifengl</groupId>
 			<artifactId>smile-core</artifactId>
@@ -211,6 +217,22 @@
 				</configuration>
 			</plugin>
 
+			<!-- Плагин для управления ресурсами - исключаем SQLite базы -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.3.1</version>
+				<configuration>
+					<excludes>
+						<!-- КРИТИЧНО: Исключаем SQLite базы данных из JAR -->
+						<exclude>**/*.sqlite</exclude>
+						<exclude>**/*.sqlite3</exclude>
+						<exclude>**/*.db</exclude>
+						<exclude>**/data/**</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
 			<!-- Плагин Spring Boot для сборки -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -223,8 +245,25 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+					<!-- КРИТИЧНО: Исключаем SQLite файлы из финального JAR -->
+					<excludeArtifactIds>sqlite-jdbc</excludeArtifactIds>
 				</configuration>
 			</plugin>
 		</plugins>
+		
+		<!-- Дополнительная конфигурация ресурсов -->
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<!-- Исключаем SQLite базы из ресурсов -->
+					<exclude>**/*.sqlite</exclude>
+					<exclude>**/*.sqlite3</exclude>
+					<exclude>**/*.db</exclude>
+					<exclude>**/data/**</exclude>
+				</excludes>
+			</resource>
+		</resources>
 	</build>
 </project>

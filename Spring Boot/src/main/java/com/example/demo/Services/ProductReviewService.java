@@ -5,6 +5,7 @@ import com.example.demo.Entities.Product;
 import com.example.demo.Entities.ProductReview;
 import com.example.demo.Entities.User;
 
+import com.example.demo.Repositories.OrderItemRepository;
 import com.example.demo.Repositories.ProductRepository;
 import com.example.demo.Repositories.ProductReviewRepository;
 import com.example.demo.Repositories.UserRepository;
@@ -31,6 +32,9 @@ public class ProductReviewService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
     @Transactional
     public ProductReviewDTO createReview(ProductReviewDTO reviewDTO, String userEmail) {
         Product product = productRepository.findById(reviewDTO.getProductId())
@@ -40,6 +44,14 @@ public class ProductReviewService {
 
         if (reviewDTO.getRating() < 1 || reviewDTO.getRating() > 5) {
             throw new IllegalArgumentException("Рейтинг должен быть от 1 до 5");
+        }
+
+        // Проверяем, заказывал ли пользователь этот товар
+        List<com.example.demo.Entities.OrderItem> orderItems = orderItemRepository
+                .findByUserEmailAndProductIdInPaidOrders(userEmail, product.getId());
+        
+        if (orderItems == null || orderItems.isEmpty()) {
+            throw new IllegalArgumentException("Вы можете оставить отзыв только на товары, которые вы заказывали");
         }
 
         ProductReview review = new ProductReview();

@@ -1,10 +1,8 @@
 package com.example.demo.Services;
 
 import com.example.demo.Entities.Order;
-import com.example.demo.Entities.OrderHistory;
 import com.example.demo.Entities.OrderItem;
 import com.example.demo.Entities.User;
-import com.example.demo.Repositories.OrderHistoryRepository;
 import com.example.demo.Repositories.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,9 +32,6 @@ class OrderServiceTest {
 
     @Mock
     private OrderRepository orderRepository;
-
-    @Mock
-    private OrderHistoryRepository orderHistoryRepository;
 
     @InjectMocks
     private OrderService orderService;
@@ -99,7 +94,6 @@ class OrderServiceTest {
         assertEquals("TRACK-002", result.getTrackingNumber());
         verify(orderRepository, times(1)).findById(1L);
         verify(orderRepository, times(1)).save(existingOrder);
-        verify(orderHistoryRepository, never()).save(any());
     }
 
     @Test
@@ -119,8 +113,8 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Should create order history when status is REFUSED")
-    void testUpdateOrder_CreateHistoryWhenRefused() {
+    @DisplayName("Should update order status to REFUSED")
+    void testUpdateOrder_StatusRefused() {
         // Given
         Order updatedOrder = new Order();
         updatedOrder.setStatus("REFUSED");
@@ -128,10 +122,6 @@ class OrderServiceTest {
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(existingOrder));
         when(orderRepository.save(any(Order.class))).thenReturn(existingOrder);
-        when(orderHistoryRepository.save(any(OrderHistory.class))).thenAnswer(invocation -> {
-            OrderHistory history = invocation.getArgument(0);
-            return history;
-        });
 
         // When
         Order result = orderService.updateOrder(1L, updatedOrder);
@@ -139,23 +129,20 @@ class OrderServiceTest {
         // Then
         assertNotNull(result);
         assertEquals("REFUSED", result.getStatus());
-        verify(orderHistoryRepository, times(1)).save(any(OrderHistory.class));
-        verify(orderRepository, times(1)).delete(existingOrder);
+        assertEquals("Out of stock", result.getReasonRefusal());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(orderRepository, times(1)).save(existingOrder);
     }
 
     @Test
-    @DisplayName("Should create order history when status is RECEIVED")
-    void testUpdateOrder_CreateHistoryWhenReceived() {
+    @DisplayName("Should update order status to RECEIVED")
+    void testUpdateOrder_StatusReceived() {
         // Given
         Order updatedOrder = new Order();
         updatedOrder.setStatus("RECEIVED");
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(existingOrder));
         when(orderRepository.save(any(Order.class))).thenReturn(existingOrder);
-        when(orderHistoryRepository.save(any(OrderHistory.class))).thenAnswer(invocation -> {
-            OrderHistory history = invocation.getArgument(0);
-            return history;
-        });
 
         // When
         Order result = orderService.updateOrder(1L, updatedOrder);
@@ -163,31 +150,28 @@ class OrderServiceTest {
         // Then
         assertNotNull(result);
         assertEquals("RECEIVED", result.getStatus());
-        verify(orderHistoryRepository, times(1)).save(any(OrderHistory.class));
-        verify(orderRepository, times(1)).delete(existingOrder);
+        verify(orderRepository, times(1)).findById(1L);
+        verify(orderRepository, times(1)).save(existingOrder);
     }
 
     @Test
-    @DisplayName("Should preserve order items when creating history")
-    void testUpdateOrder_PreserveItemsInHistory() {
+    @DisplayName("Should preserve order items when updating")
+    void testUpdateOrder_PreserveItems() {
         // Given
         Order updatedOrder = new Order();
-        updatedOrder.setStatus("REFUSED");
+        updatedOrder.setStatus("PROCESSING");
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(existingOrder));
         when(orderRepository.save(any(Order.class))).thenReturn(existingOrder);
-        when(orderHistoryRepository.save(any(OrderHistory.class))).thenAnswer(invocation -> {
-            OrderHistory history = invocation.getArgument(0);
-            assertNotNull(history.getItems());
-            assertEquals(1, history.getItems().size());
-            return history;
-        });
 
         // When
-        orderService.updateOrder(1L, updatedOrder);
+        Order result = orderService.updateOrder(1L, updatedOrder);
 
         // Then
-        verify(orderHistoryRepository, times(1)).save(any(OrderHistory.class));
+        assertNotNull(result);
+        assertNotNull(result.getItems());
+        assertEquals(1, result.getItems().size());
+        verify(orderRepository, times(1)).save(existingOrder);
     }
 
     @Test
@@ -196,23 +180,24 @@ class OrderServiceTest {
         // Given
         existingOrder.setItems(new ArrayList<>());
         Order updatedOrder = new Order();
-        updatedOrder.setStatus("REFUSED");
+        updatedOrder.setStatus("PROCESSING");
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(existingOrder));
         when(orderRepository.save(any(Order.class))).thenReturn(existingOrder);
-        when(orderHistoryRepository.save(any(OrderHistory.class))).thenAnswer(invocation -> {
-            OrderHistory history = invocation.getArgument(0);
-            assertTrue(history.getItems().isEmpty());
-            return history;
-        });
 
         // When
-        orderService.updateOrder(1L, updatedOrder);
+        Order result = orderService.updateOrder(1L, updatedOrder);
 
         // Then
-        verify(orderHistoryRepository, times(1)).save(any(OrderHistory.class));
+        assertNotNull(result);
+        assertTrue(result.getItems().isEmpty());
+        verify(orderRepository, times(1)).save(existingOrder);
     }
 }
+
+
+
+
 
 
 

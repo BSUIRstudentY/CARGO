@@ -35,25 +35,29 @@ public class CatalogController {
             @RequestParam(required = false) Float maxPrice,
             @RequestParam(required = false) String sortBy) {
 
-        // Настройка пагинации и сортировки
-        Pageable pageable = PageRequest.of(page, size);
+        // Настройка пагинации и сортировки (по умолчанию — сначала новые по дате)
+        Sort sort = Sort.by("product.lastUpdated").descending();
         if (sortBy != null) {
             switch (sortBy) {
                 case "price_asc":
-                    pageable = PageRequest.of(page, size, Sort.by("product.price").ascending());
+                    sort = Sort.by("product.price").ascending();
                     break;
                 case "price_desc":
-                    pageable = PageRequest.of(page, size, Sort.by("product.price").descending());
+                    sort = Sort.by("product.price").descending();
                     break;
                 case "sales_desc":
-                    pageable = PageRequest.of(page, size, Sort.by("product.salesCount").descending());
+                    sort = Sort.by("product.salesCount").descending();
+                    break;
+                case "date_desc":
+                    sort = Sort.by("product.lastUpdated").descending();
                     break;
                 default:
-                    pageable = PageRequest.of(page, size);
+                    break;
             }
         }
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-        // Запрос к Catalog (без фильтра по status)
+        // Запрос к Catalog с загрузкой product и фильтрацией null
         Page<Catalog> catalogPage;
         if (searchTerm != null && !searchTerm.isEmpty()) {
             if (minPrice != null && maxPrice != null) {
@@ -66,18 +70,19 @@ public class CatalogController {
             Float finalMaxPrice = maxPrice != null ? maxPrice : Float.MAX_VALUE;
             catalogPage = catalogRepository.findByProductPriceBetween(finalMinPrice, finalMaxPrice, pageable);
         } else {
-            catalogPage = catalogRepository.findAll(pageable);
+            catalogPage = catalogRepository.findAllWithProduct(pageable);
         }
 
-        // Преобразуем Catalog в Product
+        // Преобразуем Catalog в Product (product уже загружен через @EntityGraph)
         List<Product> products = catalogPage.getContent().stream()
                 .map(Catalog::getProduct)
-                .filter(product -> product != null) // Фильтруем null
+                .filter(product -> product != null && product.getId() != null) // Фильтруем null и невалидные
                 .collect(Collectors.toList());
 
         // Формируем ответ
         Map<String, Object> response = new HashMap<>();
         response.put("content", products);
+        // totalPages и totalElements от оригинального запроса (уже фильтруются WHERE c.product IS NOT NULL)
         response.put("totalPages", catalogPage.getTotalPages());
         response.put("totalElements", catalogPage.getTotalElements());
 

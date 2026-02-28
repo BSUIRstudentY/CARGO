@@ -4,6 +4,7 @@ services:
     container_name: backend
     volumes:
       - ./backend.jar:/root/backend.jar
+      # ВАЖНО: НЕ монтируем data/ директорию с SQLite!
     command: ["java", "-jar", "/root/backend.jar"]
     ports:
       - "8080:8080"
@@ -11,7 +12,13 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      # Database
+      # Database - MySQL для продакшена (переопределяет SQLite из application.yml)
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/CargoDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=fluvion_user
+      - SPRING_DATASOURCE_PASSWORD=1206_1105timaZ
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      # Альтернативные переменные (для совместимости)
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_NAME=CargoDB

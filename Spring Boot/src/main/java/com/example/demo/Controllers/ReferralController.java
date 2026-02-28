@@ -61,7 +61,7 @@ public class ReferralController {
 
         UserDTO userDTO = new UserDTO();
         userDTO.setEmail(user.getEmail());
-        userDTO.setUsername(user.getUsername());
+        userDTO.setUsername(user.getDisplayUsername()); // Используем реальное имя пользователя
         userDTO.setReferralCode(user.getReferralCode() != null ? user.getReferralCode() : "");
 
         logger.info("Returning UserDTO for email: " + email);

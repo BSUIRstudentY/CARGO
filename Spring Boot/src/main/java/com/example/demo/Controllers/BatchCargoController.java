@@ -9,7 +9,9 @@ import com.example.demo.Repositories.BatchCargoRepository;
 import com.example.demo.Repositories.OrderItemRepository;
 import com.example.demo.Repositories.OrderRepository;
 import com.example.demo.Repositories.UserRepository;
+import com.example.demo.Services.GmailSenderService;
 import com.example.demo.Services.NotificationService;
+import com.example.demo.Services.GmailSenderService.OrderInfo;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +28,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import jakarta.persistence.EntityNotFoundException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -48,6 +53,8 @@ public class BatchCargoController {
     private JavaMailSender mailSender;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private GmailSenderService gmailSenderService;
     private final WebClient webClient;
 
     @Autowired
@@ -287,23 +294,104 @@ public class BatchCargoController {
         try {
             BatchCargo batch = batchCargoRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Batch not found"));
-            batch.setStatus(request.getStatus());
-            batch.setReasonRefusal(request.getReasonRefusal());
-            batch.setPhotoUrl(request.getPhotoUrl());
-            batch.setDescription(request.getDescription());
+            String oldStatus = batch.getStatus(); // Сохраняем старый статус ДО изменения
+            
+            if (request.getStatus() != null) {
+                batch.setStatus(request.getStatus());
+            }
+            if (request.getReasonRefusal() != null) {
+                batch.setReasonRefusal(request.getReasonRefusal());
+            }
+            if (request.getPhotoUrl() != null) {
+                batch.setPhotoUrl(request.getPhotoUrl());
+            }
+            if (request.getDescription() != null) {
+                batch.setDescription(request.getDescription());
+            }
+            
+            // Обновление логистических полей
+            if (request.getBatchTrackingNumber() != null) {
+                batch.setBatchTrackingNumber(request.getBatchTrackingNumber());
+            }
+            if (request.getChinaWarehouseAddress() != null) {
+                batch.setChinaWarehouseAddress(request.getChinaWarehouseAddress());
+            }
+            if (request.getConsolidationWarehouse() != null) {
+                batch.setConsolidationWarehouse(request.getConsolidationWarehouse());
+            }
+            if (request.getShippingMethod() != null) {
+                batch.setShippingMethod(request.getShippingMethod());
+            }
+            if (request.getCarrierName() != null) {
+                batch.setCarrierName(request.getCarrierName());
+            }
+            if (request.getCustomsDeclarationNumber() != null) {
+                batch.setCustomsDeclarationNumber(request.getCustomsDeclarationNumber());
+            }
+            if (request.getCustomsStatus() != null) {
+                batch.setCustomsStatus(request.getCustomsStatus());
+            }
+            if (request.getTotalBatchWeight() != null) {
+                batch.setTotalBatchWeight(request.getTotalBatchWeight());
+            }
+            if (request.getTotalBatchValue() != null) {
+                batch.setTotalBatchValue(request.getTotalBatchValue());
+            }
+            
             BatchCargo savedBatch = batchCargoRepository.save(batch);
-            if ("REFUSED".equals(request.getStatus())) {
-                for (Order order : batch.getOrders()) {
-                    User user = userRepository.findByEmail(order.getUser().getEmail()).orElse(null);
+            
+            // Асинхронная отправка уведомлений всем пользователям, чьи заказы входят в сборный груз
+            if (request.getStatus() != null && !request.getStatus().equals(oldStatus)) {
+                final String finalStatus = request.getStatus();
+                final String finalReasonRefusal = request.getReasonRefusal();
+                final String finalTrackingNumber = savedBatch.getBatchTrackingNumber();
+                
+                // Группируем заказы по пользователям
+                Map<User, List<GmailSenderService.OrderInfo>> userOrdersMap = new HashMap<>();
+                for (Order order : savedBatch.getOrders()) {
+                    User user = order.getUser();
                     if (user != null) {
-                        notificationService.sendUserNotification(
-                                user,
-                                String.format("Сборный груз #%d был отклонён. Причина: %s", id, request.getReasonRefusal()),
-                                id,
-                                "BATCH_UPDATE"
+                            userOrdersMap.computeIfAbsent(user, k -> new ArrayList<>())
+                            .add(new OrderInfo(
+                                order.getId(),
+                                order.getOrderNumber(),
+                                order.getTotalClientPrice(),
+                                order.getShippingRateFixed()
+                            ));
+                    }
+                }
+                
+                // Отправляем уведомления каждому пользователю
+                for (Map.Entry<User, List<GmailSenderService.OrderInfo>> entry : userOrdersMap.entrySet()) {
+                    User user = entry.getKey();
+                    List<GmailSenderService.OrderInfo> userOrders = entry.getValue();
+                    
+                    // Асинхронная отправка уведомления на сайте
+                    String notificationMessage = String.format(
+                        "Статус сборного груза #%d изменён на: %s",
+                        id,
+                        getBatchStatusText(finalStatus)
+                    );
+                    if ("REFUSED".equals(finalStatus) && finalReasonRefusal != null) {
+                        notificationMessage += ". Причина: " + finalReasonRefusal;
+                    }
+                    notificationService.sendUserNotificationAsync(
+                        user,
+                        notificationMessage,
+                        id,
+                        "BATCH_UPDATE"
+                    );
+
+                    // Асинхронная отправка email-уведомления (если email верифицирован и флаг уведомлений включен)
+                    if (user.getEmailVerified() != null && user.getEmailVerified() &&
+                        user.getNotificationsEnabled() != null && user.getNotificationsEnabled()) {
+                        gmailSenderService.sendBatchCargoStatusChangeNotification(
+                            user.getEmail(),
+                            id,
+                            finalStatus,
+                            finalTrackingNumber,
+                            userOrders
                         );
-                    } else {
-                        System.err.println("User not found for email: " + order.getUser().getEmail());
                     }
                 }
             }
@@ -317,6 +405,28 @@ public class BatchCargoController {
         }
     }
 
+    private String getBatchStatusText(String status) {
+        switch (status) {
+            case "UNFINISHED":
+                return "Не завершён";
+            case "FINISHED":
+                return "Готов к отправке";
+            case "IN_TRANSIT":
+                return "В пути";
+            case "AT_CUSTOMS":
+                return "На таможне";
+            case "ARRIVED_IN_MINSK":
+                return "Прибыл в Минск";
+            case "DELIVERED":
+            case "COMPLETED":
+                return "Доставлен";
+            case "REFUSED":
+                return "Отклонён";
+            default:
+                return status;
+        }
+    }
+
     @PutMapping("/{id}/arrived-minsk")
     @Transactional
     public ResponseEntity<BatchCargoDTO> markArrivedInMinsk(@PathVariable Long id) {
@@ -326,26 +436,45 @@ public class BatchCargoController {
             // Убрана проверка на FINISHED, так как статусы теперь управляются вручную
             batch.setStatus("ARRIVED_IN_MINSK");
             BatchCargo savedBatch = batchCargoRepository.save(batch);
+            
+            // Группируем заказы по пользователям
+            Map<User, List<OrderInfo>> userOrdersMap = new HashMap<>();
             for (Order order : batch.getOrders()) {
-                User user = userRepository.findByEmail(order.getUser().getEmail()).orElse(null);
+                User user = order.getUser();
                 if (user != null) {
-                    notificationService.sendUserNotification(
-                            user,
-                            String.format("Сборный груз #%d пришел в Минск и уже на Европочте.", id),
-                            id,
-                            "BATCH_UPDATE"
-                    );
-                } else {
-                    System.err.println("User not found for email: " + order.getUser().getEmail());
+                    userOrdersMap.computeIfAbsent(user, k -> new ArrayList<>())
+                        .add(new OrderInfo(
+                            order.getId(),
+                            order.getOrderNumber(),
+                            order.getTotalClientPrice(),
+                            order.getShippingRateFixed()
+                        ));
                 }
-                try {
-                    SimpleMailMessage message = new SimpleMailMessage();
-                    message.setTo(order.getUser().getEmail());
-                    message.setSubject("Сборный груз прибыл в Минск");
-                    message.setText("Ваш груз из сборного груза прибыл в Минск и уже на Европочте.");
-                    mailSender.send(message);
-                } catch (Exception mailError) {
-                    System.err.println("Failed to send arrived in Minsk email to " + order.getUser().getEmail() + ": " + mailError.getMessage());
+            }
+            
+            // Отправляем уведомления каждому пользователю
+            for (Map.Entry<User, List<OrderInfo>> entry : userOrdersMap.entrySet()) {
+                User user = entry.getKey();
+                List<OrderInfo> userOrders = entry.getValue();
+                
+                // Асинхронная отправка уведомления на сайте
+                notificationService.sendUserNotificationAsync(
+                        user,
+                        String.format("Сборный груз #%d пришел в Минск и уже на Европочте.", id),
+                        id,
+                        "BATCH_UPDATE"
+                );
+
+                // Асинхронная отправка email-уведомления (если email верифицирован и флаг уведомлений включен)
+                if (user.getEmailVerified() != null && user.getEmailVerified() &&
+                    user.getNotificationsEnabled() != null && user.getNotificationsEnabled()) {
+                    gmailSenderService.sendBatchCargoStatusChangeNotification(
+                        user.getEmail(),
+                        id,
+                        "ARRIVED_IN_MINSK",
+                        savedBatch.getBatchTrackingNumber(),
+                        userOrders
+                    );
                 }
             }
             return ResponseEntity.ok(mapToBatchCargoDTO(savedBatch));
@@ -369,26 +498,45 @@ public class BatchCargoController {
             }
             batch.setStatus("COMPLETED");
             BatchCargo savedBatch = batchCargoRepository.save(batch);
+            
+            // Группируем заказы по пользователям
+            Map<User, List<OrderInfo>> userOrdersMap = new HashMap<>();
             for (Order order : batch.getOrders()) {
-                User user = userRepository.findByEmail(order.getUser().getEmail()).orElse(null);
+                User user = order.getUser();
                 if (user != null) {
-                    notificationService.sendUserNotification(
-                            user,
-                            String.format("Груз #%d доставлен, нужно его забрать.", id),
-                            id,
-                            "BATCH_UPDATE"
-                    );
-                } else {
-                    System.err.println("User not found for email: " + order.getUser().getEmail());
+                    userOrdersMap.computeIfAbsent(user, k -> new ArrayList<>())
+                        .add(new OrderInfo(
+                            order.getId(),
+                            order.getOrderNumber(),
+                            order.getTotalClientPrice(),
+                            order.getShippingRateFixed()
+                        ));
                 }
-                try {
-                    SimpleMailMessage message = new SimpleMailMessage();
-                    message.setTo(order.getUser().getEmail());
-                    message.setSubject("Груз доставлен");
-                    message.setText("Ваш груз из сборного груза доставлен. Нужно его забрать.");
-                    mailSender.send(message);
-                } catch (Exception mailError) {
-                    System.err.println("Failed to send delivered email to " + order.getUser().getEmail() + ": " + mailError.getMessage());
+            }
+            
+            // Отправляем уведомления каждому пользователю
+            for (Map.Entry<User, List<OrderInfo>> entry : userOrdersMap.entrySet()) {
+                User user = entry.getKey();
+                List<OrderInfo> userOrders = entry.getValue();
+                
+                // Асинхронная отправка уведомления на сайте
+                notificationService.sendUserNotificationAsync(
+                        user,
+                        String.format("Груз #%d доставлен, нужно его забрать.", id),
+                        id,
+                        "BATCH_UPDATE"
+                );
+
+                // Асинхронная отправка email-уведомления (если email верифицирован и флаг уведомлений включен)
+                if (user.getEmailVerified() != null && user.getEmailVerified() &&
+                    user.getNotificationsEnabled() != null && user.getNotificationsEnabled()) {
+                    gmailSenderService.sendBatchCargoStatusChangeNotification(
+                        user.getEmail(),
+                        id,
+                        "COMPLETED",
+                        savedBatch.getBatchTrackingNumber(),
+                        userOrders
+                    );
                 }
             }
             return ResponseEntity.ok(mapToBatchCargoDTO(savedBatch));
@@ -426,6 +574,20 @@ public class BatchCargoController {
         }
     }
 
+    @PutMapping("/items/{itemId}/tracking")
+    @Transactional
+    public ResponseEntity<Void> updateItemTracking(@PathVariable Long itemId, @RequestBody ItemTrackingRequest request) {
+        OrderItem item = orderItemRepository.findById(itemId).orElse(null);
+        if (item == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (request.getTrackingNumber() != null) {
+            item.setTrackingNumber(request.getTrackingNumber());
+        }
+        orderItemRepository.save(item);
+        return ResponseEntity.ok().build();
+    }
+
     @PutMapping("/items/{itemId}")
     @Transactional
     public ResponseEntity<Void> markItemStatus(@PathVariable Long itemId, @RequestBody ItemStatusRequest request) {
@@ -443,26 +605,6 @@ public class BatchCargoController {
             Order order = item.getOrder();
             if (order.getTotalClientPrice() > 0) {
                 User user = order.getUser();
-                
-                // Возвращаем зарезервированные средства пропорционально стоимости товара
-                float itemCost = item.getPriceAtTime() * item.getQuantity();
-                float orderTotal = order.getTotalClientPrice() != null ? order.getTotalClientPrice() : 1.0f;
-                float reservedToReturn = 0.0f;
-                
-                if (order.getBalanceAmount() != null && order.getBalanceAmount() > 0) {
-                    // Рассчитываем пропорциональную часть зарезервированных средств для этого товара
-                    float reservedRatio = itemCost / orderTotal;
-                    reservedToReturn = order.getBalanceAmount() * reservedRatio;
-                }
-                
-                // Если есть зарезервированные средства, возвращаем их (уменьшаем reservedBalance)
-                if (reservedToReturn > 0) {
-                    float currentReserved = user.getReservedBalance() != null ? user.getReservedBalance() : 0.0f;
-                    user.setReservedBalance(Math.max(0.0f, currentReserved - reservedToReturn));
-                    logger.info("Returned reserved balance {} for NOT_PURCHASED item {} in order {}", reservedToReturn, itemId, order.getId());
-                }
-                
-                userRepository.save(user);
             }
             User notificationUser = order.getUser();
             String productName = item.getProduct() != null ? item.getProduct().getName() :
@@ -495,6 +637,22 @@ public class BatchCargoController {
         dto.setStatus(batchCargo.getStatus());
         dto.setPhotoUrl(batchCargo.getPhotoUrl());
         dto.setDescription(batchCargo.getDescription());
+        // Устанавливаем количество заказов: сначала пробуем из поля orderCount, если нет - считаем из orders
+        int orderCount = 0;
+        if (batchCargo.getOrderCount() != null) {
+            orderCount = batchCargo.getOrderCount();
+        } else {
+            try {
+                orderCount = batchCargo.getOrders() != null ? batchCargo.getOrders().size() : 0;
+            } catch (Exception e) {
+                // Если orders не загружены (lazy loading), используем 0 или можем загрузить явно
+                logger.warn("Could not get order count from orders list for batch {}: {}", batchCargo.getId(), e.getMessage());
+                orderCount = 0;
+            }
+        }
+        dto.setOrderCount(orderCount);
+        // Включаем список заказов для обратной совместимости, но оставляем пустым для оптимизации (не загружаем все заказы)
+        dto.setOrders(List.of());
         return dto;
     }
 
@@ -552,7 +710,6 @@ public class BatchCargoController {
                 .collect(Collectors.toList()));
         dto.setUserEmail(order.getUser().getEmail());
         dto.setPaymentMethod(order.getPaymentMethod());
-        dto.setBalanceAmount(order.getBalanceAmount());
         return dto;
     }
 
@@ -564,6 +721,8 @@ public class BatchCargoController {
         private String status;
         private String photoUrl;
         private String description;
+        private Integer orderCount;
+        private List<OrderDTO> orders;
     }
 
     @Data
@@ -603,6 +762,15 @@ public class BatchCargoController {
         private String description;
         private String status;
         private String reasonRefusal;
+        private String batchTrackingNumber;
+        private String chinaWarehouseAddress;
+        private String consolidationWarehouse;
+        private String shippingMethod;
+        private String carrierName;
+        private String customsDeclarationNumber;
+        private String customsStatus;
+        private Float totalBatchWeight;
+        private Float totalBatchValue;
     }
 
     @Data
@@ -616,8 +784,7 @@ public class BatchCargoController {
         private String reasonRefusal;
         private List<OrderItemDTO> items;
         private String userEmail;
-        private String paymentMethod; // BALANCE_ONLY, NO_BALANCE, BALANCE_PARTIAL
-        private Float balanceAmount; // Сумма, оплаченная с баланса
+        private String paymentMethod; // NO_BALANCE (обычная оплата)
     }
 
     @Data
@@ -640,6 +807,11 @@ public class BatchCargoController {
     static class ItemStatusRequest {
         private String status;
         private String purchaseRefusalReason;
+    }
+
+    @Data
+    static class ItemTrackingRequest {
+        private String trackingNumber;
     }
 
     @Data

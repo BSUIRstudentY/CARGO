@@ -19,7 +19,7 @@ import lombok.EqualsAndHashCode;
         @Index(name = "idx_purchase_status", columnList = "purchase_status")
 })
 @Data
-@EqualsAndHashCode(exclude = {"order", "orderHistory", "product"})
+@EqualsAndHashCode(exclude = {"order", "product"})
 public class OrderItem {
 
     @Id
@@ -32,14 +32,10 @@ public class OrderItem {
     @NotNull(message = "Order is required")
     private Order order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_history_id")
-    private OrderHistory orderHistory;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    @NotNull(message = "Product is required")
-    private Product product;
+    @JoinColumn(name = "product_id", nullable = true)
+    private Product product; // Nullable for self-pickup orders where product is unknown
 
     @Column(name = "quantity", nullable = false)
     @NotNull(message = "Quantity is required")

@@ -1,5 +1,6 @@
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Components/ContextHolder.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Components/LocalDateTimeArraySerializer.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Config/ExchangeRateInitializer.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/AsyncConfig.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/CacheConfig.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/GlobalExceptionHandler.java
@@ -7,6 +8,7 @@
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/SecurityConfiguration.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/WebClientConfig.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Configs/WebSocketConfig.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/AdminCRMController.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/AdminStatsController.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/AuthController.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/BatchCargoController.java
@@ -15,11 +17,11 @@
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/CatalogController.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/ChatController.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/EupostApiController.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/ExchangeRateController.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/LoyaltyController.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/NewsController.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/NotificationController.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/OrderController.java
-/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/OrderHistoryController.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/ProductController.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/ProductReviewController.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Controllers/PromocodeController.java
@@ -41,10 +43,10 @@
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Catalog.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/ChatMessage.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/DiscountType.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/ExchangeRate.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/News.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Notification.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Order.java
-/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/OrderHistory.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/OrderItem.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/Product.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Entities/ProductReview.java
@@ -66,9 +68,9 @@
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/CartRepository.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/CatalogRepository.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/ChatMessageRepository.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/ExchangeRateRepository.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/NewsRepository.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/NotificationRepository.java
-/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/OrderHistoryRepository.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/OrderItemRepository.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/OrderRepository.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Repositories/ProductRepository.java
@@ -84,10 +86,12 @@
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/ChatService.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/ClusteringService.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/CustomUserDetailsService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/ExchangeRateService.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/GmailSenderService.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/NewsService.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/NotificationService.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/OrderService.java
+/home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/PasswordResetService.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/ProductReviewService.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/QuestService.java
 /home/itmaibenben/Рабочий стол/Cursor/CargoSite/Spring Boot/src/main/java/com/example/demo/Services/ReviewService.java

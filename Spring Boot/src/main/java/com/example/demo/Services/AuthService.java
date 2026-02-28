@@ -67,7 +67,7 @@ public class AuthService {
 
             HashMap<String, String> map = new HashMap<>();
             map.put("email", user.getEmail());
-            map.put("username", user.getUsername());
+            map.put("username", user.getDisplayUsername()); // Используем реальное имя пользователя
             map.put("token", token);
             map.put("role", user.getRole());
             return map;
@@ -123,6 +123,7 @@ public class AuthService {
         user.setReferralCode(UUID.randomUUID().toString());
         user.setMoneySpent(0.0);
         user.setReferralCount(0);
+        user.setNotificationsEnabled(true); // По умолчанию уведомления включены
 
 
         try {
@@ -146,6 +147,23 @@ public class AuthService {
     {
 
         return userRepository.existsByReferralCode(code);
+    }
+
+    @Transactional
+    public void resetPassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    logger.warn("Password reset failed: user not found with email: {}", email);
+                    return new RuntimeException("Пользователь с таким email не найден");
+                });
+
+        if (newPassword == null || newPassword.trim().isEmpty() || newPassword.length() < 6) {
+            throw new IllegalArgumentException("Пароль должен содержать минимум 6 символов");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        logger.info("Password reset successfully for email: {}", email);
     }
 
 }

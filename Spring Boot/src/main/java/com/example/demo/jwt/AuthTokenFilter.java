@@ -66,10 +66,22 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    private static final String AUTH_COOKIE_NAME = "auth_token";
+
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
         if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
             return headerAuth.substring(7);
+        }
+        // Поддержка httpOnly-куки (веб): токен недоступен из JavaScript
+        jakarta.servlet.http.Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (jakarta.servlet.http.Cookie cookie : cookies) {
+                if (AUTH_COOKIE_NAME.equals(cookie.getName())) {
+                    String v = cookie.getValue();
+                    return (v != null && !v.isEmpty()) ? v : null;
+                }
+            }
         }
         return null;
     }

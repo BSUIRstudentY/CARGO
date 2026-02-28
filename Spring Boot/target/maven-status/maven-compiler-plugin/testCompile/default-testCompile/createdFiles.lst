@@ -16,7 +16,6 @@ com/example/demo/DemoApplicationTests.class
 com/example/demo/integration/AdminStatsControllerIntegrationTest.class
 com/example/demo/integration/ReviewControllerIntegrationTest.class
 com/example/demo/integration/ProductReviewControllerIntegrationTest.class
-com/example/demo/integration/OrderHistoryControllerIntegrationTest.class
 com/example/demo/integration/ReferralControllerIntegrationTest.class
 com/example/demo/integration/VerificationControllerIntegrationTest.class
 com/example/demo/integration/BatchCargoControllerIntegrationTest.class

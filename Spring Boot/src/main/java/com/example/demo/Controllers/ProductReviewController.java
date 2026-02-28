@@ -4,8 +4,11 @@ package com.example.demo.Controllers;
 import com.example.demo.Components.ContextHolder;
 import com.example.demo.DTO.ProductReviewDTO;
 import com.example.demo.Entities.Product;
+import com.example.demo.Entities.QuestConditionType;
+import com.example.demo.POJO.QuestEvent;
 import com.example.demo.Repositories.ProductRepository;
 import com.example.demo.Services.ProductReviewService;
+import com.example.demo.Services.QuestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,9 @@ public class ProductReviewController {
     private ProductReviewService reviewService;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private QuestService questService;
+    
     @PostMapping
     public ResponseEntity<ProductReviewDTO> createReview(@RequestBody ProductReviewDTO reviewDTO, Authentication authentication) {
         String userEmail = ContextHolder.getCurrentUserEmail();
@@ -26,6 +32,16 @@ public class ProductReviewController {
         product.addReview(reviewDTO.getRating());
         productRepository.save(product);
         ProductReviewDTO createdReview = reviewService.createReview(reviewDTO, userEmail);
+        
+        // Обновляем квест REVIEW (оставить отзыв)
+        try {
+            QuestEvent reviewEvent = new QuestEvent(userEmail, QuestConditionType.REVIEW);
+            questService.handleEvent(reviewEvent);
+        } catch (Exception e) {
+            System.err.println("Error processing REVIEW quest event: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
         return ResponseEntity.ok(createdReview);
     }
 

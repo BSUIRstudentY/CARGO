@@ -21,9 +21,12 @@ import org.springframework.security.web.header.writers.XXssProtectionHeaderWrite
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.Arrays;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Security configuration with enhanced security features:
@@ -38,6 +41,8 @@ import java.util.List;
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class SecurityConfiguration {
     
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfiguration.class);
+    
     @Autowired
     private AuthTokenFilter authTokenFilter;
 
@@ -45,7 +50,7 @@ public class SecurityConfiguration {
     private UserDetailsService userDetailsService;
 
     @Value("${app.cors.allowed-origins:http://localhost:5173,https://fluvion.by}")
-    private String[] allowedOrigins;
+    private String allowedOriginsString;
 
     /**
      * Public endpoints that don't require authentication.
@@ -53,6 +58,7 @@ public class SecurityConfiguration {
      */
     private static final String[] WHITE_LIST_URL = {
             "/api/telegram",
+            "/api/telegram/**",
             "/api/auth/**",
             "/api/products",
             "/api/cluster",
@@ -63,7 +69,11 @@ public class SecurityConfiguration {
             "/api/payment/webhook", // Webhook needs to be public but should verify signature
             "/api/news", // Public news endpoints
             "/api/news/**", // Public news endpoints
-            "/error" // Error endpoint
+            "/error", // Error endpoint
+            "/api/exchange-rates/**",
+            "/api/exchange-rates/shipping/current",
+            "/api/exchange-rates/active"
+
     };
 
     /**
@@ -75,6 +85,8 @@ public class SecurityConfiguration {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        logger.info("Configuring security filter chain with white list: {}", Arrays.toString(WHITE_LIST_URL));
+        
         http
                 // Disable CSRF for stateless JWT-based API
                 // Note: For stateful sessions, CSRF should be enabled
@@ -83,8 +95,16 @@ public class SecurityConfiguration {
                 // CORS configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 
-                // Authorization rules
+                // Authorization rules - order matters! More specific paths first
                 .authorizeHttpRequests(auth -> auth
+                        // Exchange rates endpoints - must be first for exact match
+                        // Try with explicit HTTP method
+                        .requestMatchers(HttpMethod.GET, "/api/exchange-rates/shipping/current").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/exchange-rates/active").permitAll()
+                        .requestMatchers("/api/exchange-rates/shipping/current").permitAll()
+                        .requestMatchers("/api/exchange-rates/active").permitAll()
+                        .requestMatchers("/api/exchange-rates/**").permitAll()
+                        // Other white list endpoints
                         .requestMatchers(WHITE_LIST_URL).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
@@ -129,11 +149,35 @@ public class SecurityConfiguration {
         
         // Allow specific origins (configure via application.yml)
         // In production, replace with actual frontend domain
-        if (allowedOrigins != null && allowedOrigins.length > 0) {
-            configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
+        if (allowedOriginsString != null && !allowedOriginsString.isEmpty()) {
+            // Parse comma-separated origins
+            String[] origins = allowedOriginsString.split(",");
+            List<String> originList = Arrays.stream(origins)
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .toList();
+            if (!originList.isEmpty()) {
+                configuration.setAllowedOrigins(originList);
+                logger.info("CORS configured with allowed origins: {}", originList);
+            } else {
+                // Fallback for development - includes mobile app support
+                configuration.setAllowedOriginPatterns(List.of(
+                    "http://localhost:*", 
+                    "https://*.fluvion.by",
+                    "exp://*",
+                    "https://*.expo.dev"
+                ));
+                logger.info("CORS configured with origin patterns: http://localhost:*, https://*.fluvion.by, exp://*, https://*.expo.dev");
+            }
         } else {
-            // Fallback for development
-            configuration.setAllowedOriginPatterns(List.of("http://localhost:*", "https://*.fluvion.by"));
+            // Fallback for development - includes mobile app support
+            configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:*", 
+                "https://*.fluvion.by",
+                "exp://*",
+                "https://*.expo.dev"
+            ));
+            logger.info("CORS configured with default origin patterns: http://localhost:*, https://*.fluvion.by, exp://*, https://*.expo.dev");
         }
         
         // Allowed HTTP methods
@@ -145,6 +189,14 @@ public class SecurityConfiguration {
                 "Content-Type",
                 "X-Requested-With",
                 "Accept",
+                "accept",
+                "accept-language",
+                "origin",
+                "referer",
+                "sec-fetch-dest",
+                "sec-fetch-mode",
+                "sec-fetch-site",
+                "user-agent",
                 "Origin",
                 "Access-Control-Request-Method",
                 "Access-Control-Request-Headers"
@@ -157,7 +209,13 @@ public class SecurityConfiguration {
         ));
         
         // Allow credentials (cookies, authorization headers)
-        configuration.setAllowCredentials(true);
+        // Note: When using setAllowedOrigins with specific origins, allowCredentials can be true
+        // When using setAllowedOriginPatterns, allowCredentials should be false or use specific origins
+        if (configuration.getAllowedOrigins() != null && !configuration.getAllowedOrigins().isEmpty()) {
+            configuration.setAllowCredentials(true);
+        } else {
+            configuration.setAllowCredentials(false);
+        }
         
         // Cache preflight requests for 1 hour
         configuration.setMaxAge(3600L);

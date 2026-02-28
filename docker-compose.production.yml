@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  backend:
+    image: openjdk:21-jdk-slim
+    container_name: backend
+    volumes:
+      - ./backend.jar:/root/backend.jar
+    command: ["java", "-jar", "/root/backend.jar"]
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Database - MySQL для продакшена (КРИТИЧНО: переопределяет SQLite!)
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/CargoDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=fluvion_user
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-1206_1105timaZ}
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      # Альтернативные переменные (для совместимости)
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=CargoDB
+      - DB_USERNAME=fluvion_user
+      - DB_PASSWORD=${DB_PASSWORD:-1206_1105timaZ}
+      
+      # Mail
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=fluvionbiz@gmail.com
+      - SPRING_MAIL_PASSWORD=1206_1105timaZ
+      # Или:
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=fluvionbiz@gmail.com
+      - MAIL_PASSWORD=1206_1105timaZ
+      
+      # JWT
+      - JWT_SECRET=your-very-secure-secret-key-32-chars-long-minimum
+      - JWT_EXPIRATION=86400000
+      
+      # ⚠️ КРИТИЧНО: bePaid (добавьте реальные значения!)
+      - BEPAID_SHOP_ID=your_shop_id
+      - BEPAID_SECRET_KEY=your_secret_key
+      - BEPAID_CHECKOUT_URL=https://checkout.bepaid.by/ctp/api/checkouts
+      - BEPAID_RETURN_URL=https://fluvion.by/thanks
+      - BEPAID_FAIL_URL=https://fluvion.by/badResponse
+      - BEPAID_CALLBACK_URL=https://fluvion.by/api/payment/webhook
+      - BEPAID_TEST_MODE=true
+      
+      # ⚠️ КРИТИЧНО: EuropePost API (добавьте реальные значения!)
+      - EUPOST_API_URL=https://api.eurotorg.by:10352/Json
+      - EUPOST_SERVICE_NUMBER=your_service_number
+      - EUPOST_LOGIN=your_login
+      - EUPOST_PASSWORD=your_password
+      
+      # Server
+      - SERVER_PORT=8080
+      
+      # Hibernate
+      - HIBERNATE_DDL_AUTO=update
+      - SHOW_SQL=false
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: CargoDB
+      MYSQL_USER: fluvion_user
+      MYSQL_PASSWORD: 1206_1105timaZ
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - app-network
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+
+networks:
+  app-network:
+    driver: bridge
+
+
+
+
+
+

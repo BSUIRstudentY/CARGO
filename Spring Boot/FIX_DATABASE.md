@@ -50,3 +50,7 @@ HIBERNATE_DDL_AUTO=update
 # Logging Configuration
 SHOW_SQL=false
 
+
+
+
+

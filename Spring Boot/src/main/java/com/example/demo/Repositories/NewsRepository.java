@@ -46,3 +46,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     Page<News> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }
 
+
+
+
+

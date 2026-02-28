@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление списком рассылки</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📢 Управление списком рассылки</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-label">Всего чатов:</span>
+                    <span class="stat-value" id="total-chats">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">В списке рассылки:</span>
+                    <span class="stat-value" id="spam-list-count">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="controls">
+            <button id="refresh-btn" class="btn btn-primary">🔄 Обновить список</button>
+            <input type="text" id="search-input" placeholder="🔍 Поиск по названию чата..." class="search-input">
+        </div>
+
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Загрузка чатов...</p>
+        </div>
+
+        <div class="error" id="error" style="display: none;"></div>
+
+        <div class="chats-container" id="chats-container">
+            <div class="chats-grid" id="chats-grid">
+                <!-- Карточки чатов будут добавлены через JavaScript -->
+            </div>
+            
+            <!-- Пагинация -->
+            <div class="pagination" id="pagination" style="display: none;">
+                <button id="prev-btn" class="pagination-btn" disabled>‹ Назад</button>
+                <div class="pagination-info">
+                    <span id="page-info">Страница 1 из 1</span>
+                </div>
+                <button id="next-btn" class="pagination-btn">Вперед ›</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+

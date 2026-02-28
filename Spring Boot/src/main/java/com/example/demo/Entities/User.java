@@ -16,7 +16,9 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+    @UniqueConstraint(columnNames = "telegram")
+})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Getter
 @Setter
@@ -25,14 +27,11 @@ public class User implements UserDetails {  // Добавлено: implements Us
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
-    private String username;
+    @Column(nullable = false, name = "username")
+    private String username; // Реальное имя пользователя (display name)
 
     @Column(nullable = false)
     private String password;
-
-    @Column(nullable = true)
-    private String phone;
 
     @Column(nullable = true)
     private String company;
@@ -58,11 +57,6 @@ public class User implements UserDetails {  // Добавлено: implements Us
     @Column(nullable = true)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    private Float balance = 0.0f;
-
-    @Column(nullable = false)
-    private Float reservedBalance = 0.0f; // Зарезервированный баланс для заказов
 
     @Column(nullable = true)
     private Double moneySpent;
@@ -78,9 +72,6 @@ public class User implements UserDetails {  // Добавлено: implements Us
 
     @Column(nullable = false)
     private Boolean emailVerified = false;
-
-    @Column(nullable = false)
-    private Boolean phoneVerified = false;
 
     @Column(name = "telegram")
     private String telegramUserId;
@@ -116,8 +107,16 @@ public class User implements UserDetails {  // Добавлено: implements Us
     }
 
     @Override
+    @JsonIgnore  // Игнорируем при сериализации, чтобы не конфликтовало с полем username
     public String getUsername() {
-        return email;  // Username = email (как в вашем JWT)
+        return email;  // Для UserDetails username = email (как в вашем JWT)
+    }
+    
+    // Геттер для реального имени пользователя (display name)
+    // Используем прямое обращение к полю, так как Lombok не создаст getUsername() для поля
+    // из-за переопределенного метода из UserDetails
+    public String getDisplayUsername() {
+        return username;
     }
 
     @Override

@@ -9,8 +9,17 @@ id_rsa.pub
 *.pem
 *.key
 
-# SQLite Database
+# SQLite Database - КРИТИЧНО: не коммитить в git!
 *.sqlite
 *.sqlite3
 *.db
 Spring Boot/data/
+Spring Boot/data/**
+**/data/*.sqlite
+**/data/*.sqlite3
+**/data/*.db
+
+# JAR файлы (собираются при деплое)
+*.jar
+!Spring Boot/mvnw
+!Spring Boot/mvnw.cmd

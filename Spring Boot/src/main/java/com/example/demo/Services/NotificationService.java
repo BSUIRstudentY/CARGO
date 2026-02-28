@@ -107,4 +107,31 @@ public class NotificationService {
         return savedNotification;
     }
 
+    @Async
+    public void sendUserNotificationAsync(User user, String message, Long relatedId, String category) {
+        try {
+            // Небольшая задержка, чтобы SQLite освободил блокировку после коммита основной транзакции
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.warn("Interrupted sleep before sending notification");
+        }
+        
+        try {
+            Notification notification = new Notification();
+            notification.setUser(user);
+            notification.setMessage(message);
+            notification.setTimestamp(LocalDateTime.now());
+            notification.setRead(false);
+            notification.setRelatedId(relatedId);
+            notification.setCategory(category);
+
+            Notification savedNotification = notificationRepository.save(notification);
+            messagingTemplate.convertAndSend("/topic/personal/" + user.getEmail(), savedNotification);
+            logger.debug("Async notification sent to user {}: {}", user.getEmail(), message);
+        } catch (Exception e) {
+            logger.error("Failed to send async notification to user {}: {}", user.getEmail(), e.getMessage(), e);
+        }
+    }
+
 }
