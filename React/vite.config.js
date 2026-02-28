@@ -35,6 +35,7 @@ export default defineConfig({
   
   // Optimize dependencies
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom'],
+    include: ['react', 'react-dom', 'react-router-dom', '@studio-freight/lenis', 'gsap'],
+    exclude: ['locomotive-scroll'],
   },
 })

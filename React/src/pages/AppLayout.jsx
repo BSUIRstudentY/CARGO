@@ -56,6 +56,8 @@ function AppLayout() {
   const navContainerRef = useRef(null);
   const canvasRef = useRef(null);
 
+  const COLORS = { navy: '#0F172A', gold: '#B89E6E' };
+
   // Определение мобильного устройства
   useEffect(() => {
     const checkMobile = () => {
@@ -257,7 +259,6 @@ function AppLayout() {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
-  /* ---------- NavItem: special = CTA «Заказать товар», isActive = текущая страница ---------- */
   const NavItem = ({ item, delay, isMobile = false }) => {
     const isSpecial = item.special;
     const isActive = isNavActive(item.path);
@@ -266,32 +267,30 @@ function AppLayout() {
       <button
         onClick={() => handleNavClick(item.path)}
         className={`w-full text-left px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl transition-all duration-200 text-xs sm:text-sm font-medium flex items-center gap-2 sm:gap-3 active:scale-95
-          ${isActive ? 'ring-2 ring-white/50 ring-inset' : ''}
+          ${isActive ? 'ring-1 ring-[#B89E6E]/50 ring-inset' : ''}
           ${isSpecial
-            ? 'font-bold bg-[rgba(0,240,255,0.1)] hover:bg-[rgba(0,240,255,0.15)] border border-[rgba(0,240,255,0.3)] hover:border-[rgba(0,240,255,0.5)] text-base text-[#00f0ff]'
-            : 'text-[#9ca3af] hover:text-[#e5e7eb] bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)]'
+            ? 'font-bold border text-[#B89E6E] hover:bg-[rgba(184,158,110,0.12)]'
+            : 'text-white/70 hover:text-white border border-transparent hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.06]'
           }`}
         style={{
+          borderColor: isSpecial ? 'rgba(184, 158, 110, 0.5)' : undefined,
           willChange: 'transform',
           transform: 'translateZ(0)',
         }}
         aria-current={isActive ? 'page' : undefined}
       >
-        {/* Иконка */}
-        <span className={`transition-transform ${isMobile ? '' : 'group-hover:scale-110'}`}>
+        <span className="transition-transform">
           {React.cloneElement(item.icon, {
             className: `w-5 h-5 ${isSpecial ? 'w-6 h-6' : ''}`,
-            style: { color: isSpecial ? '#00f0ff' : (isActive ? '#e5e7eb' : '#9ca3af') }
+            style: { color: isSpecial ? '#B89E6E' : (isActive ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.6)') }
           })}
         </span>
-
-        {/* Текст */}
         <span className="flex-1">{item.label}</span>
         {isActive && !isSpecial && (
-          <span className="flex-shrink-0 text-[10px] uppercase tracking-wider text-white/60" aria-hidden>Сейчас</span>
+          <span className="flex-shrink-0 text-[10px] uppercase tracking-wider text-white/50" aria-hidden>Сейчас</span>
         )}
         {isSpecial && (
-          <span className="flex-shrink-0 w-2 h-2 rounded-full bg-[#00f0ff] shadow-[0_0_6px_#00f0ff]" aria-hidden />
+          <span className="flex-shrink-0 w-2 h-2 rounded-full bg-[#B89E6E]" aria-hidden />
         )}
       </button>
     );
@@ -305,12 +304,9 @@ function AppLayout() {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3, delay }}
-        whileHover={{ x: 6 }}
+        whileHover={{ x: 4 }}
         className="group"
-        style={{
-          willChange: 'transform',
-          transform: 'translateZ(0)',
-        }}
+        style={{ willChange: 'transform', transform: 'translateZ(0)' }}
       >
         {content}
       </motion.li>
@@ -319,48 +315,34 @@ function AppLayout() {
 
   const HeaderActions = () => (
     <div className="flex items-center gap-2 sm:gap-3">
-      {/* Notifications Icon */}
-      <motion.button
-        whileHover={{ scale: 1.05, rotate: 5 }}
-        whileTap={{ scale: 0.95 }}
+      <button
         onClick={() => navigate('/notifications')}
-        className="relative p-1.5 sm:p-2 text-[#9ca3af] hover:text-[#00f0ff] transition-all duration-200 rounded-full hover:bg-[rgba(0,240,255,0.1)] focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/20"
+        className="p-1.5 sm:p-2 rounded-full text-white/70 hover:text-[#B89E6E] transition-colors border border-transparent hover:border-[#B89E6E]/30"
         aria-label="Уведомления"
       >
         <BellOutlineIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-      </motion.button>
-
-      {/* Cart Icon with Badge */}
-      <motion.button
-        whileHover={{ scale: 1.05, rotate: 5 }}
-        whileTap={{ scale: 0.95 }}
+      </button>
+      <button
         onClick={() => navigate('/cart')}
-        className="relative p-1.5 sm:p-2 text-[#9ca3af] hover:text-[#00f0ff] transition-all duration-200 rounded-full hover:bg-[rgba(0,240,255,0.1)] focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/20"
+        className="relative p-1.5 sm:p-2 rounded-full text-white/70 hover:text-[#B89E6E] transition-colors border border-transparent hover:border-[#B89E6E]/30"
         aria-label="Корзина"
       >
         <CartOutlineIcon className="w-4 h-4 sm:w-5 sm:h-5" />
         {cart && cart.length > 0 && (
-          <motion.span
-            className="absolute -top-1 -right-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-[#00f0ff] text-xs font-bold text-[#0a0d14] shadow-md"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full text-[10px] font-bold text-[#0F172A] min-w-[1rem]"
+            style={{ background: '#B89E6E' }}
           >
             {cart.length > 99 ? '99+' : cart.length}
-          </motion.span>
+          </span>
         )}
-      </motion.button>
-
-      {/* Profile Icon */}
-      <motion.button
-        whileHover={{ scale: 1.05, rotate: -5 }}
-        whileTap={{ scale: 0.95 }}
+      </button>
+      <button
         onClick={() => navigate('/profile')}
-        className="p-1.5 sm:p-2 text-[#9ca3af] hover:text-[#00f0ff] transition-all duration-200 rounded-full hover:bg-[rgba(0,240,255,0.1)] focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/20"
+        className="p-1.5 sm:p-2 rounded-full text-white/70 hover:text-[#B89E6E] transition-colors border border-transparent hover:border-[#B89E6E]/30"
         aria-label="Профиль"
       >
         <UserOutlineIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-      </motion.button>
+      </button>
     </div>
   );
 
@@ -426,18 +408,17 @@ function AppLayout() {
 
         .scrollbar-custom { 
           scrollbar-width: thin; 
-          scrollbar-color: #00f0ff transparent; 
+          scrollbar-color: #B89E6E transparent; 
           -webkit-overflow-scrolling: touch;
           overscroll-behavior: contain;
         }
         .scrollbar-custom::-webkit-scrollbar { width: 6px; }
         .scrollbar-custom::-webkit-scrollbar-track { background: transparent; border-radius: 3px; }
         .scrollbar-custom::-webkit-scrollbar-thumb { 
-          background: #00f0ff;
+          background: #B89E6E;
           border-radius: 3px; 
-          box-shadow: 0 0 6px rgba(0, 240, 255, 0.5); 
         }
-        .scrollbar-custom:hover::-webkit-scrollbar-thumb { background: #00d9ff; }
+        .scrollbar-custom:hover::-webkit-scrollbar-thumb { background: #D4B98A; }
         
         /* Обеспечиваем прокрутку на всех устройствах */
         aside[class*="w-64"] {
@@ -455,38 +436,62 @@ function AppLayout() {
         @keyframes float-left-right { 0%, 100% { transform: translateX(-10px); } 50% { transform: translateX(10px); } }
 
         #scroll-indicator { position: absolute; right: 3px; top: 0; bottom: 0; width: 2px;
-          background: #00f0ff; border-radius: 1px; opacity: 0; transition: opacity 0.3s ease;
-          pointer-events: none; box-shadow: 0 0 8px #00f0ff; }
+          background: #B89E6E; border-radius: 1px; opacity: 0.4; transition: opacity 0.3s ease;
+          pointer-events: none; }
 
         .nav-group-title { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
       `}</style>
 
-      {/* ---------- Fixed Header (desktop) ---------- */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0d14]/80 backdrop-blur-md border-b border-[rgba(255,255,255,0.1)]">
+      {/* ---------- Fixed Header (desktop) — Silent Empire ---------- */}
+      <header
+        className="fixed top-0 left-0 right-0 z-50 border-b"
+        style={{
+          background: 'rgba(15, 23, 42, 0.92)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderColor: 'rgba(184, 158, 110, 0.2)',
+        }}
+      >
         <div className="container-xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Hamburger (desktop) - внутри хедера слева */}
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] transition-all duration-300 text-[#e5e7eb] hover:text-[#00f0ff]"
+            className="p-2 rounded-lg border transition-all duration-200 text-white/90 hover:text-[#B89E6E] hover:border-[#B89E6E]/50"
+            style={{ borderColor: 'rgba(184, 158, 110, 0.3)', background: 'rgba(184, 158, 110, 0.06)' }}
             aria-label="Меню"
           >
             <Bars3Icon className="w-6 h-6" />
           </button>
 
-          {/* Header Actions - справа */}
           <HeaderActions />
         </div>
       </header>
 
-      {/* ---------- Mobile Header ---------- */}
-      <header className="mobile-header flex sm:hidden">
-        <button onClick={toggleSidebar} className="mobile-hamburger">
-          {isSidebarOpen ? <XMarkIcon /> : <Bars3Icon />}
+      {/* ---------- Mobile Header — Silent Empire ---------- */}
+      <header
+        className="mobile-header flex sm:hidden items-center justify-between px-4 py-3 border-b"
+        style={{
+          background: 'rgba(15, 23, 42, 0.98)',
+          backdropFilter: 'blur(12px)',
+          borderColor: 'rgba(184, 158, 110, 0.2)',
+        }}
+      >
+        <button
+          onClick={toggleSidebar}
+          className="mobile-hamburger flex items-center justify-center p-2 rounded-xl border"
+          style={{
+            borderColor: 'rgba(184, 158, 110, 0.4)',
+            color: '#B89E6E',
+            background: 'rgba(184, 158, 110, 0.08)',
+          }}
+        >
+          {isSidebarOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
         </button>
-        <div className="flex items-center gap-2">
-          <span className="mobile-logo-text">FLUVION</span>
-        </div>
-        {/* Mobile Header Actions */}
+        <span
+          className="text-xl font-black text-white"
+          style={{ fontFamily: 'Satoshi, sans-serif', letterSpacing: '-0.02em' }}
+        >
+          Fluvion
+        </span>
         <HeaderActions />
       </header>
 
@@ -527,50 +532,31 @@ function AppLayout() {
               transform: 'translateZ(0)',
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
+              background: COLORS.navy,
+              borderColor: 'rgba(184, 158, 110, 0.2)',
             }}
-            className="w-64 bg-[#0a0d14] fixed top-0 left-0 h-screen min-h-[100dvh] z-[99999] overflow-hidden border-r border-[rgba(255,255,255,0.1)] shadow-2xl flex flex-col mobile-sidebar-wrap"
+            className="w-64 fixed top-0 left-0 h-screen min-h-[100dvh] z-[99999] overflow-hidden border-r shadow-2xl flex flex-col mobile-sidebar-wrap"
           >
-            {/* Статичные световые акценты - упрощены для мобильных */}
-            {!isMobile && (
-              <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-                <div
-                  className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%)',
-                  }}
-                />
-                <div
-                  className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(167, 139, 250, 0.06) 0%, transparent 70%)',
-                  }}
-                />
-              </div>
-            )}
-            
+            {/* Убраны световые акценты — минимализм */}
             <div className="p-4 sm:p-6 h-full flex flex-col relative z-10 min-h-0 mobile-sidebar-inner">
-              {/* Logo + Close */}
-              <motion.div
-                initial={isMobile ? false : { opacity: 0, y: -20 }}
-                animate={isMobile ? false : { opacity: 1, y: 0 }}
-                transition={isMobile ? {} : { delay: 0.1 }}
-                className="flex justify-between items-center mb-4 sm:mb-6"
-              >
+              <div className="flex justify-between items-center mb-4 sm:mb-6">
                 <div className="flex items-center gap-2">
-                  <img src="/logo.png" alt="Fluvion Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-md" />
-                  <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+                  <img src="/logo.png" alt="Fluvion" className="w-6 h-6 sm:w-8 sm:h-8 rounded-md object-contain" />
+                  <span
+                    className="text-xl sm:text-2xl font-black text-white"
+                    style={{ fontFamily: 'Satoshi, sans-serif', letterSpacing: '-0.02em' }}
+                  >
                     Fluvion
                   </span>
                 </div>
-                <motion.button
-                  whileHover={isMobile ? {} : { scale: 1.1, rotate: 90 }}
-                  whileTap={isMobile ? {} : { scale: 0.9 }}
+                <button
                   onClick={closeSidebar}
-                  className="p-2 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] transition-all duration-300 text-[#9ca3af] hover:text-[#00f0ff] active:scale-95"
+                  className="p-2 rounded-lg border transition-all duration-200 text-white/70 hover:text-[#B89E6E] hover:border-[#B89E6E]/50"
+                  style={{ borderColor: 'rgba(184, 158, 110, 0.3)' }}
                 >
                   <XMarkIcon className="w-6 h-6" />
-                </motion.button>
-              </motion.div>
+                </button>
+              </div>
 
               {/* Scrollable Nav */}
               <div ref={navContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden pr-3 -mr-3 scrollbar-custom min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
@@ -581,7 +567,7 @@ function AppLayout() {
                     animate={isMobile ? false : { opacity: 1, x: 0 }}
                     transition={isMobile ? {} : { delay: 0.2 }}
                   >
-                    <h3 className="text-[10px] sm:text-xs font-semibold text-[#9ca3af] mb-2 sm:mb-3 uppercase tracking-wider">Основное</h3>
+                    <h3 className="text-[10px] sm:text-xs font-semibold mb-2 sm:mb-3 uppercase tracking-wider" style={{ color: '#B89E6E' }}>Основное</h3>
                     <ul className="space-y-1.5 sm:space-y-2">
                       {navItems.filter(i => ['/', '/calculator'].includes(i.path))
                         .map((item, i) => <NavItem key={item.path} item={item} delay={isMobile ? 0 : 0.2 + i * 0.05} isMobile={isMobile} />)}
@@ -594,7 +580,7 @@ function AppLayout() {
                     animate={isMobile ? false : { opacity: 1, x: 0 }}
                     transition={isMobile ? {} : { delay: 0.3 }}
                   >
-                    <h3 className="text-[10px] sm:text-xs font-semibold text-[#808080] mb-2 sm:mb-3 uppercase tracking-wider">Покупки</h3>
+                    <h3 className="text-[10px] sm:text-xs font-semibold mb-2 sm:mb-3 uppercase tracking-wider text-white/50">Покупки</h3>
                     <ul className="space-y-1.5 sm:space-y-2">
                       {navItems.filter(i => ['/catalog', '/terminal', '/self-pickup', '/rates', '/news', '/batch-cargo-list', '/cart'].includes(i.path))
                         .map((item, i) => <NavItem key={item.path} item={item} delay={isMobile ? 0 : 0.3 + i * 0.05} isMobile={isMobile} />)}
@@ -607,7 +593,7 @@ function AppLayout() {
                     animate={isMobile ? false : { opacity: 1, x: 0 }}
                     transition={isMobile ? {} : { delay: 0.4 }}
                   >
-                    <h3 className="text-[10px] sm:text-xs font-semibold text-[#808080] mb-2 sm:mb-3 uppercase tracking-wider">Аккаунт</h3>
+                    <h3 className="text-[10px] sm:text-xs font-semibold mb-2 sm:mb-3 uppercase tracking-wider text-white/50">Аккаунт</h3>
                     <ul className="space-y-1.5 sm:space-y-2">
                       {navItems.filter(i => ['/profile', '/notifications'].includes(i.path))
                         .map((item, i) => <NavItem key={item.path} item={item} delay={isMobile ? 0 : 0.4 + i * 0.05} isMobile={isMobile} />)}
@@ -620,7 +606,7 @@ function AppLayout() {
                     animate={isMobile ? false : { opacity: 1, x: 0 }}
                     transition={isMobile ? {} : { delay: 0.5 }}
                   >
-                    <h3 className="text-[10px] sm:text-xs font-semibold text-[#808080] mb-2 sm:mb-3 uppercase tracking-wider">Информация</h3>
+                    <h3 className="text-[10px] sm:text-xs font-semibold mb-2 sm:mb-3 uppercase tracking-wider text-white/50">Информация</h3>
                     <ul className="space-y-1.5 sm:space-y-2">
                       {navItems.filter(i => !['/', '/calculator', '/catalog', '/terminal', '/self-pickup', '/rates', '/news', '/batch-cargo-list', '/cart', '/profile', '/notifications'].includes(i.path))
                         .map((item, i) => <NavItem key={item.path} item={item} delay={isMobile ? 0 : 0.5 + i * 0.05} isMobile={isMobile} />)}
@@ -629,20 +615,22 @@ function AppLayout() {
 
                   {/* Кнопка Выйти - внутри прокручиваемой области */}
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={isMobile ? false : { opacity: 0, y: 20 }}
+                    animate={isMobile ? false : { opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 }}
-                    className="relative mt-6 pt-6 border-t border-[rgba(255,255,255,0.1)]"
+                    className="relative mt-6 pt-6 border-t"
+                    style={{ borderColor: 'rgba(184, 158, 110, 0.2)' }}
                   >
-                    <div className="car-animation w-24 h-12 absolute -bottom-4 left-2 opacity-90 pointer-events-none">
-                      <img src="/car.png" alt="Cargo Truck" className="w-full h-full object-contain filter brightness-150 drop-shadow-lg" />
-                    </div>
-
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={logout}
-                      className="w-full mt-8 px-4 py-3 rounded-xl bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)] transition-all duration-300 text-base font-medium flex items-center justify-center gap-2"
+                      className="w-full mt-6 px-4 py-3 rounded-xl border font-medium flex items-center justify-center gap-2 transition-colors"
+                      style={{
+                        borderColor: 'rgba(184, 158, 110, 0.5)',
+                        background: 'rgba(184, 158, 110, 0.1)',
+                        color: '#B89E6E',
+                      }}
                     >
                       <ArrowRightOnRectangleIcon className="w-5 h-5" />
                       <span>Выйти</span>
@@ -650,7 +638,7 @@ function AppLayout() {
                   </motion.div>
                 </nav>
 
-                <div id="scroll-indicator" className="absolute right-1 top-0 bottom-0 w-1 bg-[#00f0ff] opacity-30 rounded-full" />
+                <div id="scroll-indicator" className="absolute right-1 top-0 bottom-0 w-1 rounded-full opacity-40" style={{ background: '#B89E6E' }} />
               </div>
             </div>
           </motion.aside>
