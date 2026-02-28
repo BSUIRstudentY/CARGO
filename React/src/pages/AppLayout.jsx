@@ -461,7 +461,8 @@ function AppLayout() {
         .nav-group-title { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
       `}</style>
 
-      {/* ---------- Fixed Header (desktop) ---------- */}
+      {/* ---------- Fixed Header (desktop) — скрыт на главной (Black Void свой хедер) ---------- */}
+      {location.pathname !== '/' && (
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0d14]/80 backdrop-blur-md border-b border-[rgba(255,255,255,0.1)]">
         <div className="container-xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Hamburger (desktop) - внутри хедера слева */}
@@ -477,8 +478,10 @@ function AppLayout() {
           <HeaderActions />
         </div>
       </header>
+      )}
 
-      {/* ---------- Mobile Header ---------- */}
+      {/* ---------- Mobile Header — скрыт на главной ---------- */}
+      {location.pathname !== '/' && (
       <header className="mobile-header flex sm:hidden">
         <button onClick={toggleSidebar} className="mobile-hamburger">
           {isSidebarOpen ? <XMarkIcon /> : <Bars3Icon />}
@@ -489,6 +492,7 @@ function AppLayout() {
         {/* Mobile Header Actions */}
         <HeaderActions />
       </header>
+      )}
 
       {/* ---------- Sidebar Overlay для мобильных ---------- */}
       {isMobile && (
@@ -658,7 +662,7 @@ function AppLayout() {
       </AnimatePresence>
 
       {/* ---------- Main Content ---------- */}
-      <main className="main-content flex-1 relative z-10 w-full p-0 pt-16 pb-safe sm:pb-16">
+      <main className={`main-content flex-1 relative z-10 w-full p-0 pb-safe sm:pb-16 ${location.pathname === '/' ? 'pt-0' : 'pt-16'}`}>
         <Suspense fallback={<Loading message="Загрузка страницы..." />}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -692,7 +696,7 @@ function AppLayout() {
         </Suspense>
       </main>
 
-      <Footer id="contact" />
+      {location.pathname !== '/' && <Footer id="contact" />}
 
       {/* Telegram Button - Fixed bottom right */}
       <a

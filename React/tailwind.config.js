@@ -32,10 +32,12 @@ export default {
         'border-primary': 'var(--border-primary, #333333)', // Dark borders
         'shadow-primary': 'var(--shadow-primary, rgba(0, 0, 0, 0.5))', // Dark shadows
       },
-      // Fonts (modern sans-serif like in Delta/Bootstrap)
+      // Fonts — Black Void: Cabinet Grotesk (headings), Neue Montreal (body)
       fontFamily: {
-        'sans': ['Inter', 'system-ui', 'sans-serif'], // Primary font
-        'display': ['Inter', 'system-ui', 'sans-serif'], // For headings
+        'sans': ['Neue Montreal', 'Inter', 'system-ui', 'sans-serif'],
+        'display': ['Inter', 'system-ui', 'sans-serif'],
+        'cabinet': ['Cabinet Grotesk', 'system-ui', 'sans-serif'],
+        'neue-montreal': ['Neue Montreal', 'Inter', 'system-ui', 'sans-serif'],
       },
       // Text Sizes (responsive, based on HTML classes like display-4, lead)
       fontSize: {

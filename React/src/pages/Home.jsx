@@ -1,798 +1,748 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { 
-  TruckIcon, 
-  ClockIcon, 
-  CurrencyDollarIcon,
+import { motion, AnimatePresence } from 'framer-motion';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from '@studio-freight/lenis';
+import {
+  BanknotesIcon,
+  ClockIcon,
   ShieldCheckIcon,
   MagnifyingGlassIcon,
-  GlobeAltIcon,
-  CreditCardIcon,
-  StarIcon,
-  ChevronDownIcon
-} from '@heroicons/react/24/solid';
+  Bars3Icon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
 
-/**
- * Оптимизированная главная страница
- * Минималистичный dark mode с легковесными эффектами
- */
+gsap.registerPlugin(ScrollTrigger);
+
+const GOLD = '#C9A97A';
+const BG_VOID = '#050505';
+const BG_SURFACE = '#0F0F0F';
+
+const JOURNEY_STEPS = [
+  { label: 'Заказ', days: '1–2', desc: 'Оформление в Терминале или по ссылке' },
+  { label: 'Выкуп', days: '2–5', desc: 'Оплата и выкуп на складе в Китае' },
+  { label: 'Проверка', days: '1–3', desc: 'Фото и видео от $5 по желанию' },
+  { label: 'Отправка', days: '5–15', desc: 'Карго до нашей базы' },
+  { label: 'Доставка', days: '7–14', desc: 'Европочта до двери' },
+];
+
+const ADVANTAGES = [
+  { title: 'Фиксированная ставка', desc: '$6 / кг без сюрпризов', icon: BanknotesIcon },
+  { title: '18–35 дней', desc: 'Реальные сроки карго', icon: ClockIcon },
+  { title: 'Полная страховка', desc: 'Возврат 100% стоимости', icon: ShieldCheckIcon },
+  { title: 'Проверка на складе', desc: 'Фото + видео от $5', icon: MagnifyingGlassIcon },
+];
+
+const STATS = [
+  { value: 1000, suffix: '+', label: 'Товаров из Китая' },
+  { value: 90, suffix: '%', label: 'Клиентов рекомендуют' },
+  { value: 5, suffix: '', label: 'Складов-партнёров' },
+  { value: 24, suffix: '/7', label: 'Поддержка' },
+];
+
+const MARKETPLACES_LIST = [
+  'Pinduoduo', 'Taobao', '1688', 'WeChat', 'Poizon', 'GoFish', 'Tmall', 'JD', 'AliExpress', 'Xianyu', 'Weidian',
+];
+
+const SCROLLER = typeof document !== 'undefined' ? document.documentElement : null;
 
 const Home = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const scopeRef = useRef(null);
+  const lenisRef = useRef(null);
   const heroSectionRef = useRef(null);
-  const advantagesSectionRef = useRef(null);
+  const heroTitleRef = useRef(null);
+  const heroContentRef = useRef(null);
+  const goldLineRef = useRef(null);
+  const journeySectionRef = useRef(null);
+  const journeyWrapperRef = useRef(null);
+  const advantagesRefs = useRef([]);
   const statsSectionRef = useRef(null);
-  const marketplacesSectionRef = useRef(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const ctaSectionRef = useRef(null);
+  const ctaTitleRef = useRef(null);
+  const priceDisplayRef = useRef(null);
+  const magneticRef = useRef(null);
+  const reduceMotionRef = useRef(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [weight, setWeight] = useState(5);
+  const [price, setPrice] = useState(30);
 
-  // Определение мобильного устройства и слабого устройства
+  const navGroups = [
+    { title: 'Сервис', links: [
+      { to: '/', label: 'Главная' },
+      { to: '/calculator', label: 'Калькулятор' },
+      { to: '/catalog', label: 'Примеры товаров' },
+      { to: '/terminal', label: 'Заказать товар' },
+      { to: '/self-pickup', label: 'Самовыкуп' },
+      { to: '/rates', label: 'Курс' },
+      { to: '/news', label: 'Новости' },
+      { to: '/batch-cargo-list', label: 'Сборные грузы' },
+      { to: '/cart', label: 'Корзина' },
+    ]},
+    { title: 'Информация', links: [
+      { to: '/delivery-payment', label: 'Доставка и оплата' },
+      { to: '/order-instructions', label: 'Инструкции' },
+      { to: '/public-offer', label: 'Публичная оферта' },
+      { to: '/privacy-policy', label: 'Политика конфиденциальности' },
+      { to: '/user-agreement', label: 'Согласие на обработку' },
+      { to: '/faq', label: 'FAQ' },
+      { to: '/support', label: 'Поддержка' },
+      { to: '/reviews', label: 'Отзывы' },
+    ]},
+  ];
+
+  const PRICE_PER_KG = 6;
+  reduceMotionRef.current = reduceMotion;
+
   useEffect(() => {
-    const checkDevice = () => {
-      const isMobileDevice = window.innerWidth <= 768;
-      setIsMobile(isMobileDevice);
-
-      // Проверка на слабое устройство (низкое разрешение или медленный CPU)
-      const isLowEndDevice = 
-        isMobileDevice && 
-        (window.innerWidth < 400 || 
-         navigator.hardwareConcurrency <= 2 ||
-         navigator.deviceMemory <= 2);
-      
-      setReduceMotion(isLowEndDevice || window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    };
-
-    checkDevice();
-    window.addEventListener('resize', checkDevice);
-    return () => window.removeEventListener('resize', checkDevice);
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduceMotion(mq.matches);
+    const handler = () => setReduceMotion(mq.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
   }, []);
 
-  const marketplaces = [
-    { name: 'Pinduoduo', url: 'https://www.pinduoduo.com', text: '拼多多', logo: '/logos/pinduoduo.svg', hasImage: false },
-    { name: 'Taobao', url: 'https://www.taobao.com', text: '淘宝', logo: '/logos/taobao.svg', hasImage: true },
-    { name: '1688', url: 'https://www.1688.com', text: '1688', hasImage: false },
-    { name: 'GoFish', url: 'https://www.gofish.com', text: 'GoFish', hasImage: false },
-    { name: 'WeChat', url: 'https://www.wechat.com', text: '微信', logo: '/logos/wechat.svg', hasImage: true },
-    { name: 'Poizon', url: 'https://www.poizon.com', text: 'Poizon', hasImage: false },
-    { name: '95', url: 'https://www.95.com', text: '95', hasImage: false },
-  ];
-
-  const advantages = [
-    {
-      icon: ClockIcon,
-      title: 'Быстрая доставка',
-      description: 'Доставка из Китая за 18–35 дней через Карго',
-      accent: '#00f0ff'
-    },
-    {
-      icon: CurrencyDollarIcon,
-      title: 'Фиксированная цена',
-      description: '$6 за кг + тарифы Европочты, без скрытых платежей',
-      accent: '#a78bfa'
-    },
-    {
-      icon: ShieldCheckIcon,
-      title: 'Страховка груза',
-      description: 'Гарантия возврата полной стоимости груза, если что-то с ним случится по нашей вине',
-      accent: '#10b981'
-    },
-    {
-      icon: MagnifyingGlassIcon,
-      title: 'Проверка товаров',
-      description: 'Проверка целостности и качества (от $5)',
-      accent: '#00f0ff'
-    },
-    {
-      icon: GlobeAltIcon,
-      title: 'Упрощённая таможня',
-      description: 'Помощь с таможенными процедурами',
-      accent: '#a78bfa'
-    },
-    {
-      icon: TruckIcon,
-      title: 'Отслеживание',
-      description: 'Трек-номер и уведомления в Профиле',
-      accent: '#10b981'
-    },
-    {
-      icon: CreditCardIcon,
-      title: 'Прозрачная оплата',
-      description: 'Оплата через Альфа-Банк (Visa, Mastercard)',
-      accent: '#00f0ff'
-    },
-    {
-      icon: StarIcon,
-      title: 'Опыт',
-      description: 'Более 5 лет успешной доставки из Китая',
-      accent: '#a78bfa'
-    }
-  ];
-
-  const stats = [
-    { number: '1000+', label: 'Товаров из Китая' },
-    { number: '90%', label: 'Клиентов рекомендуют' },
-    { number: '5', label: 'Складов-партнёров' },
-    { number: '24/7', label: 'Поддержка клиентов' },
-  ];
-
-  // Intersection Observer для анимаций при прокрутке
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.1, // Элемент должен быть виден хотя бы на 10%
-      rootMargin: '0px 0px -50px 0px' // Небольшой отступ снизу
+    if (!menuOpen) return;
+    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false); };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (!scopeRef.current || !SCROLLER) return;
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      smoothTouch: false,
+    });
+    lenisRef.current = lenis;
+
+    ScrollTrigger.scrollerProxy(SCROLLER, {
+      scrollTop(value) {
+        if (arguments.length) lenis.scrollTo(value, { immediate: false });
+        return lenis.scroll;
+      },
+      getBoundingClientRect() {
+        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
+      },
+    });
+    lenis.on('scroll', ScrollTrigger.update);
+
+    const raf = (time) => {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
     };
-
-    const observerCallback = (entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          // Добавляем класс in-view ко всем дочерним элементам с классами анимации
-          const animatedElements = entry.target.querySelectorAll('.fade-in-trigger, .fade-in-trigger-delay-1, .fade-in-trigger-delay-2, .fade-in-up-trigger');
-          animatedElements.forEach(el => el.classList.add('in-view'));
-          // Отключаем observer после первого срабатывания для оптимизации
-          observer.unobserve(entry.target);
-        }
-      });
-    };
-
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
-
-    // Hero секция видна сразу - запускаем анимации немедленно
-    if (heroSectionRef.current) {
-      const heroAnimatedElements = heroSectionRef.current.querySelectorAll('.fade-in-trigger, .fade-in-trigger-delay-1, .fade-in-trigger-delay-2');
-      heroAnimatedElements.forEach(el => el.classList.add('in-view'));
-    }
-
-    // Наблюдаем за секциями, которые появляются при прокрутке
-    if (advantagesSectionRef.current) {
-      observer.observe(advantagesSectionRef.current);
-    }
-    if (statsSectionRef.current) {
-      observer.observe(statsSectionRef.current);
-    }
-    if (marketplacesSectionRef.current) {
-      observer.observe(marketplacesSectionRef.current);
-    }
+    requestAnimationFrame(raf);
 
     return () => {
-      observer.disconnect();
+      lenis.destroy();
+      lenisRef.current = null;
+      ScrollTrigger.clearScrollMemory();
     };
   }, []);
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Fluvion",
-    "url": "https://fluvion.by",
-    "logo": "https://fluvion.by/logo.png",
-    "description": "Доставка товаров из Китая в Беларусь за 18-35 дней. Заказывайте с Pinduoduo, Taobao, 1688 и других маркетплейсов.",
-    "address": {
-      "@type": "PostalAddress",
-      "addressCountry": "BY"
-    },
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "contactType": "customer service",
-      "availableLanguage": ["Russian"]
-    },
-    "sameAs": [
-      "https://t.me/FLUVIONN"
-    ],
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.5",
-      "reviewCount": "1000"
-    },
-    "offers": {
-      "@type": "Offer",
-      "priceCurrency": "USD",
-      "price": "6",
-      "priceSpecification": {
-        "@type": "UnitPriceSpecification",
-        "price": "6",
-        "priceCurrency": "USD",
-        "unitCode": "KGM"
-      }
-    }
-  };
+  // MOBILE ADAPTIVE: horizontal pinned journey on all viewports; smaller scrollDistance on mobile
+  useEffect(() => {
+    if (!scopeRef.current || reduceMotionRef.current) return;
+    const ctx = gsap.context(() => {
+      const section = journeySectionRef.current;
+      const wrapper = journeyWrapperRef.current;
+      if (!section || !wrapper) return;
+      const steps = wrapper.querySelectorAll('.journey-step');
+      const isNarrow = typeof window !== 'undefined' && window.innerWidth < 768;
+      const scrollDistance = window.innerHeight * (steps.length - 1) * (isNarrow ? 0.8 : 1);
 
-  const serviceStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "serviceType": "Cargo Delivery",
-    "provider": {
-      "@type": "Organization",
-      "name": "Fluvion"
-    },
-    "areaServed": {
-      "@type": "Country",
-      "name": "Belarus"
-    },
-    "description": "Доставка товаров из Китая в Беларусь за 18-35 дней",
-    "offers": {
-      "@type": "Offer",
-      "price": "6",
-      "priceCurrency": "USD",
-      "unitCode": "KGM"
+      const anim = gsap.to(wrapper, {
+        xPercent: -100 * (steps.length - 1),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          scroller: SCROLLER,
+          pin: true,
+          scrub: 0.8,
+          start: 'top top',
+          end: () => `+=${scrollDistance}`,
+          invalidateOnRefresh: true,
+          id: 'journey-h',
+        },
+      });
+
+      steps.forEach((step) => {
+        const icon = step.querySelector('.step-icon');
+        const line = step.querySelector('.step-line');
+        if (!icon || !line) return;
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: step,
+            scroller: SCROLLER,
+            containerAnimation: anim,
+            start: 'left 70%',
+            end: 'left 30%',
+            scrub: 0.5,
+          },
+        })
+          .to(icon, { scale: 1.1, duration: 0.5 })
+          .to(line, { scaleX: 1, duration: 0.8, transformOrigin: 'left' }, '-=0.4');
+      });
+    }, scopeRef);
+
+    return () => ctx.revert();
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (!scopeRef.current || reduceMotionRef.current) return;
+    const ctx = gsap.context(() => {
+      if (!heroTitleRef.current) return;
+      const letters = heroTitleRef.current.querySelectorAll('.hero-letter');
+      const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+      tl.from(letters, {
+        yPercent: 120,
+        opacity: 0,
+        stagger: 0.07,
+        duration: 1.4,
+      })
+        .from('.hero-subtitle', { opacity: 0, y: 60, duration: 1.1 }, '-=0.9')
+        .from('.hero-cta', { scale: 0.7, opacity: 0, duration: 1, ease: 'back.out(1.4)' }, '-=0.8');
+
+      const path = goldLineRef.current?.querySelector('.gold-line-path');
+      if (path && typeof path.getTotalLength === 'function') {
+        const length = path.getTotalLength();
+        path.setAttribute('stroke-dasharray', String(length));
+        gsap.fromTo(
+          path,
+          { strokeDashoffset: length },
+          { strokeDashoffset: 0, duration: 3.2, ease: 'power2.out', delay: 1.2 }
+        );
+      }
+    }, scopeRef);
+
+    return () => ctx.revert();
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (!scopeRef.current || !heroSectionRef.current || !heroContentRef.current || reduceMotionRef.current) return;
+    const ctx = gsap.context(() => {
+      const section = heroSectionRef.current;
+      const content = heroContentRef.current;
+      const noiseLayer = section?.querySelector('.hero-parallax-noise');
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          scroller: SCROLLER,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1.2,
+        },
+      })
+        .to(content, { yPercent: 32, ease: 'none' }, 0)
+        .to(noiseLayer, { yPercent: 15, ease: 'none' }, 0);
+    }, scopeRef);
+
+    return () => ctx.revert();
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (!scopeRef.current || reduceMotionRef.current) return;
+    const ctx = gsap.context(() => {
+      advantagesRefs.current.forEach((block, i) => {
+        if (!block) return;
+        const direction = i % 2 === 0 ? -60 : 60;
+        const line = block.querySelector('.advantage-line');
+        const icon = block.querySelector('.advantage-icon');
+        const title = block.querySelector('.advantage-title');
+        if (!line || !icon || !title) return;
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: block,
+            scroller: SCROLLER,
+            start: 'top 70%',
+            toggleActions: 'play none none reverse',
+          },
+        })
+          .from(line, { scaleX: 0, duration: 1.4, ease: 'power3.out', transformOrigin: 'left' })
+          .from(icon, { scale: 0.4, x: direction, opacity: 0, duration: 1.1 }, '-=0.9')
+          .from(title, { opacity: 0, x: -direction * 0.5, duration: 0.9 }, '-=0.7');
+      });
+    }, scopeRef);
+
+    return () => ctx.revert();
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (!scopeRef.current || !statsSectionRef.current || reduceMotionRef.current) return;
+    const ctx = gsap.context(() => {
+      const boxes = statsSectionRef.current.querySelectorAll('.stat-box');
+      boxes.forEach((box, i) => {
+        const numEl = box.querySelector('.stat-number');
+        const barEl = box.querySelector('.stat-bar-fill');
+        const data = STATS[i];
+        if (!numEl || !barEl || !data) return;
+        const obj = { val: 0 };
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: box,
+            scroller: SCROLLER,
+            start: 'top 80%',
+            toggleActions: 'play none none reverse',
+          },
+        })
+          .to(obj, {
+            val: data.value,
+            duration: 1.8,
+            ease: 'power2.out',
+            onUpdate: function () {
+              numEl.textContent = Math.round(obj.val) + data.suffix;
+            },
+          })
+          .to(barEl, { scaleX: 1, duration: 1.2, ease: 'power3.out', transformOrigin: 'left' }, '-=1.2');
+      });
+    }, scopeRef);
+
+    return () => ctx.revert();
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (!scopeRef.current || !ctaSectionRef.current || !ctaTitleRef.current || reduceMotionRef.current) return;
+    const ctx = gsap.context(() => {
+      const letters = ctaTitleRef.current.querySelectorAll('.cta-letter');
+      gsap.from(letters, {
+        opacity: 0,
+        y: 40,
+        stagger: 0.04,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: ctaSectionRef.current,
+          scroller: SCROLLER,
+          start: 'top 75%',
+          toggleActions: 'play none none reverse',
+        },
+      });
+    }, scopeRef);
+
+    return () => ctx.revert();
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    setPrice(weight * PRICE_PER_KG);
+    if (priceDisplayRef.current && !reduceMotionRef.current) {
+      gsap.to(priceDisplayRef.current, { scale: 1.15, duration: 0.2, yoyo: true, repeat: 1 });
     }
+  }, [weight]);
+
+  useEffect(() => {
+    const el = magneticRef.current;
+    if (!el || reduceMotionRef.current) return;
+    const onMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      const x = (e.clientX - rect.left - rect.width / 2) * 0.2;
+      const y = (e.clientY - rect.top - rect.height / 2) * 0.2;
+      gsap.to(el, { x, y, duration: 0.3, ease: 'power2.out' });
+    };
+    const onLeave = () => gsap.to(el, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.5)' });
+    el.addEventListener('mousemove', onMove);
+    el.addEventListener('mouseleave', onLeave);
+    return () => {
+      el.removeEventListener('mousemove', onMove);
+      el.removeEventListener('mouseleave', onLeave);
+    };
+  }, [reduceMotion]);
+
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Fluvion',
+    url: 'https://fluvion.by',
+    description: 'Доставка товаров из Китая в Беларусь за 18-35 дней.',
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] overflow-hidden relative pb-24 sm:pb-0">
+    <div
+      ref={scopeRef}
+      className="min-h-screen overflow-x-hidden text-[#F5F5F5] text-base md:text-lg"
+      style={{ background: BG_VOID, fontFamily: "'Neue Montreal', 'Inter', system-ui, sans-serif" }}
+    >
       <Helmet>
-        <title>Fluvion - Доставка товаров из Китая в Беларусь | Карго доставка под ключ</title>
-        <meta name="description" content="Доставка товаров из Китая в Беларусь за 18-35 дней. Заказывайте с Pinduoduo, Taobao, 1688, GoFish и других маркетплейсов. Фиксированная цена $6/кг, страховка груза, отслеживание заказа. Более 5 лет опыта, 1000+ товаров, 90% клиентов рекомендуют." />
-        <meta name="keywords" content="доставка из Китая, карго доставка, доставка товаров из Китая в Беларусь, Pinduoduo доставка, Taobao доставка, 1688 доставка, карго из Китая, доставка из Китая в Минск, китайские товары, заказ из Китая, доставка под ключ, Fluvion" />
-        <meta property="og:title" content="Fluvion - Доставка товаров из Китая в Беларусь | Карго доставка под ключ" />
-        <meta property="og:description" content="Доставка товаров из Китая в Беларусь за 18-35 дней. Заказывайте с Pinduoduo, Taobao, 1688 и других маркетплейсов. Фиксированная цена $6/кг, страховка груза, отслеживание." />
-        <meta property="og:image" content="https://fluvion.by/logo.png" />
-        <meta property="og:url" content="https://fluvion.by/" />
-        <meta property="og:type" content="website" />
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:title" content="Fluvion - Доставка товаров из Китая в Беларусь" />
-        <meta property="twitter:description" content="Доставка товаров из Китая в Беларусь за 18-35 дней. Фиксированная цена $6/кг, страховка груза, отслеживание заказа." />
-        <meta property="twitter:image" content="https://fluvion.by/logo.png" />
-        <link rel="canonical" href="https://fluvion.by/" />
+        <title>Fluvion — Доставка из Китая в Беларусь | Карго под ключ</title>
+        <meta name="description" content="Доставка из Китая за 18–35 дней. $6/кг, страховка, проверка на складе. Заказывайте с Pinduoduo, Taobao, 1688." />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
-        <script type="application/ld+json">{JSON.stringify(serviceStructuredData)}</script>
       </Helmet>
-      {/* Hero Section */}
-      <section ref={heroSectionRef} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-5xl mx-auto text-center">
-            {/* Логотип с glow эффектом */}
-            <div className="mb-12 flex justify-center fade-in-trigger">
-              <div className="relative logo-glow-wrapper">
-                <img
-                  src="/logo.png"
-                  alt="Fluvion Logo"
-                  className={`relative w-40 h-40 md:w-56 md:h-56 object-contain ${reduceMotion ? '' : 'logo-glow'}`}
-                />
+
+      <header className="fixed top-0 left-0 right-0 z-50 h-14 md:h-[68px] border-b border-[#1A1A1A] backdrop-blur-xl px-4 md:px-6" style={{ background: `${BG_VOID}E6` }}>
+        <div className="container mx-auto flex h-full max-w-7xl items-center justify-between">
+          <div className="flex items-center gap-3 md:gap-6">
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              className="p-2 rounded-lg border border-[#1A1A1A] text-[#F5F5F5] hover:text-[#C9A97A] hover:border-[#C9A97A]/40 transition-colors"
+              aria-label="Меню"
+            >
+              <Bars3Icon className="w-6 h-6" />
+            </button>
+            <Link to="/" className="font-cabinet text-xl md:text-2xl font-bold tracking-tight" style={{ color: GOLD }}>
+              Fluvion
+            </Link>
+          </div>
+          <nav className="hidden items-center gap-6 md:flex md:gap-8">
+            <Link to="/catalog" className="text-xs md:text-sm text-[#F5F5F5] transition-colors hover:text-[#C9A97A]">Примеры товаров</Link>
+            <Link to="/rates" className="text-xs md:text-sm text-[#F5F5F5] transition-colors hover:text-[#C9A97A]">Курс</Link>
+            <Link to="/delivery-payment" className="text-xs md:text-sm text-[#F5F5F5] transition-colors hover:text-[#C9A97A]">Доставка</Link>
+            <Link to="/faq" className="text-xs md:text-sm text-[#F5F5F5] transition-colors hover:text-[#C9A97A]">FAQ</Link>
+          </nav>
+          <button
+            ref={magneticRef}
+            onClick={() => navigate('/terminal')}
+            className="relative overflow-hidden rounded-full px-4 py-2.5 md:px-6 md:py-3 text-xs md:text-sm font-medium text-black transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_60px_rgba(201,169,122,0.25)]"
+            style={{ background: `linear-gradient(145deg, ${GOLD}, #E8C89A)` }}
+          >
+            <span className="relative z-10">Рассчитать</span>
+          </button>
+        </div>
+      </header>
+
+      <AnimatePresence onExitComplete={() => { document.body.style.overflow = ''; }}>
+        {menuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+              className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Закрыть меню"
+            />
+            <motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'tween', duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
+              className="fixed top-0 left-0 z-[101] h-full w-72 max-w-[85vw] overflow-y-auto border-r border-[#1A1A1A] py-6 px-4 shadow-2xl"
+              style={{ background: BG_VOID }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <span className="font-cabinet text-lg font-bold" style={{ color: GOLD }}>Меню</span>
+                <motion.button
+                  type="button"
+                  onClick={() => setMenuOpen(false)}
+                  className="p-2 rounded-lg text-[#A3A3A3] hover:text-[#F5F5F5] transition-colors"
+                  aria-label="Закрыть"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </motion.button>
+              </div>
+              {navGroups.map((group, gi) => (
+                <motion.div
+                  key={group.title}
+                  className="mb-6"
+                  initial={{ opacity: 0, x: -16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 + gi * 0.08, duration: 0.25 }}
+                >
+                  <h4 className="text-[10px] font-semibold text-[#A3A3A3] uppercase tracking-wider mb-3">{group.title}</h4>
+                  <ul className="space-y-1">
+                    {group.links.map(({ to, label }, li) => {
+                      const isOrder = to === '/terminal';
+                      const isCurrent = location.pathname === to || (to !== '/' && location.pathname.startsWith(to + '/'));
+                      return (
+                        <motion.li
+                          key={to}
+                          initial={{ opacity: 0, x: -12 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.08 + gi * 0.08 + li * 0.02, duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
+                        >
+                          <Link
+                            to={to}
+                            className="flex items-center gap-2.5 py-2 text-sm text-[#F5F5F5] hover:text-[#C9A97A] transition-colors"
+                            onClick={() => setMenuOpen(false)}
+                          >
+                            {label}
+                            {isOrder && (
+                              <span
+                                className="ml-0.5 h-2 w-2 shrink-0 rounded-full"
+                                style={{
+                                  background: GOLD,
+                                  boxShadow: `0 0 8px ${GOLD}, 0 0 14px ${GOLD}99, 0 0 20px ${GOLD}66`,
+                                }}
+                                aria-hidden
+                              />
+                            )}
+                            {isCurrent && (
+                              <span className="ml-auto text-[10px] font-medium uppercase tracking-wider" style={{ color: GOLD }}>
+                                Сейчас
+                              </span>
+                            )}
+                          </Link>
+                        </motion.li>
+                      );
+                    })}
+                  </ul>
+                </motion.div>
+              ))}
+              <motion.div
+                className="pt-4 border-t border-[#1A1A1A]"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25, duration: 0.2 }}
+              >
+                <Link to="/profile" className="flex items-center justify-between py-2 text-sm text-[#F5F5F5] hover:text-[#C9A97A] transition-colors" onClick={() => setMenuOpen(false)}>
+                  Профиль
+                  {(location.pathname === '/profile' || location.pathname.startsWith('/profile/')) && (
+                    <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: GOLD }}>Сейчас</span>
+                  )}
+                </Link>
+                <Link to="/notifications" className="flex items-center justify-between py-2 text-sm text-[#F5F5F5] hover:text-[#C9A97A] transition-colors" onClick={() => setMenuOpen(false)}>
+                  Уведомления
+                  {(location.pathname === '/notifications' || location.pathname.startsWith('/notifications/')) && (
+                    <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: GOLD }}>Сейчас</span>
+                  )}
+                </Link>
+              </motion.div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* TIGHT SPACING + MOBILE ADAPTIVE + PARALLAX */}
+      <section ref={heroSectionRef} className="relative flex min-h-screen items-center justify-center overflow-hidden pt-14 pb-12 px-4 md:pt-20 md:pb-32 md:px-6" style={{ background: BG_VOID }}>
+        <div className="hero-parallax-noise absolute inset-0 opacity-[0.02] will-change-transform" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")' }} />
+        <div ref={heroContentRef} className="container relative z-10 mx-auto max-w-6xl text-center will-change-transform">
+          <h1
+            ref={heroTitleRef}
+            className="mb-4 font-cabinet text-[38px] leading-tight font-extrabold tracking-tight sm:text-[48px] md:mb-10 md:text-8xl md:leading-none lg:text-[96px]"
+          >
+            {'Доставка'.split('').map((char, i) => (
+              <span key={i} className="hero-letter inline-block will-change-transform">
+                {char}
+              </span>
+            ))}
+            <br />
+            <span className="mt-1 md:mt-4 block" style={{ color: GOLD }}>
+              {'из Китая'.split('').map((char, i) => (
+                <span key={i} className="hero-letter inline-block will-change-transform">
+                  {char}
+                </span>
+              ))}
+            </span>
+          </h1>
+          <p className="hero-subtitle mx-auto mb-6 max-w-3xl text-sm text-[#A3A3A3] md:mb-16 md:text-xl lg:text-3xl">
+            $6 / кг · 18–35 дней · полная страховка · проверка на складе
+          </p>
+          <button
+            className="hero-cta rounded-full px-6 py-3 text-sm font-medium text-black shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_60px_rgba(201,169,122,0.2)] md:px-12 md:py-6 md:text-2xl lg:text-3xl"
+            style={{ background: `linear-gradient(145deg, ${GOLD}, #E8C89A)` }}
+            onClick={() => navigate('/terminal')}
+          >
+            Начать расчёт
+          </button>
+        </div>
+        <svg ref={goldLineRef} className="absolute bottom-0 right-4 h-40 w-0.5 hidden sm:block md:right-16 md:h-96" viewBox="0 0 2 400" fill="none">
+          <path className="gold-line-path" d="M1 0v400" stroke={GOLD} strokeWidth="2" />
+        </svg>
+      </section>
+
+      <section ref={journeySectionRef} className="relative h-screen overflow-hidden">
+        <div
+          ref={journeyWrapperRef}
+          className="absolute inset-y-0 flex items-center"
+          style={{ width: `${JOURNEY_STEPS.length * 100}vw` }}
+        >
+          {JOURNEY_STEPS.map((step, i) => (
+            <div key={step.label} className="journey-step flex h-full w-screen flex-shrink-0 items-center justify-center px-4 md:px-6">
+              <div className="max-w-2xl text-center">
+                <div className="step-icon mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 text-2xl md:mb-10 md:h-24 md:w-24 md:text-4xl" style={{ borderColor: `${GOLD}4D` }}>
+                  {i + 1}
+                </div>
+                <h2 className="mb-2 font-cabinet text-3xl font-extrabold md:mb-4 md:text-5xl lg:text-7xl xl:text-8xl">{step.label}</h2>
+                <p className="mb-2 text-sm text-[#A3A3A3] md:mb-6 md:text-xl">{step.days} дней</p>
+                <p className="mb-4 text-xs text-[#A3A3A3] md:mb-8 md:text-lg">{step.desc}</p>
+                <div className="step-line mx-auto h-0.5 w-20 origin-left rounded-full bg-[#C9A97A]/30 md:h-1 md:w-32" style={{ transform: 'scaleX(0)' }} />
               </div>
             </div>
+          ))}
+        </div>
+      </section>
 
-            {/* Заголовок */}
-            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-6 sm:mb-8 leading-tight fade-in-trigger">
-              <span className="block mb-2 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-                Доставка из Китая
-              </span>
-              <span className="block text-[#e5e7eb] font-light">под ключ</span>
-            </h1>
+      {/* TIGHT SPACING */}
+      <section className="py-12 px-4 md:py-24 md:px-6">
+        <div className="container mx-auto max-w-7xl space-y-12 px-0 md:space-y-40 md:px-6 lg:space-y-48">
+          {ADVANTAGES.map((adv, i) => {
+            const Icon = adv.icon;
+            return (
+              <div
+                key={adv.title}
+                ref={(el) => (advantagesRefs.current[i] = el)}
+                className={`flex flex-col items-center gap-6 md:flex-row md:gap-32 ${i % 2 ? 'md:flex-row-reverse' : ''}`}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="advantage-line mb-3 h-0.5 origin-left rounded-full md:mb-8 md:h-1" style={{ background: GOLD, transform: 'scaleX(0)' }} />
+                  <h3 className="advantage-title font-cabinet text-xl font-extrabold md:text-6xl lg:text-7xl">{adv.title}</h3>
+                  <p className="mt-2 text-sm text-[#A3A3A3] md:mt-6 md:text-2xl lg:text-3xl">{adv.desc}</p>
+                </div>
+                <div className="advantage-icon flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-xl border md:h-80 md:w-80 md:rounded-3xl" style={{ background: BG_SURFACE, borderColor: `${GOLD}1A` }}>
+                  <Icon className="h-8 w-8 md:h-20 md:w-20" style={{ color: GOLD, strokeWidth: 1.5 }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
-            <p className="text-sm sm:text-base md:text-2xl text-[#9ca3af] mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed fade-in-trigger-delay-1">
-              Заказывайте товары из Китая без хлопот: от выбора в{' '}
-              <span className="text-[#00f0ff] font-semibold">примерах товаров</span> (уже заказывали клиенты) или{' '}
-              <span className="text-[#a78bfa] font-semibold">Терминале</span> (любые товары по ссылке) до доставки в Беларусь за 18–35 дней по цене $6/кг
+      <section ref={statsSectionRef} className="py-12 px-4 md:py-24 md:px-6">
+        <div className="container mx-auto grid max-w-7xl grid-cols-2 gap-3 md:grid-cols-4 md:gap-6">
+          {STATS.map((stat, i) => (
+            <div
+              key={stat.label}
+              className="stat-box rounded-xl p-4 md:rounded-2xl md:p-8 lg:p-10"
+              style={{ background: BG_SURFACE, borderBottom: `3px solid ${GOLD}` }}
+            >
+              <div className="font-cabinet text-2xl font-extrabold md:text-5xl lg:text-6xl xl:text-7xl" style={{ color: GOLD }}>
+                <span className="stat-number">{stat.value}</span>{stat.suffix}
+              </div>
+              <p className="mt-1 text-xs text-[#A3A3A3] md:mt-4 md:text-lg">{stat.label}</p>
+              <div className="stat-bar mt-2 h-0.5 md:mt-6 md:h-1 w-full overflow-hidden rounded-full bg-[#1A1A1A]">
+                <div className="stat-bar-fill h-full rounded-full bg-[#C9A97A]" style={{ width: '100%', transform: 'scaleX(0)', transformOrigin: 'left' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="py-12 px-4 md:py-24 md:px-6">
+        <div className="container mx-auto max-w-4xl">
+          <h2 className="mb-3 text-center font-cabinet text-xl font-extrabold md:mb-8 md:text-4xl lg:text-5xl">Прямо с источников</h2>
+          <p className="mb-3 text-center text-sm text-[#A3A3A3] md:mb-8 md:text-lg">
+            Заказываем с площадок:{' '}
+            <span className="text-[#F5F5F5]" style={{ fontFamily: "'Neue Montreal', sans-serif" }}>
+              {MARKETPLACES_LIST.join(', ')}
+            </span>
+            . Выкупим и доставим под ключ.
+          </p>
+          <p className="text-center text-sm text-[#A3A3A3] md:text-base">
+            <span style={{ color: GOLD }}>Прямо из Китая.</span>
+          </p>
+        </div>
+      </section>
+
+      <section ref={ctaSectionRef} className="flex min-h-screen flex-col items-center justify-center py-12 px-4 md:py-32 md:px-6">
+        <div className="container mx-auto max-w-4xl text-center">
+          <h2 ref={ctaTitleRef} className="mb-6 font-cabinet text-lg font-extrabold leading-tight md:mb-16 md:text-4xl lg:text-6xl xl:text-7xl">
+            {'Готовы забрать свой товар из Китая?'.split('').map((char, i) => (
+              <span key={i} className="cta-letter inline-block">{char}</span>
+            ))}
+          </h2>
+          <div className="mb-6 flex flex-col items-center gap-4 rounded-2xl border p-4 md:mb-12 md:gap-8 md:rounded-3xl md:p-8 lg:p-12" style={{ background: BG_SURFACE, borderColor: `${GOLD}20` }}>
+            <div className="w-full max-w-md">
+              <label className="mb-1 block text-left text-xs text-[#A3A3A3] md:mb-4 md:text-lg">Вес груза (кг)</label>
+              <input
+                type="range"
+                min="1"
+                max="50"
+                value={weight}
+                onChange={(e) => setWeight(Number(e.target.value))}
+                className="h-2 w-full cursor-pointer appearance-none rounded-full bg-[#1A1A1A] accent-[#C9A97A] md:h-3"
+              />
+              <div className="mt-1 flex justify-between text-xs text-[#A3A3A3] md:mt-2 md:text-sm">
+                <span>1 кг</span>
+                <span>{weight} кг</span>
+                <span>50 кг</span>
+              </div>
+            </div>
+            <p className="text-sm text-[#A3A3A3] md:text-2xl">
+              Примерно: <strong ref={priceDisplayRef} className="text-[#C9A97A] md:text-[1.5rem]">${price}</strong> (доставка по весу)
             </p>
-            
-            {/* Информационное уведомление о каталоге */}
-            <div className="max-w-3xl mx-auto mb-8 sm:mb-12 p-3 sm:p-4 rounded-xl bg-[rgba(255,193,7,0.1)] border border-[rgba(255,193,7,0.3)] fade-in-trigger-delay-2">
-              <p className="text-[11px] sm:text-sm md:text-base text-[#ffeaa7] text-center">
-                <span className="font-bold text-[#ffc107]">💡 Важно:</span> В «Примерах товаров» — только то, что уже заказывали. Чтобы заказать любой товар по ссылке, используйте «Заказать товар».
+          </div>
+          <button
+            onClick={() => navigate('/terminal')}
+            className="rounded-full px-6 py-3 text-sm font-medium text-black shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_60px_rgba(201,169,122,0.25)] md:px-14 md:py-6 md:text-2xl lg:text-3xl"
+            style={{ background: `linear-gradient(145deg, ${GOLD}, #E8C89A)` }}
+          >
+            Начать расчёт
+          </button>
+        </div>
+      </section>
+
+      <footer className="border-t border-[#1A1A1A] px-4 py-8 md:px-6 md:py-16 lg:py-20" style={{ background: BG_VOID }}>
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-12 lg:grid-cols-3">
+            <div>
+              <div className="font-cabinet text-base md:text-xl font-bold tracking-tight mb-1 md:mb-4" style={{ color: GOLD }}>Fluvion</div>
+              <p className="text-xs text-[#A3A3A3] leading-relaxed md:text-sm">
+                Доставка товаров из Китая в Беларусь под ключ. Надёжно, быстро, с гарантией.
               </p>
             </div>
-
-            {/* Кнопки: сначала «Заказать товар» как основной призыв */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center fade-in-trigger-delay-2">
-              <button
-                onClick={() => navigate('/terminal')}
-                className="px-5 py-3 text-sm sm:px-8 sm:py-4 sm:text-lg font-medium rounded-xl bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] hover:bg-[rgba(0,240,255,0.15)] hover:scale-105 active:scale-95 transition-all duration-300"
-              >
-                Заказать товар
-              </button>
-              <button
-                onClick={() => navigate('/catalog')}
-                className="px-5 py-3 text-sm sm:px-8 sm:py-4 sm:text-lg font-medium rounded-xl bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] text-[#e5e7eb] hover:bg-[rgba(255,255,255,0.05)] hover:border-[rgba(167,139,250,0.4)] hover:text-[#a78bfa] hover:scale-105 active:scale-95 transition-all duration-300"
-              >
-                Примеры товаров
-              </button>
+            <div>
+              <h4 className="text-xs md:text-sm font-semibold text-[#F5F5F5] mb-1 md:mb-4 uppercase tracking-wider">Информация</h4>
+              <ul className="space-y-1 md:space-y-3">
+                <li><Link to="/delivery-payment" className="text-xs text-[#A3A3A3] hover:text-[#C9A97A] transition-colors md:text-sm">Доставка и оплата</Link></li>
+                <li><Link to="/public-offer" className="text-xs text-[#A3A3A3] hover:text-[#C9A97A] transition-colors md:text-sm">Публичная оферта</Link></li>
+                <li><Link to="/privacy-policy" className="text-xs text-[#A3A3A3] hover:text-[#C9A97A] transition-colors md:text-sm">Политика конфиденциальности</Link></li>
+                <li><Link to="/faq" className="text-xs text-[#A3A3A3] hover:text-[#C9A97A] transition-colors md:text-sm">FAQ</Link></li>
+                <li><Link to="/reviews" className="text-xs text-[#A3A3A3] hover:text-[#C9A97A] transition-colors md:text-sm">Отзывы</Link></li>
+              </ul>
             </div>
-          </div>
-        </div>
-
-        {/* Иконка прокрутки мыши */}
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-20 fade-in-trigger-delay-2">
-          <div className="flex flex-col items-center gap-2">
-            <div className="mouse-scroll-icon">
-              <svg
-                width="20"
-                height="32"
-                viewBox="0 0 24 40"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-8"
-              >
-                <rect
-                  x="2"
-                  y="2"
-                  width="20"
-                  height="32"
-                  rx="10"
-                  stroke="rgba(0, 240, 255, 0.6)"
-                  strokeWidth="2"
-                  fill="rgba(0, 240, 255, 0.05)"
-                />
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="3"
-                  fill="#00f0ff"
-                  className="mouse-scroll-wheel"
-                />
-              </svg>
-            </div>
-            <ChevronDownIcon className="w-6 h-6 text-[#00f0ff] animate-bounce" />
-          </div>
-        </div>
-      </section>
-
-      {/* Преимущества */}
-      <section ref={advantagesSectionRef} className="pt-12 pb-20 relative z-10">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-20 fade-in-up-trigger">
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-                Преимущества
-              </span>
-              <span className="text-[#e5e7eb]"> доставки с нами</span>
-            </h2>
-            <p className="text-[#9ca3af] text-sm sm:text-lg max-w-2xl mx-auto">
-              Мы делаем доставку из Китая простой, быстрой и надежной
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {advantages.map((advantage, index) => {
-              const Icon = advantage.icon;
-              return (
-                <div key={index} className="fade-in-up-trigger group" style={{ animationDelay: `${index * 0.1}s` }}>
-                  <div className="relative h-full p-4 sm:p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                    <div
-                      className="relative w-10 h-10 sm:w-14 sm:h-14 mx-auto mb-5 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
-                      style={{
-                        background: `linear-gradient(135deg, ${advantage.accent}15, ${advantage.accent}05)`,
-                        border: `1px solid ${advantage.accent}30`,
-                      }}
-                    >
-                      <Icon className="w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-300 group-hover:scale-110" style={{ color: advantage.accent }} />
-                    </div>
-                    <h3 className="text-base sm:text-xl font-semibold text-[#e5e7eb] mb-3 text-center">
-                      {advantage.title}
-                    </h3>
-                    <p className="text-[#9ca3af] text-sm text-center leading-relaxed">
-                      {advantage.description}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Статистика */}
-      <section ref={statsSectionRef} className="py-20 relative z-10">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center fade-in-up-trigger" style={{ animationDelay: `${index * 0.15}s` }}>
-                <div
-                  className="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 hover:scale-110 transition-transform duration-300"
-                  style={{
-                    background: 'linear-gradient(135deg, #00f0ff, #a78bfa)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
-                  {stat.number}
-                </div>
-                <div className="text-[#9ca3af] text-xs sm:text-sm md:text-base">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Маркетплейсы */}
-      <section ref={marketplacesSectionRef} className="py-20 relative z-10">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-20 fade-in-up-trigger">
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-                С нами вы можете заказывать
-              </span>
-              <span className="text-[#e5e7eb]"> с этих сайтов</span>
-            </h2>
-            <p className="text-[#9ca3af] text-sm sm:text-lg max-w-2xl mx-auto">
-              Мы работаем со всеми популярными китайскими маркетплейсами
-            </p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-6">
-            {marketplaces.map((marketplace, index) => (
+            <div>
+              <h4 className="text-xs md:text-sm font-semibold text-[#F5F5F5] mb-1 md:mb-4 uppercase tracking-wider">Контакты</h4>
+              <ul className="space-y-1 text-xs text-[#A3A3A3] md:space-y-3 md:text-sm">
+                <li><a href="tel:+375336540611" className="hover:text-[#C9A97A] transition-colors">+375 33 654-06-11</a></li>
+                <li><a href="mailto:fluvionbiz@gmail.com" className="hover:text-[#C9A97A] transition-colors">fluvionbiz@gmail.com</a></li>
+                <li>Беларусь, Минск</li>
+              </ul>
               <a
-                key={marketplace.name}
-                href={marketplace.url}
+                href="https://t.me/FLUVIONN"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="marketplace-link fade-in-up-trigger group"
-                style={{ animationDelay: `${index * 0.1}s` }}
-                title={marketplace.name}
+                className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition-all hover:shadow-[0_0_30px_rgba(201,169,122,0.2)] md:mt-4 md:px-5 md:py-3 md:text-sm"
+                style={{ background: `${GOLD}20`, color: GOLD, border: `1px solid ${GOLD}40` }}
               >
-                {marketplace.hasImage ? (
-                  <div className={`marketplace-logo-wrapper marketplace-logo-${index % 4} marketplace-logo-image`}>
-                    <img 
-                      src={marketplace.logo} 
-                      alt={marketplace.name} 
-                      className="marketplace-logo-img"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.parentElement.innerHTML = `<span class="marketplace-text">${marketplace.text}</span>`;
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className={`marketplace-logo-wrapper marketplace-logo-${index % 4}`}>
-                    <span className="marketplace-text">{marketplace.text}</span>
-                  </div>
-                )}
+                Telegram
               </a>
-            ))}
+            </div>
+          </div>
+          <div className="mt-8 border-t border-[#1A1A1A] pt-6 md:mt-12 md:pt-8">
+            <h4 className="text-xs font-semibold text-[#F5F5F5] mb-3 uppercase tracking-wider md:text-sm md:mb-4">Способы оплаты</h4>
+            <div className="flex flex-wrap items-center gap-2 md:gap-4">
+              <div className="rounded-lg border p-2 md:p-3" style={{ borderColor: `${GOLD}30`, background: BG_SURFACE }}>
+                <img src="/payment-logos/visa.svg" alt="Visa" className="h-6 object-contain md:h-10" />
+              </div>
+              <div className="rounded-lg border p-2 md:p-3" style={{ borderColor: `${GOLD}30`, background: BG_SURFACE }}>
+                <img src="/payment-logos/mastercard.svg" alt="Mastercard" className="h-6 object-contain md:h-10" />
+              </div>
+              <div className="rounded-lg border p-2 md:p-3" style={{ borderColor: `${GOLD}30`, background: BG_SURFACE }}>
+                <img src="/payment-logos/belkart.svg" alt="Белкарт" className="h-6 object-contain md:h-10" />
+              </div>
+              <div className="rounded-lg border p-2 md:p-3" style={{ borderColor: `${GOLD}30`, background: BG_SURFACE }}>
+                <img src="/payment-logos/apple-pay.svg" alt="Apple Pay" className="h-6 object-contain md:h-10" />
+              </div>
+              <div className="rounded-lg border p-2 md:p-3" style={{ borderColor: `${GOLD}30`, background: BG_SURFACE }}>
+                <img src="/payment-logos/gpay.svg" alt="Google Pay" className="h-6 object-contain md:h-10" />
+              </div>
+              <div className="rounded-lg border p-2 md:p-3" style={{ borderColor: `${GOLD}30`, background: BG_SURFACE }}>
+                <img src="/payment-logos/samsung-pay.svg" alt="Samsung Pay" className="h-6 object-contain md:h-10" />
+              </div>
+              <div className="rounded-lg border p-2 md:p-3" style={{ borderColor: `${GOLD}30`, background: BG_SURFACE }}>
+                <img src="/payment-logos/bepaid.svg" alt="bePaid" className="h-6 object-contain md:h-10" />
+              </div>
+              <div className="rounded-lg border p-2 md:p-3" style={{ borderColor: `${GOLD}30`, background: BG_SURFACE }}>
+                <img src="/payment-logos/erip.svg" alt="ЕРИП" className="h-6 object-contain md:h-10" />
+              </div>
+            </div>
+          </div>
+          <div className="mt-8 pt-4 flex flex-col md:flex-row justify-between items-center gap-2 border-t border-[#1A1A1A] md:mt-16 md:pt-8 md:gap-4">
+            <p className="text-xs text-[#A3A3A3] md:text-sm">© {new Date().getFullYear()} Fluvion. Все права защищены.</p>
+            <p className="text-xs text-[#A3A3A3] md:text-sm">Доставка из Китая в Беларусь</p>
           </div>
         </div>
-      </section>
-
-      {/* CSS стили для эффектов */}
-      <style>{`
-        /* Анимация иконки прокрутки мыши */
-        .mouse-scroll-icon {
-          animation: mouse-scroll-pulse 2s ease-in-out infinite;
-        }
-
-        .mouse-scroll-wheel {
-          animation: mouse-scroll-wheel 2s ease-in-out infinite;
-        }
-
-        @keyframes mouse-scroll-pulse {
-          0%, 100% {
-            opacity: 0.6;
-            transform: translateY(0);
-          }
-          50% {
-            opacity: 1;
-            transform: translateY(5px);
-          }
-        }
-
-        @keyframes mouse-scroll-wheel {
-          0% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-          50% {
-            opacity: 0.3;
-            transform: translateY(8px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        /* Glow эффект для логотипа - оптимизирован для мобильных */
-        .logo-glow-wrapper {
-          position: relative;
-          display: inline-block;
-        }
-
-        .logo-glow {
-          position: relative;
-          z-index: 1;
-          display: block;
-          /* Упрощенный glow для десктопа */
-          filter: 
-            drop-shadow(0 0 8px rgba(0, 240, 255, 0.7))
-            drop-shadow(0 0 20px rgba(0, 240, 255, 0.5))
-            drop-shadow(0 0 35px rgba(167, 139, 250, 0.4));
-          animation: logo-glow-breathe 3s ease-in-out infinite;
-          will-change: filter;
-        }
-
-        @keyframes logo-glow-breathe {
-          0%, 100% {
-            filter: 
-              drop-shadow(0 0 8px rgba(0, 240, 255, 0.7))
-              drop-shadow(0 0 20px rgba(0, 240, 255, 0.5))
-              drop-shadow(0 0 35px rgba(167, 139, 250, 0.4));
-          }
-          50% {
-            filter: 
-              drop-shadow(0 0 12px rgba(0, 240, 255, 0.9))
-              drop-shadow(0 0 30px rgba(0, 240, 255, 0.7))
-              drop-shadow(0 0 50px rgba(167, 139, 250, 0.6));
-          }
-        }
-
-        /* Упрощенный glow для мобильных устройств */
-        @media (max-width: 768px) {
-          .logo-glow {
-            /* Минимальный glow на мобильных - только 2 слоя */
-            filter: 
-              drop-shadow(0 0 6px rgba(0, 240, 255, 0.6))
-              drop-shadow(0 0 15px rgba(0, 240, 255, 0.4));
-            animation: logo-glow-breathe-mobile 3s ease-in-out infinite;
-          }
-
-          @keyframes logo-glow-breathe-mobile {
-            0%, 100% {
-              filter: 
-                drop-shadow(0 0 6px rgba(0, 240, 255, 0.6))
-                drop-shadow(0 0 15px rgba(0, 240, 255, 0.4));
-            }
-            50% {
-              filter: 
-                drop-shadow(0 0 8px rgba(0, 240, 255, 0.8))
-                drop-shadow(0 0 20px rgba(0, 240, 255, 0.5));
-            }
-          }
-        }
-
-        /* Отключение анимации для устройств с низкой производительностью */
-        @media (prefers-reduced-motion: reduce) {
-          .logo-glow {
-            animation: none;
-            filter: 
-              drop-shadow(0 0 8px rgba(0, 240, 255, 0.7))
-              drop-shadow(0 0 20px rgba(0, 240, 255, 0.5));
-          }
-        }
-
-        /* Эффекты появления (fade-in) */
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        /* Анимации срабатывают только когда элемент виден (через класс in-view) */
-        .fade-in-trigger {
-          opacity: 0;
-        }
-
-        .fade-in-trigger.in-view {
-          animation: fadeIn 0.8s ease-out forwards;
-        }
-
-        .fade-in-trigger-delay-1 {
-          opacity: 0;
-        }
-
-        .fade-in-trigger-delay-1.in-view {
-          animation: fadeIn 0.8s ease-out 0.2s forwards;
-        }
-
-        .fade-in-trigger-delay-2 {
-          opacity: 0;
-        }
-
-        .fade-in-trigger-delay-2.in-view {
-          animation: fadeIn 0.8s ease-out 0.4s forwards;
-        }
-
-        .fade-in-up-trigger {
-          opacity: 0;
-        }
-
-        .fade-in-up-trigger.in-view {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
-
-        /* Оптимизация анимаций */
-        @media (prefers-reduced-motion: reduce) {
-          .fade-in-trigger,
-          .fade-in-trigger-delay-1,
-          .fade-in-trigger-delay-2,
-          .fade-in-up-trigger {
-            animation: none;
-            opacity: 1;
-          }
-        }
-
-        /* Оптимизация для мобильных устройств */
-        @media (max-width: 768px) {
-          /* Упрощаем hover эффекты на мобильных */
-          .marketplace-link:hover {
-            transform: none;
-          }
-
-          .marketplace-link:hover .marketplace-logo-wrapper {
-            border-color: rgba(0, 240, 255, 0.3);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
-          }
-
-          /* Отключаем сложные анимации на мобильных */
-          .mouse-scroll-icon,
-          .mouse-scroll-wheel {
-            animation-duration: 3s;
-          }
-
-          /* Упрощаем анимации появления */
-          .fade-in-trigger.in-view,
-          .fade-in-trigger-delay-1.in-view,
-          .fade-in-trigger-delay-2.in-view,
-          .fade-in-up-trigger.in-view {
-            animation-duration: 0.5s;
-          }
-        }
-
-        /* Дополнительная оптимизация для слабых устройств */
-        @media (max-width: 768px) and (max-height: 900px) {
-          .logo-glow {
-            /* Еще более упрощенный glow для маленьких экранов */
-            filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5));
-            animation: none;
-          }
-        }
-
-        /* Класс для отключения glow на слабых устройствах */
-        .no-glow {
-          filter: none !important;
-          animation: none !important;
-        }
-
-        /* GPU ускорение для анимаций */
-        .logo-glow-wrapper,
-        .fade-in-trigger,
-        .fade-in-trigger-delay-1,
-        .fade-in-trigger-delay-2,
-        .fade-in-up-trigger {
-          transform: translateZ(0);
-          backface-visibility: hidden;
-          -webkit-backface-visibility: hidden;
-        }
-
-        /* Отключение hover эффектов на тач-устройствах */
-        @media (hover: none) and (pointer: coarse) {
-          .marketplace-link:hover,
-          .marketplace-link:hover .marketplace-logo-wrapper,
-          button:hover,
-          .group:hover {
-            transform: none;
-          }
-
-          .group:hover .group-hover\:scale-110 {
-            transform: none;
-          }
-
-          .group:hover .group-hover\:-translate-y-1 {
-            transform: none;
-          }
-        }
-
-        /* Оптимизация для карточек преимуществ на мобильных */
-        @media (max-width: 768px) {
-          .group:hover .group-hover\:scale-110,
-          .group:hover .group-hover\:-translate-y-1 {
-            transform: none;
-          }
-        }
-
-        /* Стили для маркетплейсов */
-        .marketplace-link {
-          display: inline-flex;
-          text-decoration: none;
-          transition: transform 0.3s ease;
-        }
-
-        .marketplace-link:hover {
-          transform: translateY(-5px) scale(1.05);
-        }
-
-        .marketplace-logo-wrapper {
-          width: 80px;
-          height: 80px;
-          border-radius: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 2px solid rgba(255, 255, 255, 0.1);
-          transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .marketplace-link:hover .marketplace-logo-wrapper {
-          border-color: rgba(0, 240, 255, 0.5);
-          box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
-        }
-
-        /* Все маркетплейсы в голубых оттенках */
-        .marketplace-logo-0,
-        .marketplace-logo-1,
-        .marketplace-logo-2,
-        .marketplace-logo-3 {
-          background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 240, 255, 0.05));
-        }
-
-        .marketplace-link:hover .marketplace-logo-0,
-        .marketplace-link:hover .marketplace-logo-1,
-        .marketplace-link:hover .marketplace-logo-2,
-        .marketplace-link:hover .marketplace-logo-3 {
-          background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(0, 240, 255, 0.1));
-        }
-
-        .marketplace-logo-image {
-          padding: 12px;
-        }
-
-        .marketplace-logo-img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          filter: brightness(0) invert(1) sepia(100%) saturate(5000%) hue-rotate(175deg) brightness(1.1);
-          transition: filter 0.3s ease;
-          will-change: filter;
-        }
-
-        .marketplace-link:hover .marketplace-logo-img {
-          filter: brightness(0) invert(1) sepia(100%) saturate(5000%) hue-rotate(175deg) brightness(1.3);
-        }
-
-        /* Упрощение filter эффектов на мобильных */
-        @media (max-width: 768px) {
-          .marketplace-logo-img {
-            /* Упрощенный filter на мобильных - только базовые операции */
-            filter: brightness(0.8) invert(1) hue-rotate(175deg);
-          }
-
-          .marketplace-link:hover .marketplace-logo-img {
-            filter: brightness(1) invert(1) hue-rotate(175deg);
-          }
-        }
-
-        .marketplace-text {
-          font-size: 1rem;
-          font-weight: 700;
-          color: #00f0ff;
-          text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-          transition: all 0.3s ease;
-        }
-
-        .marketplace-link:hover .marketplace-text {
-          color: #00ffff;
-          text-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
-        }
-
-        @media (max-width: 768px) {
-          .marketplace-logo-wrapper {
-            width: 70px;
-            height: 70px;
-          }
-
-          .marketplace-text {
-            font-size: 0.875rem;
-          }
-        }
-      `}</style>
+      </footer>
     </div>
   );
 };
