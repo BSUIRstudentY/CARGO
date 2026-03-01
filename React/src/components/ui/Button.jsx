@@ -20,6 +20,8 @@ export const Button = ({
     secondary: 'bg-[rgba(167,139,250,0.1)] border border-[rgba(167,139,250,0.3)] text-[#a78bfa] hover:bg-[rgba(167,139,250,0.15)] hover:border-[rgba(167,139,250,0.5)] focus:ring-[#a78bfa]/50',
     outline: 'bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] text-[#e5e7eb] hover:bg-[rgba(255,255,255,0.05)] hover:border-[rgba(167,139,250,0.4)] hover:text-[#a78bfa] focus:ring-[#00f0ff]/50',
     ghost: 'text-[#9ca3af] hover:bg-[rgba(255,255,255,0.05)] hover:text-[#e5e7eb] focus:ring-[#00f0ff]/50',
+    'ev-primary': 'bg-[var(--ev-gold)]/20 border border-[var(--ev-gold)]/40 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/30 hover:border-[var(--ev-gold)]/60 focus:ring-[var(--ev-gold)]/50',
+    'ev-outline': 'bg-[var(--ev-glass)] border border-[var(--ev-gold)]/20 text-[var(--ev-text)] hover:border-[var(--ev-gold)]/40 hover:text-[var(--ev-gold)] focus:ring-[var(--ev-gold)]/50',
   };
   
   const sizes = {

@@ -1,7 +1,11 @@
 // GuestLayout.jsx
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import Footer from './Footer';
+import Lenis from 'lenis';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Loading } from '../components/ui/Loading';
 
 // Lazy load all pages for better code splitting and performance
@@ -57,6 +61,20 @@ function GuestLayout() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMenuOpen]);
 
+  /* ---------- Lenis: плавный скролл на всех страницах ---------- */
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.config({ autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load' });
+    const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
+    const raf = (time) => {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    };
+    requestAnimationFrame(raf);
+    lenis.on('scroll', ScrollTrigger.update);
+    return () => lenis.destroy();
+  }, []);
+
   /* ---------- Navigation items ---------- */
   const navItems = [
     { path: '/', label: 'Главная', icon: <HomeIcon className="w-5 h-5" /> },
@@ -89,6 +107,15 @@ function GuestLayout() {
 
   return (
     <div className="flex flex-col min-h-screen text-text-primary relative overflow-x-hidden bg-[var(--ev-void)] font-ev-body antialiased">
+      {/* Grain оверлей только на странице каталога — рендер в body поверх всего */}
+      {location.pathname === '/catalog' && createPortal(
+        <div
+          className="grain-overlay"
+          style={{ zIndex: 2147483647 }}
+          aria-hidden="true"
+        />,
+        document.body
+      )}
       {/* Фон Ethereal Void — мягкие золотые акценты */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div
@@ -113,7 +140,7 @@ function GuestLayout() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--ev-glass)] backdrop-blur-[32px] border-b border-[var(--ev-gold-soft)] pt-safe [&_button]:outline-none [&_button]:ring-0 [&_button]:ring-offset-0">
         <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between gap-4">
           <button onClick={() => handleNavClick('/')} className="flex items-center gap-2 shrink-0">
-            <div className="w-6 h-6 rounded-full bg-[var(--ev-gold)]" />
+            <span className="ev-logo-tint block h-6 w-6 md:h-7 md:w-7 shrink-0" style={{ maskImage: 'url(/logo.png)', WebkitMaskImage: 'url(/logo.png)' }} aria-hidden />
             <span className="font-[var(--ev-font-display)] font-light text-lg text-[var(--ev-text)]">Fluvion</span>
           </button>
 
@@ -129,7 +156,7 @@ function GuestLayout() {
                 onClick={() => handleNavClick(path)}
                 className={
                   cta
-                    ? 'px-4 py-2 rounded-full text-sm font-normal bg-[var(--ev-gold)]/25 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/40 transition-colors'
+                    ? 'px-4 py-2 rounded-full text-sm font-normal bg-[var(--ev-gold)]/60 text-[#faf8f5] hover:bg-[var(--ev-gold)]/80 hover:text-white transition-colors shadow-[0_0_20px_var(--ev-gold-glow)]'
                     : `px-3 py-2 rounded-lg text-sm font-normal transition-colors ${isNavActive(path)
                       ? 'text-[var(--ev-gold)]'
                       : 'text-[var(--ev-text-muted)] hover:text-[var(--ev-text)]'
@@ -251,7 +278,7 @@ function GuestLayout() {
         </Suspense>
       </main>
 
-      <Footer id="contact" />
+      {location.pathname !== '/catalog' && <Footer id="contact" />}
 
       {/* Telegram Button - Fixed bottom right */}
       <a

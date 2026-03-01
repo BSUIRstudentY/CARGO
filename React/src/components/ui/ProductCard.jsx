@@ -20,9 +20,9 @@ export const ProductCard = ({
       transition={{ duration: 0.4, delay: index * 0.05 }}
       className="h-full flex"
     >
-      <div className="h-full w-full flex flex-col p-3 sm:p-4 lg:p-5 bg-[rgba(255,255,255,0.02)] rounded-2xl border border-[rgba(255,255,255,0.05)] hover:border-[rgba(0,240,255,0.5)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-        {/* Изображение товара */}
-        <div className="relative w-full aspect-square mb-3 sm:mb-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.1)] overflow-hidden flex items-center justify-center p-2 sm:p-3 flex-shrink-0">
+      <div className="ev-card h-full w-full flex flex-col p-3 sm:p-4 lg:p-5 rounded-2xl bg-[var(--ev-card-bg)] transition-all duration-300">
+        {/* Изображение товара — без границы */}
+        <div className="relative w-full aspect-square mb-3 sm:mb-4 rounded-xl bg-[var(--ev-void)] overflow-hidden flex items-center justify-center p-2 sm:p-3 flex-shrink-0">
           {product.imageUrl ? (
             <motion.img
               src={product.imageUrl}
@@ -35,35 +35,31 @@ export const ProductCard = ({
               }}
             />
           ) : (
-            <div className="w-full h-full bg-[rgba(255,255,255,0.02)] flex items-center justify-center rounded-lg">
-              <span className="text-[#9ca3af] text-xs sm:text-sm text-center px-2">Нет изображения</span>
+            <div className="w-full h-full bg-[var(--ev-void)] flex items-center justify-center rounded-lg">
+              <span className="text-[var(--ev-text-muted)] text-xs sm:text-sm text-center px-2">Нет изображения</span>
             </div>
           )}
         </div>
 
         {/* Информация о товаре */}
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          {/* Название товара */}
-          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-[#e5e7eb] mb-2 sm:mb-3 line-clamp-2 break-words overflow-hidden leading-tight">
+          {/* Название товара — основной текст */}
+          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-[var(--ev-text)] mb-2 sm:mb-3 line-clamp-2 break-words overflow-hidden leading-snug">
             {product.name || 'Без названия'}
           </h3>
           
-          {/* Цена */}
+          {/* Цена — акцент золотом из палитры */}
           <div className="mb-3 sm:mb-4 flex-shrink-0">
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent break-words"
-            >
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--ev-gold)] break-words">
               ¥{product.price?.toFixed(2) || '0.00'}
-            </motion.div>
-            <div className="text-xs sm:text-sm text-[#9ca3af] mt-1">Из Китая</div>
+            </p>
+            <p className="text-xs sm:text-sm text-[var(--ev-text-muted)] mt-0.5">Из Китая</p>
           </div>
 
           {/* Кнопки действий */}
           <div className="flex flex-col sm:flex-row gap-2 mt-auto pt-2 flex-shrink-0">
             <Button
-              variant="primary"
+              variant="ev-primary"
               size="sm"
               onClick={() => onAddToCart(product)}
               className="flex-1 flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 py-1.5 sm:py-2 min-w-0"
@@ -72,7 +68,7 @@ export const ProductCard = ({
               <span className="whitespace-nowrap">В корзину</span>
             </Button>
             <Button
-              variant="outline"
+              variant="ev-outline"
               size="sm"
               onClick={() => onViewDetails(product.id)}
               className="flex-1 flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 py-1.5 sm:py-2 min-w-0"

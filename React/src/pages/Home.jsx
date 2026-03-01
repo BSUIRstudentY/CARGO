@@ -1,13 +1,14 @@
+
+
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Lenis from 'lenis';
 /**
  * Home.jsx — главная страница «Ethereal Void» 2026
  * Ultra-Minimal Glassmorphism + Parallax
- * ТЗ v4.0: Lenis, GSAP ScrollTrigger, Radial Menu, Timeline, Orbs, Mega CTA
+ * ТЗ v4.0: Lenis (в лейауте), GSAP ScrollTrigger, Radial Menu, Timeline, Orbs, Mega CTA
  */
 gsap.registerPlugin(ScrollTrigger);
 // Компонент одной орбиты с count-up и scroll-эффектом как в «Путь груза»
@@ -133,7 +134,6 @@ const statsSectionRef = useRef(null);
 const statsLineRef = useRef(null);
 const statsOrbsRef = useRef([]);
 const ctaSphereRef = useRef(null);
-const lenisRef = useRef(null);
 const marqueeContentRef = useRef(null);
 const ripple = useRipple();
 // Reduce motion + mobile
@@ -151,21 +151,10 @@ check();
 mq.addEventListener('change', check);
 return () => mq.removeEventListener('change', check);
   }, []);
-// Lenis + GSAP ScrollTrigger
+// ScrollTrigger: Lenis запускается в AppLayout/GuestLayout — здесь только анимации по скроллу
 useEffect(() => {
-const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
-lenisRef.current = lenis;
-const raf = (time) => {
-lenis.raf(time);
-requestAnimationFrame(raf);
-    };
-requestAnimationFrame(raf);
-lenis.on('scroll', ScrollTrigger.update);
 ScrollTrigger.config({ autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load' });
-return () => {
-lenis.destroy();
-ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
+return () => ScrollTrigger.getAll().forEach((t) => t.kill());
   }, []);
 // Canvas — золотые линии + спавн частиц по клику
 useEffect(() => {
@@ -295,8 +284,8 @@ scrub: 1,
     };
     const st = ScrollTrigger.create({
       trigger: section,
-      start: 'top 70%',
-      end: 'bottom 20%',
+      start: 'top 80%',
+      end: 'bottom 80%',
       scrub: 0.35,
       onUpdate: (self) => {
         const progress = self.progress;
@@ -369,8 +358,8 @@ scrub: 1,
     };
     const st = ScrollTrigger.create({
       trigger: section,
-      start: 'top top',
-      end: '+=70%',
+      start: 'top 30%',
+      end: '+=100%',
       pin: true,
       scrub: 0.35,
       onUpdate: (self) => {
@@ -436,8 +425,8 @@ scrub: 1,
     };
     const st = ScrollTrigger.create({
       trigger: section,
-      start: 'top top',
-      end: '+=70%',
+      start: 'top 30%',
+      end: '+=100%',
       pin: true,
       scrub: 0.35,
       onUpdate: (self) => {
@@ -567,8 +556,8 @@ return (
 <header className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center px-4 md:px-6 bg-[var(--ev-glass)] backdrop-blur-[32px] border-b border-[var(--ev-gold-soft)]">
 <div className="max-w-screen-2xl mx-auto w-full flex items-center justify-between">
 <a href="/" className="flex items-center gap-2">
-<div className="w-7 h-7 rounded-full bg-[var(--ev-gold)] shadow-[0_0_40px_var(--ev-gold-glow)]" />
-<span className="text-lg font-ev-display font-light tracking-[-0.04em]">Fluvion</span>
+<span className="ev-logo-tint block h-7 w-7 shrink-0" style={{ maskImage: 'url(/logo.png)', WebkitMaskImage: 'url(/logo.png)' }} aria-hidden />
+<span className="text-xl font-ev-display font-light tracking-[-0.04em]">Fluvion</span>
 </a>
 <nav className="hidden md:flex items-center gap-10 text-[15px]">
 {NAV_LINKS.map(({ href, label }) => (
@@ -652,7 +641,7 @@ particlesApiRef.current.addParticles(px, py);
 >
 <canvas ref={canvasRef} className="absolute inset-0 z-0 w-full h-full pointer-events-none" aria-hidden />
 <div className="relative z-10 text-center px-4 md:px-6 max-w-4xl mx-auto pt-12 md:pt-16">
-<p className="mb-2 md:mb-4 ev-label text-[var(--ev-gold)] font-normal">Fluvion</p>
+<p className="mb-2 md:mb-4 text-lg md:text-xl font-ev-display font-light text-[var(--ev-gold)] tracking-[-0.02em]">Fluvion</p>
 <h1 className="font-ev-display text-3xl md:text-[68px] leading-tight tracking-[-0.04em] font-light mb-4 md:mb-6 text-balance">
             Доставка
 <br />
@@ -849,8 +838,8 @@ className="group relative inline-flex items-center gap-2 md:gap-3 px-6 py-3 md:p
 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 items-center">
 <div>
 <div className="flex items-center gap-2 mb-2 md:mb-3">
-<div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-[var(--ev-gold)]" />
-<span className="font-ev-display font-light text-base md:text-lg">Fluvion</span>
+<div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-[var(--ev-gold)] flex-shrink-0" />
+<span className="font-ev-display font-light text-lg md:text-xl">Fluvion</span>
 </div>
 <p className="text-[var(--ev-text-muted)] text-[12px] md:text-sm">Прямо из Китая. С любовью в Беларусь.</p>
 </div>
