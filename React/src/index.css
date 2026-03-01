@@ -1,8 +1,45 @@
 @import './styles/animations.css';
 
+/* Ethereal Void 2026 — шрифты (локальные файлы в /public/fonts/ или CDN) */
+@import url('https://fonts.cdnfonts.com/css/cabinet-grotesk');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/**
+ * Ethereal Void 2026 — палитра и переменные
+ */
+:root {
+  /* Ethereal Void palette */
+  --ev-void: #050505;
+  --ev-glass: rgba(15, 15, 15, 0.65);
+  --ev-glass-blur: 24px;
+  --ev-text: #F5F5F5;
+  --ev-text-muted: rgba(163, 163, 163, 0.85);
+  --ev-gold: #C9A97A;
+  --ev-gold-glow: rgba(201, 169, 122, 0.25);
+  --ev-gold-soft: rgba(201, 169, 122, 0.12);
+  --ev-font-display: 'Cabinet Grotesk', system-ui, sans-serif;
+  --ev-font-body: 'Neue Montreal', 'DM Sans', system-ui, sans-serif;
+  --ev-font-hero: 'Fraunces', Georgia, serif;
+}
+
+/* Grain overlay — 2–3% на всём сайте */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain-overlay { opacity: 0.01; }
+}
 
 /**
  * Unified design system CSS variables.
@@ -64,12 +101,13 @@
 /* Base styles for consistent typography */
 @layer base {
   body {
-    @apply bg-[var(--bg-primary)] text-[var(--text-primary)] font-sans antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    @apply bg-[var(--bg-primary)] text-[var(--text-primary)] antialiased;
+    font-family: var(--ev-font-body);
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold;
+    @apply font-light;
+    font-family: var(--ev-font-display);
   }
   
   /* Consistent button styles */
@@ -77,27 +115,50 @@
     @apply transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2;
   }
   
-  /* Consistent input styles */
+  /* Consistent input styles — Ethereal Void: тёмный фон, светлый текст, без белого */
   input, textarea, select {
     @apply transition-all duration-300 focus:outline-none;
+    background-color: var(--ev-void);
+    color: var(--ev-text);
+    border: 1px solid rgba(201, 169, 122, 0.2);
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--ev-text-muted);
+  }
+  input:focus, textarea:focus {
+    border-color: rgba(201, 169, 122, 0.5);
+    box-shadow: 0 0 0 1px rgba(201, 169, 122, 0.15);
+  }
+  /* Переопределение белого фона при автозаполнении браузера */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--ev-text);
+    -webkit-box-shadow: 0 0 0 1000px var(--ev-void) inset;
+    box-shadow: 0 0 0 1000px var(--ev-void) inset;
+    transition: background-color 5000s ease-in-out 0s;
   }
 
-  /* Все выпадающие списки: тёмный фон и светлый текст (не белый на белом) */
+  /* Выпадающие списки в стиле EV: тёмный фон, светлый текст */
   select {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border-color: var(--border-primary);
+    background-color: var(--ev-void);
+    color: var(--ev-text);
+    border-color: rgba(201, 169, 122, 0.2);
   }
-  /* Опции в выпадающем списке — тёмный фон, иначе в браузере белый список */
   select option,
   select optgroup {
-    background-color: #1a1a1a;
-    color: #e5e7eb;
+    background-color: #0a0a0a;
+    color: var(--ev-text);
   }
   select:focus {
     outline: none;
-    border-color: var(--accent-secondary);
-    box-shadow: 0 0 0 2px rgba(64, 124, 255, 0.25);
+    border-color: rgba(201, 169, 122, 0.5);
+    box-shadow: 0 0 0 1px rgba(201, 169, 122, 0.15);
   }
   
   /* Consistent link styles */
@@ -129,27 +190,47 @@
   }
   
   .input-base {
-    @apply w-full px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-lg;
-    @apply text-white placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent-secondary)];
-    @apply focus:border-transparent transition-all;
+    @apply w-full px-4 py-2 rounded-lg transition-all;
+    background-color: var(--ev-void);
+    color: var(--ev-text);
+    border: 1px solid rgba(201, 169, 122, 0.2);
+  }
+  .input-base::placeholder {
+    color: var(--ev-text-muted);
+  }
+  .input-base:focus {
+    @apply outline-none;
+    border-color: rgba(201, 169, 122, 0.5);
+    box-shadow: 0 0 0 1px rgba(201, 169, 122, 0.15);
   }
 
-  /* Выпадающие списки: тёмный фон и опции (если базовых стилей мало) */
+  /* Выпадающие списки в стиле EV */
   .select-dark,
   select.select-dark {
-    background-color: #1a1a1a !important;
-    color: #e5e7eb !important;
-    border-color: #333333;
+    background-color: var(--ev-void) !important;
+    color: var(--ev-text) !important;
+    border-color: rgba(201, 169, 122, 0.2);
   }
   .select-dark option,
   select.select-dark option {
-    background-color: #1a1a1a !important;
-    color: #e5e7eb !important;
+    background-color: #0a0a0a !important;
+    color: var(--ev-text) !important;
   }
 }
 
 /* Hide scrollbars but keep scroll functionality */
 @layer utilities {
+  /* Минималистичная подпись в стиле «SCROLL»: мелкий кегль, широкий трекинг */
+  .ev-label {
+    font-family: var(--ev-font-body);
+    font-size: 0.625rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  @media (min-width: 768px) {
+    .ev-label { font-size: 0.75rem; }
+  }
+
   .scrollbar-hide {
     /* Firefox */
     scrollbar-width: none;

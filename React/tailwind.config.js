@@ -32,10 +32,13 @@ export default {
         'border-primary': 'var(--border-primary, #333333)', // Dark borders
         'shadow-primary': 'var(--shadow-primary, rgba(0, 0, 0, 0.5))', // Dark shadows
       },
-      // Fonts (modern sans-serif like in Delta/Bootstrap)
+      // Fonts — Ethereal Void: минималистичный DM Sans везде, Cabinet Grotesk для акцентов
       fontFamily: {
-        'sans': ['Inter', 'system-ui', 'sans-serif'], // Primary font
-        'display': ['Inter', 'system-ui', 'sans-serif'], // For headings
+        'sans': ['DM Sans', 'Neue Montreal', 'system-ui', 'sans-serif'],
+        'display': ['Cabinet Grotesk', 'system-ui', 'sans-serif'],
+        'ev-display': ['Cabinet Grotesk', 'system-ui', 'sans-serif'],
+        'ev-body': ['DM Sans', 'Neue Montreal', 'system-ui', 'sans-serif'],
+        'ev-hero': ['Fraunces', 'Georgia', 'serif'],
       },
       // Text Sizes (responsive, based on HTML classes like display-4, lead)
       fontSize: {
@@ -69,6 +72,10 @@ export default {
       animation: {
         'float': 'float 3s ease-in-out infinite',
         'fade-in': 'fadeIn 0.5s ease-in-out',
+        'marquee': 'marquee 35s linear infinite',
+        'marquee-fast': 'marquee 20s linear infinite',
+        'spin-slow': 'spin 25s linear infinite',
+        'breathing': 'breathing 3s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -78,6 +85,18 @@ export default {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+        spin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        breathing: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.05)' },
         },
       },
     },

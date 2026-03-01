@@ -1,6 +1,5 @@
 // GuestLayout.jsx
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import Footer from './Footer';
 import { Loading } from '../components/ui/Loading';
@@ -26,19 +25,16 @@ const News = lazy(() => import('./News'));
 const OrderInstructions = lazy(() => import('./OrderInstructions'));
 import {
   HomeIcon, ShoppingBagIcon, ComputerDesktopIcon, CalculatorIcon, TruckIcon, QuestionMarkCircleIcon,
-  WrenchScrewdriverIcon, StarIcon, LockClosedIcon, CurrencyDollarIcon, Bars3Icon, XMarkIcon, MegaphoneIcon,
-  ClipboardDocumentListIcon
+  WrenchScrewdriverIcon, StarIcon, LockClosedIcon, CurrencyDollarIcon, MegaphoneIcon,
+  ClipboardDocumentListIcon, ChevronDownIcon
 } from '@heroicons/react/24/solid';
 
 function GuestLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isSidebarFullyClosed, setIsSidebarFullyClosed] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const sidebarRef = useRef(null);
-  const navContainerRef = useRef(null);
-  const canvasRef = useRef(null);
+  const menuRef = useRef(null);
 
   // Определение мобильного устройства
   useEffect(() => {
@@ -50,161 +46,16 @@ function GuestLayout() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  /* ---------- Sidebar handling ---------- */
+  /* ---------- Menu dropdown click outside ---------- */
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isSidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-        setIsSidebarOpen(false);
+      if (isMenuOpen && menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isSidebarOpen]);
-
-  useEffect(() => {
-    let timer;
-    if (!isSidebarOpen) {
-      timer = setTimeout(() => setIsSidebarFullyClosed(true), 300);
-    } else {
-      setIsSidebarFullyClosed(false);
-    }
-    return () => clearTimeout(timer);
-  }, [isSidebarOpen]);
-
-  /* ---------- Scroll indicator ---------- */
-  useEffect(() => {
-    const nav = navContainerRef.current;
-    const indicator = document.getElementById('scroll-indicator');
-    if (!nav || !indicator) return;
-
-    const updateIndicator = () => {
-      const { scrollTop, scrollHeight, clientHeight } = nav;
-      const scrollPercent = scrollTop / (scrollHeight - clientHeight);
-      const maxTop = clientHeight - 80;
-      indicator.style.opacity = scrollPercent > 0.05 && scrollPercent < 0.95 ? '1' : '0.3';
-      indicator.style.transform = `translateY(${scrollPercent * maxTop}px)`;
-    };
-
-    nav.addEventListener('scroll', updateIndicator);
-    updateIndicator();
-    return () => nav.removeEventListener('scroll', updateIndicator);
-  }, [isSidebarOpen]);
-
-  /* ---------- Снежная анимация фона ---------- */
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
-    ctx.imageSmoothingEnabled = false;
-    
-    let animationFrameId;
-    let snowflakes = [];
-
-    const getSnowflakeCount = () => {
-      const area = window.innerWidth * window.innerHeight;
-      const baseCount = 100;
-      const maxCount = 150;
-      const count = Math.min(maxCount, Math.floor((area / 1500000) * baseCount));
-      return Math.max(50, count);
-    };
-
-    class Snowflake {
-      constructor() {
-        this.reset();
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 0.5;
-      }
-
-      reset(startFromTop = false) {
-        this.x = Math.random() * canvas.width;
-        this.y = startFromTop ? -10 : Math.random() * canvas.height;
-        this.vy = Math.random() * 0.3 + 0.2;
-        this.vx = Math.random() * 0.3 - 0.15;
-        this.wobble = Math.random() * Math.PI * 2;
-        this.wobbleSpeed = Math.random() * 0.015 + 0.008;
-        this.size = Math.random() * 2 + 0.5;
-        this.opacity = Math.random() * 0.5 + 0.5;
-      }
-
-      update(deltaTime) {
-        const timeFactor = deltaTime * 0.0625;
-        this.wobble += this.wobbleSpeed * timeFactor;
-        const wobbleOffset = Math.sin(this.wobble) * 0.15;
-        const currentVX = this.vx + wobbleOffset;
-        
-        this.x += currentVX * timeFactor;
-        this.y += this.vy * timeFactor;
-
-        if (this.y > canvas.height + 10) {
-          this.reset(true);
-        } else if (this.x < -10) {
-          this.x = canvas.width + 10;
-        } else if (this.x > canvas.width + 10) {
-          this.x = -10;
-        }
-      }
-
-      draw() {
-        ctx.globalAlpha = this.opacity;
-        ctx.fillStyle = 'rgb(255, 255, 255)';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      }
-    }
-
-    const initSnowflakes = () => {
-      const count = getSnowflakeCount();
-      snowflakes = [];
-      for (let i = 0; i < count; i++) {
-        const flake = new Snowflake();
-        flake.y = Math.random() * canvas.height;
-        snowflakes.push(flake);
-      }
-    };
-
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      initSnowflakes();
-    };
-    
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    let lastFrameTime = performance.now();
-    const animate = (currentTime) => {
-      const deltaTime = currentTime - lastFrameTime;
-      lastFrameTime = currentTime;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'rgb(255, 255, 255)';
-      
-      for (let i = 0; i < snowflakes.length; i++) {
-        const snowflake = snowflakes[i];
-        snowflake.update(deltaTime);
-        
-        ctx.globalAlpha = snowflake.opacity;
-        ctx.beginPath();
-        ctx.arc(snowflake.x, snowflake.y, snowflake.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      
-      ctx.globalAlpha = 1;
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    animate(performance.now());
-
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
-  }, []);
+  }, [isMenuOpen]);
 
   /* ---------- Navigation items ---------- */
   const navItems = [
@@ -222,13 +73,12 @@ function GuestLayout() {
     { path: '/login', label: 'Вход/Регистрация', icon: <LockClosedIcon className="w-5 h-5" />, special: true },
   ];
 
-  const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
-  const closeSidebar = () => setIsSidebarOpen(false);
+  const toggleMenu = () => setIsMenuOpen(prev => !prev);
+  const closeMenu = () => setIsMenuOpen(false);
 
-  /* ---------- Unified click handler ---------- */
   const handleNavClick = (path) => {
     navigate(path);
-    closeSidebar();
+    closeMenu();
   };
 
   /* Активная вкладка = текущая страница (отдельно от special = «Заказать товар» / «Вход») */
@@ -237,336 +87,140 @@ function GuestLayout() {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
-  /* ---------- NavItem: special = CTA, isActive = текущая страница ---------- */
-  const NavItem = ({ item, delay, isMobile = false }) => {
-    const isSpecial = item.special;
-    const isActive = isNavActive(item.path);
-
-    const content = (
-      <button
-        onClick={() => handleNavClick(item.path)}
-        className={`w-full text-left px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl transition-all duration-200 text-xs sm:text-sm font-medium flex items-center gap-2 sm:gap-3 active:scale-95
-          ${isActive ? 'ring-2 ring-white/50 ring-inset' : ''}
-          ${isSpecial
-            ? 'font-bold bg-[rgba(0,240,255,0.1)] hover:bg-[rgba(0,240,255,0.15)] border border-[rgba(0,240,255,0.3)] hover:border-[rgba(0,240,255,0.5)] text-base text-[#00f0ff]'
-            : 'text-[#9ca3af] hover:text-[#e5e7eb] bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)]'
-          }`}
-        style={{
-          willChange: 'transform',
-          transform: 'translateZ(0)',
-        }}
-        aria-current={isActive ? 'page' : undefined}
-      >
-        {/* Иконка */}
-        <span className={`transition-transform ${isMobile ? '' : 'group-hover:scale-110'}`}>
-          {React.cloneElement(item.icon, {
-            className: `w-5 h-5 ${isSpecial ? 'w-6 h-6' : ''}`,
-            style: { color: isSpecial ? '#00f0ff' : (isActive ? '#e5e7eb' : '#9ca3af') }
-          })}
-        </span>
-
-        {/* Текст */}
-        <span className="flex-1">{item.label}</span>
-        {isActive && !isSpecial && (
-          <span className="flex-shrink-0 text-[10px] uppercase tracking-wider text-white/60" aria-hidden>Сейчас</span>
-        )}
-        {isSpecial && (
-          <span className="flex-shrink-0 w-2 h-2 rounded-full bg-[#00f0ff] shadow-[0_0_6px_#00f0ff]" aria-hidden />
-        )}
-      </button>
-    );
-
-    if (isMobile) {
-      return <li className="group">{content}</li>;
-    }
-
-    return (
-      <motion.li
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3, delay }}
-        whileHover={{ x: 6 }}
-        className="group"
-        style={{
-          willChange: 'transform',
-          transform: 'translateZ(0)',
-        }}
-      >
-        {content}
-      </motion.li>
-    );
-  };
-
   return (
-    <div className="flex flex-col min-h-screen text-text-primary relative overflow-x-hidden bg-[#0a0d14]">
-      {/* Canvas для снежной анимации - фон на всех страницах */}
-      <canvas
-        ref={canvasRef}
-        className="fixed inset-0 pointer-events-none z-[5]"
-        style={{ background: 'transparent' }}
-      />
-
-      {/* Статичные световые акценты */}
+    <div className="flex flex-col min-h-screen text-text-primary relative overflow-x-hidden bg-[var(--ev-void)] font-ev-body antialiased">
+      {/* Фон Ethereal Void — мягкие золотые акценты */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div
-          className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl"
+          className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-60"
           style={{
-            background: 'radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, var(--ev-gold-glow) 0%, transparent 70%)',
           }}
         />
         <div
-          className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl"
+          className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-40"
           style={{
-            background: 'radial-gradient(circle, rgba(167, 139, 250, 0.06) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(201, 169, 122, 0.12) 0%, transparent 70%)',
           }}
         />
       </div>
 
       <style>{`
-        @media (max-width: 640px) {
-          .mobile-header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(10, 13, 20, 0.95);
-            backdrop-filter: blur(12px); padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)); display: flex; align-items: center; justify-content: space-between;
-            z-index: 9998; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            -webkit-backface-visibility: hidden; backface-visibility: hidden; transform: translateZ(0); }
-          .mobile-sidebar-wrap { min-height: 100dvh; height: 100dvh; min-height: -webkit-fill-available; }
-          .mobile-sidebar-nav { padding-bottom: calc(2rem + env(safe-area-inset-bottom)); }
-          .mobile-sidebar-inner { padding-top: env(safe-area-inset-top); }
-          .mobile-hamburger { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; cursor: pointer;
-            transition: all 0.2s ease; color: #e5e7eb; -webkit-tap-highlight-color: transparent;
-            will-change: transform; transform: translateZ(0); }
-          .mobile-hamburger:active { transform: scale(0.95) translateZ(0); }
-          .mobile-logo-text { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: #e5e7eb; }
-          .desktop-header { display: none; }
-          .main-content { padding-top: calc(64px + env(safe-area-inset-top)); padding-bottom: 0; }
-          
-          /* Оптимизация сайдбара для мобильных */
-          aside[class*="w-64"] {
-            will-change: transform;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-          }
-        }
-        @media (min-width: 641px) {
-          .mobile-header { display: none; }
-          .main-content { padding-top: 64px; padding-bottom: 0; }
-          .mobile-sidebar-wrap { min-height: 100vh; height: 100vh; }
-          .mobile-sidebar-nav { padding-bottom: 2rem; }
-          .mobile-sidebar-inner { padding-top: 0; }
-        }
-
-        .scrollbar-custom { 
-          scrollbar-width: thin; 
-          scrollbar-color: #00f0ff transparent; 
-          -webkit-overflow-scrolling: touch;
-          overscroll-behavior: contain;
-        }
-        .scrollbar-custom::-webkit-scrollbar { width: 6px; }
-        .scrollbar-custom::-webkit-scrollbar-track { background: transparent; border-radius: 3px; }
-        .scrollbar-custom::-webkit-scrollbar-thumb { 
-          background: #00f0ff;
-          border-radius: 3px; 
-          box-shadow: 0 0 6px rgba(0, 240, 255, 0.5); 
-        }
-        .scrollbar-custom:hover::-webkit-scrollbar-thumb { background: #00d9ff; }
-        
-        /* Обеспечиваем прокрутку на всех устройствах */
-        aside[class*="w-64"] {
-          display: flex;
-          flex-direction: column;
-        }
-        aside[class*="w-64"] > div {
-          display: flex;
-          flex-direction: column;
-          min-height: 0;
-          flex: 1;
-        }
-
-        #scroll-indicator { position: absolute; right: 3px; top: 0; bottom: 0; width: 2px;
-          background: #00f0ff; border-radius: 1px; opacity: 0; transition: opacity 0.3s ease;
-          pointer-events: none; box-shadow: 0 0 8px #00f0ff; }
-
-        .nav-group-title { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+        .main-content { padding-top: calc(56px + env(safe-area-inset-top)); padding-bottom: 0; }
       `}</style>
 
-      {/* ---------- Fixed Header (desktop) ---------- */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0d14]/80 backdrop-blur-md border-b border-[rgba(255,255,255,0.1)]">
-        <div className="container-xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Hamburger (desktop) - внутри хедера слева */}
-          <button
-            onClick={toggleSidebar}
-            className="p-2 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] transition-all duration-300 text-[#e5e7eb] hover:text-[#00f0ff]"
-            aria-label="Меню"
-          >
-            <Bars3Icon className="w-6 h-6" />
+      {/* ---------- Fixed Header (Ethereal Void) ---------- */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--ev-glass)] backdrop-blur-[32px] border-b border-[var(--ev-gold-soft)] pt-safe [&_button]:outline-none [&_button]:ring-0 [&_button]:ring-offset-0">
+        <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between gap-4">
+          <button onClick={() => handleNavClick('/')} className="flex items-center gap-2 shrink-0">
+            <div className="w-6 h-6 rounded-full bg-[var(--ev-gold)]" />
+            <span className="font-[var(--ev-font-display)] font-light text-lg text-[var(--ev-text)]">Fluvion</span>
           </button>
 
+          <nav className="hidden md:flex items-center gap-1">
+            {[
+              { path: '/', label: 'Главная' },
+              { path: '/calculator', label: 'Калькулятор' },
+              { path: '/terminal', label: 'Заказать товар', cta: true },
+              { path: '/catalog', label: 'Каталог' },
+            ].map(({ path, label, cta }) => (
+              <button
+                key={path}
+                onClick={() => handleNavClick(path)}
+                className={
+                  cta
+                    ? 'px-4 py-2 rounded-full text-sm font-normal bg-[var(--ev-gold)]/25 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/40 transition-colors'
+                    : `px-3 py-2 rounded-lg text-sm font-normal transition-colors ${isNavActive(path)
+                      ? 'text-[var(--ev-gold)]'
+                      : 'text-[var(--ev-text-muted)] hover:text-[var(--ev-text)]'
+                    }`
+                }
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="relative flex items-center gap-2 md:ml-auto" ref={menuRef}>
+            <button
+              onClick={toggleMenu}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-normal text-[var(--ev-text-muted)] hover:text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10 transition-all"
+              aria-expanded={isMenuOpen}
+              aria-haspopup="true"
+            >
+              {isMobile ? 'Меню' : 'Ещё'}
+              <ChevronDownIcon className={`w-4 h-4 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isMenuOpen && (
+              <div className="absolute left-4 right-4 md:left-auto md:right-auto md:min-w-[220px] top-full mt-1 py-2 rounded-xl bg-[var(--ev-glass)] backdrop-blur-[24px] border border-[var(--ev-gold)]/20 shadow-xl z-[100] max-h-[min(70vh,400px)] overflow-y-auto">
+                {isMobile ? (
+                  <>
+                    <div className="px-3 py-2">
+                      <p className="ev-label text-[var(--ev-gold)]/80 mb-2">Основное</p>
+                      {navItems.filter(i => ['/', '/calculator'].includes(i.path)).map((item) => (
+                        <button key={item.path} onClick={() => handleNavClick(item.path)} className="w-full text-left px-3 py-2 rounded-lg text-sm text-[var(--ev-text)] hover:bg-[var(--ev-gold)]/10">
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="px-3 py-2">
+                      <p className="ev-label text-[var(--ev-gold)]/80 mb-2">Покупки</p>
+                      {navItems.filter(i => ['/catalog', '/terminal', '/rates', '/news'].includes(i.path)).map((item) => (
+                        <button key={item.path} onClick={() => handleNavClick(item.path)} className="w-full text-left px-3 py-2 rounded-lg text-sm text-[var(--ev-text)] hover:bg-[var(--ev-gold)]/10">
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="px-3 py-2">
+                      <p className="ev-label text-[var(--ev-gold)]/80 mb-2">Информация</p>
+                      {navItems.filter(i => ['/delivery-payment', '/order-instructions', '/faq', '/support', '/reviews'].includes(i.path)).map((item) => (
+                        <button key={item.path} onClick={() => handleNavClick(item.path)} className="w-full text-left px-3 py-2 rounded-lg text-sm text-[var(--ev-text)] hover:bg-[var(--ev-gold)]/10">
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="px-3 py-2">
+                      <p className="ev-label text-[var(--ev-gold)]/80 mb-2">Аккаунт</p>
+                      {navItems.filter(i => ['/login'].includes(i.path)).map((item) => (
+                        <button key={item.path} onClick={() => handleNavClick(item.path)} className="w-full text-left px-3 py-2 rounded-lg text-sm text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10 font-normal">
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {[
+                      { path: '/delivery-payment', label: 'Доставка и оплата' },
+                      { path: '/order-instructions', label: 'Инструкции' },
+                      { path: '/faq', label: 'FAQ' },
+                      { path: '/support', label: 'Поддержка' },
+                      { path: '/reviews', label: 'Отзывы' },
+                    ].map(({ path, label }) => (
+                      <button key={path} onClick={() => handleNavClick(path)} className="w-full text-left px-4 py-2 text-sm text-[var(--ev-text)] hover:bg-[var(--ev-gold)]/10">
+                        {label}
+                      </button>
+                    ))}
+                    <div className="border-t border-[var(--ev-gold)]/10 mt-2 pt-2">
+                      <button onClick={() => handleNavClick('/login')} className="w-full text-left px-4 py-2 text-sm text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10 font-normal">
+                        Вход / Регистрация
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
           <button
-            onClick={() => navigate('/login')}
-            className="px-6 py-2 rounded-xl bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)] transition-all duration-300 text-sm font-medium"
+            onClick={() => handleNavClick('/login')}
+            className="px-4 py-2 rounded-xl bg-[var(--ev-gold)] text-[var(--ev-void)] text-sm font-normal hover:opacity-90 transition-opacity"
           >
             Войти
           </button>
         </div>
       </header>
-
-      {/* ---------- Mobile Header ---------- */}
-      <header className="mobile-header flex sm:hidden">
-        <button onClick={toggleSidebar} className="mobile-hamburger">
-          {isSidebarOpen ? <XMarkIcon /> : <Bars3Icon />}
-        </button>
-        <div className="flex items-center gap-2">
-          <span className="mobile-logo-text">FLUVION</span>
-        </div>
-        <div />
-      </header>
-
-      {/* ---------- Sidebar Overlay для мобильных ---------- */}
-      {isMobile && (
-        <AnimatePresence>
-          {isSidebarOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={closeSidebar}
-              className="fixed inset-0 bg-black/60 z-[99998]"
-              style={{
-                willChange: 'opacity',
-                WebkitTapHighlightColor: 'transparent',
-              }}
-            />
-          )}
-        </AnimatePresence>
-      )}
-
-      {/* ---------- Sidebar ---------- */}
-      <AnimatePresence>
-        {isSidebarOpen && (
-          <motion.aside
-            ref={sidebarRef}
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={isMobile 
-              ? { type: 'tween', duration: 0.25, ease: [0.4, 0, 0.2, 1] }
-              : { type: 'spring', damping: 25, stiffness: 200 }
-            }
-            style={{
-              willChange: 'transform',
-              transform: 'translateZ(0)',
-              backfaceVisibility: 'hidden',
-              WebkitBackfaceVisibility: 'hidden',
-            }}
-            className="w-64 bg-[#0a0d14] fixed top-0 left-0 h-screen min-h-[100dvh] z-[99999] overflow-hidden border-r border-[rgba(255,255,255,0.1)] shadow-2xl flex flex-col mobile-sidebar-wrap"
-          >
-            {/* Статичные световые акценты - упрощены для мобильных */}
-            {!isMobile && (
-              <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-                <div
-                  className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%)',
-                  }}
-                />
-                <div
-                  className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(167, 139, 250, 0.06) 0%, transparent 70%)',
-                  }}
-                />
-              </div>
-            )}
-            
-            <div className="p-6 h-full flex flex-col relative z-10 min-h-0">
-              {/* Logo + Close */}
-              <motion.div
-                initial={isMobile ? false : { opacity: 0, y: -20 }}
-                animate={isMobile ? false : { opacity: 1, y: 0 }}
-                transition={isMobile ? {} : { delay: 0.1 }}
-                className="flex justify-between items-center mb-4 sm:mb-6"
-              >
-                <div className="flex items-center gap-2">
-                  <img src="/logo.png" alt="Fluvion Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-md" />
-                  <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-                    Fluvion
-                  </span>
-                </div>
-                <motion.button
-                  whileHover={isMobile ? {} : { scale: 1.1, rotate: 90 }}
-                  whileTap={isMobile ? {} : { scale: 0.9 }}
-                  onClick={closeSidebar}
-                  className="p-2 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] transition-all duration-300 text-[#9ca3af] hover:text-[#00f0ff] active:scale-95"
-                >
-                  <XMarkIcon className="w-6 h-6" />
-                </motion.button>
-              </motion.div>
-
-              {/* Scrollable Nav */}
-              <div ref={navContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden pr-3 -mr-3 scrollbar-custom min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
-                <nav className="space-y-4 sm:space-y-6 pb-8 mobile-sidebar-nav">
-                  {/* Основное */}
-                  <motion.div
-                    initial={isMobile ? false : { opacity: 0, x: -20 }}
-                    animate={isMobile ? false : { opacity: 1, x: 0 }}
-                    transition={isMobile ? {} : { delay: 0.2 }}
-                  >
-                    <h3 className="text-[10px] sm:text-xs font-semibold text-[#9ca3af] mb-2 sm:mb-3 uppercase tracking-wider">Основное</h3>
-                    <ul className="space-y-1.5 sm:space-y-2">
-                      {navItems.filter(i => ['/', '/calculator'].includes(i.path))
-                        .map((item, i) => <NavItem key={item.path} item={item} delay={isMobile ? 0 : 0.2 + i * 0.05} isMobile={isMobile} />)}
-                    </ul>
-                  </motion.div>
-
-                  {/* Покупки */}
-                  <motion.div
-                    initial={isMobile ? false : { opacity: 0, x: -20 }}
-                    animate={isMobile ? false : { opacity: 1, x: 0 }}
-                    transition={isMobile ? {} : { delay: 0.3 }}
-                  >
-                    <h3 className="text-[10px] sm:text-xs font-semibold text-[#808080] mb-2 sm:mb-3 uppercase tracking-wider">Покупки</h3>
-                    <ul className="space-y-1.5 sm:space-y-2">
-                      {navItems.filter(i => ['/catalog', '/terminal', '/rates', '/news'].includes(i.path))
-                        .map((item, i) => <NavItem key={item.path} item={item} delay={isMobile ? 0 : 0.3 + i * 0.05} isMobile={isMobile} />)}
-                    </ul>
-                  </motion.div>
-
-                  {/* Информация */}
-                  <motion.div
-                    initial={isMobile ? false : { opacity: 0, x: -20 }}
-                    animate={isMobile ? false : { opacity: 1, x: 0 }}
-                    transition={isMobile ? {} : { delay: 0.4 }}
-                  >
-                    <h3 className="text-[10px] sm:text-xs font-semibold text-[#808080] mb-2 sm:mb-3 uppercase tracking-wider">Информация</h3>
-                    <ul className="space-y-1.5 sm:space-y-2">
-                      {navItems.filter(i => ['/delivery-payment', '/order-instructions', '/faq', '/support', '/reviews'].includes(i.path))
-                        .map((item, i) => <NavItem key={item.path} item={item} delay={isMobile ? 0 : 0.4 + i * 0.05} isMobile={isMobile} />)}
-                    </ul>
-                  </motion.div>
-
-                  {/* Аккаунт */}
-                  <motion.div
-                    initial={isMobile ? false : { opacity: 0, x: -20 }}
-                    animate={isMobile ? false : { opacity: 1, x: 0 }}
-                    transition={isMobile ? {} : { delay: 0.5 }}
-                  >
-                    <h3 className="text-[10px] sm:text-xs font-semibold text-[#808080] mb-2 sm:mb-3 uppercase tracking-wider">Аккаунт</h3>
-                    <ul className="space-y-1.5 sm:space-y-2">
-                      {navItems.filter(i => ['/login'].includes(i.path))
-                        .map((item, i) => <NavItem key={item.path} item={item} delay={isMobile ? 0 : 0.5 + i * 0.05} isMobile={isMobile} />)}
-                    </ul>
-                  </motion.div>
-                </nav>
-
-                <div id="scroll-indicator" className="absolute right-1 top-0 bottom-0 w-1 bg-[#00f0ff] opacity-30 rounded-full" />
-              </div>
-            </div>
-          </motion.aside>
-        )}
-      </AnimatePresence>
 
       {/* ---------- Main Content ---------- */}
       <main className="main-content flex-1 relative z-10 w-full p-0 pt-16 pb-16 sm:pb-16 pb-safe">
@@ -604,7 +258,7 @@ function GuestLayout() {
         href="https://t.me/FLUVIONN"
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed right-6 z-50 bg-[#0088cc] text-white p-4 rounded-full shadow-lg hover:bg-[#00a0e0] transition-all duration-300 hover:scale-110 active:scale-95 bottom-safe sm:bottom-6"
+        className="fixed right-6 z-50 bg-[var(--ev-gold)] text-[var(--ev-void)] p-4 rounded-full shadow-lg hover:opacity-90 transition-opacity hover:scale-105 active:scale-95 bottom-safe sm:bottom-6"
         aria-label="Telegram канал FLUVION"
       >
         <svg
