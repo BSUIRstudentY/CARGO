@@ -76,8 +76,20 @@ function AppLayout() {
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, [isMenuOpen]);
+
+  /* ---------- Блокировка скролла при открытом меню на мобильных ---------- */
+  useEffect(() => {
+    if (!isMobile || !isMenuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [isMobile, isMenuOpen]);
 
   /* ---------- Lenis: плавный скролл на всех страницах (как на Home) ---------- */
   useEffect(() => {
@@ -217,20 +229,18 @@ function AppLayout() {
             {[
               { path: '/', label: 'Главная' },
               { path: '/calculator', label: 'Калькулятор' },
-              { path: '/terminal', label: 'Заказать товар', cta: true },
-              { path: '/catalog', label: 'Каталог' },
-            ].map(({ path, label, cta }) => (
+              { path: '/terminal', label: 'Заказать товар', gentle: true },
+              { path: '/catalog', label: 'Примеры товаров' },
+            ].map(({ path, label, gentle }) => (
               <button
                 key={path}
                 onClick={() => handleNavClick(path)}
-                className={
-                  cta
-                    ? 'px-4 py-2 rounded-full text-sm font-normal bg-[var(--ev-gold)]/60 text-[#faf8f5] hover:bg-[var(--ev-gold)]/80 hover:text-white transition-colors shadow-[0_0_20px_var(--ev-gold-glow)]'
-                    : `px-3 py-2 rounded-lg text-sm font-normal transition-colors ${isNavActive(path)
-                      ? 'text-[var(--ev-gold)]'
-                      : 'text-[var(--ev-text-muted)] hover:text-[var(--ev-text)]'
-                    }`
-                }
+                className={`px-3 py-2 rounded-lg text-sm font-normal transition-colors ${isNavActive(path)
+                  ? 'text-[var(--ev-gold)]'
+                  : gentle
+                    ? 'text-[var(--ev-gold)]/75 bg-[var(--ev-gold)]/[0.06] hover:text-[var(--ev-gold)]/90 hover:bg-[var(--ev-gold)]/[0.09]'
+                    : 'text-[var(--ev-text-muted)] hover:text-[var(--ev-text)]'
+                }`}
               >
                 {label}
               </button>
@@ -250,7 +260,28 @@ function AppLayout() {
             </button>
 
             {isMenuOpen && (
-              <div className="absolute left-4 right-4 md:left-auto md:right-auto md:min-w-[220px] top-full mt-1 py-2 rounded-xl bg-[var(--ev-glass)] backdrop-blur-[24px] border border-[var(--ev-gold)]/20 shadow-xl z-[100] max-h-[min(70vh,400px)] overflow-y-auto">
+              <>
+                {/* На мобильных: затемнение под меню для закрытия по тапу */}
+                {isMobile && (
+                  <div
+                    className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-2xl md:hidden"
+                    style={{
+                      top: 'calc(56px + env(safe-area-inset-top))',
+                      WebkitBackdropFilter: 'blur(24px)',
+                      backdropFilter: 'blur(24px)',
+                    }}
+                    onClick={closeMenu}
+                    aria-hidden="true"
+                  />
+                )}
+                <div
+                  className={`py-2 rounded-xl bg-[var(--ev-glass)] backdrop-blur-[24px] border border-[var(--ev-gold)]/20 shadow-xl z-[100] max-h-[min(70vh,400px)] overflow-y-auto
+                    ${isMobile
+                      ? 'fixed left-0 right-0 mx-0 rounded-t-none border-t-0 mt-0 pt-safe px-4 pb-safe'
+                      : 'absolute left-4 right-4 md:left-auto md:right-auto md:min-w-[220px] top-full mt-1'
+                    }`}
+                  style={isMobile ? { top: 'calc(56px + env(safe-area-inset-top))' } : undefined}
+                >
                 {isMobile ? (
                   <>
                     <div className="px-3 py-2">
@@ -316,6 +347,7 @@ function AppLayout() {
                   </>
                 )}
               </div>
+              </>
             )}
           </div>
 
@@ -324,7 +356,7 @@ function AppLayout() {
       </header>
 
       {/* ---------- Main Content ---------- */}
-      <main className="main-content flex-1 relative z-10 w-full p-0 pt-16 pb-safe sm:pb-16">
+      <main className={`main-content flex-1 relative z-10 w-full p-0 pt-16 pb-safe sm:pb-16 transition-[filter] duration-200 ${isMobile && isMenuOpen ? 'blur-2xl' : ''}`}>
         <Suspense fallback={<Loading message="Загрузка страницы..." />}>
           <Routes>
             <Route path="/" element={<Home />} />

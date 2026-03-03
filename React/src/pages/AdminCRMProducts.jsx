@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import ExcelJS from 'exceljs';
 import api from '../api/axiosInstance';
 import { Loading } from '../components/ui/Loading';
 import { Card } from '../components/ui/Card';
@@ -9,7 +10,8 @@ import {
   MagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
-  PlusIcon
+  PlusIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/solid';
 
 const AdminCRMProducts = () => {
@@ -34,6 +36,7 @@ const AdminCRMProducts = () => {
     status: 'PENDING',
     originCountry: 'China'
   });
+  const [exportLoading, setExportLoading] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -134,6 +137,97 @@ const AdminCRMProducts = () => {
     return colors[status] || 'bg-gray-500/20 text-gray-400';
   };
 
+  /** Экспорт товаров в Excel для отправки в карго/закупку */
+  const handleExportToExcel = async () => {
+    setExportLoading(true);
+    try {
+      const params = new URLSearchParams({ page: '0', size: '10000' });
+      if (search) params.append('search', search);
+      if (statusFilter) params.append('status', statusFilter);
+      const response = await api.get(`/admin/crm/products?${params}`);
+      const list = response.data.content || [];
+
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Fluvion Admin';
+      const worksheet = workbook.addWorksheet('Товары для закупки', { views: [{ state: 'frozen', ySplit: 1 }] });
+
+      const headerStyle = {
+        font: { bold: true, size: 11, color: { argb: 'FFFFFFFF' } },
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } },
+        alignment: { vertical: 'middle', wrapText: true },
+        border: {
+          top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
+        }
+      };
+      const dataStyle = {
+        alignment: { vertical: 'middle', wrapText: true },
+        border: {
+          top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
+        }
+      };
+
+      const headers = [
+        '№',
+        'Ссылка на товар',
+        'Название',
+        'Цена (¥)',
+        'Количество',
+        'Примечания',
+        'ID товара',
+        'Страна',
+        'Описание'
+      ];
+      const headerRow = worksheet.addRow(headers);
+      headerRow.eachCell((cell) => { cell.style = headerStyle; });
+      worksheet.getRow(1).height = 22;
+
+      worksheet.getColumn(1).width = 6;
+      worksheet.getColumn(2).width = 45;
+      worksheet.getColumn(3).width = 40;
+      worksheet.getColumn(4).width = 12;
+      worksheet.getColumn(5).width = 12;
+      worksheet.getColumn(6).width = 25;
+      worksheet.getColumn(7).width = 18;
+      worksheet.getColumn(8).width = 14;
+      worksheet.getColumn(9).width = 50;
+
+      list.forEach((p, index) => {
+        const row = worksheet.addRow([
+          index + 1,
+          p.url || '',
+          p.name || '',
+          p.price != null ? Number(p.price) : '',
+          '', // Количество — заполняется при закупке
+          '', // Примечания
+          p.id || '',
+          p.originCountry || 'China',
+          (p.description || '').toString().slice(0, 500)
+        ]);
+        row.eachCell((cell, colNumber) => {
+          cell.style = dataStyle;
+          if (colNumber === 4) cell.numFmt = '#,##0.00';
+        });
+        row.height = 24;
+      });
+
+      const dateStr = new Date().toISOString().split('T')[0];
+      const fileName = `Товары_для_закупки_${dateStr}.xlsx`;
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      setError('Ошибка экспорта в Excel');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   if (loading && products.length === 0) {
     return <Loading message="Загрузка товаров..." />;
   }
@@ -149,10 +243,21 @@ const AdminCRMProducts = () => {
           <h1 className="text-3xl font-bold text-white mb-2">Управление товарами</h1>
           <p className="text-gray-400">Просмотр и управление всеми товарами системы</p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2">
-          <PlusIcon className="w-5 h-5" />
-          Создать товар
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            onClick={handleExportToExcel}
+            disabled={exportLoading}
+            variant="secondary"
+            className="flex items-center gap-2"
+          >
+            <ArrowDownTrayIcon className="w-5 h-5" />
+            {exportLoading ? 'Экспорт...' : 'Скачать в Excel для закупки'}
+          </Button>
+          <Button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2">
+            <PlusIcon className="w-5 h-5" />
+            Создать товар
+          </Button>
+        </div>
       </motion.div>
 
       {/* Фильтры */}

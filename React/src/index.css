@@ -86,6 +86,47 @@
   .grain-overlay { opacity: 0.01; }
 }
 
+/* FAQ: убрать выделение при тапе и фокусе (бордер/обводка не светится) */
+.ev-faq-question-btn {
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+.ev-faq-question-btn:focus,
+.ev-faq-question-btn:focus-visible,
+.ev-faq-question-btn:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Пульсирующее свечение текста «Заказать товар» в хедере — выраженный glow */
+@keyframes ev-cta-glow-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 12px rgba(201, 169, 122, 0.9),
+      0 0 24px rgba(201, 169, 122, 0.7),
+      0 0 40px rgba(201, 169, 122, 0.5),
+      0 0 56px rgba(201, 169, 122, 0.35);
+  }
+  50% {
+    text-shadow:
+      0 0 16px rgba(201, 169, 122, 1),
+      0 0 36px rgba(201, 169, 122, 0.85),
+      0 0 56px rgba(201, 169, 122, 0.6),
+      0 0 80px rgba(201, 169, 122, 0.4);
+  }
+}
+.ev-cta-glow-pulse {
+  animation: ev-cta-glow-pulse 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ev-cta-glow-pulse { animation: none; }
+}
+
 /**
  * Unified design system CSS variables.
  * Ensures consistent theming across the entire application.

@@ -10,8 +10,6 @@ import PostOfficeSelect from '../components/PostOfficeSelect';
 import nonCacheApi from '../api/nonCacheApi';
 import { Button } from '../components/ui/Button';
 import { Alert } from '../components/ui/Alert';
-import { Loading } from '../components/ui/Loading';
-import { PageHeader } from '../components/ui/PageHeader';
 import { Input } from '../components/ui/Input';
 import { StyledSelect } from '../components/ui/StyledSelect';
 import { authStorage } from '../utils/authStorage';
@@ -266,26 +264,40 @@ function CartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] relative overflow-hidden pb-24 sm:pb-0">
+    <div className="min-h-screen bg-transparent text-[var(--ev-text)] relative overflow-hidden pb-24 sm:pb-0">
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8 lg:py-12 pb-safe">
-        <PageHeader title="Корзина" subtitle="Проверьте и оформите заказ" />
+        {/* Заголовок */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-[var(--ev-text)] flex items-center gap-3">
+            <ShoppingCartIcon className="w-8 h-8 text-[var(--ev-gold)]" />
+            Корзина
+          </h1>
+          <p className="text-[var(--ev-text-muted)] text-sm sm:text-base mt-1">Проверьте и оформите заказ</p>
+        </motion.div>
 
         <AnimatePresence>
-          {loading && <Loading message="Загрузка корзины..." />}
+          {loading && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center py-12">
+              <div className="text-center bg-[var(--ev-glass)] p-8 rounded-2xl border border-[var(--ev-gold)]/20">
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-[var(--ev-gold)]/30 border-t-[var(--ev-gold)] mx-auto mb-3" />
+                <p className="text-[var(--ev-text-muted)] text-sm">Загрузка корзины...</p>
+              </div>
+            </motion.div>
+          )}
           {error && <Alert type="error" message={error} onClose={() => setError('')} className="mb-8" />}
         </AnimatePresence>
 
         {/* Пустая корзина */}
         {!loading && !error && (!cart || cart.length === 0) && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center py-20">
-            <div className="p-6 sm:p-12 text-center max-w-md rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)]">
-              <ShoppingCartIcon className="w-16 h-16 sm:w-24 sm:h-24 mx-auto text-[#9ca3af] mb-4 sm:mb-6" />
-              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-[#e5e7eb]">Корзина пуста</h2>
-              <p className="text-xs sm:text-base text-[#9ca3af] mb-6 sm:mb-8">Добавьте товары через «Заказать товар» или выберите из примеров</p>
-              <button onClick={() => navigate('/terminal')} className="w-full px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl text-sm sm:text-base bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)] transition-all duration-300 font-medium flex items-center justify-center mb-2">
+            <div className="p-6 sm:p-12 text-center max-w-md rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15">
+              <ShoppingCartIcon className="w-16 h-16 sm:w-24 sm:h-24 mx-auto text-[var(--ev-text-muted)]/60 mb-4 sm:mb-6" />
+              <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-[var(--ev-text)]">Корзина пуста</h2>
+              <p className="text-xs sm:text-base text-[var(--ev-text-muted)] mb-6 sm:mb-8">Добавьте товары через «Заказать товар» или выберите из примеров</p>
+              <button onClick={() => navigate('/terminal')} className="w-full px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl text-sm sm:text-base bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25 hover:border-[var(--ev-gold)]/40 transition-all duration-300 font-medium flex items-center justify-center mb-2">
                 Заказать товар <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5 ml-1.5 sm:ml-2" />
               </button>
-              <button onClick={() => navigate('/catalog')} className="w-full px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl text-sm sm:text-base bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] text-[#9ca3af] hover:bg-[rgba(255,255,255,0.05)] transition-all duration-300 font-medium flex items-center justify-center">
+              <button onClick={() => navigate('/catalog')} className="w-full px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl text-sm sm:text-base bg-[var(--ev-gold)]/5 border border-[var(--ev-gold)]/20 text-[var(--ev-text-muted)] hover:bg-[var(--ev-gold)]/10 hover:text-[var(--ev-text)] transition-all duration-300 font-medium flex items-center justify-center">
                 Примеры товаров <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5 ml-1.5 sm:ml-2" />
               </button>
             </div>
@@ -310,10 +322,10 @@ function CartPage() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-50/5 transition-colors duration-200 relative group bg-[#1a1a1a]/50 border border-[#333]/50">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-[var(--ev-gold)]/5 transition-colors duration-200 relative group bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25">
                         <div className="flex gap-3 sm:gap-4 w-full sm:w-auto">
                           {/* Фото */}
-                          <div className="relative bg-[rgba(255,255,255,0.02)] w-[70px] h-[70px] sm:w-[90px] sm:h-[90px] lg:w-[100px] lg:h-[100px] flex-shrink-0 rounded-xl overflow-hidden border border-[rgba(255,255,255,0.1)]">
+                          <div className="relative bg-[var(--ev-gold)]/5 w-[70px] h-[70px] sm:w-[90px] sm:h-[90px] lg:w-[100px] lg:h-[100px] flex-shrink-0 rounded-xl overflow-hidden border border-[var(--ev-gold)]/15">
                             <img
                               src={item.imageUrl || 'https://via.placeholder.com/128x128?text=Нет+фото'}
                               alt={item.name}
@@ -324,7 +336,7 @@ function CartPage() {
 
                           {/* Инфо */}
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-white mb-1 leading-tight line-clamp-2">{item.name}</h3>
+                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-[var(--ev-text)] mb-1 leading-tight line-clamp-2">{item.name}</h3>
                             
                             {/* Количество */}
                             <div className="flex items-center gap-2 sm:gap-3 mt-2">
@@ -335,11 +347,11 @@ function CartPage() {
                                   handleQuantityBlur(productId);
                                 }}
                                 disabled={currentQty <= 1}
-                                className="w-7 h-7 sm:w-8 sm:h-8 border border-[rgba(255,255,255,0.1)] rounded-full flex items-center justify-center hover:bg-[rgba(0,240,255,0.1)] hover:text-[#00f0ff] hover:border-[#00f0ff] active:scale-95 transition duration-200 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-inherit disabled:hover:border-[rgba(255,255,255,0.1)]"
+                                className="w-7 h-7 sm:w-8 sm:h-8 border border-[var(--ev-gold)]/20 rounded-full flex items-center justify-center hover:bg-[var(--ev-gold)]/15 hover:text-[var(--ev-gold)] hover:border-[var(--ev-gold)]/40 active:scale-95 transition duration-200 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-inherit disabled:hover:border-[var(--ev-gold)]/20 text-[var(--ev-text)]"
                               >
                                 <MinusIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                               </button>
-                              <span className="text-sm sm:text-base text-white font-medium min-w-[18px] sm:min-w-[20px] text-center">
+                              <span className="text-sm sm:text-base text-[var(--ev-text)] font-medium min-w-[18px] sm:min-w-[20px] text-center">
                                 {currentQty}
                               </span>
                               <button
@@ -348,7 +360,7 @@ function CartPage() {
                                   handleQuantityChange(productId, newQty.toString());
                                   handleQuantityBlur(productId);
                                 }}
-                                className="w-7 h-7 sm:w-8 sm:h-8 border border-[rgba(255,255,255,0.1)] rounded-full flex items-center justify-center hover:bg-[rgba(0,240,255,0.1)] hover:text-[#00f0ff] hover:border-[#00f0ff] active:scale-95 transition duration-200"
+                                className="w-7 h-7 sm:w-8 sm:h-8 border border-[var(--ev-gold)]/20 rounded-full flex items-center justify-center hover:bg-[var(--ev-gold)]/15 hover:text-[var(--ev-gold)] hover:border-[var(--ev-gold)]/40 active:scale-95 transition duration-200 text-[var(--ev-text)]"
                               >
                                 <PlusIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                               </button>
@@ -359,11 +371,11 @@ function CartPage() {
                         {/* Цена и удаление */}
                         <div className="flex justify-between items-center sm:flex-col sm:items-end gap-2 sm:gap-3 mt-3 sm:mt-0 sm:ml-auto">
                           <div className="flex flex-col items-end">
-                            <div className="text-sm sm:text-base lg:text-lg font-semibold text-white">¥{itemTotal.toFixed(2)}</div>
+                            <div className="text-sm sm:text-base lg:text-lg font-semibold text-[var(--ev-gold)]">¥{itemTotal.toFixed(2)}</div>
                           </div>
                           <button
                             onClick={() => removeFromCart(productId)}
-                            className="p-1.5 sm:p-2 text-[#9ca3af] hover:text-[#00f0ff] hover:bg-[rgba(0,240,255,0.1)] rounded-lg transition duration-200"
+                            className="p-1.5 sm:p-2 text-[var(--ev-text-muted)] hover:text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10 rounded-lg transition duration-200"
                             aria-label="Удалить товар"
                           >
                             <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -375,10 +387,10 @@ function CartPage() {
                 })}
 
                 {/* Сумма товаров */}
-                <div className="p-4 sm:p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)]">
+                <div className="p-4 sm:p-5 rounded-xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15">
                   <div className="flex justify-between items-center text-base sm:text-lg">
-                    <span className="font-semibold text-[#9ca3af]">Сумма товаров</span>
-                    <span className="text-xl sm:text-2xl font-bold text-[#e5e7eb]">¥{total.toFixed(2)}</span>
+                    <span className="font-semibold text-[var(--ev-text-muted)]">Сумма товаров</span>
+                    <span className="text-xl sm:text-2xl font-bold text-[var(--ev-gold)]">¥{total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -386,28 +398,28 @@ function CartPage() {
     {/* Правая колонка — оформление заказа (Desktop) */}
     <div className="hidden lg:block w-[650px] flex-shrink-0">
               <div className="sticky top-8">
-                <div className="p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-                  <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Оформление заказа</h3>
+                <div className="p-6 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 transition-all duration-300">
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-[var(--ev-text)]">Оформление заказа</h3>
 
                   {/* Все поля в один столбец */}
                   <div className="space-y-4">
                         {/* Доставка */}
-                        <div className="pb-4 border-b border-[rgba(255,255,255,0.1)]">
-                          <h4 className="font-semibold text-sm mb-2 text-[#00f0ff]">
+                        <div className="pb-4 border-b border-[var(--ev-gold)]/15">
+                          <h4 className="font-semibold text-sm mb-2 text-[var(--ev-gold)]">
                             <span className="flex items-center gap-2">
                               Доставка
-                              <span className="text-[#00f0ff] text-xs">*</span>
+                              <span className="text-[var(--ev-gold)] text-xs">*</span>
                             </span>
                           </h4>
                           <PostOfficeSelect deliveryAddress={deliveryAddress} setDeliveryAddress={setDeliveryAddress} setError={setError} />
                               </div>
 
                         {/* Номер телефона */}
-                        <div className="pb-4 border-b border-[rgba(255,255,255,0.1)]">
-                          <h4 className="font-semibold text-sm mb-2 text-[#00f0ff]">
+                        <div className="pb-4 border-b border-[var(--ev-gold)]/15">
+                          <h4 className="font-semibold text-sm mb-2 text-[var(--ev-gold)]">
                             <span className="flex items-center gap-2">
                               Номер телефона
-                              <span className="text-[#00f0ff] text-xs">*</span>
+                              <span className="text-[var(--ev-gold)] text-xs">*</span>
                             </span>
                           </h4>
                           <Input
@@ -417,17 +429,17 @@ function CartPage() {
                             placeholder="+375 (XX) XXX-XX-XX"
                             className="text-sm"
                           />
-                          <p className="text-xs text-gray-400 mt-2">
+                          <p className="text-xs text-[var(--ev-text-muted)] mt-2">
                             Номер телефона необходим для связи с вами по поводу заказа
                           </p>
                         </div>
 
                         {/* ФИО */}
-                        <div className="pb-4 border-b border-[rgba(255,255,255,0.1)]">
-                          <h4 className="font-semibold text-sm mb-2 text-[#00f0ff]">
+                        <div className="pb-4 border-b border-[var(--ev-gold)]/15">
+                          <h4 className="font-semibold text-sm mb-2 text-[var(--ev-gold)]">
                             <span className="flex items-center gap-2">
                               ФИО
-                              <span className="text-[#00f0ff] text-xs">*</span>
+                              <span className="text-[var(--ev-gold)] text-xs">*</span>
                             </span>
                           </h4>
                           <div className="space-y-3">
@@ -458,11 +470,11 @@ function CartPage() {
                         </div>
 
                         {/* Упаковка */}
-                        <div className="pb-4 border-b border-[rgba(255,255,255,0.1)]">
-                          <h4 className="font-semibold text-sm mb-2 text-[#00f0ff]">
+                        <div className="pb-4 border-b border-[var(--ev-gold)]/15">
+                          <h4 className="font-semibold text-sm mb-2 text-[var(--ev-gold)]">
                             <span className="flex items-center gap-2">
                               Тип упаковки
-                              <span className="text-[#00f0ff] text-xs">*</span>
+                              <span className="text-[var(--ev-gold)] text-xs">*</span>
                             </span>
                           </h4>
                           <StyledSelect
@@ -475,12 +487,12 @@ function CartPage() {
                             placeholder="Выберите тип упаковки"
                             className="text-sm"
                           />
-                          <p className="text-xs text-gray-400 mt-2">
+                          <p className="text-xs text-[var(--ev-text-muted)] mt-2">
                             Цена за упаковку включается в общую цену доставки и уплачивается вместе с доставкой.{' '}
                             <a 
                               href="/order-instructions" 
                               onClick={(e) => { e.preventDefault(); navigate('/order-instructions'); }}
-                              className="text-[#00f0ff] hover:underline font-medium"
+                              className="text-[var(--ev-gold)] hover:underline font-medium"
                             >
                               Подробнее
                             </a>
@@ -488,66 +500,66 @@ function CartPage() {
                           </div>
 
                           {/* Страховка */}
-                        <div className="pb-4 border-b border-[rgba(255,255,255,0.1)]">
-                          <div className="flex items-center gap-3 p-3 bg-[rgba(255,255,255,0.02)] rounded-lg border border-[rgba(255,255,255,0.1)] hover:border-[#00f0ff]/50 transition-colors cursor-pointer" onClick={() => setInsurance(!insurance)}>
+                        <div className="pb-4 border-b border-[var(--ev-gold)]/15">
+                          <div className="flex items-center gap-3 p-3 bg-[var(--ev-gold)]/5 rounded-lg border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 transition-colors cursor-pointer" onClick={() => setInsurance(!insurance)}>
                             <input 
                               type="checkbox" 
                               checked={insurance} 
                               onChange={(e) => setInsurance(e.target.checked)} 
-                              className="w-5 h-5 text-[#00f0ff] bg-[rgba(107,114,128,0.15)] border border-[rgba(255,255,255,0.1)] rounded focus:ring-[#00f0ff] focus:ring-2 cursor-pointer" 
+                              className="w-5 h-5 text-[var(--ev-gold)] bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/30 rounded focus:ring-[var(--ev-gold)] focus:ring-2 cursor-pointer" 
                             />
                             <label className="flex-1 cursor-pointer">
-                              <span className="font-semibold text-sm text-white">Страховка</span>
-                              <span className="block text-xs text-gray-400 mt-0.5">+5% от стоимости товаров</span>
+                              <span className="font-semibold text-sm text-[var(--ev-text)]">Страховка</span>
+                              <span className="block text-xs text-[var(--ev-text-muted)] mt-0.5">+5% от стоимости товаров</span>
                             </label>
                           </div>
                           </div>
 
                           {/* Промокод */}
                           <div>
-                          <h4 className="font-semibold text-sm mb-2 text-gray-400">Промокод</h4>
+                          <h4 className="font-semibold text-sm mb-2 text-[var(--ev-text-muted)]">Промокод</h4>
                           <Input value={promoCode} onChange={handlePromoCodeChange} placeholder="Введите промокод (необязательно)" error={promoError} className="text-sm" />
                             {promoApplied && <Alert type="success" message="Промокод применён!" className="mt-2 text-xs" />}
                         </div>
                     </div>
 
                     {/* Итоговая сумма */}
-                    <div className="mt-4 pt-4 border-t-2 border-[rgba(255,255,255,0.1)] space-y-2">
+                    <div className="mt-4 pt-4 border-t-2 border-[var(--ev-gold)]/20 space-y-2">
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between items-center py-1">
-                          <span className="text-gray-300">Товары:</span>
-                          <span className="font-semibold text-white">¥{total.toFixed(2)}</span>
+                          <span className="text-[var(--ev-text-muted)]">Товары:</span>
+                          <span className="font-semibold text-[var(--ev-text)]">¥{total.toFixed(2)}</span>
                         </div>
                         {userDiscount > 0 && (
-                          <div className="flex justify-between items-center py-1 text-green-400">
+                          <div className="flex justify-between items-center py-1 text-emerald-400">
                             <span>Скидка:</span>
                             <span className="font-semibold">-¥{userDiscount.toFixed(2)}</span>
                           </div>
                         )}
                         {promoApplied && (
-                          <div className="flex justify-between items-center py-1 text-green-400">
+                          <div className="flex justify-between items-center py-1 text-emerald-400">
                             <span>Промокод:</span>
                             <span className="font-semibold">-¥{promocodeDiscount.toFixed(2)}</span>
                           </div>
                         )}
                         {insuranceCost > 0 && (
                           <div className="flex justify-between items-center py-1">
-                            <span className="text-gray-300">Страховка:</span>
-                            <span className="font-semibold text-white">+¥{insuranceCost.toFixed(2)}</span>
+                            <span className="text-[var(--ev-text-muted)]">Страховка:</span>
+                            <span className="font-semibold text-[var(--ev-text)]">+¥{insuranceCost.toFixed(2)}</span>
                           </div>
                         )}
                         </div>
 
-                        <div className="flex justify-between items-center pt-4 border-t-2 border-[#00f0ff]">
-                          <span className="text-lg font-bold">К оплате:</span>
-                          <span className="text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+                        <div className="flex justify-between items-center pt-4 border-t-2 border-[var(--ev-gold)]/40">
+                          <span className="text-lg font-bold text-[var(--ev-text)]">К оплате:</span>
+                          <span className="text-2xl font-bold text-[var(--ev-gold)]">
                           ¥{finalTotal.toFixed(2)}
                           </span>
                         </div>
-                      <p className="text-xs text-gray-400 text-right mt-1">Оплата через эквайринг BePaid</p>
-                  <div className="mt-2 pt-2 border-t border-[rgba(255,255,255,0.1)] flex items-start gap-2">
-                    <InformationCircleIcon className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-300/90 flex-1">
+                      <p className="text-xs text-[var(--ev-text-muted)] text-right mt-1">Оплата через эквайринг BePaid</p>
+                  <div className="mt-2 pt-2 border-t border-[var(--ev-gold)]/15 flex items-start gap-2">
+                    <InformationCircleIcon className="w-4 h-4 text-[var(--ev-gold)] flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-[var(--ev-text-muted)] flex-1">
                       Оплата взимается не в момент оформления, а после проверки заказа администратором
                     </p>
                   </div>
@@ -559,11 +571,11 @@ function CartPage() {
                           size="lg"
                         onClick={handleConfirmOrder}
                         disabled={!deliveryAddress || !packaging || !phone?.trim() || !lastName?.trim() || !firstName?.trim() || loading}
-                          className="w-full text-base"
+                          className="w-full text-base bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25"
                         >
                           Оформить заказ
                         </Button>
-                        <Button variant="outline" onClick={clearCart} disabled={loading} className="w-full text-sm">
+                        <Button variant="outline" onClick={clearCart} disabled={loading} className="w-full text-sm border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10">
                           Очистить корзину
                         </Button>
                       </div>
@@ -574,26 +586,26 @@ function CartPage() {
 
     {/* Мобильная версия оформления заказа */}
     <div className="lg:hidden w-full">
-              <div className="p-5 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-                <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-[#e5e7eb]">Оформление заказа</h3>
+              <div className="p-5 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 transition-all duration-300">
+                <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-[var(--ev-text)]">Оформление заказа</h3>
 
                 {/* Доставка */}
-                <div className="mb-4 pb-4 border-b border-[rgba(255,255,255,0.1)]">
-                  <h4 className="font-semibold text-sm mb-2 text-[#00f0ff]">
+                <div className="mb-4 pb-4 border-b border-[var(--ev-gold)]/15">
+                  <h4 className="font-semibold text-sm mb-2 text-[var(--ev-gold)]">
                     <span className="flex items-center gap-2">
                       Доставка
-                      <span className="text-[#00f0ff] text-xs">*</span>
+                      <span className="text-[var(--ev-gold)] text-xs">*</span>
                     </span>
                   </h4>
                   <PostOfficeSelect deliveryAddress={deliveryAddress} setDeliveryAddress={setDeliveryAddress} setError={setError} />
                 </div>
 
                 {/* Номер телефона */}
-                <div className="mb-4 pb-4 border-b border-[rgba(255,255,255,0.1)]">
-                  <h4 className="font-semibold text-sm mb-2 text-[#00f0ff]">
+                <div className="mb-4 pb-4 border-b border-[var(--ev-gold)]/15">
+                  <h4 className="font-semibold text-sm mb-2 text-[var(--ev-gold)]">
                     <span className="flex items-center gap-2">
                       Номер телефона
-                      <span className="text-[#00f0ff] text-xs">*</span>
+                      <span className="text-[var(--ev-gold)] text-xs">*</span>
                     </span>
                   </h4>
                   <Input
@@ -603,17 +615,17 @@ function CartPage() {
                     placeholder="+375 (XX) XXX-XX-XX"
                     className="text-sm"
                   />
-                  <p className="text-xs text-gray-400 mt-2">
+                  <p className="text-xs text-[var(--ev-text-muted)] mt-2">
                     Номер телефона необходим для связи с вами по поводу заказа
                   </p>
                 </div>
 
                 {/* ФИО */}
-                <div className="mb-4 pb-4 border-b border-[rgba(255,255,255,0.1)]">
-                  <h4 className="font-semibold text-sm mb-2 text-[#00f0ff]">
+                <div className="mb-4 pb-4 border-b border-[var(--ev-gold)]/15">
+                  <h4 className="font-semibold text-sm mb-2 text-[var(--ev-gold)]">
                     <span className="flex items-center gap-2">
                       ФИО
-                      <span className="text-[#00f0ff] text-xs">*</span>
+                      <span className="text-[var(--ev-gold)] text-xs">*</span>
                     </span>
                   </h4>
                   <div className="space-y-3">
@@ -644,11 +656,11 @@ function CartPage() {
                 </div>
 
                 {/* Упаковка */}
-                <div className="mb-4 pb-4 border-b border-[rgba(255,255,255,0.1)]">
-                  <h4 className="font-semibold text-sm mb-2 text-[#00f0ff]">
+                <div className="mb-4 pb-4 border-b border-[var(--ev-gold)]/15">
+                  <h4 className="font-semibold text-sm mb-2 text-[var(--ev-gold)]">
                     <span className="flex items-center gap-2">
                       Тип упаковки
-                      <span className="text-[#00f0ff] text-xs">*</span>
+                      <span className="text-[var(--ev-gold)] text-xs">*</span>
                     </span>
                   </h4>
                   <StyledSelect
@@ -661,12 +673,12 @@ function CartPage() {
                     placeholder="Выберите тип упаковки"
                     className="text-sm"
                   />
-                  <p className="text-xs text-gray-400 mt-2">
+                  <p className="text-xs text-[var(--ev-text-muted)] mt-2">
                     Цена за упаковку включается в общую цену доставки и уплачивается вместе с доставкой.{' '}
                     <a 
                       href="/order-instructions" 
                       onClick={(e) => { e.preventDefault(); navigate('/order-instructions'); }}
-                      className="text-[#00f0ff] hover:underline font-medium"
+                      className="text-[var(--ev-gold)] hover:underline font-medium"
                     >
                       Подробнее
                     </a>
@@ -674,65 +686,65 @@ function CartPage() {
                 </div>
 
                 {/* Страховка */}
-                <div className="mb-4 pb-4 border-b border-[rgba(255,255,255,0.1)]">
-                  <div className="flex items-center gap-3 p-3 bg-[rgba(255,255,255,0.02)] rounded-lg border border-[rgba(255,255,255,0.1)] hover:border-[#00f0ff]/50 transition-colors cursor-pointer" onClick={() => setInsurance(!insurance)}>
+                <div className="mb-4 pb-4 border-b border-[var(--ev-gold)]/15">
+                  <div className="flex items-center gap-3 p-3 bg-[var(--ev-gold)]/5 rounded-lg border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 transition-colors cursor-pointer" onClick={() => setInsurance(!insurance)}>
                     <input 
                       type="checkbox" 
                       checked={insurance} 
                       onChange={(e) => setInsurance(e.target.checked)} 
-                      className="w-5 h-5 text-[#00f0ff] bg-[rgba(107,114,128,0.15)] border border-[rgba(255,255,255,0.1)] rounded focus:ring-[#00f0ff] focus:ring-2 cursor-pointer" 
+                      className="w-5 h-5 text-[var(--ev-gold)] bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/30 rounded focus:ring-[var(--ev-gold)] focus:ring-2 cursor-pointer" 
                     />
                     <label className="flex-1 cursor-pointer">
-                      <span className="font-semibold text-sm text-white">Страховка</span>
-                      <span className="block text-xs text-gray-400 mt-0.5">+5% от стоимости товаров</span>
+                      <span className="font-semibold text-sm text-[var(--ev-text)]">Страховка</span>
+                      <span className="block text-xs text-[var(--ev-text-muted)] mt-0.5">+5% от стоимости товаров</span>
                     </label>
                   </div>
                 </div>
 
                 {/* Промокод */}
                 <div className="mb-4">
-                  <h4 className="font-semibold text-sm mb-2 text-gray-400">Промокод</h4>
+                  <h4 className="font-semibold text-sm mb-2 text-[var(--ev-text-muted)]">Промокод</h4>
                   <Input value={promoCode} onChange={handlePromoCodeChange} placeholder="Введите промокод (необязательно)" error={promoError} className="text-sm" />
                   {promoApplied && <Alert type="success" message="Промокод применён!" className="mt-2 text-xs" />}
                 </div>
 
                 {/* Итоговая сумма */}
-                <div className="pt-4 border-t-2 border-[rgba(255,255,255,0.1)] space-y-2 mb-4">
+                <div className="pt-4 border-t-2 border-[var(--ev-gold)]/20 space-y-2 mb-4">
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between items-center py-1">
-                      <span className="text-gray-300">Товары:</span>
-                      <span className="font-semibold text-white">¥{total.toFixed(2)}</span>
+                      <span className="text-[var(--ev-text-muted)]">Товары:</span>
+                      <span className="font-semibold text-[var(--ev-text)]">¥{total.toFixed(2)}</span>
                     </div>
                     {userDiscount > 0 && (
-                      <div className="flex justify-between items-center py-1 text-green-400">
+                      <div className="flex justify-between items-center py-1 text-emerald-400">
                         <span>Скидка:</span>
                         <span className="font-semibold">-¥{userDiscount.toFixed(2)}</span>
                       </div>
                     )}
                     {promoApplied && (
-                      <div className="flex justify-between items-center py-1 text-green-400">
+                      <div className="flex justify-between items-center py-1 text-emerald-400">
                         <span>Промокод:</span>
                         <span className="font-semibold">-¥{promocodeDiscount.toFixed(2)}</span>
                             </div>
                     )}
                     {insuranceCost > 0 && (
                       <div className="flex justify-between items-center py-1">
-                        <span className="text-gray-300">Страховка:</span>
-                        <span className="font-semibold text-white">+¥{insuranceCost.toFixed(2)}</span>
+                        <span className="text-[var(--ev-text-muted)]">Страховка:</span>
+                        <span className="font-semibold text-[var(--ev-text)]">+¥{insuranceCost.toFixed(2)}</span>
                               </div>
                             )}
                   </div>
 
-                  <div className="flex justify-between items-center pt-3 border-t-2 border-[#00f0ff]">
-                    <span className="text-lg font-bold">К оплате:</span>
-                    <span className="text-xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+                  <div className="flex justify-between items-center pt-3 border-t-2 border-[var(--ev-gold)]/40">
+                    <span className="text-lg font-bold text-[var(--ev-text)]">К оплате:</span>
+                    <span className="text-xl font-bold text-[var(--ev-gold)]">
                       ¥{finalTotal.toFixed(2)}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-400 text-right mt-1">Оплата через эквайринг BePaid</p>
-                  <div className="mt-2 pt-2 border-t border-[rgba(255,255,255,0.1)] flex items-start gap-2">
-                    <InformationCircleIcon className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-300/90 flex-1">
+                  <p className="text-xs text-[var(--ev-text-muted)] text-right mt-1">Оплата через эквайринг BePaid</p>
+                  <div className="mt-2 pt-2 border-t border-[var(--ev-gold)]/15 flex items-start gap-2">
+                    <InformationCircleIcon className="w-4 h-4 text-[var(--ev-gold)] flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-[var(--ev-text-muted)] flex-1">
                       Оплата взимается не в момент оформления, а после проверки заказа администратором
                     </p>
                             </div>
@@ -745,11 +757,11 @@ function CartPage() {
                     size="lg"
                     onClick={handleConfirmOrder}
                     disabled={!deliveryAddress || !packaging || !phone?.trim() || !lastName?.trim() || !firstName?.trim() || loading}
-                    className="w-full text-base"
+                    className="w-full text-base bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25"
                   >
                     Оформить заказ
                   </Button>
-                  <Button variant="outline" onClick={clearCart} disabled={loading} className="w-full text-sm">
+                  <Button variant="outline" onClick={clearCart} disabled={loading} className="w-full text-sm border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10">
                     Очистить корзину
                   </Button>
                 </div>

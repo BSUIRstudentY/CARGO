@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import { CalculatorIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
 import axios from 'axios';
 import api from '../api/axiosInstance';
-import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
 import { StyledSelect } from '../components/ui/StyledSelect';
+import { Helmet } from 'react-helmet-async';
 
 function CostCalculator() {
   const [price, setPrice] = useState('');
@@ -16,39 +16,35 @@ function CostCalculator() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [rates, setRates] = useState({
-    USD_TO_BYN: 2.9994, // Fallback: 1 USD = 2.9994 BYN
-    CNY_TO_BYN: 0.41859, // Fallback: 1 CNY = 4.1859 / 10 BYN
+    USD_TO_BYN: 2.9994,
+    CNY_TO_BYN: 0.45,
   });
-  const [shippingRate, setShippingRate] = useState(6.0); // Fallback: $6 per kg
+  const [shippingRate, setShippingRate] = useState(6.0);
   const navigate = useNavigate();
 
-  // Packaging options with labels and costs
   const packagingOptions = {
-    standard: { label: 'Стандартная упаковка', cost: 3, description: 'Базовая упаковка для стандартных грузов' },
-    premium: { label: 'Водонепроницаемая упаковка', cost: 5, description: 'Максимальная защита для ценных грузов' },
+    standard: { label: 'Стандартная', cost: 3, description: 'Базовая упаковка для обычных грузов' },
+    premium: { label: 'Водонепроницаемая', cost: 5, description: 'Защита для ценных грузов' },
   };
 
-  // Fetch exchange rates from NBRB API and shipping rate from backend on component mount
+  const quickWeights = [0.5, 1, 2, 5];
+
   useEffect(() => {
     const fetchRates = async () => {
       setIsLoading(true);
       try {
-        const [usdResponse, cnyResponse, shippingResponse] = await Promise.all([
+        const [usdResponse, shippingResponse] = await Promise.all([
           axios.get('https://www.nbrb.by/api/exrates/rates/USD?parammode=2'),
-          axios.get('https://www.nbrb.by/api/exrates/rates/CNY?parammode=2'),
-          api.get('/exchange-rates/shipping/current').catch(() => null), // Fallback if API fails
+          api.get('/exchange-rates/shipping/current').catch(() => null),
         ]);
-        setRates({
+        setRates((prev) => ({
+          ...prev,
           USD_TO_BYN: usdResponse.data.Cur_OfficialRate,
-          CNY_TO_BYN: cnyResponse.data.Cur_OfficialRate / cnyResponse.data.Cur_Scale,
-        });
-        // Set shipping rate from backend if available
-        if (shippingResponse && shippingResponse.data && shippingResponse.data.rate) {
-          setShippingRate(shippingResponse.data.rate);
-        }
+        }));
+        if (shippingResponse?.data?.rate) setShippingRate(shippingResponse.data.rate);
         setError(null);
       } catch (err) {
-        setError('Не удалось загрузить курсы валют, используются стандартные значения');
+        setError('Курсы валют не загружены — используются стандартные значения');
       } finally {
         setIsLoading(false);
       }
@@ -56,175 +52,157 @@ function CostCalculator() {
     fetchRates();
   }, []);
 
-  // Memoized calculation of costs
   const { yuan, usd, byn } = useMemo(() => {
     const priceNum = parseFloat(price);
     const weightNum = parseFloat(weight);
-    let productByn = 0;
-    let shippingByn = 0;
     let totalYuan = 0;
     let totalUsd = 0;
     let totalByn = 0;
 
-    // Validation: Allow calculation if at least one input is valid
     if ((isNaN(priceNum) || priceNum < 0) && (isNaN(weightNum) || weightNum < 0)) {
-      if (price !== '' || weight !== '') {
-        setError('Введите корректные значения для стоимости (не менее 0) или веса (не менее 0)');
-      }
+      if (price !== '' || weight !== '') setError('Введите стоимость (¥) или вес (кг) — не менее 0');
       return { yuan: 0, usd: 0, byn: 0 };
     }
-
     setError(null);
 
-    // Calculate product cost if price is provided
     if (!isNaN(priceNum) && priceNum >= 0) {
-      totalYuan = priceNum; // Price without service fee
-      if (insurance) {
-        totalYuan += totalYuan * 0.05; // Add 5% insurance
-      }
-      productByn = totalYuan * rates.CNY_TO_BYN;
-      totalByn += productByn;
+      totalYuan = insurance ? priceNum * 1.05 : priceNum;
+      totalByn += totalYuan * rates.CNY_TO_BYN;
     }
-
-    // Calculate shipping cost if weight is provided
     if (!isNaN(weightNum) && weightNum >= 0) {
-      totalUsd = weightNum * shippingRate + packagingOptions[packaging].cost; // shippingRate USD/kg + packaging
-      shippingByn = totalUsd * rates.USD_TO_BYN;
-      totalByn += shippingByn;
+      totalUsd = weightNum * shippingRate + packagingOptions[packaging].cost;
+      totalByn += totalUsd * rates.USD_TO_BYN;
     }
 
-    return {
-      yuan: totalYuan,
-      usd: totalUsd,
-      byn: totalByn,
-    };
+    return { yuan: totalYuan, usd: totalUsd, byn: totalByn };
   }, [price, weight, insurance, packaging, rates, shippingRate]);
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-transparent p-3 sm:p-4 relative overflow-hidden">
-      <div className="relative max-w-lg w-full mx-auto relative z-10">
-        <div className="p-4 sm:p-6 md:p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-          <PageHeader 
-            title="Калькулятор стоимости"
-            subtitle="Рассчитайте стоимость доставки вашего товара из Китая в Беларусь"
-          />
-          
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            className="mb-4 sm:mb-6 text-xs sm:text-sm text-[#9ca3af] text-center"
-          >
-            Включает цену товара, страховку (5%, опционально), доставку по актуальному курсу и упаковку. <br />
-            Введите стоимость или вес для частичного расчета. Курсы валют обновляются через НБРБ.
-          </motion.div>
+    <section className="min-h-screen bg-[var(--ev-void)] text-[var(--ev-text)] font-[var(--ev-font-body)] overflow-x-hidden">
+      <Helmet>
+        <title>Калькулятор доставки из Китая | Fluvion</title>
+        <meta name="description" content="Рассчитайте стоимость доставки груза из Китая в Беларусь: товар, доставка $7/кг, упаковка. Актуальные курсы НБРБ." />
+      </Helmet>
 
-        {/* Loading Overlay */}
+      {/* Hero */}
+      <div className="relative pt-8 pb-6 md:pt-12 md:pb-8 px-4 text-center">
+        <p className="ev-label text-[var(--ev-gold)] mb-2">Калькулятор</p>
+        <h1 className="font-[var(--ev-font-display)] text-2xl md:text-4xl font-light tracking-tight text-[var(--ev-gold)] mb-2">
+          Стоимость доставки
+        </h1>
+        <p className="text-[var(--ev-text-muted)] text-sm md:text-base max-w-md mx-auto">
+          Цена товара, доставка $7/кг и упаковка — итог в рублях по курсу НБРБ
+        </p>
+      </div>
+
+      <div className="max-w-lg mx-auto px-4 pb-16 md:pb-24">
         {isLoading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 bg-[rgba(10,13,20,0.7)] flex items-center justify-center z-50 rounded-xl"
+            className="flex justify-center py-8"
           >
-            <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-[#00f0ff]" />
+            <div className="w-10 h-10 rounded-full border-2 border-[var(--ev-gold)]/30 border-t-[var(--ev-gold)] animate-spin" />
           </motion.div>
         )}
 
-        {/* Error Message */}
-        {error && (
+        {error && !isLoading && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl text-sm sm:text-base font-medium bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.3)] text-[#ef4444]"
+            className="mb-6 p-4 rounded-xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/20 text-[var(--ev-text-muted)] text-sm"
           >
             {error}
           </motion.div>
         )}
 
-        {/* Form */}
-        <div className="space-y-4 sm:space-y-6">
-          {/* Price Input */}
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-[#9ca3af] mb-1.5 sm:mb-2">
-              Стоимость товара (¥)
-              <span className="inline-block ml-2 group relative">
-                <InformationCircleIcon className="w-4 h-4 text-[#00f0ff]" />
-                <div className="absolute hidden group-hover:block bg-[rgba(255,255,255,0.02)] text-[#e5e7eb] text-xs p-2 rounded-xl w-48 -top-10 left-6 z-10 border border-[rgba(255,255,255,0.1)]">
-                  Введите стоимость товара в юанях (¥).
-                </div>
-              </span>
-            </label>
-            <div className="relative">
-              <CalculatorIcon className="absolute top-2.5 sm:top-3 left-3 w-5 h-5 sm:w-6 sm:h-6 text-[#00f0ff]" />
-              <input
-                type="number"
-                placeholder="Введите стоимость в юанях"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                min="0"
-                className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base bg-[rgba(255,255,255,0.02)] text-[#e5e7eb] border border-[rgba(255,255,255,0.1)] focus:outline-none focus:border-[#00f0ff] focus:ring-2 focus:ring-[#00f0ff]/50 transition duration-300 placeholder-[#9ca3af]"
-              />
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="space-y-6"
+        >
+          {/* Блок параметров */}
+          <div className="rounded-2xl bg-[var(--ev-glass)] backdrop-blur-[24px] border border-[var(--ev-gold)]/15 p-5 md:p-6">
+            <h2 className="ev-label text-[var(--ev-gold)] mb-4">Параметры</h2>
+
+            {/* Стоимость товара */}
+            <div className="mb-5">
+              <label className="flex items-center gap-2 text-sm text-[var(--ev-text-muted)] mb-2">
+                Стоимость товара (¥)
+                <span className="group relative">
+                  <InformationCircleIcon className="w-4 h-4 text-[var(--ev-gold)]/70" />
+                  <span className="absolute left-0 top-full mt-1 hidden group-hover:block w-44 p-2 rounded-lg bg-[var(--ev-void)] border border-[var(--ev-gold)]/20 text-xs text-[var(--ev-text)] z-10">
+                    Стоимость в юанях с маркетплейса
+                  </span>
+                </span>
+              </label>
+              <div className="relative">
+                <CalculatorIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--ev-gold)]/50" />
+                <input
+                  type="number"
+                  placeholder="Например 299"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  min="0"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--ev-void)]/80 border border-[var(--ev-gold)]/15 text-[var(--ev-text)] placeholder-[var(--ev-text-muted)]/50 focus:outline-none focus:border-[var(--ev-gold)]/50 focus:ring-1 focus:ring-[var(--ev-gold)]/30 transition-colors"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Weight Input */}
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-[#9ca3af] mb-1.5 sm:mb-2">
-              Вес товара (кг)
-              <span className="inline-block ml-2 group relative">
-                <InformationCircleIcon className="w-4 h-4 text-[#00f0ff]" />
-                <div className="absolute hidden group-hover:block bg-[rgba(255,255,255,0.02)] text-[#e5e7eb] text-xs p-2 rounded-xl w-48 -top-10 left-6 z-10 border border-[rgba(255,255,255,0.1)]">
-                  Введите вес товара в килограммах. Доставка рассчитывается по тарифу ${shippingRate}/кг.
-                </div>
-              </span>
-            </label>
-            <div className="relative">
-              <CalculatorIcon className="absolute top-2.5 sm:top-3 left-3 w-5 h-5 sm:w-6 sm:h-6 text-[#00f0ff]" />
-              <input
-                type="number"
-                step="0.1"
-                placeholder="Введите вес в килограммах"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                min="0"
-                className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base bg-[rgba(255,255,255,0.02)] text-[#e5e7eb] border border-[rgba(255,255,255,0.1)] focus:outline-none focus:border-[#00f0ff] focus:ring-2 focus:ring-[#00f0ff]/50 transition duration-300 placeholder-[#9ca3af]"
-              />
+            {/* Вес — с быстрыми кнопками */}
+            <div className="mb-5">
+              <label className="block text-sm text-[var(--ev-text-muted)] mb-2">Вес (кг)</label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {quickWeights.map((w) => (
+                  <button
+                    key={w}
+                    type="button"
+                    onClick={() => setWeight(String(w))}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      parseFloat(weight) === w
+                        ? 'bg-[var(--ev-gold)]/25 border border-[var(--ev-gold)]/50 text-[var(--ev-gold)]'
+                        : 'bg-[var(--ev-void)]/60 border border-[var(--ev-gold)]/15 text-[var(--ev-text-muted)] hover:border-[var(--ev-gold)]/30'
+                    }`}
+                  >
+                    {w} кг
+                  </button>
+                ))}
+              </div>
+              <div className="relative">
+                <CalculatorIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--ev-gold)]/50" />
+                <input
+                  type="number"
+                  step="0.1"
+                  placeholder="Или введите свой вес"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  min="0"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--ev-void)]/80 border border-[var(--ev-gold)]/15 text-[var(--ev-text)] placeholder-[var(--ev-text-muted)]/50 focus:outline-none focus:border-[var(--ev-gold)]/50 focus:ring-1 focus:ring-[var(--ev-gold)]/30 transition-colors"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Insurance Checkbox */}
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="insurance"
-              checked={insurance}
-              onChange={(e) => setInsurance(e.target.checked)}
-              className="w-5 h-5 rounded bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.1)] text-[#00f0ff] focus:ring-[#00f0ff] focus:ring-2"
-            />
-            <label htmlFor="insurance" className="text-xs sm:text-sm font-medium text-[#9ca3af]">
-              Добавить страховку (5% от стоимости товара)
-              <span className="inline-block ml-2 group relative">
-                <InformationCircleIcon className="w-4 h-4 text-[#00f0ff]" />
-                <div className="absolute hidden group-hover:block bg-[rgba(255,255,255,0.02)] text-[#e5e7eb] text-xs p-2 rounded-xl w-56 -top-12 left-6 z-10 border border-[rgba(255,255,255,0.1)]">
-                  Страховка работает только если товар утерян и вы полностью засняли процесс распаковки товара на видео без пауз. В таком случае мы вернём полную стоимость груза.
-                </div>
-              </span>
-            </label>
-          </div>
+            {/* Страховка */}
+            <div className="flex items-start gap-3 mb-5">
+              <input
+                type="checkbox"
+                id="insurance"
+                checked={insurance}
+                onChange={(e) => setInsurance(e.target.checked)}
+                className="mt-1 w-4 h-4 rounded border-[var(--ev-gold)]/30 bg-[var(--ev-void)] text-[var(--ev-gold)] focus:ring-[var(--ev-gold)]/50"
+              />
+              <label htmlFor="insurance" className="text-sm text-[var(--ev-text-muted)] flex-1">
+                Страховка +5% от стоимости товара
+                <span className="block text-xs mt-0.5 text-[var(--ev-text-muted)]/80">
+                  Возврат полной стоимости при утрате при наличии видео распаковки
+                </span>
+              </label>
+            </div>
 
-          {/* Packaging Select */}
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-[#9ca3af] mb-1.5 sm:mb-2">
-              Вид упаковки
-              <span className="inline-block ml-2 group relative">
-                <InformationCircleIcon className="w-4 h-4 text-[#00f0ff]" />
-                <div className="absolute hidden group-hover:block bg-[rgba(255,255,255,0.02)] text-[#e5e7eb] text-xs p-2 rounded-xl w-48 -top-10 left-6 z-10 border border-[rgba(255,255,255,0.1)]">
-                  Выберите тип упаковки: стандартная ($3) или водонепроницаемая ($5).
-                </div>
-              </span>
-            </label>
-            <div className="relative">
+            {/* Упаковка */}
+            <div>
+              <label className="block text-sm text-[var(--ev-text-muted)] mb-2">Упаковка</label>
               <StyledSelect
                 value={packaging}
                 onChange={setPackaging}
@@ -232,43 +210,38 @@ function CostCalculator() {
                   value: key,
                   label: `${label} ($${cost})`,
                 }))}
-                placeholder="Вид упаковки"
-                className="text-sm sm:text-base"
+                placeholder="Выберите упаковку"
+                className="text-sm"
               />
-              <div className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-[#9ca3af]">
+              <p className="mt-1.5 text-xs text-[var(--ev-text-muted)]/80">
                 {packagingOptions[packaging].description}
-              </div>
-            </div>
-          </div>
-
-          {/* Results */}
-          <div className="p-4 sm:p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-center bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-              Итоговая стоимость
-            </h3>
-            <div className="space-y-2 sm:space-y-3 text-center">
-              {yuan > 0 && (
-                <p className="text-sm sm:text-base text-[#9ca3af]">
-                  Товар {insurance ? '(с учетом страховки)' : ''}:{' '}
-                  <span className="text-[#00f0ff] font-bold">¥{yuan.toFixed(2)}</span>
-                </p>
-              )}
-              {usd > 0 && (
-                <p className="text-sm sm:text-base text-[#9ca3af]">
-                  Доставка (с учетом упаковки):{' '}
-                  <span className="text-[#a78bfa] font-bold">${usd.toFixed(2)}</span>
-                </p>
-              )}
-              <p className="text-sm sm:text-base text-[#9ca3af]">
-                Итого: <span className="bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent font-bold text-lg sm:text-xl">BYN {byn.toFixed(2)}</span>
               </p>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-4 sm:mt-6">
+          {/* Блок результата */}
+          <div className="rounded-2xl bg-[var(--ev-glass)] backdrop-blur-[24px] border border-[var(--ev-gold)]/20 p-5 md:p-6 text-center">
+            <h2 className="ev-label text-[var(--ev-gold)] mb-3">Итого к оплате</h2>
+            <p className="text-3xl md:text-4xl font-[var(--ev-font-display)] font-light text-[var(--ev-gold)] mb-4">
+              {byn > 0 ? `${byn.toFixed(2)} BYN` : '—'}
+            </p>
+            {(yuan > 0 || usd > 0) && (
+              <div className="space-y-1 text-sm text-[var(--ev-text-muted)]">
+                {yuan > 0 && (
+                  <p>Товар {insurance ? '(со страховкой)' : ''}: <span className="text-[var(--ev-gold)]">¥{yuan.toFixed(2)}</span></p>
+                )}
+                {usd > 0 && (
+                  <p>Доставка и упаковка: <span className="text-[var(--ev-gold)]">${usd.toFixed(2)}</span></p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* CTA */}
+          <div className="pt-2">
             <Button
-              variant="primary"
+              variant="ev-primary"
+              size="lg"
               onClick={() => navigate('/terminal')}
               disabled={isLoading}
               className="w-full"
@@ -277,21 +250,13 @@ function CostCalculator() {
             </Button>
           </div>
 
-          {/* Additional Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-            className="mt-4 sm:mt-6 text-center text-[#9ca3af] text-xs sm:text-sm"
-          >
-            <p>
-              Рассчитайте стоимость доставки и начните покупки! <br />
-              Для оформления заказа необходимо <a href="/login" className="text-[#00f0ff] hover:underline">войти</a> или{' '}
-              <a href="/login" className="text-[#00f0ff] hover:underline">зарегистрироваться</a>.
-            </p>
-          </motion.div>
-        </div>
-        </div>
+          <p className="text-center text-xs text-[var(--ev-text-muted)]">
+            Для оформления заказа{' '}
+            <a href="/login" className="text-[var(--ev-gold)] hover:underline">войдите</a>
+            {' '}или{' '}
+            <a href="/login" className="text-[var(--ev-gold)] hover:underline">зарегистрируйтесь</a>.
+          </p>
+        </motion.div>
       </div>
     </section>
   );

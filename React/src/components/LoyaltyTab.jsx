@@ -61,7 +61,7 @@ const faqData = [
 
 // Component for individual stat cards
 const StatCard = ({ children, className }) => (
-  <div className={`flex-1 min-w-[250px] p-8 text-center rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300 ${className}`}>
+  <div className={`flex-1 min-w-[250px] p-8 text-center rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300 ${className}`}>
     {children}
   </div>
 );
@@ -84,7 +84,7 @@ const QuestCard = ({ quest, onShowDetails }) => {
   return (
     <motion.div
       onClick={() => onShowDetails(quest)}
-      className={`w-full max-w-md h-20 rounded-2xl bg-[rgba(255,255,255,0.02)] border ${isPermanent ? 'border-[rgba(234,179,8,0.3)]' : 'border-[rgba(255,255,255,0.1)]'} hover:border-[#00f0ff]/50 hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300 relative overflow-hidden cursor-pointer ${isPermanent ? 'ring-2 ring-[rgba(234,179,8,0.2)]' : ''}`}
+      className={`w-full max-w-md h-20 rounded-2xl bg-[var(--ev-glass)] border ${isPermanent ? 'border-[var(--ev-gold)]/40' : 'border-[var(--ev-gold)]/15'} hover:border-[var(--ev-gold)]/30 hover:bg-[var(--ev-gold)]/5 transition-all duration-300 relative overflow-hidden cursor-pointer ${isPermanent ? 'ring-2 ring-[var(--ev-gold)]/20' : ''}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -92,29 +92,29 @@ const QuestCard = ({ quest, onShowDetails }) => {
       whileTap={{ scale: 0.98 }}
     >
         <div className="flex flex-row items-center h-full gap-4 p-4">
-          <GiftIcon className={`w-6 h-6 ${isPermanent ? 'text-yellow-400' : 'text-[#00f0ff]'}`} />
+          <GiftIcon className={`w-6 h-6 ${isPermanent ? 'text-[var(--ev-gold)]' : 'text-[var(--ev-gold)]'}`} />
           <div className="flex-1">
-            <p className="text-sm text-[#9ca3af]">
-              Прогресс: <span className="font-medium text-[#e5e7eb]">{quest.currentValue}/{quest.targetValue}</span>
+            <p className="text-sm text-[var(--ev-text-muted)]">
+              Прогресс: <span className="font-medium text-[var(--ev-text)]">{quest.currentValue}/{quest.targetValue}</span>
             </p>
           </div>
-          <div className="w-24 bg-[rgba(255,255,255,0.1)] rounded-full h-2">
+          <div className="w-24 bg-[var(--ev-gold)]/10 rounded-full h-2">
             <motion.div
-              className="bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] h-2 rounded-full"
+              className="bg-[var(--ev-gold)] h-2 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${(quest.currentValue / quest.targetValue) * 100}%` }}
               transition={{ duration: 1, ease: 'easeInOut' }}
             />
           </div>
-          {quest.completed && <CheckCircleIcon className="absolute top-3 right-12 w-6 h-6 text-[#10b981]" />}
+          {quest.completed && <CheckCircleIcon className="absolute top-3 right-12 w-6 h-6 text-emerald-500" />}
           <div
-            className={`px-4 py-1 rounded-lg text-sm ${quest.completed ? 'bg-[rgba(16,185,129,0.15)] text-[#10b981] border border-[rgba(16,185,129,0.3)]' : 'bg-[rgba(255,255,255,0.1)] text-[#9ca3af]'} ${isPermanent ? 'ring-1 ring-yellow-400/30' : ''}`}
+            className={`px-4 py-1 rounded-lg text-sm ${quest.completed ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-[var(--ev-gold)]/10 text-[var(--ev-text-muted)] border border-[var(--ev-gold)]/20'} ${isPermanent ? 'ring-1 ring-[var(--ev-gold)]/30' : ''}`}
           >
             {quest.completed ? 'Забрано автоматически' : 'Не завершено'}
           </div>
         </div>
         {isPermanent && (
-          <div className="absolute top-2 left-2 bg-[rgba(234,179,8,0.9)] text-[#1f2937] px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+          <div className="absolute top-2 left-2 bg-[var(--ev-gold)]/90 text-[var(--ev-void)] px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
             Редкий
           </div>
         )}
@@ -141,36 +141,36 @@ const QuestDetailsModal = ({ quest, getQuestName, getRewardTypeLabel, onClose })
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.8, opacity: 0 }}
         transition={{ duration: 0.3, type: 'spring', stiffness: 300 }}
-        className="bg-[rgba(31,41,55,0.95)] backdrop-blur-xl rounded-3xl p-4 sm:p-6 md:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto no-scrollbar border border-[rgba(255,255,255,0.1)] shadow-2xl relative"
+        className="bg-[var(--ev-void)]/95 backdrop-blur-xl rounded-3xl p-4 sm:p-6 md:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto no-scrollbar border border-[var(--ev-gold)]/20 shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative z-10">
           {/* Заголовок с кнопкой закрытия */}
           <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent flex-1 break-words pr-2">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[var(--ev-text)] flex-1 break-words pr-2">
               {getQuestName(quest.questConditionType, quest.targetValue)}
             </h3>
             <div className="flex items-center gap-3 flex-shrink-0">
-              <div className={`p-2 rounded-full bg-[rgba(255,255,255,0.1)] backdrop-blur-sm ${isPermanent ? 'ring-2 ring-yellow-400/30' : 'ring-2 ring-[#00f0ff]/30'}`}>
-                <RewardIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${isPermanent ? 'text-yellow-400' : 'text-[#00f0ff]'}`} />
+              <div className={`p-2 rounded-full bg-[var(--ev-gold)]/10 backdrop-blur-sm ${isPermanent ? 'ring-2 ring-[var(--ev-gold)]/30' : 'ring-2 ring-[var(--ev-gold)]/30'}`}>
+                <RewardIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--ev-gold)]" />
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-full bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.2)] transition-colors"
+                className="p-2 rounded-full bg-[var(--ev-gold)]/10 hover:bg-[var(--ev-gold)]/20 transition-colors"
                 aria-label="Закрыть"
               >
-                <svg className="w-5 h-5 text-[#9ca3af]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-[var(--ev-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
           </div>
 
-          <div className="space-y-4 sm:space-y-6 text-[#9ca3af] text-sm sm:text-base">
+          <div className="space-y-4 sm:space-y-6 text-[var(--ev-text-muted)] text-sm sm:text-base">
             {/* Описание */}
-            <div className="bg-[rgba(255,255,255,0.02)] rounded-2xl p-3 sm:p-4 border border-[rgba(255,255,255,0.1)] backdrop-blur-sm">
-              <p className="font-medium mb-2 sm:mb-3 text-[#e5e7eb] flex items-center gap-2 text-sm sm:text-base">
-                <GiftIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#00f0ff] flex-shrink-0" />
+            <div className="bg-[var(--ev-glass)] rounded-2xl p-3 sm:p-4 border border-[var(--ev-gold)]/15 backdrop-blur-sm">
+              <p className="font-medium mb-2 sm:mb-3 text-[var(--ev-text)] flex items-center gap-2 text-sm sm:text-base">
+                <GiftIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--ev-gold)] flex-shrink-0" />
                 Описание
               </p>
               <p className="leading-relaxed whitespace-pre-wrap break-words text-sm sm:text-base">
@@ -196,27 +196,27 @@ const QuestDetailsModal = ({ quest, getQuestName, getRewardTypeLabel, onClose })
             )}
 
             {/* Информация о квесте */}
-            <div className="grid grid-cols-1 gap-3 sm:gap-4 p-3 sm:p-4 bg-[rgba(255,255,255,0.02)] rounded-2xl border border-[rgba(255,255,255,0.1)] backdrop-blur-sm">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4 p-3 sm:p-4 bg-[var(--ev-glass)] rounded-2xl border border-[var(--ev-gold)]/15 backdrop-blur-sm">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 py-2">
-                <span className="font-medium text-[#e5e7eb] text-sm sm:text-base">Награда:</span>
-                <span className={`text-base sm:text-lg font-bold break-words ${isPermanent ? 'text-yellow-400' : 'text-[#00f0ff]'}`}>
+                <span className="font-medium text-[var(--ev-text)] text-sm sm:text-base">Награда:</span>
+                <span className="text-base sm:text-lg font-bold text-[var(--ev-gold)] break-words">
                   +{quest.reward}% {getRewardTypeLabel(quest.rewardType)}
                 </span>
               </div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 py-2">
-                <span className="font-medium text-[#e5e7eb] text-sm sm:text-base">Прогресс:</span>
-                <span className="text-base sm:text-lg text-[#00f0ff] font-bold">{quest.currentValue}/{quest.targetValue}</span>
+                <span className="font-medium text-[var(--ev-text)] text-sm sm:text-base">Прогресс:</span>
+                <span className="text-base sm:text-lg text-[var(--ev-gold)] font-bold">{quest.currentValue}/{quest.targetValue}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 py-2">
-                <span className="font-medium text-[#e5e7eb] text-sm sm:text-base">Статус:</span>
-                <span className={`text-sm sm:text-base font-medium break-words ${quest.completed ? 'text-[#10b981] font-bold' : 'text-yellow-400'}`}>
+                <span className="font-medium text-[var(--ev-text)] text-sm sm:text-base">Статус:</span>
+                <span className={`text-sm sm:text-base font-medium break-words ${quest.completed ? 'text-emerald-400 font-bold' : 'text-[var(--ev-gold)]'}`}>
                   {quest.completed ? 'Выполнен (автоматически забрано)' : 'В процессе'}
                 </span>
               </div>
               {isPermanent && (
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 py-2 pt-3 border-t border-[rgba(255,255,255,0.1)]">
-                  <span className="font-medium text-yellow-400 text-sm sm:text-base">Особенность:</span>
-                  <span className="text-sm sm:text-base text-yellow-400 font-bold italic break-words text-right sm:text-left">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 py-2 pt-3 border-t border-[var(--ev-gold)]/15">
+                  <span className="font-medium text-[var(--ev-gold)] text-sm sm:text-base">Особенность:</span>
+                  <span className="text-sm sm:text-base text-[var(--ev-gold)] font-bold italic break-words text-right sm:text-left">
                     Постоянная скидка — действует бессрочно!
                   </span>
                 </div>
@@ -229,7 +229,7 @@ const QuestDetailsModal = ({ quest, getQuestName, getRewardTypeLabel, onClose })
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={onClose}
-            className="w-full mt-6 sm:mt-8 py-2.5 sm:py-3 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] text-white rounded-2xl hover:opacity-90 transition-all duration-300 text-sm sm:text-base font-semibold shadow-xl"
+            className="w-full mt-6 sm:mt-8 py-2.5 sm:py-3 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] rounded-2xl hover:bg-[var(--ev-gold)]/25 transition-all duration-300 text-sm sm:text-base font-semibold"
           >
             Закрыть
           </motion.button>
@@ -242,19 +242,17 @@ const QuestDetailsModal = ({ quest, getQuestName, getRewardTypeLabel, onClose })
 // Component for FAQ items
 const FaqItem = ({ faq, index, isOpen, toggle }) => (
   <motion.div
-    className="rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300 relative overflow-hidden"
+    className="rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300 relative overflow-hidden"
     whileHover={{ y: -5, scale: 1.01 }}
     whileTap={{ scale: 0.99 }}
   >
-    <motion.button
-      animate={{ backgroundColor: isOpen ? 'rgba(255,255,255,0.04)' : 'rgba(0, 0, 0, 0)' }}
-      transition={{ duration: 0.3 }}
+    <button
       onClick={() => toggle(index)}
-      className="flex justify-between items-center w-full p-4 rounded-lg cursor-pointer transition-colors"
+      className={`flex justify-between items-center w-full p-4 rounded-lg cursor-pointer transition-colors ${isOpen ? 'bg-[var(--ev-gold)]/10' : ''}`}
     >
-      <span className="text-lg text-[#e5e7eb] font-medium">{faq.question}</span>
-      <ChevronDownIcon className={`w-5 h-5 text-[#9ca3af] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-    </motion.button>
+      <span className="text-lg text-[var(--ev-text)] font-medium">{faq.question}</span>
+      <ChevronDownIcon className={`w-5 h-5 text-[var(--ev-text-muted)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+    </button>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -262,9 +260,9 @@ const FaqItem = ({ faq, index, isOpen, toggle }) => (
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.3 }}
-          className="p-4 rounded-lg mt-2"
+          className="p-4 rounded-lg mt-2 bg-[var(--ev-gold)]/5"
         >
-          <p className="text-[#9ca3af] text-base">{faq.answer}</p>
+          <p className="text-[var(--ev-text-muted)] text-base">{faq.answer}</p>
         </motion.div>
       )}
     </AnimatePresence>
@@ -403,9 +401,9 @@ const LoyaltyTab = () => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-[#00f0ff] text-2xl bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl border border-[rgba(255,255,255,0.1)] animate-pulse"
+          className="text-center text-[var(--ev-gold)] text-2xl bg-[var(--ev-glass)] p-6 rounded-2xl border border-[var(--ev-gold)]/15"
         >
-          <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-[#00f0ff] mx-auto mb-4" />
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-[var(--ev-gold)]/30 border-t-[var(--ev-gold)] mx-auto mb-4" />
           Загрузка...
         </motion.div>
       </div>
@@ -421,13 +419,13 @@ const LoyaltyTab = () => {
         transition={{ duration: 0.5 }}
         className="flex items-center justify-between"
       >
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent flex items-center gap-3">
-          <GiftIcon className="w-8 h-8 text-[#00f0ff]" />
+        <h2 className="text-2xl font-semibold text-[var(--ev-text)] flex items-center gap-3">
+          <GiftIcon className="w-7 h-7 text-[var(--ev-gold)]" />
           Система лояльности
         </h2>
         <Button
           onClick={() => setShowTutorial(true)}
-          className="bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)] flex items-center gap-2"
+          className="bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25 flex items-center gap-2"
         >
           <InformationCircleIcon className="w-5 h-5" />
           Обучение
@@ -438,49 +436,48 @@ const LoyaltyTab = () => {
       <AnimatePresence>
           {error && (
             <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }} transition={{ duration: 0.3 }}
-              className="mb-8 p-4 bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.3)] rounded-2xl text-[#ef4444] text-center text-base font-medium"
+              className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-300 text-center text-base font-medium"
             >
               {error}
             </motion.div>
           )}
       </AnimatePresence>
 
-      {/* Discounts Section */}
       <motion.section initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-6">
-          <motion.div className="rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300 relative overflow-hidden p-8"
+          <motion.div className="rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300 relative overflow-hidden p-8"
             whileHover={{ y: -5, scale: 1.01 }} whileTap={{ scale: 0.99 }}
           >
             <div className="flex items-center mb-4">
-              <GiftIcon className="w-8 h-8 text-[#00f0ff] mr-2" />
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">Ваши скидки</h3>
+              <GiftIcon className="w-8 h-8 text-[var(--ev-gold)] mr-2" />
+              <h3 className="text-2xl font-semibold text-[var(--ev-text)]">Ваши скидки</h3>
             </div>
               <StatCard className="relative">
                 <div className="relative w-64 h-64 mx-auto">
                   <svg className="w-full h-full" viewBox="0 0 36 36">
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e5e7eb" strokeWidth="3" />
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--ev-text-muted)" strokeWidth="3" />
                     <motion.path strokeDasharray={`${userData.discountPercent}, 100`} strokeDashoffset={0}
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none" stroke="#00f0ff" strokeWidth="3"
+                      fill="none" stroke="var(--ev-gold)" strokeWidth="3"
                       initial={{ pathLength: 0 }} animate={{ pathLength: userData.discountPercent / 100 }}
                       transition={{ duration: 1.5, ease: 'easeInOut' }}
                     />
                     <motion.path strokeDasharray={`${userData.temporaryDiscountPercent || 0}, 100`} strokeDashoffset={-userData.discountPercent}
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none" stroke="#6b7280" strokeWidth="3"
+                      fill="none" stroke="var(--ev-text-muted)" strokeWidth="3"
                       initial={{ pathLength: 0 }} animate={{ pathLength: (userData.temporaryDiscountPercent || 0) / 100 }}
                       transition={{ duration: 1.5, ease: 'easeInOut', delay: 0.3 }}
                     />
                   </svg>
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                    <p className="text-5xl font-extrabold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent drop-shadow-md">{userData.totalDiscount}%</p>
-                    <p className="text-base font-medium text-[#9ca3af] mt-2">Общая скидка</p>
+                    <p className="text-5xl font-extrabold text-[var(--ev-gold)] drop-shadow-md">{userData.totalDiscount}%</p>
+                    <p className="text-base font-medium text-[var(--ev-text-muted)] mt-2">Общая скидка</p>
                   </div>
                 </div>
                 <div className="mt-6 flex flex-col items-center gap-2">
-                  <p className="text-sm font-medium text-[#9ca3af] tracking-wide">
+                  <p className="text-sm font-medium text-[var(--ev-text-muted)] tracking-wide">
                     Постоянная: {userData.discountPercent}% (Действует бессрочно)
                   </p>
-                  <p className="text-sm font-medium text-[#9ca3af] tracking-wide">
+                  <p className="text-sm font-medium text-[var(--ev-text-muted)] tracking-wide">
                     Временная: {userData.temporaryDiscountPercent || 0}%
                     {userData.temporaryDiscountExpired ? '' : ' (Нет активной скидки)'}
                   </p>
@@ -488,12 +485,12 @@ const LoyaltyTab = () => {
               </StatCard>
               {userData.temporaryDiscountPercent > 0 && userData.temporaryDiscountExpired && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}
-                  className="w-full max-w-md bg-[rgba(239,68,68,0.1)] rounded-2xl p-4 text-center border border-[rgba(239,68,68,0.3)] hover:border-[rgba(239,68,68,0.5)] mt-6"
+                  className="w-full max-w-md bg-red-500/10 rounded-2xl p-4 text-center border border-red-500/20 hover:border-red-500/30 mt-6"
                 >
-                  <p className="text-[#e5e7eb] font-semibold text-sm">
+                  <p className="text-[var(--ev-text)] font-semibold text-sm">
                     Временная скидка истекает через: {getTimeRemaining(userData.temporaryDiscountExpired)}
                   </p>
-                  <p className="text-[#9ca3af] text-xs mt-2">
+                  <p className="text-[var(--ev-text-muted)] text-xs mt-2">
                     Внимание: все достижения в квестах обнулятся при истечении временной скидки!
                   </p>
                 </motion.div>
@@ -503,16 +500,16 @@ const LoyaltyTab = () => {
 
       {/* Quests Section */}
       <motion.section initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }} className="mb-6">
-          <motion.div className="rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300 relative overflow-hidden p-8"
+          <motion.div className="rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300 relative overflow-hidden p-8"
             whileHover={{ y: -5, scale: 1.01 }} whileTap={{ scale: 0.99 }}
           >
             <div className="flex items-center mb-4">
-              <GiftIcon className="w-8 h-8 text-[#00f0ff] mr-2" />
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">Квесты</h3>
+              <GiftIcon className="w-8 h-8 text-[var(--ev-gold)] mr-2" />
+              <h3 className="text-2xl font-semibold text-[var(--ev-text)]">Квесты</h3>
             </div>
             <div className="flex justify-end mb-6">
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowIncompleteOnly(!showIncompleteOnly)}
-                className="px-4 py-2 bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] rounded-lg hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)] transition duration-300 text-base font-semibold"
+                className="px-4 py-2 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] rounded-lg hover:bg-[var(--ev-gold)]/25 hover:border-[var(--ev-gold)]/40 transition duration-300 text-base font-semibold"
               >
                 {showIncompleteOnly ? 'Показать все' : 'Только незавершенные'}
               </motion.button>
@@ -520,7 +517,7 @@ const LoyaltyTab = () => {
               <div className="space-y-8">
                 {questGroups.permanent.length > 0 && (
                   <div>
-                    <h4 className="text-xl font-semibold text-yellow-400 mb-4 flex items-center gap-2">
+                    <h4 className="text-xl font-semibold text-[var(--ev-gold)] mb-4 flex items-center gap-2">
                       <StarIcon className="w-5 h-5" /> Редкие квесты (Постоянная скидка)
                     </h4>
                     <div className="flex flex-col space-y-4">
@@ -532,7 +529,7 @@ const LoyaltyTab = () => {
                 )}
                 {questGroups.temporary.length > 0 && (
                   <div>
-                    <h4 className="text-xl font-semibold text-[#00f0ff] mb-4 flex items-center gap-2">
+                    <h4 className="text-xl font-semibold text-[var(--ev-gold)] mb-4 flex items-center gap-2">
                       <ClockIcon className="w-5 h-5" /> Обычные квесты (Временная скидка)
                     </h4>
                     <div className="flex flex-col space-y-4">
@@ -543,7 +540,7 @@ const LoyaltyTab = () => {
                   </div>
                 )}
                 {questGroups.permanent.length === 0 && questGroups.temporary.length === 0 && (
-                  <p className="text-center text-[#9ca3af] text-lg">Нет доступных квестов</p>
+                  <p className="text-center text-[var(--ev-text-muted)] text-lg">Нет доступных квестов</p>
                 )}
               </div>
             </motion.div>
@@ -551,43 +548,43 @@ const LoyaltyTab = () => {
 
       {/* Referral Section */}
       <motion.section initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.6 }} className="mb-6">
-          <motion.div className="rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300 relative overflow-hidden p-8"
+          <motion.div className="rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300 relative overflow-hidden p-8"
             whileHover={{ y: -5, scale: 1.01 }} whileTap={{ scale: 0.99 }}
           >
             <div className="flex items-center mb-4">
-              <ShareIcon className="w-8 h-8 text-[#00f0ff] mr-2" />
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">Приглашайте друзей</h3>
+              <ShareIcon className="w-8 h-8 text-[var(--ev-gold)] mr-2" />
+              <h3 className="text-2xl font-semibold text-[var(--ev-text)]">Приглашайте друзей</h3>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <input type="text" value={referralCodeActivate} onChange={e => setReferralCodeActivate(e.target.value)}
                 placeholder="Введите реферальный код"
-                className="flex-grow p-3 bg-[rgba(107,114,128,0.15)] text-[#e5e7eb] border border-[rgba(255,255,255,0.1)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/30 transition duration-300"
+                className="flex-grow p-3 bg-[var(--ev-gold)]/5 text-[var(--ev-text)] border border-[var(--ev-gold)]/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--ev-gold)]/30 focus:border-[var(--ev-gold)]/40 transition duration-300"
               />
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleActivateReferral}
-                className="px-6 py-3 bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] rounded-lg hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)] transition duration-300 text-base font-semibold"
+                className="px-6 py-3 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] rounded-lg hover:bg-[var(--ev-gold)]/25 hover:border-[var(--ev-gold)]/40 transition duration-300 text-base font-semibold"
               >
                 Активировать
               </motion.button>
             </div>
             {userData.referralCode && (
               <div className="text-center">
-                <p className="text-lg text-[#9ca3af] mb-2">Ваш реферальный код:</p>
-                <div className="flex items-center justify-center gap-4">
-                  <p className="text-xl font-mono text-[#00f0ff] bg-[rgba(255,255,255,0.02)] px-4 py-2 rounded-lg border border-[rgba(255,255,255,0.1)]">
+                <p className="text-lg text-[var(--ev-text-muted)] mb-2">Ваш реферальный код:</p>
+                <div className="flex items-center justify-center gap-4 flex-wrap">
+                  <p className="text-xl font-mono text-[var(--ev-gold)] bg-[var(--ev-glass)] px-4 py-2 rounded-lg border border-[var(--ev-gold)]/20">
                     {userData.referralCode}
                   </p>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={copyReferralCode}
-                    className="px-4 py-2 bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] rounded-lg hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)] transition duration-300 text-base font-semibold"
+                    className="px-4 py-2 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] rounded-lg hover:bg-[var(--ev-gold)]/25 hover:border-[var(--ev-gold)]/40 transition duration-300 text-base font-semibold"
                   >
                     {copied ? 'Скопировано!' : 'Копировать'}
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={shareReferralCode}
-                    className="px-4 py-2 bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] rounded-lg hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)] transition duration-300 text-base font-semibold flex items-center justify-center gap-2"
+                    className="px-4 py-2 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] rounded-lg hover:bg-[var(--ev-gold)]/25 hover:border-[var(--ev-gold)]/40 transition duration-300 text-base font-semibold flex items-center justify-center gap-2"
                   >
                     <ShareIcon className="w-5 h-5" /> Поделиться
                   </motion.button>
                 </div>
-                <p className="text-sm text-[#9ca3af] mt-2">Поделитесь кодом с друзьями, чтобы они получили бонусы при регистрации!</p>
+                <p className="text-sm text-[var(--ev-text-muted)] mt-2">Поделитесь кодом с друзьями, чтобы они получили бонусы при регистрации!</p>
               </div>
             )}
           </motion.div>
@@ -595,32 +592,32 @@ const LoyaltyTab = () => {
 
       {/* Rewards History Section */}
       <motion.section initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.8 }} className="mb-6">
-          <motion.div className="rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300 relative overflow-hidden p-8"
+          <motion.div className="rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300 relative overflow-hidden p-8"
             whileHover={{ y: -5, scale: 1.01 }} whileTap={{ scale: 0.99 }}
           >
             <div className="flex items-center mb-4">
-              <ArrowPathIcon className="w-8 h-8 text-[#00f0ff] mr-2" />
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">История наград</h3>
+              <ArrowPathIcon className="w-8 h-8 text-[var(--ev-gold)] mr-2" />
+              <h3 className="text-2xl font-semibold text-[var(--ev-text)]">История наград</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full table-auto border-collapse">
                 <thead>
-                  <tr className="bg-[rgba(255,255,255,0.02)]">
-                    <th className="px-4 py-2 text-left text-[#9ca3af] font-semibold">Квест</th>
-                    <th className="px-4 py-2 text-left text-[#9ca3af] font-semibold">Награда</th>
+                  <tr className="bg-[var(--ev-gold)]/5">
+                    <th className="px-4 py-2 text-left text-[var(--ev-text-muted)] font-semibold">Квест</th>
+                    <th className="px-4 py-2 text-left text-[var(--ev-text-muted)] font-semibold">Награда</th>
                   </tr>
                 </thead>
                 <tbody>
                   {quests.filter(quest => quest.completed).map(quest => (
-                    <tr key={quest.id} className="border-b border-[rgba(255,255,255,0.1)]">
-                      <td className="px-4 py-2 text-[#e5e7eb]">{quest.name}</td>
-                      <td className="px-4 py-2 text-[#e5e7eb]">+{quest.reward}% ({getRewardTypeLabel(quest.rewardType)})</td>
+                    <tr key={quest.id} className="border-b border-[var(--ev-gold)]/15">
+                      <td className="px-4 py-2 text-[var(--ev-text)]">{quest.name}</td>
+                      <td className="px-4 py-2 text-[var(--ev-text)]">+{quest.reward}% ({getRewardTypeLabel(quest.rewardType)})</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
               {quests.filter(quest => quest.completed).length === 0 && (
-                <p className="text-center text-[#9ca3af] mt-4 text-base">Нет выполненных квестов.</p>
+                <p className="text-center text-[var(--ev-text-muted)] mt-4 text-base">Нет выполненных квестов.</p>
               )}
             </div>
           </motion.div>
@@ -628,10 +625,10 @@ const LoyaltyTab = () => {
 
       {/* FAQ Section */}
       <motion.section initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 1.0 }} className="mb-6">
-          <div className="space-y-4 bg-primary">
+          <div className="space-y-4">
             <div className="flex items-center mb-4">
-              <InformationCircleIcon className="w-8 h-8 text-[#00f0ff] mr-2" />
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">Часто задаваемые вопросы</h3>
+              <InformationCircleIcon className="w-8 h-8 text-[var(--ev-gold)] mr-2" />
+              <h3 className="text-2xl font-semibold text-[var(--ev-text)]">Часто задаваемые вопросы</h3>
             </div>
             {faqData.map((faq, index) => (
               <FaqItem key={index} faq={faq} index={index} isOpen={faqOpenIndex === index} toggle={toggleFaq} />
@@ -646,15 +643,15 @@ const LoyaltyTab = () => {
               className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000]"
             >
               <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.3 }}
-                className="bg-[rgba(31,41,55,0.95)] backdrop-blur-xl rounded-2xl p-8 max-w-lg w-[90%] max-h-[80vh] overflow-y-auto no-scrollbar border border-[rgba(255,255,255,0.1)]"
+                className="bg-[var(--ev-void)]/95 backdrop-blur-xl rounded-2xl p-8 max-w-lg w-[90%] max-h-[80vh] overflow-y-auto no-scrollbar border border-[var(--ev-gold)]/20"
               >
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent mb-4">Добро пожаловать в систему лояльности!</h3>
-                <p className="text-[#9ca3af] mb-4 text-base">1. <strong className="text-[#e5e7eb]">Скидки:</strong> Просматривайте свои текущие постоянные и временные скидки.</p>
-                <p className="text-[#9ca3af] mb-4 text-base">2. <strong className="text-[#e5e7eb]">Квесты:</strong> Выполняйте задания, чтобы получить постоянные или временные скидки.</p>
-                <p className="text-[#9ca3af] mb-4 text-base">3. <strong className="text-[#e5e7eb]">Рефералы:</strong> Приглашайте друзей с помощью вашего уникального кода и получайте бонусы.</p>
-                <p className="text-[#9ca3af] mb-4 text-base">4. <strong className="text-[#e5e7eb]">История:</strong> Следите за своими наградами в разделе истории.</p>
+                <h3 className="text-2xl font-semibold text-[var(--ev-text)] mb-4">Добро пожаловать в систему лояльности!</h3>
+                <p className="text-[var(--ev-text-muted)] mb-4 text-base">1. <strong className="text-[var(--ev-text)]">Скидки:</strong> Просматривайте свои текущие постоянные и временные скидки.</p>
+                <p className="text-[var(--ev-text-muted)] mb-4 text-base">2. <strong className="text-[var(--ev-text)]">Квесты:</strong> Выполняйте задания, чтобы получить постоянные или временные скидки.</p>
+                <p className="text-[var(--ev-text-muted)] mb-4 text-base">3. <strong className="text-[var(--ev-text)]">Рефералы:</strong> Приглашайте друзей с помощью вашего уникального кода и получайте бонусы.</p>
+                <p className="text-[var(--ev-text-muted)] mb-4 text-base">4. <strong className="text-[var(--ev-text)]">История:</strong> Следите за своими наградами в разделе истории.</p>
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowTutorial(false)}
-                  className="w-full py-3 bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] rounded-lg hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)] transition duration-300 text-base font-semibold"
+                  className="w-full py-3 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] rounded-lg hover:bg-[var(--ev-gold)]/25 hover:border-[var(--ev-gold)]/40 transition duration-300 text-base font-semibold"
                 >
                   Понятно
                 </motion.button>

@@ -118,16 +118,16 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
       },
       CANCELLED: {
         text: 'Отменён',
-        color: 'text-[#9ca3af]',
-        bgColor: 'bg-[rgba(156,163,175,0.15)]',
-        borderColor: 'border-[rgba(156,163,175,0.3)]',
+        color: 'text-[var(--ev-text-muted)]',
+        bgColor: 'bg-[var(--ev-text-muted)]/15',
+        borderColor: 'border-[var(--ev-text-muted)]/30',
         icon: <XCircleIcon className="w-4 h-4" />
       },
       REFUSED: {
         text: 'Отклонён',
-        color: 'text-[#9ca3af]',
-        bgColor: 'bg-[rgba(156,163,175,0.15)]',
-        borderColor: 'border-[rgba(156,163,175,0.3)]',
+        color: 'text-[var(--ev-text-muted)]',
+        bgColor: 'bg-[var(--ev-text-muted)]/15',
+        borderColor: 'border-[var(--ev-text-muted)]/30',
         icon: <XCircleIcon className="w-4 h-4" />
       },
       REFUNDED: {
@@ -140,9 +140,9 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
     };
     return statusConfig[status] || {
       text: status,
-      color: 'text-[#808080]',
-      bgColor: 'bg-[#808080]/20',
-      borderColor: 'border-[#808080]/50',
+      color: 'text-[var(--ev-text-muted)]',
+      bgColor: 'bg-[var(--ev-text-muted)]/20',
+      borderColor: 'border-[var(--ev-text-muted)]/30',
       icon: <ClockIcon className="w-4 h-4" />
     };
   };
@@ -156,8 +156,8 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
         transition={{ duration: 0.5 }}
         className="flex items-center justify-between"
       >
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent flex items-center gap-3">
-          <ShoppingBagIcon className="w-8 h-8 text-[#00f0ff]" />
+        <h2 className="text-2xl font-semibold text-[var(--ev-text)] flex items-center gap-3">
+          <ShoppingBagIcon className="w-7 h-7 text-[var(--ev-gold)]" />
           Заказы
         </h2>
       </motion.div>
@@ -168,7 +168,7 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3 }}
-          className="p-4 bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.3)] rounded-xl text-[#ef4444] text-center"
+          className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 text-center"
         >
           {error}
         </motion.div>
@@ -201,25 +201,23 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
                   whileHover={{ y: -5, transition: { duration: 0.2 } }}
                   onClick={() => handleViewOrderDetails(order.id)}
                 >
-                  <div className="p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[#00f0ff]/50 hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300 cursor-pointer group overflow-x-hidden overflow-y-hidden">
+                  <div className="p-6 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300 cursor-pointer group overflow-x-hidden overflow-y-hidden">
                       <div className="flex flex-col md:flex-row gap-4 items-start justify-between">
-                        {/* Левая часть - основная информация */}
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="w-12 h-12 bg-gradient-to-br from-[#00f0ff] via-[#a78bfa] to-[#10b981] rounded-lg flex items-center justify-center">
-                              <ShoppingBagIcon className="w-6 h-6 text-white" />
+                            <div className="w-12 h-12 rounded-xl bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/20 flex items-center justify-center">
+                              <ShoppingBagIcon className="w-6 h-6 text-[var(--ev-gold)]" />
                             </div>
                             <div>
-                              <h3 className="text-xl font-bold text-[#e5e7eb] group-hover:text-[#00f0ff] transition-colors">
+                              <h3 className="text-xl font-semibold text-[var(--ev-text)] group-hover:text-[var(--ev-gold)] transition-colors">
                                 Заказ #{order.orderNumber}
                               </h3>
-                              <p className="text-sm text-[#808080]">
+                              <p className="text-sm text-[var(--ev-text-muted)]">
                                 {order.items?.length || 0} {((order.items?.length || 0) === 1) ? 'товар' : ((order.items?.length || 0) >= 2 && (order.items?.length || 0) <= 4) ? 'товара' : 'товаров'}
                               </p>
                             </div>
                           </div>
 
-                          {/* Статус */}
                           <div className="mb-4">
                             <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border ${statusDisplay.bgColor} ${statusDisplay.borderColor} ${statusDisplay.color}`}>
                               {statusDisplay.icon}
@@ -227,27 +225,25 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
                             </span>
                           </div>
 
-                          {/* Информация */}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                            <div className="flex items-center gap-2 text-[#cdcdcd]">
-                              <CalendarIcon className="w-4 h-4 text-[#808080]" />
-                              <span className="text-[#808080]">Дата:</span>
-                              <span className="text-white">
+                            <div className="flex items-center gap-2 text-[var(--ev-text-muted)]">
+                              <CalendarIcon className="w-4 h-4 text-[var(--ev-gold)]/70" />
+                              <span>Дата:</span>
+                              <span className="text-[var(--ev-text)]">
                                 {new Date(order.dateCreated).toLocaleDateString('ru-RU')}
                               </span>
                             </div>
                             {totalOrderPrice > 0 && (
-                              <div className="flex items-center gap-2 text-[#cdcdcd]">
-                                <CurrencyDollarIcon className="w-4 h-4 text-[#808080]" />
-                                <span className="text-[#808080]">Сумма:</span>
-                                <span className="text-white font-semibold">
+                              <div className="flex items-center gap-2 text-[var(--ev-text-muted)]">
+                                <CurrencyDollarIcon className="w-4 h-4 text-[var(--ev-gold)]/70" />
+                                <span>Сумма:</span>
+                                <span className="text-[var(--ev-text)] font-semibold">
                                   ¥{totalOrderPrice.toFixed(2)}
                                 </span>
                               </div>
                             )}
                           </div>
 
-                          {/* Кнопка оплаты */}
                           {totalOrderPrice > 0 &&
                             order.status === 'VERIFIED' &&
                             order.status !== 'PAID' && (
@@ -258,7 +254,7 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
                                     e.stopPropagation();
                                     handlePay(order.id);
                                   }}
-                                  className="bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)]"
+                                  className="bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25"
                                 >
                                   Оплатить
                                 </Button>
@@ -266,10 +262,9 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
                             )}
                         </div>
 
-                        {/* Правая часть - кнопка */}
                         <div className="flex items-center">
-                          <div className="px-4 py-2 bg-[rgba(0,240,255,0.1)] hover:bg-[rgba(0,240,255,0.15)] border border-[rgba(0,240,255,0.3)] rounded-lg transition-all duration-300 group-hover:border-[#00f0ff]">
-                            <span className="text-[#00f0ff] font-semibold">Подробнее →</span>
+                          <div className="px-4 py-2 bg-[var(--ev-gold)]/10 hover:bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/25 rounded-lg transition-all duration-300 group-hover:border-[var(--ev-gold)]/40">
+                            <span className="text-[var(--ev-gold)] font-semibold">Подробнее →</span>
                           </div>
                         </div>
                       </div>
@@ -280,10 +275,10 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
           })
         ) : (
           !loading && (
-            <div className="p-12 text-center rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)]">
-              <ShoppingBagIcon className="w-16 h-16 text-[#9ca3af] mx-auto mb-4" />
-              <p className="text-xl text-[#e5e7eb] mb-2">Нет заказов</p>
-              <p className="text-[#9ca3af]">Ваши заказы появятся здесь</p>
+            <div className="p-12 text-center rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15">
+              <ShoppingBagIcon className="w-16 h-16 text-[var(--ev-text-muted)]/60 mx-auto mb-4" />
+              <p className="text-xl text-[var(--ev-text)] mb-2">Нет заказов</p>
+              <p className="text-[var(--ev-text-muted)]">Ваши заказы появятся здесь</p>
             </div>
           )
         )}
@@ -292,8 +287,8 @@ const ShipmentsTab = ({ handleViewOrderDetails, handlePay, refresh }) => {
       {/* Загрузка */}
       {loading && !isInitialLoad.current && (
         <div className="text-center py-4">
-          <ClockIcon className="w-6 h-6 animate-spin mx-auto text-[#00f0ff] mb-2" />
-          <p className="text-[#808080]">Загрузка...</p>
+          <ClockIcon className="w-6 h-6 animate-spin mx-auto text-[var(--ev-gold)] mb-2" />
+          <p className="text-[var(--ev-text-muted)]">Загрузка...</p>
         </div>
       )}
     </div>

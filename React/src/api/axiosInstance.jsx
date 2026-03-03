@@ -25,13 +25,15 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 401/403: сессия недействительна — сбрасываем состояние и мягко редиректим на главную (без модалки)
+// 401/403: сессия недействительна — сбрасываем состояние и редиректим на главную.
+// Не вызываем для /auth/login и /auth/register: там 401 = неверный пароль, а не истекшая сессия.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       const url = (error.config?.url ?? '').replace(/^\//, '');
-      if (!/users\/me\/?$/.test(url)) {
+      const isAuthEndpoint = /^auth\/(login|register)$/.test(url) || /\/auth\/(login|register)$/.test(url);
+      if (!/users\/me\/?$/.test(url) && !isAuthEndpoint) {
         window.dispatchEvent(new CustomEvent('auth:sessionInvalid'));
       }
     }

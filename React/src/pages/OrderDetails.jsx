@@ -6,7 +6,6 @@ import { ArrowLeftIcon, CreditCardIcon, CheckCircleIcon, TruckIcon, UserIcon, In
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { Button } from '../components/ui/Button';
-import { PageHeader } from '../components/ui/PageHeader';
 import { Alert } from '../components/ui/Alert';
 
 
@@ -71,7 +70,7 @@ function OrderDetails() {
           particleCount: 100,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ['#00f0ff', '#a78bfa', '#10b981'],
+          colors: ['#C9A97A', '#D4AF37', '#F5F5F5'],
         });
         window.location.href = response.data.formUrl;
       } else {
@@ -96,9 +95,9 @@ function OrderDetails() {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-[#00f0ff] text-2xl bg-[rgba(255,255,255,0.02)] p-8 rounded-2xl border border-[rgba(255,255,255,0.1)]"
+          className="text-center text-[var(--ev-gold)] text-xl bg-[var(--ev-glass)] p-8 rounded-2xl border border-[var(--ev-gold)]/20"
         >
-          <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-[#00f0ff] mx-auto mb-6" />
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-[var(--ev-gold)]/30 border-t-[var(--ev-gold)] mx-auto mb-6" />
           Загрузка деталей заказа...
         </motion.div>
       </div>
@@ -118,7 +117,7 @@ function OrderDetails() {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-[#ef4444] text-xl bg-[rgba(239,68,68,0.1)] p-8 rounded-2xl border border-[rgba(239,68,68,0.3)]"
+          className="text-center text-red-300 text-xl bg-red-500/10 p-8 rounded-2xl border border-red-500/20"
         >
           {errorMsg}
         </motion.div>
@@ -133,7 +132,7 @@ function OrderDetails() {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-[#9ca3af] text-2xl bg-[rgba(255,255,255,0.02)] p-8 rounded-2xl border border-[rgba(255,255,255,0.1)]"
+          className="text-center text-[var(--ev-text-muted)] text-xl bg-[var(--ev-glass)] p-8 rounded-2xl border border-[var(--ev-gold)]/15"
         >
           Заказ не найден
         </motion.div>
@@ -169,14 +168,23 @@ function OrderDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-4 px-3 sm:py-12 sm:px-6 lg:px-8 relative overflow-hidden pb-20 sm:pb-12">
+    <div className="min-h-screen bg-transparent text-[var(--ev-text)] py-4 px-3 sm:py-12 sm:px-6 lg:px-8 relative overflow-hidden pb-20 sm:pb-12">
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <PageHeader
-          title={`Детали заказа #${order.orderNumber}`}
-          subtitle="Просмотрите информацию о вашем заказе"
+        {/* Заголовок */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
           className="mb-4 sm:mb-8"
-        />
+        >
+          <h1 className="text-2xl sm:text-3xl font-semibold text-[var(--ev-text)]">
+            Детали заказа #{order.orderNumber}
+          </h1>
+          <p className="text-[var(--ev-text-muted)] text-sm sm:text-base mt-1">
+            Просмотрите информацию о вашем заказе
+          </p>
+        </motion.div>
 
         <AnimatePresence>
           {payError && (
@@ -197,28 +205,28 @@ function OrderDetails() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mb-4 sm:mb-8"
           >
-            <div className="p-3 sm:p-6 bg-[rgba(0,240,255,0.1)] rounded-xl sm:rounded-2xl border border-[rgba(0,240,255,0.3)] transition-all duration-300">
+            <div className="p-3 sm:p-6 bg-[var(--ev-glass)] rounded-xl sm:rounded-2xl border border-[var(--ev-gold)]/20 hover:border-[var(--ev-gold)]/30 transition-all duration-300">
               <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-4">
                 <div className="flex-shrink-0">
-                  <div className="w-9 h-9 sm:w-12 sm:h-12 bg-[rgba(0,240,255,0.2)] rounded-full flex items-center justify-center border border-[rgba(0,240,255,0.4)]">
-                    <InformationCircleIcon className="w-5 h-5 sm:w-7 sm:h-7 text-[#00f0ff]" />
+                  <div className="w-9 h-9 sm:w-12 sm:h-12 bg-[var(--ev-gold)]/10 rounded-full flex items-center justify-center border border-[var(--ev-gold)]/25">
+                    <InformationCircleIcon className="w-5 h-5 sm:w-7 sm:h-7 text-[var(--ev-gold)]" />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm sm:text-xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-[#00f0ff] to-[#a78bfa] bg-clip-text text-transparent">
+                  <h3 className="text-sm sm:text-xl font-semibold mb-2 sm:mb-3 text-[var(--ev-text)]">
                     Курс доставки
                   </h3>
-                  <div className="space-y-2 sm:space-y-3 text-xs sm:text-base text-[#9ca3af]">
+                  <div className="space-y-2 sm:space-y-3 text-xs sm:text-base text-[var(--ev-text-muted)]">
                     <p className="flex items-start gap-2">
                       <span>
-                        <strong className="text-[#e5e7eb]">Текущий курс:</strong>{' '}
-                        <span className="text-[#00f0ff] font-semibold">
+                        <strong className="text-[var(--ev-text)]">Текущий курс:</strong>{' '}
+                        <span className="text-[var(--ev-gold)] font-semibold">
                           ${currentShippingRate ? currentShippingRate.toFixed(2) : '6.00'} за кг
                         </span>
                       </span>
                     </p>
                     <p className="flex items-start gap-2">
-                      <span className="text-[#a78bfa] mt-0.5">🔒</span>
+                      <span className="text-[var(--ev-gold)] mt-0.5">🔒</span>
                       <span>При оплате курс будет зафиксирован на момент оплаты.</span>
                     </p>
                   </div>
@@ -236,23 +244,23 @@ function OrderDetails() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mb-4 sm:mb-8"
           >
-            <div className="p-3 sm:p-6 bg-[rgba(167,139,250,0.1)] rounded-xl sm:rounded-2xl border border-[rgba(167,139,250,0.3)] transition-all duration-300">
+            <div className="p-3 sm:p-6 bg-[var(--ev-glass)] rounded-xl sm:rounded-2xl border border-[var(--ev-gold)]/20 hover:border-[var(--ev-gold)]/30 transition-all duration-300">
               <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-4">
                 <div className="flex-shrink-0">
-                  <div className="w-9 h-9 sm:w-12 sm:h-12 bg-[rgba(167,139,250,0.2)] rounded-full flex items-center justify-center border border-[rgba(167,139,250,0.4)]">
-                    <CheckCircleIcon className="w-5 h-5 sm:w-7 sm:h-7 text-[#a78bfa]" />
+                  <div className="w-9 h-9 sm:w-12 sm:h-12 bg-[var(--ev-gold)]/10 rounded-full flex items-center justify-center border border-[var(--ev-gold)]/25">
+                    <CheckCircleIcon className="w-5 h-5 sm:w-7 sm:h-7 text-[var(--ev-gold)]" />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm sm:text-xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-[#a78bfa] to-[#00f0ff] bg-clip-text text-transparent">
+                  <h3 className="text-sm sm:text-xl font-semibold mb-2 sm:mb-3 text-[var(--ev-text)]">
                     Курс зафиксирован
                   </h3>
-                  <div className="space-y-2 sm:space-y-3 text-xs sm:text-base text-[#9ca3af]">
+                  <div className="space-y-2 sm:space-y-3 text-xs sm:text-base text-[var(--ev-text-muted)]">
                     <p className="flex items-start gap-2">
-                      <span className="text-[#a78bfa] mt-0.5">🔒</span>
-                      <span>Курс: <strong className="text-[#a78bfa] font-semibold">${order.shippingRateFixed.toFixed(2)} за кг</strong></span>
+                      <span className="text-[var(--ev-gold)] mt-0.5">🔒</span>
+                      <span>Курс: <strong className="text-[var(--ev-gold)] font-semibold">${order.shippingRateFixed.toFixed(2)} за кг</strong></span>
                     </p>
-                    <p className="text-xs sm:text-sm text-[#9ca3af]">На момент оплаты, не изменится.</p>
+                    <p className="text-xs sm:text-sm text-[var(--ev-text-muted)]">На момент оплаты, не изменится.</p>
                   </div>
                 </div>
               </div>
@@ -268,29 +276,29 @@ function OrderDetails() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mb-4 sm:mb-8"
           >
-            <div className="p-3 sm:p-6 bg-[rgba(16,185,129,0.1)] rounded-xl sm:rounded-2xl border border-[rgba(16,185,129,0.3)] transition-all duration-300">
+            <div className="p-3 sm:p-6 bg-emerald-500/10 rounded-xl sm:rounded-2xl border border-emerald-500/20 transition-all duration-300">
               <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-4">
                 <div className="flex-shrink-0">
-                  <div className="w-9 h-9 sm:w-12 sm:h-12 bg-[rgba(16,185,129,0.2)] rounded-full flex items-center justify-center border border-[rgba(16,185,129,0.4)]">
-                    <CheckCircleIcon className="w-5 h-5 sm:w-7 sm:h-7 text-[#10b981]" />
+                  <div className="w-9 h-9 sm:w-12 sm:h-12 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-500/30">
+                    <CheckCircleIcon className="w-5 h-5 sm:w-7 sm:h-7 text-emerald-400" />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm sm:text-xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-[#10b981] to-[#00f0ff] bg-clip-text text-transparent">
+                  <h3 className="text-sm sm:text-xl font-semibold mb-2 sm:mb-3 text-emerald-300">
                     Оплачен!
                   </h3>
-                  <div className="space-y-2 sm:space-y-3 text-xs sm:text-base text-[#9ca3af]">
+                  <div className="space-y-2 sm:space-y-3 text-xs sm:text-base text-[var(--ev-text-muted)]">
                     <p className="flex items-start gap-2">
-                      <span className="text-[#10b981] mt-0.5">✓</span>
+                      <span className="text-emerald-400 mt-0.5">✓</span>
                       <span>Заказ в обработке, будет в ближайшем сборном грузе.</span>
                     </p>
                     <p className="flex items-start gap-2">
-                      <TruckIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#00f0ff] mt-0.5 flex-shrink-0" />
+                      <TruckIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--ev-gold)] mt-0.5 flex-shrink-0" />
                       <span>Статус груза — в уведомлениях.</span>
                     </p>
-                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-[rgba(16,185,129,0.2)]">
-                      <p className="flex items-start gap-2 text-[#e5e7eb] text-xs sm:text-base">
-                        <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#a78bfa] mt-0.5 flex-shrink-0" />
+                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-emerald-500/20">
+                      <p className="flex items-start gap-2 text-[var(--ev-text)] text-xs sm:text-base">
+                        <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--ev-gold)] mt-0.5 flex-shrink-0" />
                         <span><strong>Сборные грузы</strong> — в профиле или в меню.</span>
                       </p>
                     </div>
@@ -308,143 +316,143 @@ function OrderDetails() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-12"
         >
-          <div className="p-4 sm:p-6 bg-[rgba(255,255,255,0.02)] rounded-xl sm:rounded-2xl border border-[rgba(255,255,255,0.05)] transition-all duration-300">
-            <h3 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+          <div className="p-4 sm:p-6 bg-[var(--ev-glass)] rounded-xl sm:rounded-2xl border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 transition-all duration-300">
+            <h3 className="text-lg sm:text-2xl font-semibold mb-3 sm:mb-4 text-[var(--ev-text)]">
               О заказе
             </h3>
             <div className="space-y-2 sm:space-y-3 text-sm sm:text-base">
-              <p className="text-[#9ca3af]">
-                <strong className="text-[#e5e7eb]">Дата:</strong>{' '}
-                <span className="text-[#e5e7eb]">{new Date(order.dateCreated).toLocaleString('ru-RU')}</span>
+              <p className="text-[var(--ev-text-muted)]">
+                <strong className="text-[var(--ev-text)]">Дата:</strong>{' '}
+                <span className="text-[var(--ev-text)]">{new Date(order.dateCreated).toLocaleString('ru-RU')}</span>
               </p>
               <div>
-                <p className="text-[#9ca3af] mb-1 sm:mb-2">
-                  <strong className="text-[#e5e7eb]">Статус:</strong>
+                <p className="text-[var(--ev-text-muted)] mb-1 sm:mb-2">
+                  <strong className="text-[var(--ev-text)]">Статус:</strong>
                 </p>
                 <span
                   className={`inline-block px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm ${
                     order.status === 'PENDING'
-                      ? 'bg-[rgba(167,139,250,0.2)] text-[#a78bfa] border border-[rgba(167,139,250,0.4)]'
+                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
                       : order.status === 'VERIFIED'
-                      ? 'bg-[rgba(0,240,255,0.2)] text-[#00f0ff] border border-[rgba(0,240,255,0.4)]'
+                      ? 'bg-[var(--ev-gold)]/20 text-[var(--ev-gold)] border border-[var(--ev-gold)]/40'
                       : order.status === 'PAID'
-                      ? 'bg-[rgba(16,185,129,0.2)] text-[#10b981] border border-[rgba(16,185,129,0.4)]'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                       : order.status === 'PROCESSED'
-                      ? 'bg-[rgba(167,139,250,0.2)] text-[#a78bfa] border border-[rgba(167,139,250,0.4)]'
+                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
                       : order.status === 'COMPLETED'
-                      ? 'bg-[rgba(16,185,129,0.2)] text-[#10b981] border border-[rgba(16,185,129,0.4)]'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                       : (order.status === 'CANCELLED' || order.status === 'REFUSED')
-                      ? 'bg-[rgba(239,68,68,0.2)] text-[#ef4444] border border-[rgba(239,68,68,0.4)]'
-                      : 'bg-[rgba(107,114,128,0.2)] text-[#9ca3af] border border-[rgba(107,114,128,0.4)]'
+                      ? 'bg-red-500/20 text-red-300 border border-red-500/40'
+                      : 'bg-[var(--ev-text-muted)]/20 text-[var(--ev-text-muted)] border border-[var(--ev-text-muted)]/40'
                   }`}
                 >
                   {getOrderStatusText(order.status)}
                 </span>
                 {order.status === 'PENDING' && (
-                  <p className="text-[#a78bfa] text-sm mt-2">
+                  <p className="text-purple-300 text-sm mt-2">
                     Заказ ждёт одобрения администратора.
                   </p>
                 )}
                 {(order.status === 'CANCELLED' || order.status === 'REFUSED') && order.reasonRefusal && (
-                  <div className="mt-3 p-3 rounded-lg bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.3)]">
-                    <p className="text-[#ef4444] font-semibold text-sm mb-1">Причина отказа:</p>
-                    <p className="text-[#fca5a5] text-sm">{order.reasonRefusal}</p>
+                  <div className="mt-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                    <p className="text-red-300 font-semibold text-sm mb-1">Причина отказа:</p>
+                    <p className="text-red-200/90 text-sm">{order.reasonRefusal}</p>
                   </div>
                 )}
               </div>
               {(order.lastName || order.firstName || order.middleName) && (
-                <p className="text-[#9ca3af]">
-                  <strong className="text-[#e5e7eb]">ФИО:</strong>{' '}
-                  <span className="text-[#e5e7eb]">
+                <p className="text-[var(--ev-text-muted)]">
+                  <strong className="text-[var(--ev-text)]">ФИО:</strong>{' '}
+                  <span className="text-[var(--ev-text)]">
                     {`${order.lastName || ''} ${order.firstName || ''} ${order.middleName || ''}`.trim() || 'Не указано'}
                   </span>
                 </p>
               )}
               {order.userPhone && (
-                <p className="text-[#9ca3af]">
-                  <strong className="text-[#e5e7eb]">Указанный телефон:</strong>{' '}
-                  <span className="text-[#e5e7eb]">{order.userPhone}</span>
+                <p className="text-[var(--ev-text-muted)]">
+                  <strong className="text-[var(--ev-text)]">Указанный телефон:</strong>{' '}
+                  <span className="text-[var(--ev-text)]">{order.userPhone}</span>
                 </p>
               )}
-              <p className="text-[#9ca3af]">
-                <strong className="text-[#e5e7eb]">Адрес доставки:</strong>{' '}
-                <span className="text-[#e5e7eb]">{order.deliveryAddress || 'Не указан'}</span>
+              <p className="text-[var(--ev-text-muted)]">
+                <strong className="text-[var(--ev-text)]">Адрес доставки:</strong>{' '}
+                <span className="text-[var(--ev-text)]">{order.deliveryAddress || 'Не указан'}</span>
               </p>
               {order.trackingNumber && (
-                <p className="text-[#9ca3af]">
-                  <strong className="text-[#e5e7eb]">Трек-номер:</strong>{' '}
-                  <span className="text-[#e5e7eb]">{order.trackingNumber}</span>
+                <p className="text-[var(--ev-text-muted)]">
+                  <strong className="text-[var(--ev-text)]">Трек-номер:</strong>{' '}
+                  <span className="text-[var(--ev-text)]">{order.trackingNumber}</span>
                 </p>
               )}
             </div>
           </div>
 
-          <div className="p-4 sm:p-6 bg-[rgba(255,255,255,0.02)] rounded-xl sm:rounded-2xl border border-[rgba(255,255,255,0.05)] transition-all duration-300">
-            <h3 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+          <div className="p-4 sm:p-6 bg-[var(--ev-glass)] rounded-xl sm:rounded-2xl border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 transition-all duration-300">
+            <h3 className="text-lg sm:text-2xl font-semibold mb-3 sm:mb-4 text-[var(--ev-text)]">
               Финансы
             </h3>
 
             {isSelfPickup ? (
-              <p className="text-[#a78bfa] text-xs sm:text-base bg-[rgba(167,139,250,0.1)] p-2 sm:p-3 rounded-lg border border-[rgba(167,139,250,0.3)]">
+              <p className="text-[var(--ev-gold)] text-xs sm:text-base bg-[var(--ev-gold)]/10 p-2 sm:p-3 rounded-lg border border-[var(--ev-gold)]/20">
                 Самовыкуп — оплата только за доставку.
               </p>
             ) : (
               <div className="space-y-2 sm:space-y-3 text-sm sm:text-base">
-                <p className="text-[#9ca3af]">
-                  <strong className="text-[#e5e7eb]">Сумма товаров:</strong>{' '}
-                  <span className="text-[#00f0ff] font-medium">
+                <p className="text-[var(--ev-text-muted)]">
+                  <strong className="text-[var(--ev-text)]">Сумма товаров:</strong>{' '}
+                  <span className="text-[var(--ev-gold)] font-medium">
                     {(totalItemsPrice * CNY_TO_BYN_RATE).toFixed(2)} BYN
                   </span>
-                  <span className="text-xs text-[#9ca3af] ml-2">
+                  <span className="text-xs text-[var(--ev-text-muted)] ml-2">
                     (¥{totalItemsPrice.toFixed(2)})
                   </span>
                 </p>
                 {totalChinaDeliveryPrice > 0 && (
-                  <p className="text-[#9ca3af]">
-                    <strong className="text-[#e5e7eb]">Доставка по Китаю:</strong>{' '}
-                    <span className="text-[#00f0ff] font-medium">
+                  <p className="text-[var(--ev-text-muted)]">
+                    <strong className="text-[var(--ev-text)]">Доставка по Китаю:</strong>{' '}
+                    <span className="text-[var(--ev-gold)] font-medium">
                       {(totalChinaDeliveryPrice * CNY_TO_BYN_RATE).toFixed(2)} BYN
                     </span>
-                    <span className="text-xs text-[#9ca3af] ml-2">
+                    <span className="text-xs text-[var(--ev-text-muted)] ml-2">
                       (¥{totalChinaDeliveryPrice.toFixed(2)})
                     </span>
                   </p>
                 )}
                 {order.insurance && order.insuranceCost > 0 && (
-                  <p className="text-[#9ca3af]">
-                    <strong className="text-[#e5e7eb]">Стоимость страховки:</strong>{' '}
-                    <span className="text-[#00f0ff] font-medium">
+                  <p className="text-[var(--ev-text-muted)]">
+                    <strong className="text-[var(--ev-text)]">Стоимость страховки:</strong>{' '}
+                    <span className="text-[var(--ev-gold)] font-medium">
                       {(order.insuranceCost * CNY_TO_BYN_RATE).toFixed(2)} BYN
                     </span>
-                    <span className="text-xs text-[#9ca3af] ml-2">
+                    <span className="text-xs text-[var(--ev-text-muted)] ml-2">
                       (¥{order.insuranceCost.toFixed(2)})
                     </span>
                   </p>
                 )}
                 {order.supplierCost > 0 && (
-                  <p className="text-[#9ca3af]">
-                    <strong className="text-[#e5e7eb]">Стоимость поставщика:</strong>{' '}
-                    <span className="text-[#00f0ff] font-medium">
+                  <p className="text-[var(--ev-text-muted)]">
+                    <strong className="text-[var(--ev-text)]">Стоимость поставщика:</strong>{' '}
+                    <span className="text-[var(--ev-gold)] font-medium">
                       {(order.supplierCost * CNY_TO_BYN_RATE).toFixed(2)} BYN
                     </span>
-                    <span className="text-xs text-[#9ca3af] ml-2">
+                    <span className="text-xs text-[var(--ev-text-muted)] ml-2">
                       (¥{order.supplierCost.toFixed(2)})
                     </span>
                   </p>
                 )}
                 {order.userDiscountApplied > 0 && (
-                  <p className="text-[#10b981]">
+                  <p className="text-emerald-400">
                     <strong>Скидка пользователя:</strong>{' '}
                     <span className="font-medium">
                       -{(order.userDiscountApplied * CNY_TO_BYN_RATE).toFixed(2)} BYN
                     </span>
-                    <span className="text-xs text-[#10b981]/70 ml-2">
+                    <span className="text-xs text-emerald-400/70 ml-2">
                       (-¥{order.userDiscountApplied.toFixed(2)})
                     </span>
                   </p>
                 )}
                 {order.discountValue > 0 && (
-                  <p className="text-[#10b981]">
+                  <p className="text-emerald-400">
                     <strong>
                       Скидка по промокоду
                       {order.discountType === 'PERCENTAGE' && ` (${order.discountValue}%)`}:
@@ -454,7 +462,7 @@ function OrderDetails() {
                         ? (totalItemsPrice * order.discountValue / 100)
                         : order.discountValue) * CNY_TO_BYN_RATE} BYN
                     </span>
-                    <span className="text-xs text-[#10b981]/70 ml-2">
+                    <span className="text-xs text-emerald-400/70 ml-2">
                       (-¥{order.discountType === 'PERCENTAGE'
                         ? (totalItemsPrice * order.discountValue / 100).toFixed(2)
                         : order.discountValue.toFixed(2)})
@@ -462,22 +470,22 @@ function OrderDetails() {
                   </p>
                 )}
 
-                <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-[rgba(255,255,255,0.1)]">
-                  <p className="text-[#9ca3af] font-semibold mb-1 sm:mb-2 text-xs sm:text-base">
-                    <strong className="text-[#e5e7eb]">Итого:</strong>
+                <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-[var(--ev-gold)]/15">
+                  <p className="text-[var(--ev-text-muted)] font-semibold mb-1 sm:mb-2 text-xs sm:text-base">
+                    <strong className="text-[var(--ev-text)]">Итого:</strong>
                   </p>
-                  <div className="w-full bg-[rgba(255,255,255,0.05)] rounded-full h-2 sm:h-3">
+                  <div className="w-full bg-[var(--ev-gold)]/10 rounded-full h-2 sm:h-3">
                     <motion.div
-                      className="bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] h-2 sm:h-3 rounded-full"
+                      className="bg-[var(--ev-gold)] h-2 sm:h-3 rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: '100%' }}
                       transition={{ duration: 1, ease: 'easeInOut' }}
                     />
                   </div>
-                  <p className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent mt-1 sm:mt-2">
+                  <p className="text-xl sm:text-3xl font-bold text-[var(--ev-gold)] mt-1 sm:mt-2">
                     {((order.totalClientPrice + totalChinaDeliveryPrice) * CNY_TO_BYN_RATE).toFixed(2)} BYN
                   </p>
-                  <p className="text-xs sm:text-sm text-[#9ca3af] mt-0.5 sm:mt-1">
+                  <p className="text-xs sm:text-sm text-[var(--ev-text-muted)] mt-0.5 sm:mt-1">
                     (¥{(order.totalClientPrice + totalChinaDeliveryPrice).toFixed(2)})
                   </p>
                 </div>
@@ -493,8 +501,8 @@ function OrderDetails() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mb-6 sm:mb-12"
         >
-          <div className="p-4 sm:p-6 bg-[rgba(255,255,255,0.02)] rounded-xl sm:rounded-2xl border border-[rgba(255,255,255,0.05)] transition-all duration-300">
-            <h3 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+          <div className="p-4 sm:p-6 bg-[var(--ev-glass)] rounded-xl sm:rounded-2xl border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 transition-all duration-300">
+            <h3 className="text-lg sm:text-2xl font-semibold mb-4 sm:mb-6 text-[var(--ev-text)]">
               {isSelfPickup ? 'Трек-номера' : 'Товары'}
             </h3>
 
@@ -504,16 +512,16 @@ function OrderDetails() {
                   {order.items.map((item, index) => (
                     <div
                       key={index}
-                      className="p-3 sm:p-4 bg-[rgba(255,255,255,0.02)] rounded-lg sm:rounded-xl border border-[rgba(255,255,255,0.1)] transition-all duration-300"
+                      className="p-3 sm:p-4 bg-[var(--ev-gold)]/5 rounded-lg sm:rounded-xl border border-[var(--ev-gold)]/15 transition-all duration-300"
                     >
-                      <p className="font-medium text-sm sm:text-lg text-[#e5e7eb] break-words">
+                      <p className="font-medium text-sm sm:text-lg text-[var(--ev-text)] break-words">
                         {item.trackingNumber || 'Трек не указан'}
                       </p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-[#9ca3af] text-sm sm:text-base">
+                <p className="text-center text-[var(--ev-text-muted)] text-sm sm:text-base">
                   Нет трек-номеров.
                 </p>
               )
@@ -522,11 +530,11 @@ function OrderDetails() {
                 {order.items.map((item, index) => (
                   <div
                     key={index}
-                    className="p-3 sm:p-4 bg-[rgba(255,255,255,0.02)] rounded-lg sm:rounded-xl border border-[rgba(255,255,255,0.1)] hover:border-[rgba(0,240,255,0.5)] transition-all duration-300 cursor-pointer"
+                    className="p-3 sm:p-4 bg-[var(--ev-gold)]/5 rounded-lg sm:rounded-xl border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/30 transition-all duration-300 cursor-pointer"
                     onClick={() => navigate(`/product/${item.productId}`)}
                   >
                     <div className="flex items-center gap-2 sm:gap-4">
-                      <div className="w-12 h-12 sm:w-20 sm:h-20 bg-[rgba(255,255,255,0.02)] rounded-md border border-[rgba(255,255,255,0.1)] flex items-center justify-center p-1 sm:p-2 overflow-hidden flex-shrink-0">
+                      <div className="w-12 h-12 sm:w-20 sm:h-20 bg-[var(--ev-gold)]/5 rounded-md border border-[var(--ev-gold)]/15 flex items-center justify-center p-1 sm:p-2 overflow-hidden flex-shrink-0">
                         {item.imageUrl ? (
                           <img
                             src={item.imageUrl}
@@ -537,20 +545,20 @@ function OrderDetails() {
                             }}
                           />
                         ) : (
-                          <div className="w-full h-full bg-[rgba(255,255,255,0.02)] flex items-center justify-center text-xs text-[#9ca3af]">
+                          <div className="w-full h-full flex items-center justify-center text-xs text-[var(--ev-text-muted)]">
                             Нет фото
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm sm:text-lg text-[#e5e7eb] break-words line-clamp-2">
+                        <p className="font-medium text-sm sm:text-lg text-[var(--ev-text)] break-words line-clamp-2">
                           {item.productName || 'Без названия'}
                         </p>
-                        <p className="text-[#9ca3af] mt-0.5 text-xs sm:text-base">
+                        <p className="text-[var(--ev-text-muted)] mt-0.5 text-xs sm:text-base">
                           x{item.quantity} • ¥{item.priceAtTime?.toFixed(2)}
                         </p>
                         {item.chinaDeliveryPrice > 0 && (
-                          <p className="text-[#9ca3af] text-xs sm:text-base">Китай: ¥{item.chinaDeliveryPrice.toFixed(2)}</p>
+                          <p className="text-[var(--ev-text-muted)] text-xs sm:text-base">Китай: ¥{item.chinaDeliveryPrice.toFixed(2)}</p>
                         )}
                       </div>
                     </div>
@@ -558,7 +566,7 @@ function OrderDetails() {
                 ))}
               </div>
             ) : (
-              <p className="text-center text-[#9ca3af] text-sm sm:text-base">
+              <p className="text-center text-[var(--ev-text-muted)] text-sm sm:text-base">
                 Нет товаров.
               </p>
             )}
@@ -572,21 +580,29 @@ function OrderDetails() {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-4"
         >
-          <Button variant="outline" onClick={() => navigate(-1)} className="flex items-center justify-center gap-2 text-sm sm:text-base py-2.5 sm:py-3 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={() => navigate(-1)}
+            className="flex items-center justify-center gap-2 text-sm sm:text-base py-2.5 sm:py-3 w-full sm:w-auto border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10"
+          >
             <ArrowLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             Назад
           </Button>
 
           {order.status === 'VERIFIED' && order.totalClientPrice > 0 && !loadingPay && (
-            <Button variant="primary" onClick={handlePayClick} className="flex items-center justify-center gap-2 text-sm sm:text-base py-2.5 sm:py-3 w-full sm:w-auto">
+            <Button
+              variant="primary"
+              onClick={handlePayClick}
+              className="flex items-center justify-center gap-2 text-sm sm:text-base py-2.5 sm:py-3 w-full sm:w-auto bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25"
+            >
               <CreditCardIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               Оплатить
             </Button>
           )}
 
           {loadingPay && (
-            <Button variant="primary" disabled className="flex items-center justify-center gap-2 text-sm py-2.5 w-full sm:w-auto">
-              <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-t-2 border-white" />
+            <Button variant="primary" disabled className="flex items-center justify-center gap-2 text-sm py-2.5 w-full sm:w-auto bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/20 text-[var(--ev-text-muted)]">
+              <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-[var(--ev-gold)]/30 border-t-[var(--ev-gold)]" />
               Оплата...
             </Button>
           )}

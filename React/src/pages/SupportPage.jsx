@@ -35,31 +35,32 @@ const formatDate = (dateValue) => {
 
 // Status mapping with colors and labels for consistent UI
 const statusMap = {
-  OPEN: { label: 'Ожидает ответа', color: 'yellow-300' },
-  IN_PROGRESS: { label: 'В процессе', color: 'cyan-300' },
-  CLOSED: { label: 'Решено', color: 'emerald-300' },
+  OPEN: { label: 'Ожидает ответа', className: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
+  IN_PROGRESS: { label: 'В процессе', className: 'bg-[var(--ev-gold)]/20 text-[var(--ev-gold)] border-[var(--ev-gold)]/40' },
+  CLOSED: { label: 'Решено', className: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' },
 };
 
 // Ticket Row Component: Упрощенная версия - только открыть чат
 const TicketRow = ({ ticket, onOpenChat }) => {
   const { title, createdAt, admin, status } = ticket;
-  const { label, color } = statusMap[status] || { label: 'Неизвестно', color: 'gray-300' };
+  const { label, className } = statusMap[status] || { label: 'Неизвестно', className: 'bg-[var(--ev-text-muted)]/20 text-[var(--ev-text-muted)] border-[var(--ev-text-muted)]/40' };
 
   return (
-    <tr className="border-b border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.02)] transition-colors">
-      <td className="px-3 py-2 sm:px-6 sm:py-4 text-[#e5e7eb] font-medium text-sm sm:text-base">{title}</td>
-      <td className="px-3 py-2 sm:px-6 sm:py-4 text-[#9ca3af] text-xs sm:text-sm">{formatDate(createdAt)}</td>
-      <td className="px-3 py-2 sm:px-6 sm:py-4 text-[#9ca3af] text-xs sm:text-sm">{admin ? admin.username : 'Не назначен'}</td>
+    <tr className="border-b border-[var(--ev-gold)]/15 hover:bg-[var(--ev-gold)]/5 transition-colors">
+      <td className="px-3 py-2 sm:px-6 sm:py-4 text-[var(--ev-text)] font-medium text-sm sm:text-base">{title}</td>
+      <td className="px-3 py-2 sm:px-6 sm:py-4 text-[var(--ev-text-muted)] text-xs sm:text-sm">{formatDate(createdAt)}</td>
+      <td className="px-3 py-2 sm:px-6 sm:py-4 text-[var(--ev-text-muted)] text-xs sm:text-sm">{admin ? admin.username : 'Не назначен'}</td>
       <td className="px-3 py-2 sm:px-6 sm:py-4">
-        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium bg-${color}/20 text-${color}`}>
+        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${className}`}>
           {label}
         </span>
       </td>
       <td className="px-3 py-2 sm:px-6 sm:py-4">
         <Button
-          variant="secondary"
+          variant="outline"
           size="sm"
           onClick={() => onOpenChat(ticket.id)}
+          className="border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10"
         >
           Открыть чат
         </Button>
@@ -72,13 +73,14 @@ const TicketRow = ({ ticket, onOpenChat }) => {
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
   return (
-    <div className="flex justify-center space-x-2 mt-8">
+    <div className="flex justify-center flex-wrap gap-2 mt-8">
       {Array.from({ length: totalPages }, (_, index) => (
         <Button
           key={index}
-          variant={currentPage === index + 1 ? "primary" : "ghost"}
+          variant={currentPage === index + 1 ? "primary" : "outline"}
           size="sm"
           onClick={() => onPageChange(index + 1)}
+          className={currentPage === index + 1 ? 'bg-[var(--ev-gold)]/15 border-[var(--ev-gold)]/30 text-[var(--ev-gold)]' : 'border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10'}
         >
           {index + 1}
         </Button>
@@ -91,12 +93,12 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 const LoadingSkeleton = () => (
   <tbody>
     {Array.from({ length: 8 }).map((_, index) => (
-      <tr key={index} className="border-b border-[rgba(255,255,255,0.1)]">
-        <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-4 bg-[rgba(255,255,255,0.02)] rounded w-3/4 animate-pulse"></div></td>
-        <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-4 bg-[rgba(255,255,255,0.02)] rounded w-1/2 animate-pulse"></div></td>
-        <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-4 bg-[rgba(255,255,255,0.02)] rounded w-1/3 animate-pulse"></div></td>
-        <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-4 bg-[rgba(255,255,255,0.02)] rounded w-1/4 animate-pulse"></div></td>
-        <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-8 bg-[rgba(255,255,255,0.02)] rounded w-32 animate-pulse"></div></td>
+      <tr key={index} className="border-b border-[var(--ev-gold)]/15">
+        <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-4 bg-[var(--ev-gold)]/10 rounded w-3/4 animate-pulse"></div></td>
+        <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-4 bg-[var(--ev-gold)]/10 rounded w-1/2 animate-pulse"></div></td>
+        <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-4 bg-[var(--ev-gold)]/10 rounded w-1/3 animate-pulse"></div></td>
+        <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-4 bg-[var(--ev-gold)]/10 rounded w-1/4 animate-pulse"></div></td>
+        <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-8 bg-[var(--ev-gold)]/10 rounded w-32 animate-pulse"></div></td>
       </tr>
     ))}
   </tbody>
@@ -104,7 +106,7 @@ const LoadingSkeleton = () => (
 
 // Error Message Component
 const ErrorMessage = ({ message }) => (
-  <div className="flex justify-center items-center min-h-[400px] text-[#ef4444] text-xl font-semibold bg-[rgba(239,68,68,0.1)] rounded-2xl p-8 border border-[rgba(239,68,68,0.3)]">
+  <div className="flex justify-center items-center min-h-[400px] text-red-300 text-xl font-semibold bg-red-500/10 rounded-2xl p-8 border border-red-500/20">
     {message}
   </div>
 );
@@ -112,7 +114,7 @@ const ErrorMessage = ({ message }) => (
 // No Tickets Message
 const NoTicketsMessage = () => (
   <tr>
-    <td colSpan="5" className="text-center py-16 text-[#9ca3af] text-lg font-medium">
+    <td colSpan="5" className="text-center py-16 text-[var(--ev-text-muted)] text-lg font-medium">
       Нет запросов. Обновите страницу или измените фильтры.
     </td>
   </tr>
@@ -126,7 +128,7 @@ const SearchAndFilters = ({ searchTerm, onSearchChange }) => (
       placeholder="Поиск по заголовку, админу или статусу..."
       value={searchTerm}
       onChange={onSearchChange}
-      className="w-full md:w-96 px-4 py-3 bg-[rgba(255,255,255,0.02)] text-[#e5e7eb] border border-[rgba(255,255,255,0.1)] rounded-xl focus:outline-none focus:border-[#00f0ff] focus:ring-2 focus:ring-[#00f0ff]/30 transition duration-300 placeholder-[#9ca3af]"
+      className="w-full md:w-96 px-4 py-3 bg-[var(--ev-glass)] text-[var(--ev-text)] border border-[var(--ev-gold)]/20 rounded-xl focus:outline-none focus:border-[var(--ev-gold)]/50 focus:ring-2 focus:ring-[var(--ev-gold)]/30 transition duration-300 placeholder-[var(--ev-text-muted)]"
     />
   </div>
 );
@@ -142,50 +144,50 @@ const TicketFormModal = ({ formVisible, setFormVisible, ticketForm, handleInputC
       onClick={() => setFormVisible(false)}
     >
       <div
-        className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.1)] rounded-2xl p-4 sm:p-6 max-w-lg w-full"
+        className="bg-[var(--ev-glass)] border border-[var(--ev-gold)]/20 rounded-2xl p-4 sm:p-6 max-w-lg w-full"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl sm:text-2xl font-bold text-[#e5e7eb] mb-4 sm:mb-6">Создать запрос</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold text-[var(--ev-text)] mb-4 sm:mb-6">Создать запрос</h2>
         <form onSubmit={handleSubmitTicket} className="space-y-4">
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-[#9ca3af] mb-1.5 sm:mb-2">Тема *</label>
+            <label className="block text-xs sm:text-sm font-medium text-[var(--ev-text-muted)] mb-1.5 sm:mb-2">Тема *</label>
             <input
               type="text"
               name="title"
               value={ticketForm.title}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3 bg-[rgba(255,255,255,0.02)] text-[#e5e7eb] border rounded-xl focus:outline-none transition duration-300 placeholder-[#9ca3af] ${
-                formErrors.title ? 'border-[#ef4444] focus:ring-[#ef4444]/30' : 'border-[rgba(255,255,255,0.1)] focus:border-[#00f0ff] focus:ring-[#00f0ff]/30'
+              className={`w-full px-4 py-3 bg-[var(--ev-gold)]/5 text-[var(--ev-text)] border rounded-xl focus:outline-none transition duration-300 placeholder-[var(--ev-text-muted)] ${
+                formErrors.title ? 'border-red-500/50 focus:ring-red-500/30' : 'border-[var(--ev-gold)]/20 focus:border-[var(--ev-gold)]/50 focus:ring-2 focus:ring-[var(--ev-gold)]/30'
               }`}
               placeholder="Краткое описание проблемы"
             />
-            {formErrors.title && <p className="text-[#ef4444] text-xs mt-1">{formErrors.title}</p>}
+            {formErrors.title && <p className="text-red-300 text-xs mt-1">{formErrors.title}</p>}
           </div>
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-[#9ca3af] mb-1.5 sm:mb-2">Описание *</label>
+            <label className="block text-xs sm:text-sm font-medium text-[var(--ev-text-muted)] mb-1.5 sm:mb-2">Описание *</label>
             <textarea
               name="description"
               value={ticketForm.description}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3 bg-[rgba(255,255,255,0.02)] text-[#e5e7eb] border rounded-xl focus:outline-none resize-none transition duration-300 placeholder-[#9ca3af] ${
-                formErrors.description ? 'border-[#ef4444] focus:ring-[#ef4444]/30' : 'border-[rgba(255,255,255,0.1)] focus:border-[#00f0ff] focus:ring-[#00f0ff]/30'
+              className={`w-full px-4 py-3 bg-[var(--ev-gold)]/5 text-[var(--ev-text)] border rounded-xl focus:outline-none resize-none transition duration-300 placeholder-[var(--ev-text-muted)] ${
+                formErrors.description ? 'border-red-500/50 focus:ring-red-500/30' : 'border-[var(--ev-gold)]/20 focus:border-[var(--ev-gold)]/50 focus:ring-2 focus:ring-[var(--ev-gold)]/30'
               }`}
               rows="5"
               placeholder="Подробно опишите вашу проблему"
             />
-            {formErrors.description && <p className="text-[#ef4444] text-xs mt-1">{formErrors.description}</p>}
+            {formErrors.description && <p className="text-red-300 text-xs mt-1">{formErrors.description}</p>}
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
               onClick={() => setFormVisible(false)}
-              className="px-4 py-2 sm:px-6 sm:py-2 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] text-[#e5e7eb] text-sm sm:text-base rounded-xl hover:bg-[rgba(255,255,255,0.05)] transition-colors"
+              className="px-4 py-2 sm:px-6 sm:py-2 bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/20 text-[var(--ev-text)] text-sm sm:text-base rounded-xl hover:bg-[var(--ev-gold)]/15 transition-colors"
             >
               Отмена
             </button>
             <button
               type="submit"
-              className="px-4 py-2 sm:px-6 sm:py-2 bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] text-sm sm:text-base rounded-xl hover:bg-[rgba(0,240,255,0.15)] transition-colors font-semibold"
+              className="px-4 py-2 sm:px-6 sm:py-2 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] text-sm sm:text-base rounded-xl hover:bg-[var(--ev-gold)]/25 transition-colors font-semibold"
             >
               Отправить
             </button>
@@ -324,30 +326,28 @@ function SupportPage() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-6 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-[var(--ev-text)] py-6 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-1.5 sm:mb-2">
-              <span className="bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-                Поддержка
-              </span>
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-semibold mb-1.5 sm:mb-2 text-[var(--ev-text)] flex items-center gap-3">
+              <span className="text-[var(--ev-gold)]">Поддержка</span>
             </h1>
-            <p className="text-[#9ca3af] text-sm sm:text-lg">Создавайте запросы и отслеживайте их статус</p>
+            <p className="text-[var(--ev-text-muted)] text-sm sm:text-lg">Создавайте запросы и отслеживайте их статус</p>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-3">
             <Button
               variant="primary"
               onClick={() => setCreateVisible(true)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25"
             >
               Создать запрос
             </Button>
             <Button
               variant="outline"
               onClick={loadTickets}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10"
             >
               Обновить
             </Button>
@@ -358,16 +358,16 @@ function SupportPage() {
             searchTerm={searchTerm}
             onSearchChange={(e) => setSearchTerm(e.target.value)}
           />
-          <div className="overflow-hidden rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)]">
+          <div className="overflow-hidden rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15">
             <div className="overflow-x-auto">
               <table className="w-full table-auto">
-                <thead className="bg-[rgba(255,255,255,0.02)]">
+                <thead className="bg-[var(--ev-gold)]/5">
                   <tr>
-                    <th className="px-3 py-2 sm:px-6 sm:py-4 text-left text-[#e5e7eb] font-bold text-sm sm:text-lg border-b border-[rgba(255,255,255,0.1)]">Заголовок</th>
-                    <th className="px-3 py-2 sm:px-6 sm:py-4 text-left text-[#e5e7eb] font-bold text-sm sm:text-lg border-b border-[rgba(255,255,255,0.1)]">Дата</th>
-                    <th className="px-3 py-2 sm:px-6 sm:py-4 text-left text-[#e5e7eb] font-bold text-sm sm:text-lg border-b border-[rgba(255,255,255,0.1)]">Админ</th>
-                    <th className="px-3 py-2 sm:px-6 sm:py-4 text-left text-[#e5e7eb] font-bold text-sm sm:text-lg border-b border-[rgba(255,255,255,0.1)]">Статус</th>
-                    <th className="px-3 py-2 sm:px-6 sm:py-4 text-left text-[#e5e7eb] font-bold text-sm sm:text-lg border-b border-[rgba(255,255,255,0.1)]">Действия</th>
+                    <th className="px-3 py-2 sm:px-6 sm:py-4 text-left text-[var(--ev-text)] font-semibold text-sm sm:text-lg border-b border-[var(--ev-gold)]/20">Заголовок</th>
+                    <th className="px-3 py-2 sm:px-6 sm:py-4 text-left text-[var(--ev-text)] font-semibold text-sm sm:text-lg border-b border-[var(--ev-gold)]/20">Дата</th>
+                    <th className="px-3 py-2 sm:px-6 sm:py-4 text-left text-[var(--ev-text)] font-semibold text-sm sm:text-lg border-b border-[var(--ev-gold)]/20">Админ</th>
+                    <th className="px-3 py-2 sm:px-6 sm:py-4 text-left text-[var(--ev-text)] font-semibold text-sm sm:text-lg border-b border-[var(--ev-gold)]/20">Статус</th>
+                    <th className="px-3 py-2 sm:px-6 sm:py-4 text-left text-[var(--ev-text)] font-semibold text-sm sm:text-lg border-b border-[var(--ev-gold)]/20">Действия</th>
                   </tr>
                 </thead>
                 {isLoading ? (

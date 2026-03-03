@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import { Helmet } from 'react-helmet-async';
+import { motion } from 'framer-motion';
+import {
   ArrowLeftIcon,
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
-  ShoppingBagIcon
+  ShoppingBagIcon,
+  CubeIcon,
 } from '@heroicons/react/24/solid';
 import api from '../api/axiosInstance';
 import Tilt from 'react-parallax-tilt';
-import { Card } from '../components/ui/Card';
-import { PageHeader } from '../components/ui/PageHeader';
 import { Loading } from '../components/ui/Loading';
-import { Button } from '../components/ui/Button';
 
 const BatchCargoProcessing = () => {
   const { batchId, orderId } = useParams();
@@ -24,10 +23,11 @@ const BatchCargoProcessing = () => {
 
   useEffect(() => {
     setLoading(true);
+    setError(null);
     api.get(`/orders/${orderId}`)
       .then((response) => {
         if (response?.data) {
-          const hasMissingIds = response.data.items.some(item => !item.id);
+          const hasMissingIds = response.data.items?.some(item => !item.id);
           if (hasMissingIds) {
             setError('Некоторые товары не имеют ID. Проверьте данные заказа.');
           } else {
@@ -38,39 +38,53 @@ const BatchCargoProcessing = () => {
         }
         setLoading(false);
       })
-      .catch((error) => {
-        console.error('Error fetching order:', error);
+      .catch((err) => {
         let errorMessage = 'Ошибка загрузки заказа';
-        if (error.code === 'ERR_NETWORK') {
-          errorMessage = 'Не удалось подключиться к серверу.';
-        } else if (error.response?.status === 403) {
-          errorMessage = 'Доступ запрещён (403). Проверьте токен.';
-        } else {
-          errorMessage = error.response?.data?.message || error.message || 'Неизвестная ошибка';
-        }
+        if (err.code === 'ERR_NETWORK') errorMessage = 'Нет связи с сервером.';
+        else if (err.response?.status === 403) errorMessage = 'Доступ запрещён';
+        else errorMessage = err.response?.data?.message || err.message || errorMessage;
         setError(errorMessage);
         setLoading(false);
       });
   }, [orderId]);
 
+  const getPurchaseStatusDisplay = (status) => {
+    const map = {
+      PURCHASED: { text: 'Выкуплен', c: 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30', icon: <CheckCircleIcon className="w-4 h-4" /> },
+      NOT_PURCHASED: { text: 'Не выкуплен', c: 'text-red-300 bg-red-500/15 border-red-500/30', icon: <XCircleIcon className="w-4 h-4" /> },
+      PENDING: { text: 'Ожидает', c: 'text-amber-200 bg-amber-500/15 border-amber-500/30', icon: <ClockIcon className="w-4 h-4" /> },
+    };
+    const s = map[status] || map.PENDING;
+    return { ...s, className: `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${s.c}` };
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]">
-        <Loading message="Загрузка деталей заказа..." />
+      <div className="min-h-screen bg-[var(--ev-void)] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-9 h-9 rounded-full border-2 border-[var(--ev-gold)]/30 border-t-[var(--ev-gold)] animate-spin" />
+          <p className="text-sm text-[var(--ev-text-muted)]">Загрузка заказа...</p>
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error && !order) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]">
+      <div className="min-h-screen bg-[var(--ev-void)] flex items-center justify-center px-4">
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center text-red-300 text-xl bg-red-500/20 p-8 rounded-lg border border-red-500/50"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[var(--ev-glass)] backdrop-blur-sm rounded-2xl p-8 max-w-md text-center border border-[var(--ev-gold)]/20"
         >
-          {error}
+          <XCircleIcon className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <p className="text-[var(--ev-text)] font-medium mb-6">{error}</p>
+          <button
+            onClick={() => navigate(`/batch-cargo-details/${batchId}`)}
+            className="w-full py-2.5 rounded-xl bg-[var(--ev-gold)]/20 border border-[var(--ev-gold)]/40 text-[var(--ev-gold)] text-sm font-medium hover:bg-[var(--ev-gold)]/30 transition-colors"
+          >
+            К сборному грузу
+          </button>
         </motion.div>
       </div>
     );
@@ -78,221 +92,169 @@ const BatchCargoProcessing = () => {
 
   if (!order) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]">
-        <Card className="p-12 text-center">
-          <ShoppingBagIcon className="w-16 h-16 text-[#808080] mx-auto mb-4" />
-          <p className="text-xl text-[#cdcdcd]">Заказ не найден</p>
-        </Card>
+      <div className="min-h-screen bg-[var(--ev-void)] flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[var(--ev-glass)] backdrop-blur-sm rounded-2xl p-8 max-w-sm text-center border border-[var(--ev-gold)]/20"
+        >
+          <ShoppingBagIcon className="w-12 h-12 text-[var(--ev-text-muted)] mx-auto mb-4" />
+          <p className="text-[var(--ev-text)] font-medium mb-6">Заказ не найден</p>
+          <button
+            onClick={() => navigate(`/batch-cargo-details/${batchId}`)}
+            className="w-full py-2.5 rounded-xl bg-[var(--ev-gold)]/20 border border-[var(--ev-gold)]/40 text-[var(--ev-gold)] text-sm font-medium hover:bg-[var(--ev-gold)]/30 transition-colors"
+          >
+            К сборному грузу
+          </button>
+        </motion.div>
       </div>
     );
   }
 
-  const getPurchaseStatusDisplay = (status) => {
-    switch (status) {
-      case 'PURCHASED':
-        return {
-          text: 'Выкуплен',
-          color: 'text-emerald-300',
-          bgColor: 'bg-emerald-500/20',
-          borderColor: 'border-emerald-500/50',
-          icon: <CheckCircleIcon className="w-5 h-5" />
-        };
-      case 'NOT_PURCHASED':
-        return {
-          text: 'Не выкуплен',
-          color: 'text-red-300',
-          bgColor: 'bg-red-500/20',
-          borderColor: 'border-red-500/50',
-          icon: <XCircleIcon className="w-5 h-5" />
-        };
-      case 'PENDING':
-      default:
-        return {
-          text: 'Ожидает',
-          color: 'text-yellow-300',
-          bgColor: 'bg-yellow-500/20',
-          borderColor: 'border-yellow-500/50',
-          icon: <ClockIcon className="w-5 h-5" />
-        };
-    }
-  };
-
   const isSelfPickup = order.totalClientPrice === 0;
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      
-      <div className="max-w-7xl mx-auto relative z-10">
-        <PageHeader
-          title={`Детали заказа #${order.orderNumber}`}
-          subtitle="Просмотр товаров и их статусов выкупа"
-        />
+    <div className="min-h-screen bg-[var(--ev-void)] text-[var(--ev-text)] font-[var(--ev-font-body)]">
+      <Helmet>
+        <title>{`Заказ #${order.orderNumber} | Сборный груз | Fluvion`}</title>
+        <meta name="description" content={`Детали заказа #${order.orderNumber} в сборном грузе.`} />
+      </Helmet>
 
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
-              transition={{ duration: 0.3 }}
-              className="mb-8"
-            >
-              <Card className="p-6 bg-red-500/20 border border-red-500/50">
-                <p className="text-red-300 text-center">{error}</p>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Информация о заказе */}
-        <motion.section
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-12"
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pb-28">
+        <button
+          type="button"
+          onClick={() => navigate(`/batch-cargo-details/${batchId}`)}
+          className="inline-flex items-center gap-2 text-[var(--ev-text-muted)] hover:text-[var(--ev-gold)] text-sm font-medium mb-6 transition-colors"
         >
-          <Card className="p-6 bg-[#1a1a1a] border border-[#333]">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#407CFF] to-[#5a8fff] rounded-xl flex items-center justify-center">
-                <ShoppingBagIcon className="w-8 h-8 text-white" />
+          <ArrowLeftIcon className="w-4 h-4" />
+          К сборному грузу
+        </button>
+
+        {/* Карточка заказа */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mb-8"
+        >
+          <div className="rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 overflow-hidden">
+            <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/20 flex items-center justify-center shrink-0">
+                <ShoppingBagIcon className="w-7 h-7 text-[var(--ev-gold)]" />
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">Заказ #{order.orderNumber}</h3>
-                <p className="text-sm text-[#808080] mt-1">
-                  Создан: {new Date(order.dateCreated).toLocaleString('ru-RU')}
+              <div className="min-w-0 flex-1">
+                <h1 className="font-[var(--ev-font-display)] text-xl sm:text-2xl font-semibold text-[var(--ev-text)]">
+                  Заказ #{order.orderNumber}
+                </h1>
+                <p className="text-sm text-[var(--ev-text-muted)] mt-0.5">
+                  Создан {new Date(order.dateCreated).toLocaleString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </p>
+                {order.deliveryAddress && (
+                  <p className="text-sm text-[var(--ev-text-muted)] mt-2">
+                    Адрес: {order.deliveryAddress}
+                  </p>
+                )}
               </div>
             </div>
-            {order.deliveryAddress && (
-              <div className="mt-4 pt-4 border-t border-[#333]">
-                <p className="text-sm text-[#808080] mb-1">Адрес доставки</p>
-                <p className="text-[#cdcdcd]">{order.deliveryAddress}</p>
-              </div>
-            )}
-          </Card>
+          </div>
         </motion.section>
 
-        {/* Товары в заказе */}
-        <motion.section
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="mb-12"
-        >
-          <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-[#e81e2d] to-[#ff4757] bg-clip-text text-transparent">
-            Товары в заказе
-          </h3>
+        <h2 className="ev-label text-[var(--ev-gold)] text-xs font-semibold uppercase tracking-wider mb-4">
+          Товары в заказе ({order.items?.length || 0})
+        </h2>
 
-          {order.items && order.items.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {order.items.map((item, index) => {
-                const purchaseStatus = getPurchaseStatusDisplay(item.purchaseStatus || 'PENDING');
-                
-                return (
-                  <Tilt key={item.id || `item-${index}`} tiltMaxAngleX={5} tiltMaxAngleY={5} perspective={1200}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: index * 0.1 }}
-                      whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                    >
-                      <Card className="p-6 bg-[#1a1a1a] border border-[#333] hover:border-[#407CFF]/50 transition-all duration-300">
-                        {/* Изображение товара */}
-                        {!isSelfPickup && item.imageUrl && (
-                          <div className="w-full h-48 bg-[#0a0a0a] rounded-lg mb-4 overflow-hidden flex items-center justify-center border border-[#333]">
-                            <img
-                              src={item.imageUrl}
-                              alt={item.productName || 'Товар'}
-                              className="w-full h-full object-contain p-2"
-                              onError={(e) => {
-                                e.target.src = 'https://via.placeholder.com/200?text=Нет+фото';
-                              }}
-                            />
-                          </div>
-                        )}
+        {order.items && order.items.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {order.items.map((item, index) => {
+              const purchaseStatus = getPurchaseStatusDisplay(item.purchaseStatus || 'PENDING');
+              const name = isSelfPickup ? (item.trackingNumber || 'Самовыкуп') : (item.productName || 'Без названия');
+              return (
+                <motion.div
+                  key={item.id || index}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: index * 0.04 }}
+                  className="rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 overflow-hidden hover:border-[var(--ev-gold)]/25 transition-colors p-6"
+                >
+                  {!isSelfPickup && item.imageUrl ? (
+                    <div className="w-full h-48 bg-[var(--ev-void)]/50 rounded-xl mb-4 overflow-hidden flex items-center justify-center border border-[var(--ev-gold)]/10">
+                      <img
+                        src={item.imageUrl}
+                        alt={name}
+                        className="w-full h-full object-contain p-2"
+                        onError={(e) => { e.target.src = 'https://via.placeholder.com/200?text=—'; }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-48 bg-[var(--ev-void)]/50 rounded-xl mb-4 flex items-center justify-center border border-[var(--ev-gold)]/10">
+                      <CubeIcon className="w-12 h-12 text-[var(--ev-gold)]/30" />
+                    </div>
+                  )}
 
-                        {/* Название товара */}
-                        <h4 className="text-lg font-bold text-white mb-3 line-clamp-2">
-                          {isSelfPickup 
-                            ? (item.trackingNumber || 'Самовыкуп')
-                            : (item.productName || 'Без названия')
-                          }
-                        </h4>
+                  <h4 className="text-lg font-semibold text-[var(--ev-text)] mb-3 line-clamp-2">
+                    {name}
+                  </h4>
 
-                        {/* Детали товара */}
-                        {!isSelfPickup && (
-                          <div className="space-y-2 mb-4">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-[#808080]">Количество:</span>
-                              <span className="text-[#cdcdcd] font-medium">{item.quantity || 1}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-[#808080]">Цена за единицу:</span>
-                              <span className="text-[#cdcdcd] font-medium">¥{(item.priceAtTime || 0).toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-sm pt-2 border-t border-[#333]">
-                              <span className="text-[#808080] font-medium">Итого:</span>
-                              <span className="text-[#407CFF] font-bold">
-                                ¥{((item.priceAtTime || 0) * (item.quantity || 1)).toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
-                        )}
+                  {!isSelfPickup && (
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-[var(--ev-text-muted)]">Количество:</span>
+                        <span className="text-[var(--ev-text)] font-medium">{item.quantity || 1}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-[var(--ev-text-muted)]">Цена за единицу:</span>
+                        <span className="text-[var(--ev-text)] font-medium">¥{(item.priceAtTime || 0).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm pt-2 border-t border-[var(--ev-gold)]/10">
+                        <span className="text-[var(--ev-text-muted)] font-medium">Итого:</span>
+                        <span className="text-[var(--ev-gold)] font-semibold">
+                          ¥{((item.priceAtTime || 0) * (item.quantity || 1)).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
-                        {/* Трек-номер */}
-                        {item.trackingNumber && (
-                          <div className="mb-4 p-3 bg-[#0a0a0a] rounded-lg border border-[#333]">
-                            <p className="text-xs text-[#808080] mb-1">Трек-номер</p>
-                            <p className="text-sm text-[#cdcdcd] font-mono break-all">{item.trackingNumber}</p>
-                          </div>
-                        )}
+                  {item.trackingNumber && (
+                    <div className="mb-4 p-3 bg-[var(--ev-void)]/30 rounded-xl border border-[var(--ev-gold)]/10">
+                      <p className="text-xs text-[var(--ev-text-muted)] mb-0.5">Трек-номер</p>
+                      <p className="text-sm text-[var(--ev-text)] font-mono break-all">{item.trackingNumber}</p>
+                    </div>
+                  )}
 
-                        {/* Статус выкупа */}
-                        <div className="flex items-center justify-between pt-4 border-t border-[#333]">
-                          <span className={`px-3 py-2 rounded-lg text-sm font-semibold border flex items-center gap-2 ${purchaseStatus.bgColor} ${purchaseStatus.borderColor} ${purchaseStatus.color}`}>
-                            {purchaseStatus.icon}
-                            {purchaseStatus.text}
-                          </span>
-                        </div>
+                  <div className="flex items-center pt-4 border-t border-[var(--ev-gold)]/10">
+                    <span className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border ${purchaseStatus.className}`}>
+                      {purchaseStatus.icon}
+                      {purchaseStatus.text}
+                    </span>
+                  </div>
 
-                        {/* Причина отказа */}
-                        {item.purchaseStatus === 'NOT_PURCHASED' && item.purchaseRefusalReason && (
-                          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                            <p className="text-xs text-red-400 font-medium mb-1">Причина отказа:</p>
-                            <p className="text-sm text-red-300">{item.purchaseRefusalReason}</p>
-                          </div>
-                        )}
-                      </Card>
-                    </motion.div>
-                  </Tilt>
-                );
-              })}
-            </div>
-          ) : (
-            <Card className="p-12 text-center">
-              <ShoppingBagIcon className="w-16 h-16 text-[#808080] mx-auto mb-4" />
-              <p className="text-xl text-[#cdcdcd] mb-2">Нет товаров в заказе</p>
-              <p className="text-[#808080]">Товары отсутствуют</p>
-            </Card>
-          )}
-        </motion.section>
+                  {item.purchaseStatus === 'NOT_PURCHASED' && item.purchaseRefusalReason && (
+                    <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                      <p className="text-xs text-red-400 font-medium mb-0.5">Причина отказа:</p>
+                      <p className="text-sm text-red-300">{item.purchaseRefusalReason}</p>
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 p-10 text-center">
+            <CubeIcon className="w-12 h-12 text-[var(--ev-text-muted)]/50 mx-auto mb-3" />
+            <p className="text-[var(--ev-text)] font-medium">Нет товаров в заказе</p>
+            <p className="text-sm text-[var(--ev-text-muted)] mt-1">Товары отсутствуют</p>
+          </div>
+        )}
 
-        {/* Кнопка назад */}
-        <motion.section
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="flex justify-center"
-        >
-          <Button
+        <div className="mt-10">
+          <button
             onClick={() => navigate(`/batch-cargo-details/${batchId}`)}
-            variant="outline"
-            className="px-8 py-3 border-[#333] hover:border-[#407CFF] text-white flex items-center gap-2"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[var(--ev-gold)]/20 text-[var(--ev-text-muted)] text-sm font-medium hover:text-[var(--ev-gold)] hover:border-[var(--ev-gold)]/40 hover:bg-[var(--ev-gold)]/5 transition-colors"
           >
-            <ArrowLeftIcon className="w-5 h-5" />
+            <ArrowLeftIcon className="w-4 h-4" />
             Вернуться к сборному грузу
-          </Button>
-        </motion.section>
+          </button>
+        </div>
       </div>
     </div>
   );

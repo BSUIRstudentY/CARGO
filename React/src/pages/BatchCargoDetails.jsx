@@ -1,21 +1,68 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeftIcon, 
-  TruckIcon, 
+import { Helmet } from 'react-helmet-async';
+import { motion } from 'framer-motion';
+import {
+  ArrowLeftIcon,
+  TruckIcon,
   CalendarIcon,
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
-  ShoppingBagIcon
+  ChevronRightIcon,
+  CubeIcon,
 } from '@heroicons/react/24/solid';
 import { useAuth } from '../components/AuthProvider';
-import Tilt from 'react-parallax-tilt';
 import api from '../api/axiosInstance';
-import { Card } from '../components/ui/Card';
-import { PageHeader } from '../components/ui/PageHeader';
-import { Loading } from '../components/ui/Loading';
+
+const getStatusDisplay = (status) => {
+  const styles = {
+    UNFINISHED: { text: 'В процессе', dot: 'bg-amber-400' },
+    PURCHASING: { text: 'Закупка', dot: 'bg-[var(--ev-gold)]' },
+    CHECKING: { text: 'Проверка', dot: 'bg-[var(--ev-gold)]' },
+    PACKAGING: { text: 'Упаковка', dot: 'bg-[var(--ev-gold)]' },
+    SHIPPED: { text: 'В пути', dot: 'bg-emerald-400' },
+    FINISHED: { text: 'Завершён', dot: 'bg-emerald-400' },
+    ARRIVED_IN_MINSK: { text: 'В Минске', dot: 'bg-[var(--ev-gold)]' },
+    COMPLETED: { text: 'Доставлен', dot: 'bg-emerald-400' },
+    REFUSED: { text: 'Отклонён', dot: 'bg-red-400' },
+  };
+  return styles[status] || { text: status, dot: 'bg-[var(--ev-text-muted)]' };
+};
+
+const getOrderStatusDisplay = (status) => {
+  const map = {
+    PENDING: { text: 'Ожидает', c: 'text-amber-200 bg-amber-500/15' },
+    VERIFIED: { text: 'Подтверждён', c: 'text-[var(--ev-gold)] bg-[var(--ev-gold)]/15' },
+    PAID: { text: 'Оплачен', c: 'text-emerald-300 bg-emerald-500/15' },
+    PROCESSED: { text: 'Обработан', c: 'text-[var(--ev-gold)] bg-[var(--ev-gold)]/15' },
+    COMPLETED: { text: 'Завершён', c: 'text-emerald-300 bg-emerald-500/15' },
+    CANCELLED: { text: 'Отменён', c: 'text-red-300 bg-red-500/15' },
+    REFUSED: { text: 'Отклонён', c: 'text-red-300 bg-red-500/15' },
+    REFUNDED: { text: 'Возвращён', c: 'text-[var(--ev-text-muted)] bg-[var(--ev-text-muted)]/10' },
+  };
+  const s = map[status] || { text: status || '—', c: 'text-[var(--ev-text-muted)] bg-[var(--ev-gold)]/10' };
+  return { text: s.text, className: `rounded-lg px-2 py-0.5 text-xs font-medium ${s.c}` };
+};
+
+const getPurchaseStatusDisplay = (status) => {
+  const map = {
+    PURCHASED: { text: 'Выкуплен', c: 'text-emerald-300 bg-emerald-500/15' },
+    NOT_PURCHASED: { text: 'Не выкуплен', c: 'text-red-300 bg-red-500/15' },
+  };
+  const s = map[status] || { text: 'Ожидает', c: 'text-amber-200 bg-amber-500/15' };
+  return { text: s.text, className: `rounded-lg px-2 py-0.5 text-xs font-medium ${s.c}` };
+};
+
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
 
 const BatchCargoDetails = () => {
   const { user } = useAuth();
@@ -28,60 +75,60 @@ const BatchCargoDetails = () => {
   useEffect(() => {
     const fetchBatchCargo = async () => {
       setLoading(true);
+      setError(null);
       try {
         const response = await api.get(`/batch-cargos/usr/${batchId}`);
         if (response?.data) {
-          const sanitizedBatchCargo = {
+          const sanitized = {
             ...response.data,
             orders: Array.isArray(response.data.orders)
-              ? response.data.orders.map((order) => ({
-                  ...order,
-                  items: Array.isArray(order.items) ? order.items : [],
-                }))
+              ? response.data.orders.map((o) => ({ ...o, items: Array.isArray(o.items) ? o.items : [] }))
               : [],
           };
-          setBatchCargo(sanitizedBatchCargo);
+          setBatchCargo(sanitized);
         } else {
           setError('Данные груза не найдены');
         }
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching batch cargo:', error);
-        let errorMessage = 'Ошибка загрузки груза';
-        if (error.code === 'ERR_NETWORK') {
-          errorMessage = 'Не удалось подключиться к серверу.';
-        } else if (error.response?.status === 403) {
-          errorMessage = 'Доступ запрещён (403). Проверьте токен.';
-        } else {
-          errorMessage = error.response?.data?.message || error.message || 'Неизвестная ошибка';
-        }
-        setError(errorMessage);
+      } catch (err) {
+        let msg = 'Ошибка загрузки';
+        if (err.code === 'ERR_NETWORK') msg = 'Нет связи с сервером';
+        else if (err.response?.status === 403) msg = 'Доступ запрещён';
+        else msg = err.response?.data?.message || err.message || msg;
+        setError(msg);
+      } finally {
         setLoading(false);
       }
     };
-    if (user?.email) {
-      fetchBatchCargo();
-    }
+    if (user?.email) fetchBatchCargo();
   }, [batchId, user?.email]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]">
-        <Loading message="Загрузка деталей сборного груза..." />
+      <div className="min-h-screen bg-[var(--ev-void)] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-9 h-9 rounded-full border-2 border-[var(--ev-gold)]/30 border-t-[var(--ev-gold)] animate-spin" />
+          <p className="text-sm text-[var(--ev-text-muted)]">Загрузка...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]">
+      <div className="min-h-screen bg-[var(--ev-void)] flex items-center justify-center px-4">
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center text-red-300 text-xl bg-red-500/20 p-8 rounded-lg border border-red-500/50"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[var(--ev-glass)] backdrop-blur-sm rounded-xl p-8 max-w-sm text-center border border-[var(--ev-gold)]/20"
         >
-          {error}
+          <XCircleIcon className="w-10 h-10 text-red-400 mx-auto mb-4" />
+          <p className="text-[var(--ev-text)] font-medium mb-6">{error}</p>
+          <button
+            onClick={() => navigate('/batch-cargo-list')}
+            className="w-full py-2.5 rounded-xl bg-[var(--ev-gold)]/20 border border-[var(--ev-gold)]/40 text-[var(--ev-gold)] text-sm font-medium hover:bg-[var(--ev-gold)]/30 transition-colors"
+          >
+            К списку грузов
+          </button>
         </motion.div>
       </div>
     );
@@ -89,430 +136,183 @@ const BatchCargoDetails = () => {
 
   if (!batchCargo || batchCargo.orders.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]">
-        <Card className="p-12 text-center">
-          <TruckIcon className="w-16 h-16 text-[#808080] mx-auto mb-4" />
-          <p className="text-xl text-[#cdcdcd]">Ваших заказов нет в данном сборном грузе</p>
-        </Card>
+      <div className="min-h-screen bg-[var(--ev-void)] flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[var(--ev-glass)] backdrop-blur-sm rounded-xl p-8 max-w-sm text-center border border-[var(--ev-gold)]/20"
+        >
+          <CubeIcon className="w-10 h-10 text-[var(--ev-text-muted)] mx-auto mb-4" />
+          <p className="text-[var(--ev-text)] font-medium mb-2">В этом грузе нет ваших заказов</p>
+          <p className="text-sm text-[var(--ev-text-muted)] mb-6">Показываются только заказы, в которых вы участвуете.</p>
+          <button
+            onClick={() => navigate('/batch-cargo-list')}
+            className="w-full py-2.5 rounded-xl bg-[var(--ev-gold)]/20 border border-[var(--ev-gold)]/40 text-[var(--ev-gold)] text-sm font-medium hover:bg-[var(--ev-gold)]/30 transition-colors"
+          >
+            К списку грузов
+          </button>
+        </motion.div>
       </div>
     );
   }
 
-  const getStatusDisplay = (status) => {
-    switch (status) {
-      case 'UNFINISHED':
-        return { 
-          text: 'В процессе', 
-          color: 'text-yellow-300',
-          bgColor: 'bg-yellow-500/20',
-          borderColor: 'border-yellow-500/50',
-          icon: <ClockIcon className="w-5 h-5" />
-        };
-      case 'PURCHASING':
-        return { 
-          text: 'Закупка товаров', 
-          color: 'text-blue-300',
-          bgColor: 'bg-blue-500/20',
-          borderColor: 'border-blue-500/50',
-          icon: <ClockIcon className="w-5 h-5" />
-        };
-      case 'CHECKING':
-        return { 
-          text: 'Проверка товаров', 
-          color: 'text-purple-300',
-          bgColor: 'bg-purple-500/20',
-          borderColor: 'border-purple-500/50',
-          icon: <ClockIcon className="w-5 h-5" />
-        };
-      case 'PACKAGING':
-        return { 
-          text: 'Упаковка', 
-          color: 'text-indigo-300',
-          bgColor: 'bg-indigo-500/20',
-          borderColor: 'border-indigo-500/50',
-          icon: <ClockIcon className="w-5 h-5" />
-        };
-      case 'SHIPPED':
-        return { 
-          text: 'Отправлен', 
-          color: 'text-emerald-300',
-          bgColor: 'bg-emerald-500/20',
-          borderColor: 'border-emerald-500/50',
-          icon: <TruckIcon className="w-5 h-5" />
-        };
-      case 'FINISHED':
-        return { 
-          text: 'Завершён', 
-          color: 'text-emerald-300',
-          bgColor: 'bg-emerald-500/20',
-          borderColor: 'border-emerald-500/50',
-          icon: <CheckCircleIcon className="w-5 h-5" />
-        };
-      case 'ARRIVED_IN_MINSK':
-        return { 
-          text: 'Груз в Минске', 
-          color: 'text-blue-300',
-          bgColor: 'bg-blue-500/20',
-          borderColor: 'border-blue-500/50',
-          icon: <TruckIcon className="w-5 h-5" />
-        };
-      case 'COMPLETED':
-        return { 
-          text: 'Груз доставлен', 
-          color: 'text-green-300',
-          bgColor: 'bg-green-500/20',
-          borderColor: 'border-green-500/50',
-          icon: <CheckCircleIcon className="w-5 h-5" />
-        };
-      case 'REFUSED':
-        return { 
-          text: 'Отклонён', 
-          color: 'text-red-300',
-          bgColor: 'bg-red-500/20',
-          borderColor: 'border-red-500/50',
-          icon: <XCircleIcon className="w-5 h-5" />
-        };
-      default:
-        return { 
-          text: status, 
-          color: 'text-[#407CFF]',
-          bgColor: 'bg-[#407CFF]/20',
-          borderColor: 'border-[#407CFF]/50',
-          icon: <TruckIcon className="w-5 h-5" />
-        };
-    }
-  };
-
-  // Функция для перевода статуса заказа на русский
-  const getOrderStatusText = (status) => {
-    const statusMap = {
-      'PENDING': 'Ожидает подтверждения',
-      'VERIFIED': 'Подтверждён',
-      'PAID': 'Оплачен',
-      'PROCESSED': 'Обработан',
-      'COMPLETED': 'Завершён',
-      'CANCELLED': 'Отменён',
-      'REFUSED': 'Отклонён',
-      'REFUNDED': 'Возвращён'
-    };
-    return statusMap[status] || status;
-  };
-
-  const getOrderStatusDisplay = (status) => {
-    switch (status) {
-      case 'PENDING':
-        return {
-          text: getOrderStatusText(status),
-          color: 'text-yellow-300',
-          bgColor: 'bg-yellow-500/20',
-          borderColor: 'border-yellow-500/50'
-        };
-      case 'VERIFIED':
-        return {
-          text: getOrderStatusText(status),
-          color: 'text-blue-300',
-          bgColor: 'bg-blue-500/20',
-          borderColor: 'border-blue-500/50'
-        };
-      case 'PAID':
-        return {
-          text: getOrderStatusText(status),
-          color: 'text-green-300',
-          bgColor: 'bg-green-500/20',
-          borderColor: 'border-green-500/50'
-        };
-      case 'PROCESSED':
-        return {
-          text: getOrderStatusText(status),
-          color: 'text-purple-300',
-          bgColor: 'bg-purple-500/20',
-          borderColor: 'border-purple-500/50'
-        };
-      case 'COMPLETED':
-        return {
-          text: getOrderStatusText(status),
-          color: 'text-emerald-300',
-          bgColor: 'bg-emerald-500/20',
-          borderColor: 'border-emerald-500/50'
-        };
-      default:
-        return {
-          text: getOrderStatusText(status),
-          color: 'text-gray-300',
-          bgColor: 'bg-gray-500/20',
-          borderColor: 'border-gray-500/50'
-        };
-    }
-  };
-
-  const getPurchaseStatusDisplay = (status) => {
-    switch (status) {
-      case 'PURCHASED':
-        return { 
-          text: 'Выкуплен', 
-          color: 'text-emerald-300',
-          bgColor: 'bg-emerald-500/20',
-          borderColor: 'border-emerald-500/50'
-        };
-      case 'NOT_PURCHASED':
-        return { 
-          text: 'Не выкуплен', 
-          color: 'text-red-300',
-          bgColor: 'bg-red-500/20',
-          borderColor: 'border-red-500/50'
-        };
-      case 'PENDING':
-      default:
-        return { 
-          text: 'Ожидает', 
-          color: 'text-yellow-300',
-          bgColor: 'bg-yellow-500/20',
-          borderColor: 'border-yellow-500/50'
-        };
-    }
-  };
-
   const statusDisplay = getStatusDisplay(batchCargo.status);
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      
-      <div className="max-w-7xl mx-auto relative z-10">
-        <PageHeader
-          title={`Сборный груз #${batchCargo.id}`}
-          subtitle="Детальная информация о вашем сборном грузе"
-        />
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[var(--ev-void)] font-[var(--ev-font-body)]">
+      <Helmet>
+        <title>{`Груз #${batchCargo.id} | Сборные грузы | Fluvion`}</title>
+        <meta name="description" content={`Детали сборного груза #${batchCargo.id}. Ваши заказы и статусы.`} />
+      </Helmet>
 
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
-              transition={{ duration: 0.3 }}
-              className="mb-8"
-            >
-              <Card className="p-6 bg-red-500/20 border border-red-500/50">
-                <p className="text-red-300 text-center">{error}</p>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Информация о грузе */}
-        <motion.section
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-12"
-        >
-          <Card className="p-6 bg-[#1a1a1a] border border-[#333]">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#e81e2d] to-[#ff4757] rounded-xl flex items-center justify-center">
-                <TruckIcon className="w-10 h-10 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold text-white mb-2">Информация о грузе</h3>
-                <div className="flex items-center gap-3">
-                  <span className={`px-4 py-2 rounded-full text-sm font-semibold border ${statusDisplay.bgColor} ${statusDisplay.borderColor} ${statusDisplay.color} flex items-center gap-2`}>
-                    {statusDisplay.icon}
-                    {statusDisplay.text}
-                  </span>
-                </div>
-              </div>
+      {/* Sidebar — инфо о грузе */}
+      <aside className="lg:w-80 lg:min-h-screen lg:sticky lg:top-0 shrink-0 bg-[var(--ev-glass)] backdrop-blur-[var(--ev-glass-blur)] border-r border-[var(--ev-gold)]/15">
+        <div className="p-6 sm:p-6 lg:p-8">
+          <button
+            type="button"
+            onClick={() => navigate('/batch-cargo-list')}
+            className="inline-flex items-center gap-2 text-[var(--ev-text-muted)] hover:text-[var(--ev-gold)] text-sm font-medium mb-6 transition-colors"
+          >
+            <ArrowLeftIcon className="w-4 h-4" />
+            К списку грузов
+          </button>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-xl bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/20 flex items-center justify-center">
+              <TruckIcon className="w-6 h-6 text-[var(--ev-gold)]" />
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex items-center gap-3">
-                <CalendarIcon className="w-6 h-6 text-[#407CFF]" />
-                <div>
-                  <p className="text-xs text-[#808080] mb-1">Дата создания</p>
-                  <p className="text-[#cdcdcd] font-medium">{formatDate(batchCargo.creationDate)}</p>
-                </div>
-              </div>
-              {batchCargo.purchaseDate && (
-                <div className="flex items-center gap-3">
-                  <CalendarIcon className="w-6 h-6 text-[#407CFF]" />
-                  <div>
-                    <p className="text-xs text-[#808080] mb-1">Дата закупки</p>
-                    <p className="text-[#cdcdcd] font-medium">{formatDate(batchCargo.purchaseDate)}</p>
-                  </div>
-                </div>
-              )}
+            <div>
+              <h1 className="text-xl font-semibold text-[var(--ev-text)] font-[var(--ev-font-display)]">Груз #{batchCargo.id}</h1>
+              <p className="text-[var(--ev-text-muted)] text-sm">Сборный груз</p>
             </div>
-
-            {batchCargo.description && (
-              <div className="mt-6 pt-6 border-t border-[#333]">
-                <p className="text-xs text-[#808080] mb-2">Описание</p>
-                <p className="text-[#cdcdcd]">{batchCargo.description}</p>
+          </div>
+          <div className="flex items-center gap-2 mb-6">
+            <span className={`w-2 h-2 rounded-full ${statusDisplay.dot}`} />
+            <span className="text-sm font-medium text-[var(--ev-text)]">{statusDisplay.text}</span>
+          </div>
+          <dl className="space-y-4 text-sm">
+            <div>
+              <dt className="text-[var(--ev-text-muted)] mb-0.5">Создан</dt>
+              <dd className="text-[var(--ev-text)] font-medium">{formatDate(batchCargo.creationDate)}</dd>
+            </div>
+            {batchCargo.purchaseDate && (
+              <div>
+                <dt className="text-[var(--ev-text-muted)] mb-0.5">Закупка</dt>
+                <dd className="text-[var(--ev-text)] font-medium">{formatDate(batchCargo.purchaseDate)}</dd>
               </div>
             )}
-          </Card>
-        </motion.section>
+          </dl>
+          {batchCargo.description && (
+            <div className="mt-6 pt-6 border-t border-[var(--ev-gold)]/10">
+              <dt className="text-[var(--ev-text-muted)] text-sm mb-1">Описание</dt>
+              <dd className="text-[var(--ev-text-muted)] text-sm leading-relaxed">{batchCargo.description}</dd>
+            </div>
+          )}
+        </div>
+      </aside>
 
-        {/* Заказы в грузе */}
-        <motion.section
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="mb-12"
-        >
-          <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-[#e81e2d] to-[#ff4757] bg-clip-text text-transparent">
-            Ваши заказы в этом грузе
-          </h3>
-          
-          <div className="space-y-6">
-            {batchCargo.orders.map((order, orderIndex) => (
-              <motion.div
+      {/* Main — заказы */}
+      <main className="flex-1 p-5 sm:p-6 lg:p-8 pb-28">
+        <h2 className="ev-label text-[var(--ev-gold)] text-xs font-semibold uppercase tracking-wider mb-5">
+          Ваши заказы ({batchCargo.orders.length})
+        </h2>
+        <div className="space-y-5 sm:space-y-6">
+          {batchCargo.orders.map((order, idx) => {
+            const orderStatus = getOrderStatusDisplay(order.status);
+            const isSelfPickup = order.totalClientPrice === 0;
+            return (
+              <motion.article
                 key={order.id}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: orderIndex * 0.1 }}
+                transition={{ duration: 0.3, delay: idx * 0.04 }}
+                className="bg-[var(--ev-glass)] backdrop-blur-[var(--ev-glass-blur)] rounded-2xl border border-[var(--ev-gold)]/15 overflow-hidden hover:border-[var(--ev-gold)]/25 transition-colors"
               >
-                <Card className="p-6 bg-[#1a1a1a] border border-[#333] hover:border-[#407CFF]/50 transition-all duration-300">
-                  {/* Заголовок заказа */}
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <h4 className="text-xl font-bold text-white mb-2">
-                        Заказ #{order.orderNumber}
-                      </h4>
-                      <div className="flex items-center gap-4 flex-wrap">
-                        {(() => {
-                          const orderStatusDisplay = getOrderStatusDisplay(order.status);
-                          return (
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${orderStatusDisplay.bgColor} ${orderStatusDisplay.borderColor} ${orderStatusDisplay.color}`}>
-                              {orderStatusDisplay.text}
-                            </span>
-                          );
-                        })()}
-                        {order.totalClientPrice > 0 && (
-                          <span className="text-sm text-[#cdcdcd]">
-                            Сумма: <span className="text-[#407CFF] font-medium">¥{order.totalClientPrice.toFixed(2)}</span>
-                          </span>
-                        )}
-                      </div>
+                <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <h3 className="font-semibold text-[var(--ev-text)] text-lg">Заказ #{order.orderNumber}</h3>
+                    <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                      <span className={orderStatus.className}>{orderStatus.text}</span>
+                      {order.totalClientPrice > 0 && (
+                        <span className="text-sm text-[var(--ev-text-muted)]">¥{order.totalClientPrice.toFixed(2)}</span>
+                      )}
                     </div>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => navigate(`/batch-cargos/${batchId}/order/${order.id}`)}
-                      className="px-4 py-2 bg-[#407CFF] hover:bg-[#5a8fff] text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium"
-                    >
-                      <ShoppingBagIcon className="w-4 h-4" />
-                      Детали
-                    </motion.button>
                   </div>
+                  <button
+                    onClick={() => navigate(`/batch-cargos/${batchId}/order/${order.id}`)}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--ev-gold)]/20 border border-[var(--ev-gold)]/40 text-[var(--ev-gold)] text-sm font-medium hover:bg-[var(--ev-gold)]/30 hover:border-[var(--ev-gold)]/50 transition-colors shrink-0"
+                  >
+                    Детали
+                    <ChevronRightIcon className="w-4 h-4" />
+                  </button>
+                </div>
 
-                  {/* Товары в заказе */}
-                  {order.items && order.items.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {order.items.map((item, itemIndex) => {
+                {order.items && order.items.length > 0 ? (
+                  <div className="p-4 sm:p-5 border-t border-[var(--ev-gold)]/10">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3">
+                      {order.items.map((item, itemIdx) => {
                         const purchaseStatus = getPurchaseStatusDisplay(item.purchaseStatus || 'PENDING');
-                        const isSelfPickup = order.totalClientPrice === 0;
-
+                        const name = isSelfPickup ? (item.trackingNumber || 'Самовыкуп') : (item.productName || 'Без названия');
                         return (
-                          <Tilt key={item.id || `item-${itemIndex}`} tiltMaxAngleX={5} tiltMaxAngleY={5} perspective={1200}>
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.95 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ duration: 0.3, delay: itemIndex * 0.05 }}
-                              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                              className="bg-[#2a2a2a] border border-[#333] rounded-lg p-4 hover:border-[#407CFF]/50 transition-all duration-300"
-                            >
-                              {!isSelfPickup && item.imageUrl && (
-                                <div className="w-full h-32 bg-[#1a1a1a] rounded-lg mb-3 overflow-hidden flex items-center justify-center">
-                                  <img
-                                    src={item.imageUrl}
-                                    alt={item.productName || 'Товар'}
-                                    className="w-full h-full object-contain"
-                                    onError={(e) => {
-                                      e.target.src = 'https://via.placeholder.com/150?text=Нет+фото';
-                                    }}
-                                  />
-                                </div>
+                          <div
+                            key={item.id || itemIdx}
+                            className="flex flex-col rounded-xl border border-[var(--ev-gold)]/15 bg-[var(--ev-void)]/30 overflow-hidden hover:border-[var(--ev-gold)]/25 transition-colors aspect-[3/4] w-full"
+                          >
+                            <div className="flex-[7] min-h-0 w-full bg-[var(--ev-void)]/50 flex items-center justify-center">
+                              {!isSelfPickup && item.imageUrl ? (
+                                <img
+                                  src={item.imageUrl}
+                                  alt={name}
+                                  className="w-full h-full object-contain p-2"
+                                  onError={(e) => { e.target.src = 'https://via.placeholder.com/120?text=—'; }}
+                                />
+                              ) : (
+                                <CubeIcon className="w-10 h-10 text-[var(--ev-gold)]/30" />
                               )}
-
-                              <h5 className="text-sm font-semibold text-white mb-2 line-clamp-2">
-                                {isSelfPickup 
-                                  ? (item.trackingNumber || 'Самовыкуп')
-                                  : (item.productName || 'Без названия')
-                                }
-                              </h5>
-
+                            </div>
+                            <div className="flex-[3] min-h-0 p-3 flex flex-col justify-center overflow-hidden">
+                              <p className="text-sm font-medium text-[var(--ev-text)] line-clamp-2 leading-snug">{name}</p>
                               {!isSelfPickup && (
-                                <div className="space-y-1 mb-3">
-                                  <p className="text-xs text-[#808080]">
-                                    Количество: <span className="text-[#cdcdcd]">{item.quantity || 1}</span>
-                                  </p>
-                                  <p className="text-xs text-[#808080]">
-                                    Цена: <span className="text-[#cdcdcd]">¥{(item.priceAtTime || 0).toFixed(2)}</span>
-                                  </p>
-                                </div>
-                              )}
-
-                              {item.trackingNumber && (
-                                <p className="text-xs text-[#808080] mb-3">
-                                  Трек: <span className="text-[#cdcdcd] font-mono">{item.trackingNumber}</span>
+                                <p className="text-xs text-[var(--ev-text-muted)] mt-0.5">
+                                  {item.quantity || 1} шт · ¥{(item.priceAtTime || 0).toFixed(2)}
                                 </p>
                               )}
-
-                              {/* Статус выкупа */}
-                              <div className="flex items-center justify-between">
-                                <span className={`px-2 py-1 rounded text-xs font-semibold border ${purchaseStatus.bgColor} ${purchaseStatus.borderColor} ${purchaseStatus.color}`}>
-                                  {purchaseStatus.text}
-                                </span>
-                              </div>
-
-                              {item.purchaseStatus === 'NOT_PURCHASED' && item.purchaseRefusalReason && (
-                                <div className="mt-2 pt-2 border-t border-[#333]">
-                                  <p className="text-xs text-red-300">
-                                    {item.purchaseRefusalReason}
-                                  </p>
-                                </div>
+                              {item.trackingNumber && (
+                                <p className="text-xs text-[var(--ev-text-muted)] font-mono truncate mt-0.5" title={item.trackingNumber}>
+                                  {item.trackingNumber}
+                                </p>
                               )}
-                            </motion.div>
-                          </Tilt>
+                              <span className={`inline-block mt-1.5 !px-2 !py-0.5 !text-xs rounded-md w-fit ${purchaseStatus.className}`}>
+                                {purchaseStatus.text}
+                              </span>
+                              {item.purchaseStatus === 'NOT_PURCHASED' && item.purchaseRefusalReason && (
+                                <p className="text-xs text-red-300 mt-0.5 line-clamp-1">{item.purchaseRefusalReason}</p>
+                              )}
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
-                  ) : (
-                    <p className="text-[#808080] text-center py-4">Нет товаров в заказе</p>
-                  )}
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
+                  </div>
+                ) : (
+                  <div className="p-4 sm:p-5 border-t border-[var(--ev-gold)]/10">
+                    <p className="text-sm text-[var(--ev-text-muted)]">Нет товаров</p>
+                  </div>
+                )}
+              </motion.article>
+            );
+          })}
+        </div>
 
-        {/* Кнопка назад */}
-        <motion.section
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="flex justify-center"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate(-1)}
-            className="px-8 py-3 bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white rounded-lg border border-[#333] hover:border-[#407CFF]/50 transition-all duration-200 flex items-center justify-center gap-2 font-semibold"
+        <div className="mt-10">
+          <button
+            onClick={() => navigate('/batch-cargo-list')}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[var(--ev-gold)]/20 text-[var(--ev-text-muted)] text-sm font-medium hover:text-[var(--ev-gold)] hover:border-[var(--ev-gold)]/40 hover:bg-[var(--ev-gold)]/5 transition-colors"
           >
-            <ArrowLeftIcon className="w-5 h-5" />
-            Назад
-          </motion.button>
-        </motion.section>
-      </div>
+            <ArrowLeftIcon className="w-4 h-4" />
+            К списку грузов
+          </button>
+        </div>
+      </main>
     </div>
   );
 };

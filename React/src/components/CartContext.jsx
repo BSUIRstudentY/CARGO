@@ -65,23 +65,25 @@ export function CartProvider({ children }) {
   // === ОСНОВНЫЕ ФУНКЦИИ С МГНОВЕННЫМ СОХРАНЕНИЕМ В LOCALSTORAGE ===
 
   const addToCart = async (productsToAdd) => {
-    if (!Array.isArray(productsToAdd) || productsToAdd.length === 0) return;
+    const list = Array.isArray(productsToAdd) ? productsToAdd : (productsToAdd != null ? [productsToAdd] : []);
+    if (list.length === 0) return;
 
     // Мгновенно добавляем в состояние (и автоматически в localStorage)
     setCart(prev => {
       const newCart = [...prev];
-      productsToAdd.forEach(p => {
+      list.forEach(p => {
         const productId = p.id || p.productId;
+        const addQty = Math.max(1, parseInt(p.quantity, 10) || 1);
         const existing = newCart.find(i => (i.id === productId) || (i.productId === productId));
         if (existing) {
-          existing.quantity += 1;
+          existing.quantity += addQty;
         } else {
           newCart.push({
             id: productId,
             productId: productId, // Дублируем для совместимости
             name: p.name || 'Без названия',
             price: p.price || 0,
-            quantity: 1,
+            quantity: addQty,
             imageUrl: p.imageUrl || '',
             url: p.url || '',
             description: p.description || '',
@@ -93,7 +95,7 @@ export function CartProvider({ children }) {
 
     // Отправляем на сервер в фоне
     try {
-      await nonCacheApi.post('/cart/bulk-add', productsToAdd.map(p => ({ ...p, status: 'PENDING' })));
+      await nonCacheApi.post('/cart/bulk-add', list.map(p => ({ ...p, quantity: Math.max(1, parseInt(p.quantity, 10) || 1), status: 'PENDING' })));
       await fetchCart(); // точная синхронизация после успеха
     } catch (err) {
       setError('Добавлено локально. Сервер временно недоступен.');

@@ -264,7 +264,7 @@ function Catalog() {
   const pageTitle = `Примеры товаров из Китая${searchQuery} | Fluvion`;
   const pageDescription = searchTerm 
     ? `Найдено по запросу "${searchTerm}" — примеры товаров Fluvion. Доставка из Китая в Беларусь за 18-35 дней.`
-    : `Примеры товаров, которые уже заказывали клиенты. Доставка из Китая в Беларусь. Фиксированная цена $6/кг.`;
+    : `Примеры товаров, которые уже заказывали клиенты. Доставка из Китая в Беларусь. Фиксированная цена $7/кг.`;
 
   return (
     <div
@@ -314,7 +314,7 @@ function Catalog() {
               transition={{ duration: 0.4 }}
               className="text-center mb-4"
             >
-              <p className="ev-label text-[var(--ev-gold)] mb-2">Каталог</p>
+              <p className="ev-label text-[var(--ev-gold)] mb-2">Примеры товаров</p>
               <h1 className="font-ev-hero text-2xl sm:text-3xl font-light tracking-[-0.02em] text-[var(--ev-gold)]">
                 Примеры товаров
               </h1>
@@ -410,7 +410,7 @@ function Catalog() {
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   className="w-12 h-12 border-2 border-[var(--ev-gold)]/20 border-t-[var(--ev-gold)] rounded-full mb-3"
                 />
-                <p className="text-[var(--ev-text-muted)] text-sm">Загружаем каталог...</p>
+                <p className="text-[var(--ev-text-muted)] text-sm">Загружаем примеры товаров...</p>
               </div>
             </div>
           </div>
@@ -540,7 +540,7 @@ function Catalog() {
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <p className="ev-label text-[var(--ev-gold)] mb-2">Каталог</p>
+            <p className="ev-label text-[var(--ev-gold)] mb-2">Примеры товаров</p>
             <h1 className="font-ev-hero text-4xl md:text-5xl lg:text-6xl font-light tracking-[-0.02em] text-[var(--ev-gold)] mb-6">
               Примеры товаров
             </h1>
@@ -643,7 +643,7 @@ function Catalog() {
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   className="w-16 h-16 border-2 border-[var(--ev-gold)]/20 border-t-[var(--ev-gold)] rounded-full mb-4"
                 />
-                <p className="text-[var(--ev-text-muted)] text-lg">Загружаем каталог...</p>
+                <p className="text-[var(--ev-text-muted)] text-lg">Загружаем примеры товаров...</p>
               </div>
             </div>
           </div>

@@ -135,8 +135,8 @@ const PersonalDataTab = ({ setError }) => {
         transition={{ duration: 0.5 }}
         className="flex items-center justify-between"
       >
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent flex items-center gap-3">
-          <UserIcon className="w-8 h-8 text-[#00f0ff]" />
+        <h2 className="text-2xl font-semibold text-[var(--ev-text)] flex items-center gap-3">
+          <UserIcon className="w-7 h-7 text-[var(--ev-gold)]" />
           Личные данные
         </h2>
       </motion.div>
@@ -149,10 +149,10 @@ const PersonalDataTab = ({ setError }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className={`p-4 rounded-lg text-center ${
+            className={`p-4 rounded-xl text-center ${
               statusMessage.includes('Ошибка')
-                ? 'bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.3)] text-[#ef4444]'
-                : 'bg-[rgba(16,185,129,0.1)] border border-[rgba(16,185,129,0.3)] text-[#10b981]'
+                ? 'bg-red-500/10 border border-red-500/20 text-red-300'
+                : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'
             }`}
           >
             {statusMessage}
@@ -166,15 +166,15 @@ const PersonalDataTab = ({ setError }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
         whileHover={{ y: -5, transition: { duration: 0.2 } }}
-        className="p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[#00f0ff]/50 hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300"
+        className="p-6 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300"
       >
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-[#00f0ff] via-[#a78bfa] to-[#10b981] rounded-xl flex items-center justify-center">
-            <UserIcon className="w-10 h-10 text-white" />
+          <div className="w-16 h-16 rounded-xl bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/20 flex items-center justify-center">
+            <UserIcon className="w-10 h-10 text-[var(--ev-gold)]" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-[#e5e7eb]">{userData.username || 'Гость'}</h3>
-            <p className="text-sm text-[#9ca3af]">{userData.email || 'user@example.com'}</p>
+            <h3 className="text-xl font-semibold text-[var(--ev-text)]">{userData.username || 'Гость'}</h3>
+            <p className="text-sm text-[var(--ev-text-muted)]">{userData.email || 'user@example.com'}</p>
           </div>
         </div>
       </motion.div>
@@ -184,44 +184,43 @@ const PersonalDataTab = ({ setError }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="p-6 rounded-2xl bg-[rgba(255,255,255,0.05)] backdrop-blur-sm border border-[rgba(255,255,255,0.1)] hover:border-[#00f0ff]/50 hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300"
+        className="p-6 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300"
       >
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <EnvelopeIcon className="w-5 h-5 text-[#00f0ff]" />
+        <h3 className="text-lg font-semibold text-[var(--ev-text)] mb-4 flex items-center gap-2">
+          <EnvelopeIcon className="w-5 h-5 text-[var(--ev-gold)]" />
           Контактная информация
         </h3>
         <div className="space-y-4">
-          {/* Email */}
           <motion.div
             whileHover={{ y: -3 }}
-            className="p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[#00f0ff]/50 hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300"
+            className="p-4 rounded-xl bg-[var(--ev-void)]/30 border border-[var(--ev-gold)]/10 hover:border-[var(--ev-gold)]/20 transition-all duration-300"
           >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)]">
-                  <EnvelopeIcon className="w-4 h-4 text-[#00f0ff]" />
+                <div className="p-2 rounded-lg bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/15">
+                  <EnvelopeIcon className="w-4 h-4 text-[var(--ev-gold)]" />
                 </div>
-                <label className="text-sm font-medium text-[#9ca3af]">Email</label>
+                <label className="text-sm font-medium text-[var(--ev-text-muted)]">Email</label>
               </div>
               {userData.emailVerified ? (
-                <span className="flex items-center gap-1 text-[#10b981] text-xs font-medium px-3 py-1 rounded-full bg-[rgba(16,185,129,0.1)] border border-[rgba(16,185,129,0.3)]">
+                <span className="flex items-center gap-1 text-emerald-400 text-xs font-medium px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30">
                   <CheckCircleIcon className="w-4 h-4" />
                   Верифицирован
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-[#9ca3af] text-xs font-medium px-3 py-1 rounded-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)]">
+                <span className="flex items-center gap-1 text-[var(--ev-text-muted)] text-xs font-medium px-3 py-1 rounded-full bg-[var(--ev-void)]/50 border border-[var(--ev-gold)]/10">
                   <XCircleIcon className="w-4 h-4" />
                   Не верифицирован
                 </span>
               )}
             </div>
-            <p className="text-sm text-white ml-11 mb-3">{userData.email || 'user@example.com'}</p>
+            <p className="text-sm text-[var(--ev-text)] ml-11 mb-3">{userData.email || 'user@example.com'}</p>
             {!userData.emailVerified && (
               <Button
                 size="sm"
                 onClick={() => handleRequestVerification('email')}
                 disabled={isVerificationLoading.email}
-                className="ml-11 bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)]"
+                className="ml-11 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25"
               >
                 {isVerificationLoading.email ? 'Отправка...' : 'Верифицировать'}
               </Button>
@@ -237,20 +236,20 @@ const PersonalDataTab = ({ setError }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
         whileHover={{ y: -5 }}
-        className="p-6 rounded-2xl bg-[rgba(255,255,255,0.05)] backdrop-blur-sm border border-[rgba(255,255,255,0.1)] hover:border-[#00f0ff]/50 hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300"
+        className="p-6 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300"
       >
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <CurrencyDollarIcon className="w-5 h-5 text-[#00f0ff]" />
+        <h3 className="text-lg font-semibold text-[var(--ev-text)] mb-4 flex items-center gap-2">
+          <CurrencyDollarIcon className="w-5 h-5 text-[var(--ev-gold)]" />
           Финансовая информация
         </h3>
-        <div className="p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[#00f0ff]/50 hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
+        <div className="p-5 rounded-xl bg-[var(--ev-void)]/30 border border-[var(--ev-gold)]/10">
           <div className="flex items-center justify-between">
             <div>
-              <label className="block text-xs font-medium text-[#9ca3af] mb-1">Потраченные средства</label>
-              <p className="text-2xl font-bold text-white">{userData.moneySpent?.toFixed(2) || '0.00'} ¥</p>
+              <label className="block text-xs font-medium text-[var(--ev-text-muted)] mb-1">Потраченные средства</label>
+              <p className="text-2xl font-bold text-[var(--ev-text)]">{userData.moneySpent?.toFixed(2) || '0.00'} ¥</p>
             </div>
-            <div className="p-3 rounded-lg bg-gradient-to-br from-[#00f0ff] via-[#a78bfa] to-[#10b981]">
-              <CurrencyDollarIcon className="w-6 h-6 text-white" />
+            <div className="p-3 rounded-lg bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/20">
+              <CurrencyDollarIcon className="w-6 h-6 text-[var(--ev-gold)]" />
             </div>
           </div>
         </div>
@@ -262,32 +261,32 @@ const PersonalDataTab = ({ setError }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.4 }}
         whileHover={{ y: -5 }}
-        className="p-6 rounded-2xl bg-[rgba(255,255,255,0.05)] backdrop-blur-sm border border-[rgba(255,255,255,0.1)] hover:border-[#00f0ff]/50 hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300"
+        className="p-6 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300"
       >
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <UsersIcon className="w-5 h-5 text-[#00f0ff]" />
+        <h3 className="text-lg font-semibold text-[var(--ev-text)] mb-4 flex items-center gap-2">
+          <UsersIcon className="w-5 h-5 text-[var(--ev-gold)]" />
           Реферальная программа
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <motion.div
             whileHover={{ y: -3 }}
-            className="p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[#00f0ff]/50 hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300"
+            className="p-5 rounded-xl bg-[var(--ev-void)]/30 border border-[var(--ev-gold)]/10"
           >
             <div className="flex items-center gap-2 mb-2">
-              <TagIcon className="w-4 h-4 text-[#00f0ff]" />
-              <label className="text-xs font-medium text-[#9ca3af]">Реферальный код</label>
+              <TagIcon className="w-4 h-4 text-[var(--ev-gold)]" />
+              <label className="text-xs font-medium text-[var(--ev-text-muted)]">Реферальный код</label>
             </div>
-            <p className="text-base text-white font-mono font-semibold">{userData.referralCode || 'Не указан'}</p>
+            <p className="text-base text-[var(--ev-text)] font-mono font-semibold">{userData.referralCode || 'Не указан'}</p>
           </motion.div>
           <motion.div
             whileHover={{ y: -3 }}
-            className="p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[#00f0ff]/50 hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300"
+            className="p-5 rounded-xl bg-[var(--ev-void)]/30 border border-[var(--ev-gold)]/10"
           >
             <div className="flex items-center gap-2 mb-2">
-              <UsersIcon className="w-4 h-4 text-[#00f0ff]" />
-              <label className="text-xs font-medium text-[#9ca3af]">Количество рефералов</label>
+              <UsersIcon className="w-4 h-4 text-[var(--ev-gold)]" />
+              <label className="text-xs font-medium text-[var(--ev-text-muted)]">Количество рефералов</label>
             </div>
-            <p className="text-2xl font-bold text-white">{userData.referralCount || 0}</p>
+            <p className="text-2xl font-bold text-[var(--ev-text)]">{userData.referralCount || 0}</p>
           </motion.div>
         </div>
       </motion.div>
@@ -298,20 +297,20 @@ const PersonalDataTab = ({ setError }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.5 }}
         whileHover={{ y: -5 }}
-        className="p-6 rounded-2xl bg-[rgba(255,255,255,0.05)] backdrop-blur-sm border border-[rgba(255,255,255,0.1)] hover:border-[#00f0ff]/50 hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300"
+        className="p-6 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300"
       >
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <BellIcon className="w-5 h-5 text-[#00f0ff]" />
+        <h3 className="text-lg font-semibold text-[var(--ev-text)] mb-4 flex items-center gap-2">
+          <BellIcon className="w-5 h-5 text-[var(--ev-gold)]" />
           Настройки уведомлений
         </h3>
-        <div className="flex items-center justify-between p-4 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[#00f0ff]/50 hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
+        <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--ev-void)]/30 border border-[var(--ev-gold)]/10">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)]">
-              <BellIcon className="w-5 h-5 text-[#00f0ff]" />
+            <div className="p-2 rounded-lg bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/15">
+              <BellIcon className="w-5 h-5 text-[var(--ev-gold)]" />
             </div>
             <div>
-              <label className="text-sm font-medium text-white block">Уведомления</label>
-              <p className="text-xs text-[#9ca3af]">Получать уведомления о заказах и акциях</p>
+              <label className="text-sm font-medium text-[var(--ev-text)] block">Уведомления</label>
+              <p className="text-xs text-[var(--ev-text-muted)]">Получать уведомления о заказах и акциях</p>
             </div>
           </div>
           <motion.div
@@ -327,7 +326,7 @@ const PersonalDataTab = ({ setError }) => {
               className="sr-only peer"
               disabled={isLoading}
             />
-            <div className={`w-12 h-6 rounded-full transition duration-300 ${userData.notificationsEnabled ? 'bg-[#00f0ff]/30' : 'bg-[rgba(255,255,255,0.15)]'}`}></div>
+            <div className={`w-12 h-6 rounded-full transition duration-300 ${userData.notificationsEnabled ? 'bg-[var(--ev-gold)]/30' : 'bg-[var(--ev-void)]'}`}></div>
             <div className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition duration-300 shadow-lg ${userData.notificationsEnabled ? 'translate-x-6' : ''}`}></div>
           </motion.div>
         </div>
@@ -348,22 +347,22 @@ const PersonalDataTab = ({ setError }) => {
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="p-6 w-full max-w-xs rounded-2xl bg-[rgba(31,41,55,0.95)] backdrop-blur-xl border border-[#00f0ff]/30">
-                <h3 className="text-lg font-bold text-white mb-4">
+              <div className="p-6 w-full max-w-xs rounded-2xl bg-[var(--ev-glass)] backdrop-blur-xl border border-[var(--ev-gold)]/20">
+                <h3 className="text-lg font-semibold text-[var(--ev-text)] mb-4">
                   Верификация Email
                 </h3>
                 <input
                   type="text"
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
-                  className="w-full p-3 bg-[rgba(107,114,128,0.15)] text-[#e5e7eb] border border-[#00f0ff]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/50 transition duration-300 mb-4"
+                  className="w-full p-3 bg-[var(--ev-void)]/50 text-[var(--ev-text)] border border-[var(--ev-gold)]/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--ev-gold)]/40 mb-4"
                   placeholder="Введите код"
                 />
                 <div className="flex gap-2">
                   <Button
                     onClick={() => handleConfirmVerification(showVerificationModal)}
                     disabled={isLoading}
-                    className="flex-1 bg-[rgba(0,240,255,0.1)] border border-[#00f0ff]/50 text-[#00f0ff] hover:bg-[rgba(0,240,255,0.15)] hover:border-[#00f0ff]"
+                    className="flex-1 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/40 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25"
                   >
                     Подтвердить
                   </Button>

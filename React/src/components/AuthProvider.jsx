@@ -1,8 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import api from '../api/axiosInstance';
 import { jwtDecode } from 'jwt-decode';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { authStorage } from '../utils/authStorage';
+
+function normalizeRole(role) {
+  const r = (role || 'USER').toString().toUpperCase();
+  return r === 'ADMIN' ? 'ADMIN' : 'USER';
+}
 
 const AuthContext = createContext();
 
@@ -35,7 +41,7 @@ export function AuthProvider({ children }) {
           const user = {
             email: d.email ?? null,
             username: d.username ?? null,
-            role: d.role ?? 'USER',
+            role: normalizeRole(d.role),
           };
           localStorage.setItem('userEmail', user.email || '');
           localStorage.setItem('userName', user.username || '');
@@ -72,13 +78,21 @@ export function AuthProvider({ children }) {
       const response = await api.post('/auth/login', { email, password });
       const { email: userEmail, username, role } = response.data;
       authStorage.removeToken(); // JWT только в httpOnly-куке, в localStorage не храним
+      const normalizedRole = normalizeRole(role);
       localStorage.setItem('userEmail', userEmail || '');
       localStorage.setItem('userName', username || '');
-      localStorage.setItem('userRole', role || 'USER');
-      setAuthState({ isAuthenticated: true, user: { email: userEmail, username: username || '', role: role || 'USER' } });
-      navigate("/");
+      localStorage.setItem('userRole', normalizedRole);
+      // Обновляем стейт синхронно до навигации, чтобы Layout сразу увидел правильную роль (админ/пользователь)
+      flushSync(() => {
+        setAuthState({
+          isAuthenticated: true,
+          user: { email: userEmail, username: username || '', role: normalizedRole },
+        });
+      });
+      navigate('/');
     } catch (error) {
-      throw new Error('Login failed');
+      // Пробрасываем ошибку, чтобы страница логина показала сообщение (например "Invalid email or password")
+      throw error;
     }
   };
 
@@ -91,13 +105,15 @@ export function AuthProvider({ children }) {
         referralCode,
       });
       const { token } = response.data || {};
-      const userRole = token ? (() => { try { return jwtDecode(token).role || 'USER'; } catch { return 'USER'; } })() : 'USER';
+      const userRole = token ? (() => { try { return normalizeRole(jwtDecode(token).role); } catch { return 'USER'; } })() : 'USER';
       authStorage.removeToken();
       localStorage.setItem('userEmail', email || '');
       localStorage.setItem('userName', username || '');
       localStorage.setItem('userRole', userRole);
-      setAuthState({ isAuthenticated: true, user: { email, username, role: userRole } });
-      navigate("/");
+      flushSync(() => {
+        setAuthState({ isAuthenticated: true, user: { email, username, role: userRole } });
+      });
+      navigate('/');
     } catch (error) {
       throw new Error('Registration failed: ' + (error.response?.data?.message || error.message));
     }

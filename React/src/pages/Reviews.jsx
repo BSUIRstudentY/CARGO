@@ -3,18 +3,17 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
 import { StarIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import api from '../api/axiosInstance';
-import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../components/AuthProvider';
 
 // Helper function to render stars with customizable colors and sizes
-const renderStars = (rating, size = 'text-xl', color = 'text-yellow-400') => {
+const renderStars = (rating, size = 'text-xl', color = 'text-[var(--ev-gold)]') => {
   const filledStars = '★'.repeat(rating);
   const emptyStars = '☆'.repeat(5 - rating);
   return (
-    <span className={`${size} ${color}`}>
-      {filledStars}
-      <span className="text-gray-400">{emptyStars}</span>
+    <span className={size}>
+      <span className={color}>{filledStars}</span>
+      <span className="text-[var(--ev-text-muted)]">{emptyStars}</span>
     </span>
   );
 };
@@ -31,7 +30,7 @@ const StarRating = ({ rating, onRatingChange }) => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           className={`text-3xl cursor-pointer transition-colors duration-200 ${
-            (hoverRating || rating) >= star ? 'text-yellow-400' : 'text-gray-400'
+            (hoverRating || rating) >= star ? 'text-[var(--ev-gold)]' : 'text-[var(--ev-text-muted)]'
           }`}
           onClick={() => onRatingChange(star)}
           onMouseEnter={() => setHoverRating(star)}
@@ -83,7 +82,7 @@ const Toast = ({ message, type, onClose }) => {
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const bgColor = type === 'success' ? 'bg-[rgba(16,185,129,0.1)] border-[rgba(16,185,129,0.3)] text-[#10b981]' : 'bg-[rgba(239,68,68,0.1)] border-[rgba(239,68,68,0.3)] text-[#ef4444]';
+  const bgColor = type === 'success' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300' : 'bg-red-500/20 border-red-500/30 text-red-300';
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -131,15 +130,15 @@ const formatReviewDate = (dateValue) => {
 // Review Card component
 const ReviewCard = ({ review }) => {
   return (
-    <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
+    <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300">
       <div className="flex items-center justify-between mb-2 sm:mb-3">
-        <h3 className="text-base sm:text-xl font-semibold text-[#00f0ff]">
+        <h3 className="text-base sm:text-xl font-semibold text-[var(--ev-gold)]">
           {review.name}
         </h3>
-        <p className="text-xs sm:text-sm text-[#9ca3af]">{formatReviewDate(review.createdAt)}</p>
+        <p className="text-xs sm:text-sm text-[var(--ev-text-muted)]">{formatReviewDate(review.createdAt)}</p>
       </div>
       <div className="mb-2 sm:mb-3">{renderStars(review.rating, 'text-lg sm:text-2xl')}</div>
-      <p className="text-[#9ca3af] leading-relaxed text-sm sm:text-base">{review.text}</p>
+      <p className="text-[var(--ev-text-muted)] leading-relaxed text-sm sm:text-base">{review.text}</p>
     </div>
   );
 };
@@ -153,14 +152,12 @@ const AverageRating = ({ reviews }) => {
   }, [reviews]);
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 text-center mb-6 sm:mb-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-      <h2 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4">
-        <span className="bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-          Средний рейтинг: {average}
-        </span>
+    <div className="p-4 sm:p-6 md:p-8 text-center mb-6 sm:mb-8 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300">
+      <h2 className="text-2xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-[var(--ev-text)]">
+        Средний рейтинг: {average}
       </h2>
-      <div className="text-3xl sm:text-5xl mb-1.5 sm:mb-2">{renderStars(Math.round(average), 'text-3xl sm:text-5xl', 'text-yellow-400')}</div>
-      <p className="text-[#9ca3af] text-xs sm:text-sm">На основе {reviews.length} отзывов</p>
+      <div className="text-3xl sm:text-5xl mb-1.5 sm:mb-2">{renderStars(Math.round(average), 'text-3xl sm:text-5xl', 'text-[var(--ev-gold)]')}</div>
+      <p className="text-[var(--ev-text-muted)] text-xs sm:text-sm">На основе {reviews.length} отзывов</p>
     </div>
   );
 };
@@ -180,22 +177,22 @@ const RatingDistribution = ({ reviews }) => {
   }, [reviews]);
 
   return (
-    <div className="p-4 sm:p-6 mb-6 sm:mb-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-      <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+    <div className="p-4 sm:p-6 mb-6 sm:mb-8 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300">
+      <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-center text-[var(--ev-text)]">
         Распределение рейтингов
       </h3>
       {distribution.map(({ rating, percentage }) => (
         <div key={rating} className="flex items-center mb-4">
-          <span className="w-20 text-right mr-4 text-[#e5e7eb] font-semibold">{rating} ★</span>
-          <div className="flex-1 bg-[rgba(255,255,255,0.02)] h-6 rounded-full overflow-hidden border border-[rgba(255,255,255,0.1)]">
+          <span className="w-20 text-right mr-4 text-[var(--ev-text)] font-semibold">{rating} ★</span>
+          <div className="flex-1 bg-[var(--ev-gold)]/10 h-6 rounded-full overflow-hidden border border-[var(--ev-gold)]/20">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${percentage}%` }}
               transition={{ duration: 0.8, delay: rating * 0.1 }}
-              className="bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] h-6 rounded-full"
+              className="bg-[var(--ev-gold)] h-6 rounded-full"
             ></motion.div>
           </div>
-          <span className="ml-4 text-[#9ca3af] font-medium min-w-[50px] text-right">{percentage.toFixed(0)}%</span>
+          <span className="ml-4 text-[var(--ev-text-muted)] font-medium min-w-[50px] text-right">{percentage.toFixed(0)}%</span>
         </div>
       ))}
     </div>
@@ -226,17 +223,17 @@ const FilterDropdown = ({ label, value, options, onChange, isOpen, onToggle }) =
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <label className="block text-sm font-semibold uppercase tracking-wide mb-2 text-[#9ca3af]">
+      <label className="block text-sm font-semibold uppercase tracking-wide mb-2 text-[var(--ev-text-muted)]">
         {label}
       </label>
       <button
         type="button"
         onClick={() => onToggle(!isOpen)}
-        className="w-full border border-[rgba(255,255,255,0.1)] bg-[rgba(107,114,128,0.15)] backdrop-blur-xl text-[#e5e7eb] px-4 py-2.5 focus:border-[#00f0ff]/50 focus:outline-none transition-all duration-300 rounded-full flex items-center justify-between hover:bg-[rgba(107,114,128,0.2)] hover:border-[rgba(255,255,255,0.2)]"
+        className="w-full border border-[var(--ev-gold)]/20 bg-[var(--ev-gold)]/5 backdrop-blur-xl text-[var(--ev-text)] px-4 py-2.5 focus:border-[var(--ev-gold)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--ev-gold)]/30 transition-all duration-300 rounded-full flex items-center justify-between hover:bg-[var(--ev-gold)]/10 hover:border-[var(--ev-gold)]/30"
       >
-        <span className="text-[#9ca3af]">{selectedLabel}</span>
+        <span className="text-[var(--ev-text-muted)]">{selectedLabel}</span>
         <ChevronDownIcon 
-          className={`w-4 h-4 text-[#9ca3af] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-[var(--ev-text-muted)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
       <AnimatePresence>
@@ -246,7 +243,7 @@ const FilterDropdown = ({ label, value, options, onChange, isOpen, onToggle }) =
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute z-50 w-full mt-2 bg-[rgba(31,41,55,0.95)] backdrop-blur-xl border border-[rgba(255,255,255,0.1)] rounded-xl shadow-lg overflow-hidden"
+            className="absolute z-50 w-full mt-2 bg-[var(--ev-void)] border border-[var(--ev-gold)]/20 rounded-xl shadow-lg overflow-hidden backdrop-blur-xl"
           >
             {options.map((option) => (
               <button
@@ -258,8 +255,8 @@ const FilterDropdown = ({ label, value, options, onChange, isOpen, onToggle }) =
                 }}
                 className={`w-full text-left px-4 py-2.5 text-sm transition-colors duration-200 ${
                   value === option.value
-                    ? 'bg-[rgba(0,240,255,0.1)] text-[#00f0ff]'
-                    : 'text-[#9ca3af] hover:bg-[rgba(255,255,255,0.05)] hover:text-[#e5e7eb]'
+                    ? 'bg-[var(--ev-gold)]/15 text-[var(--ev-gold)]'
+                    : 'text-[var(--ev-text-muted)] hover:bg-[var(--ev-gold)]/10 hover:text-[var(--ev-text)]'
                 }`}
               >
                 {option.label}
@@ -300,17 +297,17 @@ const SearchFilter = ({ searchQuery, onSearchChange, filterRating, onFilterChang
       transition={{ duration: 0.3, delay: 0.1 }}
       className="mb-6"
     >
-      <div className="border border-[rgba(255,255,255,0.1)] bg-[rgba(107,114,128,0.15)] backdrop-blur-xl rounded-2xl p-6">
+      <div className="border border-[var(--ev-gold)]/15 bg-[var(--ev-glass)] rounded-2xl p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-1 flex items-center">
             <div className="relative w-full">
-              <MagnifyingGlassIcon className="absolute top-3 left-3 w-5 h-5 text-[#9ca3af]" />
+              <MagnifyingGlassIcon className="absolute top-3 left-3 w-5 h-5 text-[var(--ev-text-muted)]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={onSearchChange}
                 placeholder="Поиск по имени или тексту"
-                className="w-full pl-10 pr-4 py-2.5 bg-[rgba(255,255,255,0.02)] text-[#e5e7eb] border border-[rgba(255,255,255,0.1)] rounded-full focus:outline-none focus:border-[#00f0ff]/50 focus:ring-2 focus:ring-[#00f0ff]/30 transition duration-300 placeholder-[#9ca3af]"
+                className="w-full pl-10 pr-4 py-2.5 bg-[var(--ev-gold)]/5 text-[var(--ev-text)] border border-[var(--ev-gold)]/20 rounded-full focus:outline-none focus:border-[var(--ev-gold)]/50 focus:ring-2 focus:ring-[var(--ev-gold)]/30 transition duration-300 placeholder-[var(--ev-text-muted)]"
               />
             </div>
           </div>
@@ -345,11 +342,11 @@ const SearchFilter = ({ searchQuery, onSearchChange, filterRating, onFilterChang
 // Loading Skeleton for reviews
 const ReviewSkeleton = () => {
   return (
-    <div className="p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] animate-pulse">
-      <div className="h-6 bg-[rgba(255,255,255,0.02)] rounded w-3/4 mb-2"></div>
-      <div className="h-4 bg-[rgba(255,255,255,0.02)] rounded w-1/2 mb-2"></div>
-      <div className="h-4 bg-[rgba(255,255,255,0.02)] rounded mb-4"></div>
-      <div className="h-4 bg-[rgba(255,255,255,0.02)] rounded w-1/4"></div>
+    <div className="p-6 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 animate-pulse">
+      <div className="h-6 bg-[var(--ev-gold)]/10 rounded w-3/4 mb-2"></div>
+      <div className="h-4 bg-[var(--ev-gold)]/10 rounded w-1/2 mb-2"></div>
+      <div className="h-4 bg-[var(--ev-gold)]/10 rounded mb-4"></div>
+      <div className="h-4 bg-[var(--ev-gold)]/10 rounded w-1/4"></div>
     </div>
   );
 };
@@ -486,7 +483,7 @@ const Reviews = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="text-center text-[#ef4444] p-6 rounded-xl bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.3)]"
+        className="text-center text-red-300 p-6 rounded-xl bg-red-500/10 border border-red-500/20 max-w-2xl mx-auto"
       >
         {error}
       </motion.div>
@@ -494,23 +491,28 @@ const Reviews = () => {
   }
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-6 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-[var(--ev-text)] py-6 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       
       <div className="max-w-7xl mx-auto relative z-10">
-        <PageHeader 
-          title="Отзывы"
-          subtitle="Просмотрите отзывы наших клиентов или оставьте свой"
-        />
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-[var(--ev-text)] flex items-center gap-3">
+            <StarIcon className="w-8 h-8 text-[var(--ev-gold)]" />
+            Отзывы
+          </h1>
+          <p className="text-[var(--ev-text-muted)] text-sm sm:text-base mt-1">
+            Просмотрите отзывы наших клиентов или оставьте свой
+          </p>
+        </motion.div>
         
         {!isAuthenticated && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
-            className="mb-6 text-sm text-[#9ca3af] text-center"
+            className="mb-6 text-sm text-[var(--ev-text-muted)] text-center"
           >
-            Для отправки отзыва <a href="/login" className="text-[#00f0ff] hover:underline">войдите</a> или{' '}
-            <a href="/login" className="text-[#00f0ff] hover:underline">зарегистрируйтесь</a>.
+            Для отправки отзыва <a href="/login" className="text-[var(--ev-gold)] hover:underline">войдите</a> или{' '}
+            <a href="/login" className="text-[var(--ev-gold)] hover:underline">зарегистрируйтесь</a>.
           </motion.div>
         )}
 
@@ -536,8 +538,8 @@ const Reviews = () => {
           className="py-6"
         >
           {displayedReviews.length === 0 ? (
-              <div className="text-center py-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)]">
-                <p className="text-[#9ca3af] text-xl">
+              <div className="text-center py-8 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15">
+                <p className="text-[var(--ev-text-muted)] text-xl">
                   Пока нет отзывов.
                 </p>
               </div>
@@ -568,8 +570,9 @@ const Reviews = () => {
               className="text-center mt-6"
             >
               <Button
-                variant="primary"
+                variant="outline"
                 onClick={() => setPage((prev) => prev + 1)}
+                className="border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10"
               >
                 Загрузить больше отзывов
               </Button>
@@ -585,32 +588,32 @@ const Reviews = () => {
           className="py-8"
         >
           <div className="text-center">
-            <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+            <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-[var(--ev-text)]">
               Оставить отзыв
             </h2>
-            <div className="max-w-3xl mx-auto p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
+            <div className="max-w-3xl mx-auto p-8 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-[#9ca3af] mb-3">Выберите рейтинг:</label>
+                  <label className="block text-sm font-medium text-[var(--ev-text-muted)] mb-3">Выберите рейтинг:</label>
                   <div className="flex justify-center">
                     <StarRating rating={formData.rating} onRatingChange={handleRatingChange} />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#9ca3af] mb-2">Ваш отзыв:</label>
+                  <label className="block text-sm font-medium text-[var(--ev-text-muted)] mb-2">Ваш отзыв:</label>
                   <textarea
                     name="text"
                     value={formData.text}
                     onChange={handleInputChange}
                     placeholder="Поделитесь своим опытом..."
-                    className="w-full p-4 bg-[rgba(255,255,255,0.02)] text-[#e5e7eb] border border-[rgba(255,255,255,0.1)] rounded-xl focus:outline-none focus:border-[#00f0ff] focus:ring-2 focus:ring-[#00f0ff]/30 transition duration-300 h-32 resize-none placeholder-[#9ca3af]"
+                    className="w-full p-4 bg-[var(--ev-gold)]/5 text-[var(--ev-text)] border border-[var(--ev-gold)]/20 rounded-xl focus:outline-none focus:border-[var(--ev-gold)]/50 focus:ring-2 focus:ring-[var(--ev-gold)]/30 transition duration-300 h-32 resize-none placeholder-[var(--ev-text-muted)]"
                     required
                   ></textarea>
                 </div>
                 <Button
                   variant="primary"
                   type="submit"
-                  className="w-full py-3 text-lg"
+                  className="w-full py-3 text-lg bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25"
                 >
                   Отправить отзыв
                 </Button>

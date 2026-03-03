@@ -1,410 +1,259 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import axios from 'axios';
 import api from '../api/axiosInstance';
+import { Helmet } from 'react-helmet-async';
 import {
   CurrencyDollarIcon,
-  QuestionMarkCircleIcon,
-  ChevronDownIcon,
-  ShoppingCartIcon,
-  DocumentCheckIcon,
-  ArrowTrendingUpIcon,
-  SparklesIcon,
-  ChartBarIcon,
-  ClockIcon,
-  TruckIcon,
   BanknotesIcon,
+  CalculatorIcon,
+  ChevronRightIcon,
+  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/solid';
-import { PageHeader } from '../components/ui/PageHeader';
-  
-// Минималистичная карточка с курсом валют
-const RateCard = ({ label, value, icon: Icon, accentColor, delay = 0 }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      className="h-full"
-    >
-      <div className="p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300 h-full">
-        <div className="flex items-center gap-4 mb-4">
-          <div 
-            className="p-3 rounded-xl flex items-center justify-center"
-            style={{
-              background: `${accentColor}15`,
-              border: `1px solid ${accentColor}30`,
-            }}
-          >
-            <Icon className="w-6 h-6" style={{ color: accentColor }} />
-              </div>
-            </div>
-            
-        <span className="text-xs uppercase tracking-wider text-[#9ca3af] font-semibold block mb-3">
-              {label}
-            </span>
-            
-        <span className="text-2xl sm:text-3xl font-bold block" style={{ color: accentColor }}>
-                {value}
-              </span>
-          </div>
-    </motion.div>
-  );
-};
+import { Button } from '../components/ui/Button';
 
-// Минималистичная карточка расчета стоимости
-const CalculationCard = ({ shippingRate = 6.0 }) => {
-  // Расчет: товар 500 CNY = 225 BYN (500 * 0.45), доставка 3кг × shippingRate = $18, упаковка $3
-  const deliveryCost = 3 * shippingRate;
-  const usdToByn = 3.0; // Примерный курс USD/BYN
-  const totalByn = 225 + (deliveryCost * usdToByn) + (3 * usdToByn);
-  const steps = [
-    { label: 'Товар', value: '500 CNY', result: '225 BYN', accentColor: '#00f0ff' },
-    { label: 'Доставка', value: `3 кг × $${shippingRate}`, result: `$${deliveryCost.toFixed(2)}`, accentColor: '#a78bfa' },
-    { label: 'Упаковка', value: 'Стандарт', result: '$3', accentColor: '#10b981' },
-  ];
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2, duration: 0.4 }}
-    >
-      <div className="p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-            <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-xl bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)]">
-            <ChartBarIcon className="w-5 h-5 text-[#00f0ff]" />
-              </div>
-          <h3 className="text-xl font-bold text-[#00f0ff]">
-                Пример расчета
-              </h3>
-            </div>
-
-        <p className="text-[#9ca3af] mb-6 text-sm">
-          Товар стоимостью <span className="text-[#e5e7eb] font-semibold">500 CNY</span>, весом <span className="text-[#e5e7eb] font-semibold">3 кг</span>
-            </p>
-
-            <div className="space-y-3">
-              {steps.map((step, index) => (
-                <motion.div
-                  key={index}
-              initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 + index * 0.05 }}
-              className="p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] transition-all duration-300"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                  <div 
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: step.accentColor }}
-                  />
-                  <span className="text-[#e5e7eb] font-medium">{step.label}:</span>
-                  <span className="text-[#9ca3af]">{step.value}</span>
-                    </div>
-                <span className="font-bold" style={{ color: step.accentColor }}>
-                      {step.result}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            <motion.div
-          initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="mt-6 p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.1)]"
-            >
-              <div className="flex items-center justify-between">
-            <span className="text-[#e5e7eb] font-bold text-lg">Итого:</span>
-            <span className="text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-              ~{totalByn.toFixed(0)} BYN
-                </span>
-              </div>
-            </motion.div>
-          </div>
-    </motion.div>
-  );
-};
-
-// Минималистичная FAQ карточка
-const FAQItem = ({ question, answer, index }) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 + index * 0.05, duration: 0.4 }}
-    >
-      <div className="p-5 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-          <button
-            onClick={() => setOpen(!open)}
-            className="w-full flex items-center justify-between text-left group"
-          >
-            <div className="flex items-center gap-3 flex-1">
-            <div className="p-2 rounded-xl bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)]">
-              <QuestionMarkCircleIcon className="w-5 h-5 text-[#00f0ff]" />
-              </div>
-            <span className="font-semibold text-[#e5e7eb] group-hover:text-[#00f0ff] transition-colors">
-                {question}
-              </span>
-            </div>
-            <ChevronDownIcon
-            className={`w-5 h-5 text-[#9ca3af] transition-all duration-300 ${
-              open ? 'rotate-180 text-[#00f0ff]' : 'group-hover:text-[#e5e7eb]'
-              }`}
-            />
-          </button>
-          <AnimatePresence>
-            {open && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-              >
-              <p className="mt-4 text-[#9ca3af] leading-relaxed pl-12">
-                  {answer}
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-      </div>
-    </motion.div>
-  );
-};
+const linkClass = 'text-[var(--ev-gold)] hover:underline';
+const strongClass = 'font-medium text-[var(--ev-text)]';
 
 function Rate() {
   const navigate = useNavigate();
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [shippingRate, setShippingRate] = useState(6.0); // Fallback значение
+  const [loading, setLoading] = useState(true);
+  const cnyToByn = 0.45; // ваш курс юаня при закупке
+  const [usdToByn, setUsdToByn] = useState(null);
+  const [shippingRate, setShippingRate] = useState(6);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  // Загружаем курс доставки из API
-  useEffect(() => {
-    const fetchShippingRate = async () => {
+    const fetch = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await api.get('/exchange-rates/shipping/current');
-        if (response.data && response.data.rate) {
-          setShippingRate(response.data.rate);
-        }
-      } catch (error) {
-        console.error('Ошибка при получении курса доставки:', error);
-        // Используем значение по умолчанию
+        const [usdRes, shipRes] = await Promise.all([
+          axios.get('https://www.nbrb.by/api/exrates/rates/USD?parammode=2'),
+          api.get('/exchange-rates/shipping/current').catch(() => null),
+        ]);
+        setUsdToByn(usdRes.data.Cur_OfficialRate);
+        if (shipRes?.data?.rate != null) setShippingRate(Number(shipRes.data.rate));
+      } catch (e) {
+        setError('Курсы временно недоступны');
+        setUsdToByn(3.0);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchShippingRate();
+    fetch();
   }, []);
 
-  const faqs = [
-    {
-      question: 'Как часто обновляется курс?',
-      answer: 'Курс CNY/BYN обновляется ежедневно по данным банка и внутренних расчетов Fluvion. При оформлении заказа фиксируется актуальное значение.',
-    },
-    {
-      question: `Что входит в стоимость доставки $${shippingRate}/кг?`,
-      answer: 'В ставку входит международная доставка из Китая до склада в Минске, работа логистики и базовое страхование груза.',
-    },
-    {
-      question: 'Меняется ли стоимость после оформления заказа?',
-      answer: 'Нет. После оплаты стоимость фиксируется и не пересчитывается даже при изменении курса на следующий день.',
-    },
-    {
-      question: 'Можно ли получить скидку на курс или доставку?',
-      answer: 'Скидки доступны по программе лояльности и промокодам. Актуальные предложения отображаются в вашем профиле Fluvion.',
-    },
-  ];
+  const exampleGoods = 500; // CNY
+  const exampleWeight = 3; // kg
+  const exampleGoodsByn = (exampleGoods * cnyToByn).toFixed(2);
+  const exampleDeliveryUsd = exampleWeight * shippingRate;
+  const exampleDeliveryByn = usdToByn != null ? (exampleDeliveryUsd * usdToByn).toFixed(0) : '—';
+  const exampleTotal = usdToByn != null
+    ? Math.round(exampleGoods * cnyToByn + exampleDeliveryUsd * usdToByn + 3 * usdToByn)
+    : '—';
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-12"
-        >
-          <PageHeader
-            title="Курс валют"
-            subtitle="Актуальный курс CNY/BYN и прозрачное ценообразование для заказов через Fluvion"
-          />
-        </motion.div>
+    <div className="min-h-screen bg-[var(--ev-void)] text-[var(--ev-text)] font-[var(--ev-font-body)] overflow-x-hidden">
+      <Helmet>
+        <title>Курс и тарифы | Fluvion</title>
+        <meta name="description" content="Актуальный курс CNY/BYN, стоимость доставки из Китая за кг. Прозрачное ценообразование для заказов через Fluvion." />
+      </Helmet>
 
-        {/* Основные показатели */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-          <RateCard
-            label="Курс CNY/BYN"
-            value="1 CNY = 0.45 BYN"
-            icon={CurrencyDollarIcon}
-            accentColor="#00f0ff"
-            delay={0.1}
-          />
-          <RateCard
-            label="Доставка из Китая"
-            value={`$${shippingRate} за 1 кг`}
-            icon={TruckIcon}
-            accentColor="#a78bfa"
-            delay={0.15}
-          />
-          <RateCard
-            label="Обновление курса"
-            value="Ежедневно 10:00"
-            icon={ClockIcon}
-            accentColor="#10b981"
-            delay={0.2}
-          />
-        </div>
+      {/* Hero */}
+      <div className="pt-8 pb-6 md:pt-12 md:pb-8 px-4 text-center">
+        <p className="ev-label text-[var(--ev-gold)] mb-2">Тарифы</p>
+        <h1 className="font-[var(--ev-font-display)] text-2xl md:text-4xl font-light tracking-tight text-[var(--ev-gold)] mb-2">
+          Курс и доставка
+        </h1>
+        <p className="text-[var(--ev-text-muted)] text-sm md:text-base max-w-xl mx-auto">
+          Актуальные курсы и тариф доставки — без скрытых платежей
+        </p>
+      </div>
 
-        {/* Как формируется стоимость */}
+      <div className="max-w-3xl mx-auto px-4 pb-20 md:pb-24 space-y-6 md:space-y-8">
+        {/* Актуальные курсы — главный блок */}
         <motion.section
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.4 }}
-          className="mb-12"
+          transition={{ duration: 0.35 }}
+          className="rounded-2xl bg-[var(--ev-glass)] backdrop-blur-[20px] md:backdrop-blur-[24px] border border-[var(--ev-gold)]/15 md:border-[var(--ev-gold)]/20 hover:border-[var(--ev-gold)]/40 transition-all duration-300 overflow-hidden"
         >
-          <div className="p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-                <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 rounded-xl bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)]">
-                <BanknotesIcon className="w-6 h-6 text-[#00f0ff]" />
-                  </div>
-              <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-                    Как рассчитывается стоимость
-                  </h2>
+          <div className="p-4 md:p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-xl bg-[var(--ev-gold)]/10">
+                <CurrencyDollarIcon className="w-5 h-5 md:w-6 md:h-6 text-[var(--ev-gold)]" />
+              </div>
+              <h2 className="font-[var(--ev-font-display)] text-lg md:text-xl font-medium text-[var(--ev-text)]">
+                Актуальные курсы
+              </h2>
+            </div>
+            {error && (
+              <p className="text-amber-400/90 text-sm mb-4">{error}</p>
+            )}
+            {loading ? (
+              <p className="text-[var(--ev-text-muted)] text-sm">Загрузка курсов...</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-4 rounded-xl bg-[var(--ev-void)]/60 border border-[var(--ev-gold)]/10">
+                  <p className="ev-label text-[var(--ev-gold)]/80 text-xs mb-1">Курс CNY → BYN</p>
+                  <p className="text-xl md:text-2xl font-[var(--ev-font-display)] text-[var(--ev-gold)]">
+                    1 ¥ = {cnyToByn.toFixed(2)} BYN
+                  </p>
                 </div>
-                
-            <p className="text-[#9ca3af] mb-6 text-base leading-relaxed">
-                  Мы делаем ценообразование максимально прозрачным. Итоговая сумма складывается из нескольких компонентов:
-                </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                { title: 'Стоимость товара', desc: 'Пересчет из CNY в BYN по текущему курсу', icon: CurrencyDollarIcon, accentColor: '#00f0ff' },
-                { title: 'Международная доставка', desc: `Ставка $${shippingRate} за 1 кг (минимум 1 кг) от склада в Китае до Минска`, icon: TruckIcon, accentColor: '#a78bfa' },
-                { title: 'Упаковка и обработка', desc: 'Подготовка груза к транспортировке, консолидация и фотоотчет', icon: DocumentCheckIcon, accentColor: '#10b981' },
-                  ].map((item, index) => (
-                    <motion.div
-                      key={index}
-                  initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.05 }}
-                  className="p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300"
-                    >
-                  <div 
-                    className="inline-flex p-2 rounded-xl mb-3"
-                    style={{
-                      background: `${item.accentColor}15`,
-                      border: `1px solid ${item.accentColor}30`,
-                    }}
-                  >
-                    <item.icon className="w-5 h-5" style={{ color: item.accentColor }} />
-                      </div>
-                  <h3 className="text-[#e5e7eb] font-semibold mb-2">
-                        {item.title}
-                      </h3>
-                  <p className="text-[#9ca3af] text-sm leading-relaxed">
-                        {item.desc}
-                      </p>
-                    </motion.div>
-                  ))}
+                <div className="p-4 rounded-xl bg-[var(--ev-void)]/60 border border-[var(--ev-gold)]/10">
+                  <p className="ev-label text-[var(--ev-gold)]/80 text-xs mb-1">Доставка из Китая</p>
+                  <p className="text-xl md:text-2xl font-[var(--ev-font-display)] text-[var(--ev-gold)]">
+                    ${shippingRate} за 1 кг
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-[var(--ev-void)]/60 border border-[var(--ev-gold)]/10">
+                  <p className="ev-label text-[var(--ev-gold)]/80 text-xs mb-1">Обновление</p>
+                  <p className="text-lg font-[var(--ev-font-display)] text-[var(--ev-text)]">
+                    Ежедневно
+                  </p>
                 </div>
               </div>
+            )}
+          </div>
         </motion.section>
 
-        {/* Пример расчета и как зафиксировать курс */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-          <CalculationCard shippingRate={shippingRate} />
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-          >
-            <div className="p-8 h-full flex flex-col justify-between rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-              <div>
-                  <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-xl bg-[rgba(167,139,250,0.1)] border border-[rgba(167,139,250,0.3)]">
-                    <ArrowTrendingUpIcon className="w-5 h-5 text-[#a78bfa]" />
-                    </div>
-                  <h3 className="text-xl font-bold text-[#a78bfa]">
-                      Как зафиксировать курс
-                    </h3>
-                  </div>
-                  
-                <p className="text-[#9ca3af] mb-6 text-sm leading-relaxed">
-                    Курс фиксируется в момент создания счета на оплату в Fluvion и не меняется после успешной оплаты.
-                  </p>
-                  
-                <div className="space-y-3 mb-6">
-                    {[
-                      'Оформите заказ через «Заказать товар» или выберите из примеров товаров',
-                      'Проверьте итоговую сумму в профиле',
-                      'Оплатите счет в указанный срок — курс зафиксируется',
-                    ].map((step, index) => (
-                      <motion.div
-                        key={index}
-                      initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 + index * 0.05 }}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(167,139,250,0.3)] transition-all duration-300"
-                      >
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[rgba(167,139,250,0.1)] border border-[rgba(167,139,250,0.3)] flex items-center justify-center text-[#a78bfa] font-bold">
-                          {index + 1}
-                        </div>
-                      <span className="text-[#9ca3af]">{step}</span>
-                      </motion.div>
-                    ))}
-                </div>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-3">
-                <button
-                      onClick={() => navigate('/terminal')}
-                  className="px-6 py-3 rounded-xl bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)] transition-all duration-300 font-medium flex items-center gap-2"
-                    >
-                      <ShoppingCartIcon className="w-5 h-5" />
-                      Заказать товар
-                </button>
-                <button
-                      onClick={() => navigate('/terminal')}
-                  className="px-6 py-3 rounded-xl bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] text-[#e5e7eb] hover:bg-[rgba(255,255,255,0.05)] hover:border-[rgba(167,139,250,0.4)] hover:text-[#a78bfa] transition-all duration-300 font-medium flex items-center gap-2"
-                    >
-                      <DocumentCheckIcon className="w-5 h-5" />
-                      В терминал
-                </button>
-                  </div>
-                </div>
-          </motion.div>
-        </div>
-
-        {/* FAQ */}
+        {/* Из чего складывается стоимость */}
         <motion.section
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.4 }}
-          className="mb-8"
+          transition={{ duration: 0.35, delay: 0.05 }}
+          className="rounded-2xl bg-[var(--ev-glass)] backdrop-blur-[20px] md:backdrop-blur-[24px] border border-[var(--ev-gold)]/15 md:border-[var(--ev-gold)]/20 hover:border-[var(--ev-gold)]/40 transition-all duration-300 p-5 md:p-6"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-xl bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)]">
-              <QuestionMarkCircleIcon className="w-5 h-5 text-[#00f0ff]" />
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-xl bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/20">
+              <BanknotesIcon className="w-5 h-5 md:w-6 md:h-6 text-[var(--ev-gold)]" />
             </div>
-            <h3 className="text-2xl font-bold text-[#00f0ff]">
-              Часто задаваемые вопросы
-            </h3>
+            <h2 className="font-[var(--ev-font-display)] text-lg md:text-xl font-medium text-[var(--ev-text)]">
+              Из чего складывается сумма
+            </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {faqs.map((faq, index) => (
-              <FAQItem key={faq.question} question={faq.question} answer={faq.answer} index={index} />
-            ))}
+          <ul className="space-y-3 text-[var(--ev-text-muted)] text-sm md:text-base">
+            <li><span className={strongClass}>Товар</span> — пересчёт из CNY в BYN по курсу НБРБ.</li>
+            <li><span className={strongClass}>Доставка</span> — ${shippingRate} за 1 кг (мин. 1 кг) от Китая до Минска.</li>
+            <li><span className={strongClass}>Упаковка</span> — по тарифу (стандарт от $3).</li>
+            <li><span className={strongClass}>Страховка</span> — по желанию, 5% от стоимости груза.</li>
+          </ul>
+          <p className="text-[var(--ev-text-muted)] text-sm mt-4">
+            Итог считаем после проверки заказа и показываем в <span className={linkClass}>Профиле</span> → «Отправления». После оплаты курс не пересчитывается.
+          </p>
+        </motion.section>
+
+        {/* Пример расчёта */}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
+          className="rounded-2xl bg-[var(--ev-glass)] backdrop-blur-[20px] md:backdrop-blur-[24px] border border-[var(--ev-gold)]/15 md:border-[var(--ev-gold)]/20 hover:border-[var(--ev-gold)]/40 transition-all duration-300 p-5 md:p-6"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-xl bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/20">
+              <CalculatorIcon className="w-5 h-5 md:w-6 md:h-6 text-[var(--ev-gold)]" />
+            </div>
+            <h2 className="font-[var(--ev-font-display)] text-lg md:text-xl font-medium text-[var(--ev-text)]">
+              Пример расчёта
+            </h2>
           </div>
+          <p className="text-[var(--ev-text-muted)] text-sm mb-4">
+            Товар {exampleGoods} ¥, вес {exampleWeight} кг, упаковка стандарт.
+          </p>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between text-[var(--ev-text-muted)]">
+              <span>Товар</span>
+              <span className="text-[var(--ev-text)]">{exampleGoodsByn} BYN</span>
+            </div>
+            <div className="flex justify-between text-[var(--ev-text-muted)]">
+              <span>Доставка {exampleWeight} кг × ${shippingRate}</span>
+              <span className="text-[var(--ev-text)]">~{exampleDeliveryByn} BYN</span>
+            </div>
+            <div className="flex justify-between text-[var(--ev-text-muted)]">
+              <span>Упаковка</span>
+              <span className="text-[var(--ev-text)]">~9 BYN</span>
+            </div>
+          </div>
+          <div className="mt-4 pt-4 border-t border-[var(--ev-gold)]/10 flex justify-between items-center">
+            <span className="font-medium text-[var(--ev-text)]">Итого</span>
+            <span className="text-xl font-[var(--ev-font-display)] text-[var(--ev-gold)]">≈ {exampleTotal} BYN</span>
+          </div>
+          <Button
+            variant="ev-outline"
+            size="md"
+            onClick={() => navigate('/calculator')}
+            className="mt-4 w-full sm:w-auto flex items-center justify-center gap-2"
+          >
+            <CalculatorIcon className="w-4 h-4" />
+            Калькулятор
+          </Button>
+        </motion.section>
+
+        {/* Как зафиксировать курс */}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.15 }}
+          className="rounded-2xl bg-[var(--ev-glass)] backdrop-blur-[20px] md:backdrop-blur-[24px] border border-[var(--ev-gold)]/15 md:border-[var(--ev-gold)]/20 hover:border-[var(--ev-gold)]/40 transition-all duration-300 p-5 md:p-6"
+        >
+          <h2 className="font-[var(--ev-font-display)] text-lg md:text-xl font-medium text-[var(--ev-text)] mb-4">
+            Как зафиксировать курс
+          </h2>
+          <p className="text-[var(--ev-text-muted)] text-sm mb-4">
+            Курс фиксируется при создании счёта и не меняется после оплаты.
+          </p>
+          <ol className="space-y-2 text-sm text-[var(--ev-text-muted)] mb-6 list-decimal list-inside">
+            <li>Оформите заказ в <span className={linkClass}>Заказать товар</span> или выберите из примеров.</li>
+            <li>Проверьте итог в профиле после проверки заказа.</li>
+            <li>Оплатите в срок — курс зафиксируется.</li>
+          </ol>
+          <Button
+            variant="ev-primary"
+            size="md"
+            onClick={() => navigate('/terminal')}
+            className="w-full sm:w-auto flex items-center justify-center gap-2"
+          >
+            Заказать товар
+            <ChevronRightIcon className="w-4 h-4" />
+          </Button>
+        </motion.section>
+
+        {/* Краткий FAQ */}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.2 }}
+          className="rounded-2xl bg-[var(--ev-glass)] backdrop-blur-[20px] md:backdrop-blur-[24px] border border-[var(--ev-gold)]/15 md:border-[var(--ev-gold)]/20 hover:border-[var(--ev-gold)]/40 transition-all duration-300 p-5 md:p-6"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-xl bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/20">
+              <QuestionMarkCircleIcon className="w-5 h-5 text-[var(--ev-gold)]" />
+            </div>
+            <h2 className="font-[var(--ev-font-display)] text-lg font-medium text-[var(--ev-text)]">
+              Вопросы по курсу и тарифам
+            </h2>
+          </div>
+          <div className="space-y-4 text-sm text-[var(--ev-text-muted)]">
+            <div>
+              <p className={strongClass}>Меняется ли сумма после оплаты?</p>
+              <p>Нет. После оплаты стоимость фиксируется и не пересчитывается при изменении курса.</p>
+            </div>
+            <div>
+              <p className={strongClass}>Есть ли скидки?</p>
+              <p>Скидки по программе лояльности и промокодам. Актуальные предложения — в профиле.</p>
+            </div>
+          </div>
+          <Button
+            variant="ev-outline"
+            size="md"
+            onClick={() => navigate('/faq')}
+            className="mt-4"
+          >
+            Все вопросы в FAQ
+          </Button>
         </motion.section>
       </div>
     </div>

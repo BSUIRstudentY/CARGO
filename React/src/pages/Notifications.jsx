@@ -29,9 +29,9 @@ const Notifications = () => {
   };
 
   const notificationStyles = {
-    order: { icon: '📦', accentColor: '#10b981' },
-    support: { icon: '🛠️', accentColor: '#00f0ff' },
-    promotion: { icon: '🎉', accentColor: '#a78bfa' },
+    order: { icon: '📦', accentClasses: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400', titleClass: 'text-emerald-400' },
+    support: { icon: '🛠️', accentClasses: 'bg-[var(--ev-gold)]/15 border-[var(--ev-gold)]/30 text-[var(--ev-gold)]', titleClass: 'text-[var(--ev-gold)]' },
+    promotion: { icon: '🎉', accentClasses: 'bg-purple-500/15 border-purple-500/30 text-purple-300', titleClass: 'text-purple-300' },
   };
 
   const getTitleFromCategory = (category) => {
@@ -292,7 +292,7 @@ const Notifications = () => {
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-6 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-[var(--ev-text)] py-6 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.header
@@ -301,10 +301,10 @@ const Notifications = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-8 sm:mb-12"
         >
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold font-display bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent tracking-tight">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-semibold text-[var(--ev-text)] tracking-tight">
             Уведомления
           </h1>
-          <p className="text-sm sm:text-lg text-[#9ca3af] mt-1.5 sm:mt-2">
+          <p className="text-sm sm:text-lg text-[var(--ev-text-muted)] mt-1.5 sm:mt-2">
             Будьте в курсе всех событий: заказы, поддержка, акции
           </p>
         </motion.header>
@@ -312,7 +312,7 @@ const Notifications = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] p-4 sm:p-6 relative overflow-hidden"
+          className="rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 p-4 sm:p-6 relative overflow-hidden"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div>
@@ -336,30 +336,30 @@ const Notifications = () => {
               />
             </div>
             <div>
-              <label className="block text-[#9ca3af] mb-1.5 sm:mb-2 text-xs sm:text-sm">Поиск</label>
+              <label className="block text-[var(--ev-text-muted)] mb-1.5 sm:mb-2 text-xs sm:text-sm">Поиск</label>
               <input
                 type="text"
                 placeholder="Поиск по уведомлениям..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full p-2.5 sm:p-3 text-sm sm:text-base bg-[rgba(255,255,255,0.02)] text-[#e5e7eb] border border-[rgba(255,255,255,0.1)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/30 focus:border-[#00f0ff] transition duration-300 placeholder-[#9ca3af]"
+                className="w-full p-2.5 sm:p-3 text-sm sm:text-base bg-[var(--ev-gold)]/5 text-[var(--ev-text)] border border-[var(--ev-gold)]/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--ev-gold)]/30 focus:border-[var(--ev-gold)]/50 transition duration-300 placeholder-[var(--ev-text-muted)]"
               />
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={markAllAsRead}
-              className="bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl text-sm sm:text-base hover:bg-[rgba(0,240,255,0.15)] transition duration-300"
+              className="bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl text-sm sm:text-base hover:bg-[var(--ev-gold)]/25 transition duration-300"
             >
               Отметить все как прочитанные
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={clearReadNotifications}
-              className="bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl text-sm sm:text-base hover:bg-[rgba(0,240,255,0.15)] transition duration-300"
+              className="bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl text-sm sm:text-base hover:bg-[var(--ev-gold)]/25 transition duration-300"
             >
               Очистить прочитанные
             </motion.button>
@@ -372,7 +372,7 @@ const Notifications = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
                   transition={{ duration: 0.3 }}
-                  className="text-[#ef4444] text-center mb-4 bg-[rgba(239,68,68,0.1)] p-4 rounded-xl border border-[rgba(239,68,68,0.3)]"
+                  className="text-red-300 text-center mb-4 bg-red-500/10 p-4 rounded-xl border border-red-500/20"
                 >
                   {error}
                 </motion.div>
@@ -382,13 +382,13 @@ const Notifications = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="text-[#9ca3af] text-center p-4"
+                  className="text-[var(--ev-text-muted)] text-center p-8"
                 >
                   Нет уведомлений
                 </motion.div>
               )}
               {notifications.map((notification, index) => {
-                const accentColor = notificationStyles[notification.type]?.accentColor || '#00f0ff';
+                const style = notificationStyles[notification.type] || { icon: '🔔', accentClasses: 'bg-[var(--ev-gold)]/15 border-[var(--ev-gold)]/30 text-[var(--ev-gold)]', titleClass: 'text-[var(--ev-gold)]' };
                 return (
                   <motion.div
                     key={notification.id}
@@ -396,25 +396,21 @@ const Notifications = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                     whileHover={{ y: -5, scale: 1.01 }}
-                    className={`p-3 sm:p-4 rounded-xl flex items-center justify-between transition-all duration-300 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] cursor-pointer ${
+                    className={`p-3 sm:p-4 rounded-xl flex items-center justify-between transition-all duration-300 bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 cursor-pointer ${
                       notification.isRead ? 'opacity-70' : 'opacity-100'
                     }`}
                     onClick={() => handleNotificationClick(notification)}
                   >
                     <div className="flex items-center">
                       <span
-                        className="rounded-full p-2 sm:p-3 mr-3 sm:mr-4 text-base sm:text-xl"
-                        style={{
-                          background: `${accentColor}15`,
-                          border: `1px solid ${accentColor}30`,
-                        }}
+                        className={`rounded-full p-2 sm:p-3 mr-3 sm:mr-4 text-base sm:text-xl border ${style.accentClasses}`}
                       >
-                        {notificationStyles[notification.type]?.icon || '🔔'}
+                        {style.icon}
                       </span>
                       <div>
-                        <h4 className="text-base sm:text-lg font-semibold font-display" style={{ color: accentColor }}>{notification.title}</h4>
-                        <p className="text-[#9ca3af] text-xs sm:text-base">{notification.message}</p>
-                        <p className="text-[#9ca3af] text-xs">
+                        <h4 className={`text-base sm:text-lg font-semibold ${style.titleClass}`}>{notification.title}</h4>
+                        <p className="text-[var(--ev-text-muted)] text-xs sm:text-base">{notification.message}</p>
+                        <p className="text-[var(--ev-text-muted)] text-xs">
                           {safeFormatDate(notification.createdAt)}
                         </p>
                       </div>
@@ -427,7 +423,7 @@ const Notifications = () => {
                           e.stopPropagation();
                           toggleReadStatus(notification.id, notification.isRead);
                         }}
-                        className="text-[#9ca3af] hover:text-[#00f0ff] transition-colors"
+                        className="text-[var(--ev-text-muted)] hover:text-[var(--ev-gold)] transition-colors text-sm"
                       >
                         {notification.isRead ? 'Отметить непрочитанным' : 'Отметить прочитанным'}
                       </motion.button>
@@ -445,11 +441,11 @@ const Notifications = () => {
               className="text-center mt-6"
             >
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={loadMore}
                 disabled={loading}
-                className="bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl text-sm sm:text-base hover:bg-[rgba(0,240,255,0.15)] transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl text-sm sm:text-base hover:bg-[var(--ev-gold)]/25 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Загрузка...' : 'Загрузить еще'}
               </motion.button>

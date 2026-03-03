@@ -114,8 +114,8 @@ const ReferralTab = () => {
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-[#00f0ff] mx-auto mb-4" />
-          <p className="text-[#808080]">Загрузка...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-[var(--ev-gold)]/30 border-t-[var(--ev-gold)] mx-auto mb-4" />
+          <p className="text-[var(--ev-text-muted)]">Загрузка...</p>
         </motion.div>
       </div>
     );
@@ -130,8 +130,8 @@ const ReferralTab = () => {
         transition={{ duration: 0.5 }}
         className="flex items-center justify-between"
       >
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent flex items-center gap-3">
-          <UsersIcon className="w-8 h-8 text-[#00f0ff]" />
+        <h2 className="text-2xl font-semibold text-[var(--ev-text)] flex items-center gap-3">
+          <UsersIcon className="w-7 h-7 text-[var(--ev-gold)]" />
           Реферальная программа
         </h2>
       </motion.div>
@@ -144,7 +144,7 @@ const ReferralTab = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 50 }}
             transition={{ duration: 0.3 }}
-            className="p-4 bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.3)] rounded-xl text-[#ef4444] text-center"
+            className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 text-center"
           >
             {error}
           </motion.div>
@@ -152,39 +152,39 @@ const ReferralTab = () => {
       </AnimatePresence>
 
       {/* Ваш реферальный код */}
-      <div className="p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-        <h3 className="text-xl font-bold text-[#e5e7eb] mb-4 flex items-center gap-2">
-          <TagIcon className="w-6 h-6 text-[#00f0ff]" />
+      <div className="p-6 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300">
+        <h3 className="text-xl font-semibold text-[var(--ev-text)] mb-4 flex items-center gap-2">
+          <TagIcon className="w-6 h-6 text-[var(--ev-gold)]" />
           Ваш реферальный код
         </h3>
           {userData.referralCode ? (
             <div className="space-y-4">
-              <p className="text-[#cdcdcd]">Поделитесь этим кодом с друзьями:</p>
+              <p className="text-[var(--ev-text-muted)]">Поделитесь этим кодом с друзьями:</p>
               <div className="flex flex-col sm:flex-row items-center gap-4">
-                <div className="flex-1 w-full p-4 bg-[rgba(255,255,255,0.02)] rounded-lg border border-[rgba(255,255,255,0.1)]">
-                  <p className="text-xl font-mono text-[#00f0ff] text-center">{userData.referralCode}</p>
+                <div className="flex-1 w-full p-4 bg-[var(--ev-gold)]/5 rounded-lg border border-[var(--ev-gold)]/20">
+                  <p className="text-xl font-mono text-[var(--ev-gold)] text-center">{userData.referralCode}</p>
                 </div>
                 <Button
                   onClick={copyReferralText}
-                  className="bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)] flex items-center gap-2"
+                  className="bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25 hover:border-[var(--ev-gold)]/40 flex items-center gap-2"
                 >
                   <ClipboardIcon className="w-5 h-5" />
                   {copied ? 'Скопировано!' : 'Пригласить друга'}
                 </Button>
               </div>
-              <p className="text-sm text-[#808080] text-center">
+              <p className="text-sm text-[var(--ev-text-muted)] text-center">
                 Нажмите "Пригласить друга" для копирования текста с вашим кодом и ссылкой на регистрацию.
               </p>
             </div>
           ) : (
-            <p className="text-center text-[#9ca3af]">Реферальный код отсутствует. Выполните квесты, чтобы получить код!</p>
+            <p className="text-center text-[var(--ev-text-muted)]">Реферальный код отсутствует. Выполните квесты, чтобы получить код!</p>
           )}
         </div>
 
       {/* Активировать реферальный код */}
-      <div className="p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-        <h3 className="text-xl font-bold text-[#e5e7eb] mb-4 flex items-center gap-2">
-          <ArrowPathIcon className="w-6 h-6 text-[#00f0ff]" />
+      <div className="p-6 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300">
+        <h3 className="text-xl font-semibold text-[var(--ev-text)] mb-4 flex items-center gap-2">
+          <ArrowPathIcon className="w-6 h-6 text-[var(--ev-gold)]" />
           Активировать реферальный код
         </h3>
           <div className="space-y-4">
@@ -194,42 +194,42 @@ const ReferralTab = () => {
                 value={referralCodeActivate}
                 onChange={e => setReferralCodeActivate(e.target.value)}
                 placeholder="Введите реферальный код друга"
-                className="flex-1 p-3 bg-[rgba(107,114,128,0.15)] text-[#e5e7eb] border border-[rgba(255,255,255,0.1)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/30 transition duration-300"
+                className="flex-1 p-3 bg-[var(--ev-gold)]/5 text-[var(--ev-text)] border border-[var(--ev-gold)]/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--ev-gold)]/30 focus:border-[var(--ev-gold)]/40 transition duration-300"
               />
               <Button
                 onClick={handleActivateReferral}
                 disabled={activating}
-                className="bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] text-[#00f0ff] hover:bg-[rgba(0,240,255,0.15)] hover:border-[rgba(0,240,255,0.5)]"
+                className="bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25 hover:border-[var(--ev-gold)]/40"
               >
                 {activating ? 'Активация...' : 'Активировать'}
               </Button>
             </div>
-            <p className="text-sm text-[#808080] text-center">
+            <p className="text-sm text-[var(--ev-text-muted)] text-center">
               Введите код друга, чтобы получить бонусы за регистрацию.
             </p>
           </div>
         </div>
 
       {/* Ваши рефералы */}
-      <div className="p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-        <h3 className="text-xl font-bold text-[#e5e7eb] mb-4 flex items-center gap-2">
-          <UsersIcon className="w-6 h-6 text-[#00f0ff]" />
+      <div className="p-6 rounded-2xl bg-[var(--ev-glass)] border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 hover:bg-[var(--ev-gold)]/5 transition-all duration-300">
+        <h3 className="text-xl font-semibold text-[var(--ev-text)] mb-4 flex items-center gap-2">
+          <UsersIcon className="w-6 h-6 text-[var(--ev-gold)]" />
           Ваши рефералы
         </h3>
           {referrals.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-[rgba(255,255,255,0.1)]">
-                    <th className="px-4 py-3 text-left text-[#9ca3af] font-semibold">Имя пользователя</th>
-                    <th className="px-4 py-3 text-left text-[#9ca3af] font-semibold">Дата регистрации</th>
+                  <tr className="border-b border-[var(--ev-gold)]/20">
+                    <th className="px-4 py-3 text-left text-[var(--ev-text-muted)] font-semibold">Имя пользователя</th>
+                    <th className="px-4 py-3 text-left text-[var(--ev-text-muted)] font-semibold">Дата регистрации</th>
                   </tr>
                 </thead>
                 <tbody>
                   {referrals.map((referral, index) => (
-                    <tr key={index} className="border-b border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.02)] transition-colors">
-                      <td className="px-4 py-3 text-[#e5e7eb]">{referral.username || 'Аноним'}</td>
-                      <td className="px-4 py-3 text-[#9ca3af]">{new Date(referral.createdAt).toLocaleDateString('ru-RU')}</td>
+                    <tr key={index} className="border-b border-[var(--ev-gold)]/15 hover:bg-[var(--ev-gold)]/5 transition-colors">
+                      <td className="px-4 py-3 text-[var(--ev-text)]">{referral.username || 'Аноним'}</td>
+                      <td className="px-4 py-3 text-[var(--ev-text-muted)]">{new Date(referral.createdAt).toLocaleDateString('ru-RU')}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -237,9 +237,9 @@ const ReferralTab = () => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <UsersIcon className="w-16 h-16 text-[#9ca3af] mx-auto mb-4" />
-              <p className="text-[#e5e7eb] mb-2">У вас пока нет рефералов</p>
-              <p className="text-[#9ca3af]">Приглашайте друзей, чтобы они появились!</p>
+              <UsersIcon className="w-16 h-16 text-[var(--ev-text-muted)]/60 mx-auto mb-4" />
+              <p className="text-[var(--ev-text)] mb-2">У вас пока нет рефералов</p>
+              <p className="text-[var(--ev-text-muted)]">Приглашайте друзей, чтобы они появились!</p>
             </div>
           )}
         </div>

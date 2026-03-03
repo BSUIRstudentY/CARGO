@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
+import ExcelJS from 'exceljs';
 import api from '../api/axiosInstance';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -15,7 +16,8 @@ import {
   ArrowLeftIcon,
   TrashIcon,
   ExclamationTriangleIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/solid';
 
 function BatchDetail() {
@@ -32,6 +34,7 @@ function BatchDetail() {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [exportLoading, setExportLoading] = useState(false);
 
   const basicReasons = [
     'Неверная ссылка',
@@ -222,6 +225,223 @@ function BatchDetail() {
     setSelectedOrderId(orderId);
     setSelectedItemId(itemId);
     setShowItemRefusalModal(true);
+  };
+
+  /** Загрузка изображения в ArrayBuffer для вставки в Excel */
+  const loadImageAsBuffer = async (imageUrl) => {
+    if (!imageUrl || (!String(imageUrl).startsWith('http') && !String(imageUrl).startsWith('data:'))) return null;
+    try {
+      const res = await fetch(imageUrl, { mode: 'cors', credentials: 'omit', cache: 'no-cache' });
+      if (res.ok) {
+        const blob = await res.blob();
+        const buf = await blob.arrayBuffer();
+        return buf && buf.byteLength > 0 ? buf : null;
+      }
+    } catch (_) {}
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      let done = false;
+      const t = setTimeout(() => { if (!done) { done = true; resolve(null); } }, 8000);
+      img.onload = () => {
+        if (done) return;
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width || 400;
+          canvas.height = img.height || 400;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob((b) => {
+            if (done || !b || b.size === 0) { if (!done) resolve(null); return; }
+            b.arrayBuffer().then((buf) => { if (!done) { done = true; clearTimeout(t); resolve(buf); } });
+          }, 'image/png', 0.95);
+        } catch (_) { if (!done) { done = true; clearTimeout(t); resolve(null); } }
+      };
+      img.onerror = () => { if (!done) { done = true; clearTimeout(t); resolve(null); } };
+      img.src = imageUrl;
+    });
+  };
+
+  /** Экспорт всего сборного груза в Excel для карго (формат: ТОВАРЫ ДЛЯ ЗАКАЗА + ДОСТАВКА ИЗ КИТАЯ, с фото) */
+  const handleExportBatchToExcel = async () => {
+    if (!batch || !batch.orders || batch.orders.length === 0) return;
+    setExportLoading(true);
+    try {
+      const orders = batch.orders || [];
+      const flatItems = [];
+      orders.forEach((order) => {
+        (order.items || []).forEach((item) => flatItems.push({ order, item }));
+      });
+      if (flatItems.length === 0) return;
+
+      const imagePromises = flatItems.map(({ item }, idx) =>
+        (item.imageUrl ? loadImageAsBuffer(item.imageUrl) : Promise.resolve(null)).then((buf) => ({ index: idx, buffer: buf }))
+      );
+      const imageResults = await Promise.race([
+        Promise.all(imagePromises),
+        new Promise((r) => setTimeout(() => r(flatItems.map((_, i) => ({ index: i, buffer: null }))), 25000)),
+      ]);
+
+      const imageMap = new Map();
+      imageResults.forEach((r) => { if (r.buffer && r.buffer.byteLength > 0) imageMap.set(r.index, r.buffer); });
+
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Fluvion Admin';
+      const ws = workbook.addWorksheet('Сборный груз', { views: [{ state: 'frozen', ySplit: 2 }] });
+
+      const sectionHeaderStyle = {
+        font: { bold: true, size: 13, color: { argb: 'FF000000' } },
+        alignment: { vertical: 'middle', horizontal: 'center', wrapText: true },
+        border: { top: { style: 'medium' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } },
+      };
+      const headerStyle = {
+        font: { bold: true, size: 11, color: { argb: 'FFFFFFFF' } },
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } },
+        alignment: { vertical: 'middle', horizontal: 'center', wrapText: true },
+        border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      };
+      const dataStyle = {
+        alignment: { vertical: 'middle', horizontal: 'left', wrapText: true },
+        border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      };
+      const totalStyle = {
+        font: { bold: true, size: 12 },
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF90EE90' } },
+        alignment: { vertical: 'middle', horizontal: 'right', wrapText: true },
+        border: { top: { style: 'medium' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      };
+
+      const YUAN_TO_BYN = 0.65;
+
+      let currentRow = 1;
+
+      ws.mergeCells(currentRow, 1, currentRow, 10);
+      ws.getCell(currentRow, 1).value = 'ТОВАРЫ ДЛЯ ЗАКАЗА';
+      ws.getCell(currentRow, 1).style = sectionHeaderStyle;
+      ws.mergeCells(currentRow, 11, currentRow, 13);
+      ws.getCell(currentRow, 11).value = 'ДОСТАВКА ИЗ КИТАЯ (заполняется карго при получении груза в Минске)';
+      ws.getCell(currentRow, 11).style = sectionHeaderStyle;
+      ws.getRow(currentRow).height = 28;
+      currentRow++;
+
+      const headers1 = [
+        '№',
+        'название товара',
+        'ссылка на товар (ничего страшного если она целиком не будет видна)',
+        'цвет / размер / иные характеристики',
+        'кол-во',
+        'цена за 1 ед. в юанях',
+        'цена за доставку по китаю в юанях (оставьте пустым, если платная — внесу)',
+        'общая сумма в юанях',
+        'общая сумма в byn',
+        'ваш комментарий / можно прикрепить картинку',
+      ];
+      const headers2 = ['вес в кг', 'цена в $', 'цена в byn (по курсу продажи альфа банк на день оплаты)'];
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach((col, i) => {
+        ws.getCell(currentRow, col).value = headers1[i];
+        ws.getCell(currentRow, col).style = headerStyle;
+      });
+      [11, 12, 13].forEach((col, i) => {
+        ws.getCell(currentRow, col).value = headers2[i];
+        ws.getCell(currentRow, col).style = headerStyle;
+      });
+      ws.getRow(currentRow).height = 50;
+      currentRow++;
+
+      const colWidths = [6, 32, 48, 32, 10, 18, 38, 20, 18, 28, 14, 14, 38];
+      colWidths.forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+
+      let totalYuan = 0;
+      let totalByn = 0;
+
+      flatItems.forEach(({ order, item }, index) => {
+        const qty = item.quantity ?? 1;
+        const price = item.priceAtTime ?? 0;
+        const sumYuan = Math.round(qty * price * 100) / 100;
+        const sumByn = Math.round(sumYuan * YUAN_TO_BYN * 100) / 100;
+        totalYuan += sumYuan;
+        totalByn += sumByn;
+
+        const chars = (item.description || '').toString().slice(0, 200);
+        const rowData = [
+          index + 1,
+          item.productName ?? 'Без названия',
+          item.url ?? '',
+          chars || '',
+          qty,
+          price,
+          '', // доставка по Китаю — пусто
+          sumYuan,
+          sumByn,
+          '', // картинка — вставим отдельно
+          '', // вес — заполняет карго
+          '', // цена $ — карго
+          '', // цена byn — карго
+        ];
+        const row = ws.addRow(rowData);
+        row.height = 130;
+        row.eachCell((cell, colNumber) => {
+          cell.style = dataStyle;
+          if ([6, 8, 9].includes(colNumber)) cell.numFmt = '#,##0.00';
+        });
+
+        const imgBuffer = imageMap.get(index);
+        if (imgBuffer && imgBuffer.byteLength > 0) {
+          try {
+            let ext = 'png';
+            const url = (item.imageUrl || '').toLowerCase();
+            if (url.includes('.jpg') || url.includes('.jpeg')) ext = 'jpeg';
+            else if (url.includes('.gif')) ext = 'gif';
+            else if (url.includes('.webp')) ext = 'webp';
+            const imageId = workbook.addImage({ buffer: imgBuffer, extension: ext });
+            ws.addImage(imageId, {
+              tl: { col: 9, row: currentRow - 1 },
+              ext: { width: 140, height: 140 },
+              editAs: 'oneCell',
+            });
+            row.getCell(10).value = '';
+          } catch (_) {}
+        }
+        currentRow++;
+      });
+
+      const totalRow = ws.addRow([
+        flatItems.length + 1,
+        'ИТОГО',
+        '',
+        '',
+        '',
+        '',
+        '',
+        Math.round(totalYuan * 100) / 100,
+        Math.round(totalByn * 100) / 100,
+        '',
+        '',
+        '',
+        '',
+      ]);
+      totalRow.height = 28;
+      totalRow.eachCell((cell, colNumber) => {
+        if (colNumber === 1 || colNumber === 8 || colNumber === 9) cell.style = totalStyle;
+        else cell.style = dataStyle;
+        if (colNumber === 8 || colNumber === 9) cell.numFmt = '#,##0.00';
+      });
+
+      const dateStr = new Date().toISOString().split('T')[0];
+      const fileName = `Сборный_груз_${batch.id}_${dateStr}.xlsx`;
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export batch to Excel:', err);
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   const getStatusDisplay = (status) => {
@@ -589,6 +809,15 @@ function BatchDetail() {
 
         {/* Кнопки действий */}
         <div className="mt-6 flex flex-wrap justify-end gap-4">
+          <Button
+            onClick={handleExportBatchToExcel}
+            disabled={exportLoading || !batch?.orders?.length}
+            variant="outline"
+            className="border-emerald-500 text-emerald-500 hover:bg-emerald-500 hover:text-white"
+          >
+            <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
+            {exportLoading ? 'Экспорт...' : 'Скачать сборный груз в Excel'}
+          </Button>
           <Button
             variant="outline"
             onClick={() => {

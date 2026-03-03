@@ -223,6 +223,7 @@ class AuthResponse {
     private String token;
     private String email;
     private String username;
+    private String role;
 
     public AuthResponse(String token) {
         this.token = token;
@@ -232,6 +233,7 @@ class AuthResponse {
         this.token = map.get("token");
         this.email = map.get("email");
         this.username = map.get("username");
+        this.role = map.get("role");
     }
 }
 

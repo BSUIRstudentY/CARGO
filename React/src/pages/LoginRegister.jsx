@@ -165,7 +165,10 @@ function LoginRegister() {
       setError('');
       // Navigation handled by App.jsx
     } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || 'Ошибка аутентификации';
+      const msg = error.response?.data?.message ?? error.response?.data;
+      const errorMsg = typeof msg === 'string' ? msg : (error.response?.status === 401 || error.response?.status === 403
+        ? 'Неверный email или пароль'
+        : error.message || 'Ошибка аутентификации');
       setError(errorMsg);
     } finally {
       setIsLoading(false);

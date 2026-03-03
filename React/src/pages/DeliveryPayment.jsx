@@ -1,250 +1,203 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShoppingCartIcon, TruckIcon, CreditCardIcon, DocumentCheckIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
-import { PageHeader } from '../components/ui/PageHeader';
+import { TruckIcon, CreditCardIcon, DocumentCheckIcon, ArrowPathIcon, ShoppingBagIcon } from '@heroicons/react/24/solid';
 import { Button } from '../components/ui/Button';
+import { Helmet } from 'react-helmet-async';
+
+const SectionCard = ({ icon: Icon, label, title, children, className = '' }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.35 }}
+    className={`rounded-2xl bg-[var(--ev-glass)] backdrop-blur-[24px] border border-[var(--ev-gold)]/15 p-5 md:p-6 ${className}`}
+  >
+    <div className="flex items-center gap-3 mb-4">
+      <div className="p-2 rounded-xl bg-[var(--ev-gold)]/10 border border-[var(--ev-gold)]/20">
+        <Icon className="w-5 h-5 md:w-6 md:h-6 text-[var(--ev-gold)]" />
+      </div>
+      <div>
+        {label && <p className="ev-label text-[var(--ev-gold)]/80">{label}</p>}
+        <h2 className="font-[var(--ev-font-display)] text-lg md:text-xl font-light text-[var(--ev-text)]">
+          {title}
+        </h2>
+      </div>
+    </div>
+    {children}
+  </motion.div>
+);
 
 function DeliveryPayment() {
   const navigate = useNavigate();
+  const linkClass = 'text-[var(--ev-gold)] hover:underline';
+  const strongClass = 'font-medium text-[var(--ev-text)]';
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-6 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto relative z-10">
-        <PageHeader 
-          title="Доставка и оплата"
-          subtitle="Узнайте, как мы организуем доставку товаров из Китая и принимаем платежи"
-        />
+    <div className="min-h-screen bg-[var(--ev-void)] text-[var(--ev-text)] font-[var(--ev-font-body)] overflow-x-hidden">
+      <Helmet>
+        <title>Доставка и оплата | Fluvion</title>
+        <meta name="description" content="Как мы доставляем товары из Китая в Беларусь, способы оплаты, сборные грузы и безопасность платежей." />
+      </Helmet>
 
-        <motion.section
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="space-y-6 sm:space-y-10"
+      {/* Hero */}
+      <div className="pt-8 pb-6 md:pt-12 md:pb-8 px-4 text-center">
+        <p className="ev-label text-[var(--ev-gold)] mb-2">Информация</p>
+        <h1 className="font-[var(--ev-font-display)] text-2xl md:text-4xl font-light tracking-tight text-[var(--ev-gold)] mb-2">
+          Доставка и оплата
+        </h1>
+        <p className="text-[var(--ev-text-muted)] text-sm md:text-base max-w-xl mx-auto">
+          Как мы везём груз из Китая, как платить и как отслеживать заказ
+        </p>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4 pb-16 md:pb-24 space-y-6 md:space-y-8">
+        {/* Способы оплаты */}
+        <SectionCard
+          icon={CreditCardIcon}
+          label="Оплата"
+          title="Способы оплаты"
         >
-          {/* Способы оплаты */}
-            <div className="p-4 sm:p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-              <div className="flex items-center mb-3 sm:mb-4">
-                <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] mr-2 sm:mr-3">
-                  <CreditCardIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#00f0ff]" />
-                </div>
-                <h2 className="text-xl sm:text-2xl font-bold text-[#00f0ff]">
-                  Способы оплаты
-                </h2>
-              </div>
-              <p className="text-[#9ca3af] mb-3 sm:mb-4 text-sm sm:text-base">
-              На Fluvion мы предлагаем удобные и безопасные способы оплаты. Оплата производится после проверки заказа администратором и подтверждения итоговой стоимости.
-            </p>
-            
-            <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
-              <div className="p-3 sm:p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)]">
-                <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2">
-                  <CreditCardIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#00f0ff]" />
-                  <h3 className="text-base sm:text-lg font-semibold text-[#e5e7eb]">Банковская карта</h3>
-                </div>
-                <p className="text-[#9ca3af] text-xs sm:text-sm">
-                  Принимаем карты Visa и Mastercard через безопасный эквайринг BePaid с 256-битным SSL-шифрованием и 3D-Secure. Все платежи защищены и обрабатываются в соответствии с международными стандартами безопасности.
-                </p>
-              </div>
-            </div>
-
-            <div className="mb-3 sm:mb-4">
-              <h3 className="text-base sm:text-lg font-semibold text-[#e5e7eb] mb-2 sm:mb-3">Из чего складывается стоимость заказа:</h3>
-              <ul className="list-disc pl-4 sm:pl-5 space-y-2 sm:space-y-3 text-[#9ca3af] text-sm sm:text-base">
-                <li>
-                  <strong className="text-[#e5e7eb]">Цена товара:</strong> Рассчитывается по актуальному курсу с учётом стоимости у поставщика.
-                </li>
-                <li>
-                  <strong className="text-[#e5e7eb]">Международная доставка:</strong> Рассчитывается по <a href="/rates" onClick={(e) => { e.preventDefault(); navigate('/rates'); }} className="font-bold text-[#00f0ff] hover:underline">актуальному курсу</a> (минимальный вес — 1 кг). Рассчитывается на основе фактического или объёмного веса товаров.
-                </li>
-                <li>
-                  <strong className="text-[#e5e7eb]">Страховка (опционально):</strong> 5% от стоимости товаров. Страховка работает только если товар утерян и вы полностью засняли процесс распаковки товара на видео без пауз. В таком случае мы вернём полную стоимость груза.
-                </li>
-                <li>
-                  <strong className="text-[#e5e7eb]">Скидки:</strong> Применяются скидки пользователя (накопительная система) и промокоды, если они доступны.
-                </li>
-              </ul>
-            </div>
-
-              <p className="text-[#9ca3af] mt-3 sm:mt-4 text-sm sm:text-base">
-              Итоговая стоимость с учётом всех компонентов рассчитывается администратором после проверки заказа и отображается в <span className="font-bold text-[#00f0ff]">Профиле</span> во вкладке "Отправления" после проверки.
-              </p>
-            </div>
-
-          {/* Способы доставки */}
-            <div className="p-4 sm:p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-              <div className="flex items-center mb-3 sm:mb-4">
-                <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-[rgba(167,139,250,0.1)] border border-[rgba(167,139,250,0.3)] mr-2 sm:mr-3">
-                  <TruckIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#a78bfa]" />
-                </div>
-                <h2 className="text-xl sm:text-2xl font-bold text-[#a78bfa]">
-                  Способы доставки
-                </h2>
-              </div>
-              <p className="text-[#9ca3af] mb-3 sm:mb-4 text-sm sm:text-base">
-              Доставка товаров из Китая в Беларусь осуществляется в несколько этапов через систему сборных грузов для оптимизации логистики и снижения стоимости доставки.
-            </p>
-            
-            <div className="space-y-3 sm:space-y-4 mb-3 sm:mb-4">
-              <div className="p-3 sm:p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)]">
-                <h3 className="text-base sm:text-lg font-semibold text-[#e5e7eb] mb-1.5 sm:mb-2">1. Международная доставка из Китая</h3>
-                <ul className="list-disc pl-4 sm:pl-5 space-y-1.5 sm:space-y-2 text-[#9ca3af] text-xs sm:text-sm">
-                  <li>После проверки и оплаты заказ включается в <span className="font-bold text-[#a78bfa]">сборный груз</span></li>
-                  <li>Товары выкупаются у поставщиков и консолидируются на складе в Китае</li>
-                  <li>Транспортировка через транспортную компанию Карго в Минск</li>
-                  <li><strong className="text-[#e5e7eb]">Срок доставки: 18–35 дней</strong> (зависит от способа транспортировки)</li>
-                  <li><strong className="text-[#e5e7eb]">Стоимость:</strong> Рассчитывается по <a href="/rates" onClick={(e) => { e.preventDefault(); navigate('/rates'); }} className="font-bold text-[#a78bfa] hover:underline">актуальному курсу</a> (минимальный вес — 1 кг)</li>
-                  <li>Расчёт веса: оплачивается максимальное значение из фактического и объёмного веса</li>
-                </ul>
-              </div>
-
-              <div className="p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)]">
-                <h3 className="text-base sm:text-lg font-semibold text-[#e5e7eb] mb-1.5 sm:mb-2">2. Доставка по Республике Беларусь</h3>
-                <ul className="list-disc pl-4 sm:pl-5 space-y-1.5 sm:space-y-2 text-[#9ca3af] text-xs sm:text-sm">
-                  <li>После прибытия на склад в Минске заказ передаётся в Европочту</li>
-                  <li>Доставка до выбранного вами отделения Европочты</li>
-                  <li><strong className="text-[#e5e7eb]">Срок доставки: 2–5 дней</strong> (зависит от региона)</li>
-                  <li><strong className="text-[#e5e7eb]">Оплата:</strong> При получении в отделении Европочты оплачивается стоимость доставки по тарифам Европочты + стоимость доставки из Китая в РБ по <a href="/rates" onClick={(e) => { e.preventDefault(); navigate('/rates'); }} className="font-bold text-[#a78bfa] hover:underline">актуальному курсу</a> (наличными или картой в отделении Европочты)</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="p-3 sm:p-4 rounded-xl bg-[rgba(0,240,255,0.05)] border border-[rgba(0,240,255,0.2)]">
-              <p className="text-[#9ca3af] text-xs sm:text-sm">
-                <strong className="text-[#e5e7eb]">Отслеживание:</strong> Статус доставки можно отслеживать в разделе <span className="font-bold text-[#00f0ff]">Профиль</span> во вкладках "Отправления" (статус вашего заказа) и "Сборные грузы" (статус всего сборного груза). Вы получите уведомления при изменении статуса.
-              </p>
-            </div>
-          </div>
-
-          {/* Процесс работы со сборными грузами */}
-          <div className="p-4 sm:p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-            <div className="flex items-center mb-3 sm:mb-4">
-              <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-[rgba(16,185,129,0.1)] border border-[rgba(16,185,129,0.3)] mr-2 sm:mr-3">
-                <DocumentCheckIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#10b981]" />
-              </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-[#10b981]">
-                Сборные грузы
-              </h2>
-            </div>
-            <p className="text-[#9ca3af] mb-3 sm:mb-4 text-sm sm:text-base">
-              Все заказы объединяются в сборные грузы для оптимизации логистики и снижения стоимости доставки для всех клиентов.
-              </p>
-              <ul className="list-disc pl-4 sm:pl-5 space-y-2 sm:space-y-3 text-[#9ca3af] text-sm sm:text-base">
-                <li>
-                <strong className="text-[#e5e7eb]">Формирование:</strong> После проверки администратором и оплаты заказ включается в ближайший сборный груз. В сборный груз включаются только оплаченные заказы. Сборные грузы формируются регулярно для оптимизации отправок.
-              </li>
-              <li>
-                <strong className="text-[#e5e7eb]">Преимущества:</strong> Объединение заказов снижает стоимость доставки и ускоряет обработку всех заказов.
-                </li>
-                <li>
-                <strong className="text-[#e5e7eb]">Отслеживание:</strong> В разделе <span className="font-bold text-[#10b981]">Профиль</span> → "Сборные грузы" вы можете видеть все сборные грузы, в которые включён ваш заказ, их текущий статус и даты отправки.
-                </li>
-                <li>
-                <strong className="text-[#e5e7eb]">Статусы:</strong> Сборный груз проходит этапы: формирование → выкуп товаров → консолидация на складе → отправка из Китая → прибытие в Минск → распределение по заказам.
-                </li>
-              </ul>
-          </div>
-
-          {/* Правила оплаты и безопасности */}
-          <div className="p-4 sm:p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-            <div className="flex items-center mb-3 sm:mb-4">
-              <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-[rgba(0,240,255,0.1)] border border-[rgba(0,240,255,0.3)] mr-2 sm:mr-3">
-                <CreditCardIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#00f0ff]" />
-              </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-[#00f0ff]">
-                Безопасность платежей
-              </h2>
-            </div>
-            <p className="text-[#9ca3af] text-sm sm:text-base mb-3 sm:mb-4">
-              Мы гарантируем безопасность ваших платежей и данных при заказе доставки из Китая.
-            </p>
-            <ul className="list-disc pl-4 sm:pl-5 space-y-2 sm:space-y-3 text-[#9ca3af] text-sm sm:text-base">
-              <li>
-                <strong className="text-[#e5e7eb]">Защита данных:</strong> Все платёжные данные обрабатываются через защищённый эквайринг BePaid с 256-битным SSL-шифрованием и 3D-Secure для дополнительной защиты.
-              </li>
-              <li>
-                <strong className="text-[#e5e7eb]">Конфиденциальность:</strong> Ваши персональные данные (ФИО, телефон, email, адрес) защищены в соответствии с Законом РБ № 99-З "О защите персональных данных" и используются только для организации доставки.
-              </li>
-              <li>
-                <strong className="text-[#e5e7eb]">Срок оплаты:</strong> После проверки заказа администратором и подтверждения итоговой стоимости необходимо оплатить заказ в течение 3 дней банковской картой через эквайринг BePaid.
-              </li>
-            </ul>
-            </div>
-
-          {/* Правила возврата */}
-            <div className="p-4 sm:p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-              <div className="flex items-center mb-3 sm:mb-4">
-              <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-[rgba(167,139,250,0.1)] border border-[rgba(167,139,250,0.3)] mr-2 sm:mr-3">
-                <ArrowPathIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#a78bfa]" />
-              </div>
-                <h2 className="text-xl sm:text-2xl font-bold text-[#a78bfa]">
-                Правила возврата и гарантии
-                </h2>
-              </div>
-            <p className="text-[#9ca3af] text-sm sm:text-base mb-3 sm:mb-4">
-              Правила возврата средств и обработки претензий для услуг по доставке товаров из Китая:
-              </p>
-              <ul className="list-disc pl-4 sm:pl-5 space-y-2 sm:space-y-3 text-[#9ca3af] text-sm sm:text-base">
-                <li>
-                <strong className="text-[#e5e7eb]">Возврат при невозможности выкупа:</strong> Если товар невозможно выкупить у поставщика (закончился, неверная ссылка и т.д.), средства автоматически возвращаются. Вы получите уведомление об этом.
-              </li>
-              <li>
-                <strong className="text-[#e5e7eb]">Возврат средств:</strong> Возврат денежных средств за оказанные услуги возможен только в случаях, предусмотренных законодательством Республики Беларусь.
-                </li>
-                <li>
-                <strong className="text-[#e5e7eb]">Ответственность за качество:</strong> Наша компания не несёт ответственности за качество товаров, приобретённых у китайских поставщиков, но мы содействуем в решении претензий к поставщику при необходимости.
-                </li>
-                <li>
-                <strong className="text-[#e5e7eb]">Страхование и компенсация:</strong> При оформлении страховки мы гарантируем возврат полной стоимости груза, если товар утерян. Страховка работает только если вы полностью засняли процесс распаковки товара на видео без пауз. Претензии принимаются в течение 7 дней после получения товара.
-                </li>
-                <li>
-                <strong className="text-[#e5e7eb]">Подача претензий:</strong> Претензии можно подать в течение 7 дней через  <span className="font-bold text-[#a78bfa]">Тех.поддержку</span> или по email <a href="mailto:fluvionbiz@gmail.com" className="text-[#a78bfa] hover:underline">fluvionbiz@gmail.com</a>.
-                </li>
-              </ul>
-            <p className="text-[#9ca3af] mt-3 sm:mt-4 text-sm sm:text-base">
-              Свяжитесь с поддержкой по email{' '}
-              <a href="mailto:fluvionbiz@gmail.com" className="text-[#00f0ff] hover:underline">
-                fluvionbiz@gmail.com
-              </a>{' '}
-              или  на сайте{' '}
-              . Поддержка доступна 24/7.
+          <p className="text-[var(--ev-text-muted)] text-sm md:text-base mb-4">
+            Оплата после проверки заказа администратором и подтверждения итоговой стоимости.
+          </p>
+          <div className="p-4 rounded-xl bg-[var(--ev-void)]/60 border border-[var(--ev-gold)]/10 mb-4">
+            <h3 className="font-medium text-[var(--ev-text)] mb-1.5">Банковская карта</h3>
+            <p className="text-[var(--ev-text-muted)] text-sm">
+              Visa и Mastercard через BePaid: SSL-шифрование и 3D-Secure. Платежи соответствуют международным стандартам.
             </p>
           </div>
+          <h3 className="text-sm font-medium text-[var(--ev-text)] mb-2">Из чего складывается стоимость:</h3>
+          <ul className="list-disc pl-5 space-y-2 text-[var(--ev-text-muted)] text-sm">
+            <li><span className={strongClass}>Цена товара</span> — по курсу с учётом стоимости у поставщика.</li>
+            <li><span className={strongClass}>Доставка</span> — по <a href="/rates" onClick={(e) => { e.preventDefault(); navigate('/rates'); }} className={linkClass}>актуальному тарифу</a> (мин. 1 кг), по фактическому или объёмному весу.</li>
+            <li><span className={strongClass}>Страховка</span> (по желанию) — 5% от стоимости. Возврат полной суммы при утрате при наличии видео распаковки без пауз.</li>
+            <li><span className={strongClass}>Скидки</span> — накопительные и промокоды, если доступны.</li>
+          </ul>
+          <p className="text-[var(--ev-text-muted)] text-sm mt-4">
+            Итоговая сумма считается после проверки заказа и отображается в <span className="text-[var(--ev-gold)]">Профиле</span> → «Отправления».
+          </p>
+        </SectionCard>
 
-          {/* Призыв к действию */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <div className="p-4 sm:p-6 md:p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300 text-center">
-              <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent mb-3 sm:mb-4">
-                Готовы оформить заказ?
-              </h2>
-              <p className="text-[#9ca3af] mb-4 sm:mb-6 text-sm sm:text-base max-w-2xl mx-auto">
-                Добавьте товары через «Заказать товар» или выберите из примеров. Мы организуем доставку от поставщика до вашего отделения почты!
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  variant="primary"
-                  onClick={() => navigate('/terminal')}
-                  className="flex items-center gap-2"
-                >
-                  <DocumentCheckIcon className="w-5 h-5" />
-                  Заказать товар
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => navigate('/catalog')}
-                  className="flex items-center gap-2"
-                >
-                  <ShoppingCartIcon className="w-5 h-5" />
-                  Примеры товаров
-                </Button>
-              </div>
+        {/* Способы доставки */}
+        <SectionCard
+          icon={TruckIcon}
+          label="Логистика"
+          title="Как мы доставляем"
+        >
+          <p className="text-[var(--ev-text-muted)] text-sm md:text-base mb-4">
+            Доставка из Китая в Беларусь — сборные грузы для оптимизации стоимости и сроков.
+          </p>
+          <div className="space-y-4">
+            <div className="p-4 rounded-xl bg-[var(--ev-void)]/60 border border-[var(--ev-gold)]/10">
+              <h3 className="font-medium text-[var(--ev-text)] mb-2">1. Из Китая в Минск</h3>
+              <ul className="list-disc pl-5 space-y-1.5 text-[var(--ev-text-muted)] text-sm">
+                <li>После оплаты заказ попадает в <span className="text-[var(--ev-gold)]">сборный груз</span></li>
+                <li>Выкуп, консолидация на складе в Китае, перевозка в Минск</li>
+                <li><span className={strongClass}>Срок: 18–35 дней</span></li>
+                <li><span className={strongClass}>Стоимость:</span> по <a href="/rates" onClick={(e) => { e.preventDefault(); navigate('/rates'); }} className={linkClass}>актуальному курсу</a> (мин. 1 кг). Вес — максимум из фактического и объёмного.</li>
+              </ul>
             </div>
-          </motion.div>
-        </motion.section>
+            <div className="p-4 rounded-xl bg-[var(--ev-void)]/60 border border-[var(--ev-gold)]/10">
+              <h3 className="font-medium text-[var(--ev-text)] mb-2">2. По Беларуси</h3>
+              <ul className="list-disc pl-5 space-y-1.5 text-[var(--ev-text-muted)] text-sm">
+                <li>Из Минска — через Европочту до выбранного отделения</li>
+                <li><span className={strongClass}>Срок: 2–5 дней</span></li>
+                <li><span className={strongClass}>Оплата:</span> в отделении Европочты (наличные или карта) — доставка по РБ + доля доставки из Китая по <a href="/rates" onClick={(e) => { e.preventDefault(); navigate('/rates'); }} className={linkClass}>курсу</a>.</li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-4 p-4 rounded-xl bg-[var(--ev-gold)]/5 border border-[var(--ev-gold)]/20">
+            <p className="text-[var(--ev-text-muted)] text-sm">
+              <span className={strongClass}>Отслеживание:</span> в <span className="text-[var(--ev-gold)]">Профиле</span> — вкладки «Отправления» (ваш заказ) и «Сборные грузы» (общий груз). Уведомления при смене статуса.
+            </p>
+          </div>
+        </SectionCard>
+
+        {/* Сборные грузы */}
+        <SectionCard
+          icon={DocumentCheckIcon}
+          label="Процесс"
+          title="Сборные грузы"
+        >
+          <p className="text-[var(--ev-text-muted)] text-sm md:text-base mb-4">
+            Заказы объединяются в сборные грузы — так дешевле и быстрее для всех.
+          </p>
+          <ul className="list-disc pl-5 space-y-2 text-[var(--ev-text-muted)] text-sm">
+            <li><span className={strongClass}>Формирование:</span> после проверки и оплаты заказ добавляется в ближайший сборный груз. В груз попадают только оплаченные заказы.</li>
+            <li><span className={strongClass}>Плюсы:</span> ниже стоимость доставки, быстрее обработка.</li>
+            <li><span className={strongClass}>Отслеживание:</span> в <span className="text-[var(--ev-gold)]">Профиле</span> → «Сборные грузы» — список грузов с вашими заказами, статусы и даты.</li>
+            <li><span className={strongClass}>Этапы:</span> формирование → выкуп → консолидация → отправка из Китая → Минск → распределение по заказам.</li>
+          </ul>
+        </SectionCard>
+
+        {/* Безопасность */}
+        <SectionCard
+          icon={CreditCardIcon}
+          label="Защита"
+          title="Безопасность платежей"
+        >
+          <p className="text-[var(--ev-text-muted)] text-sm md:text-base mb-4">
+            Платежи и персональные данные защищены при заказе доставки из Китая.
+          </p>
+          <ul className="list-disc pl-5 space-y-2 text-[var(--ev-text-muted)] text-sm">
+            <li><span className={strongClass}>Платежи:</span> эквайринг BePaid — SSL 256-bit и 3D-Secure.</li>
+            <li><span className={strongClass}>Данные:</span> ФИО, телефон, email, адрес — в соответствии с Законом РБ о персональных данных, только для доставки.</li>
+            <li><span className={strongClass}>Срок оплаты:</span> после подтверждения итоговой суммы — оплата в течение 3 дней картой через BePaid.</li>
+          </ul>
+        </SectionCard>
+
+        {/* Возврат и гарантии */}
+        <SectionCard
+          icon={ArrowPathIcon}
+          label="Гарантии"
+          title="Возврат и претензии"
+        >
+          <p className="text-[var(--ev-text-muted)] text-sm md:text-base mb-4">
+            Условия возврата и обработки претензий при доставке из Китая.
+          </p>
+          <ul className="list-disc pl-5 space-y-2 text-[var(--ev-text-muted)] text-sm">
+            <li><span className={strongClass}>Невозможность выкупа:</span> товар закончился или неверная ссылка — средства возвращаются, вы получите уведомление.</li>
+            <li><span className={strongClass}>Возврат:</span> по правилам, предусмотренным законодательством РБ.</li>
+            <li><span className={strongClass}>Качество:</span> за качество товаров поставщика мы не отвечаем, но помогаем в претензиях к поставщику при необходимости.</li>
+            <li><span className={strongClass}>Страховка:</span> при утрате — возврат полной стоимости при наличии видео распаковки без пауз. Претензии — в течение 7 дней после получения.</li>
+            <li><span className={strongClass}>Претензии:</span> через <span className="text-[var(--ev-gold)]">Поддержку</span> или <a href="mailto:fluvionbiz@gmail.com" className={linkClass}>fluvionbiz@gmail.com</a>. Поддержка 24/7.</li>
+          </ul>
+        </SectionCard>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
+          className="rounded-2xl bg-[var(--ev-glass)] backdrop-blur-[24px] border border-[var(--ev-gold)]/20 p-6 md:p-8 text-center"
+        >
+          <h2 className="font-[var(--ev-font-display)] text-xl md:text-2xl font-light text-[var(--ev-gold)] mb-2">
+            Готовы оформить заказ?
+          </h2>
+          <p className="text-[var(--ev-text-muted)] text-sm md:text-base mb-6 max-w-md mx-auto">
+            Добавьте товары через «Заказать товар» или выберите из примеров — довезём до отделения почты.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              variant="ev-primary"
+              size="lg"
+              onClick={() => navigate('/terminal')}
+              className="flex items-center justify-center gap-2"
+            >
+              <DocumentCheckIcon className="w-5 h-5" />
+              Заказать товар
+            </Button>
+            <Button
+              variant="ev-outline"
+              size="lg"
+              onClick={() => navigate('/catalog')}
+              className="flex items-center justify-center gap-2"
+            >
+              <ShoppingBagIcon className="w-5 h-5" />
+              Примеры товаров
+            </Button>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

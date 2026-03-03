@@ -53,7 +53,7 @@ const HomeScreen = () => {
     {
       icon: 'cash-outline',
       title: 'Фиксированная цена',
-      description: '$6 за кг + тарифы Европочты, без скрытых платежей',
+      description: '$7 за кг + тарифы Европочты, без скрытых платежей',
       accent: theme.colors.purple,
     },
     {
@@ -142,7 +142,7 @@ const HomeScreen = () => {
           <Text style={styles.heroDescription}>
             Заказывайте товары из Китая без хлопот: от выбора в{' '}
             <Text style={styles.heroDescriptionAccent}>Каталоге</Text> (проверенные товары, которые уже заказывали) или{' '}
-            <Text style={styles.heroDescriptionAccentPurple}>Терминале</Text> (любые товары по ссылке) до доставки в Беларусь за 18–35 дней по цене $6/кг
+            <Text style={styles.heroDescriptionAccentPurple}>Терминале</Text> (любые товары по ссылке) до доставки в Беларусь за 18–35 дней по цене $7/кг
           </Text>
 
           {/* Info Notice */}

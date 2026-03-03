@@ -8,8 +8,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { Button } from '../components/ui/Button';
 import { Alert } from '../components/ui/Alert';
-import { Loading } from '../components/ui/Loading';
-import { PageHeader } from '../components/ui/PageHeader';
 import { useAuth } from '../components/AuthProvider';
 
 // Стили для скрытия скроллбара
@@ -34,7 +32,7 @@ function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { addToCart, cartLoading, cartError } = useCart();
+  const { addToCart, loading: cartLoading, error: cartError } = useCart();
   const [product, setProduct] = useState(null);
   const [similarProducts, setSimilarProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -136,12 +134,13 @@ function ProductDetail() {
       return;
     }
     try {
-      await addToCart({ ...productToAdd, quantity: productToAdd === product ? quantity : 1 });
+      const qty = productToAdd === product ? quantity : 1;
+      await addToCart([{ ...productToAdd, quantity: qty }]);
       confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#00f0ff', '#a78bfa', '#10b981'],
+        colors: ['#C9A97A', '#D4AF37', '#F5F5F5'],
       });
     } catch (error) {
       if (error.response && error.response.status === 403) {
@@ -179,7 +178,7 @@ function ProductDetail() {
         particleCount: 50,
         spread: 50,
         origin: { y: 0.6 },
-        colors: ['#00f0ff', '#a78bfa', '#10b981'],
+        colors: ['#C9A97A', '#D4AF37', '#F5F5F5'],
       });
       fetchProduct();
     } catch (error) {
@@ -194,25 +193,25 @@ function ProductDetail() {
   const maskedMarketplaceLink = (url) => {
     return url ? (
       <span className="flex items-center gap-2 break-words">
-        <LinkIcon className="w-5 h-5 text-[#00f0ff]" />
-        <span className="text-[#00f0ff]">Зашифрованная ссылка на маркетплейс</span>
+        <LinkIcon className="w-5 h-5 text-[var(--ev-gold)]" />
+        <span className="text-[var(--ev-gold)]">Зашифрованная ссылка на маркетплейс</span>
       </span>
     ) : (
-      <span className="break-words text-[#9ca3af]">Ссылка недоступна</span>
+      <span className="break-words text-[var(--ev-text-muted)]">Ссылка недоступна</span>
     );
   };
 
   const renderDescription = (description) => {
-    if (!description) return <p className="text-[#9ca3af] text-base">Детали товара будут здесь.</p>;
+    if (!description) return <p className="text-[var(--ev-text-muted)] text-base">Детали товара будут здесь.</p>;
     const lines = description.split('\n').filter((line) => line.trim() !== '');
     return (
-      <div className="space-y-4 text-[#9ca3af] leading-relaxed">
+      <div className="space-y-4 text-[var(--ev-text-muted)] leading-relaxed">
         {lines.map((line, index) => {
           if (line.match(/^(•|\*|-|#)\s+/)) {
             const cleanedLine = line.replace(/^(•|\*|-|#)\s+/, '');
             return (
               <div key={index} className="flex items-start gap-2 pl-4">
-                <span className="text-[#00f0ff] mt-1 flex-shrink-0">•</span>
+                <span className="text-[var(--ev-gold)] mt-1 flex-shrink-0">•</span>
                 <span className="text-base sm:text-sm break-words">{cleanedLine}</span>
               </div>
             );
@@ -225,7 +224,7 @@ function ProductDetail() {
               <p key={index} className="text-base break-words">
                 {parts.map((part, i) =>
                   i % 2 === 1 && (part.includes('**') || part.includes('__')) ? (
-                    <span key={i} className="font-bold text-[#e5e7eb]">
+                    <span key={i} className="font-bold text-[var(--ev-text)]">
                       {part.slice(2, -2)}
                     </span>
                   ) : (
@@ -243,7 +242,7 @@ function ProductDetail() {
               <p key={index} className="text-base break-words">
                 {parts.map((part, i) =>
                   i % 2 === 1 && (part.includes('*') || part.includes('_')) ? (
-                    <span key={i} className="italic text-[#a78bfa]">
+                    <span key={i} className="italic text-[var(--ev-gold)]">
                       {part.slice(2, -2)}
                     </span>
                   ) : (
@@ -262,7 +261,14 @@ function ProductDetail() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-transparent">
-        <Loading message="Загрузка товара..." />
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-center text-[var(--ev-gold)] bg-[var(--ev-glass)] p-8 rounded-2xl border border-[var(--ev-gold)]/20"
+        >
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-[var(--ev-gold)]/30 border-t-[var(--ev-gold)] mx-auto mb-3" />
+          <p className="text-[var(--ev-text-muted)] text-sm">Загрузка товара...</p>
+        </motion.div>
       </div>
     );
   }
@@ -270,12 +276,12 @@ function ProductDetail() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-transparent p-4">
-        <div className="max-w-md w-full p-8 bg-[rgba(255,255,255,0.02)] rounded-2xl border border-[rgba(255,255,255,0.1)]">
+        <div className="max-w-md w-full p-8 bg-[var(--ev-glass)] rounded-2xl border border-[var(--ev-gold)]/15">
           <Alert type="error" message={error} />
           <Button
             variant="outline"
             onClick={() => navigate(-1)}
-            className="mt-4 w-full"
+            className="mt-4 w-full border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10"
           >
             <ArrowLeftIcon className="w-5 h-5 mr-2" />
             Назад
@@ -288,12 +294,12 @@ function ProductDetail() {
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-transparent p-4">
-        <div className="max-w-md w-full p-8 text-center bg-[rgba(255,255,255,0.02)] rounded-2xl border border-[rgba(255,255,255,0.1)]">
-          <p className="text-xl text-[#9ca3af] mb-4">Товар не найден</p>
+        <div className="max-w-md w-full p-8 text-center bg-[var(--ev-glass)] rounded-2xl border border-[var(--ev-gold)]/15">
+          <p className="text-xl text-[var(--ev-text-muted)] mb-4">Товар не найден</p>
           <Button
             variant="outline"
             onClick={() => navigate(-1)}
-            className="w-full"
+            className="w-full border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10"
           >
             <ArrowLeftIcon className="w-5 h-5 mr-2" />
             Назад
@@ -344,7 +350,7 @@ function ProductDetail() {
   } : null;
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-4 px-3 sm:py-12 sm:px-6 lg:px-8 relative overflow-hidden pb-20 sm:pb-12">
+    <div className="min-h-screen bg-transparent text-[var(--ev-text)] py-4 px-3 sm:py-12 sm:px-6 lg:px-8 relative overflow-hidden pb-20 sm:pb-12">
       {product && (
         <Helmet>
           <title>{productTitle}</title>
@@ -371,18 +377,17 @@ function ProductDetail() {
         {/* Header Section */}
         <div className="mb-4 sm:mb-8">
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => navigate(-1)}
-            className="mb-2 sm:mb-4 text-sm sm:text-base py-1.5 sm:py-2 -ml-1"
+            className="mb-2 sm:mb-4 text-sm sm:text-base py-1.5 sm:py-2 -ml-1 border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10"
           >
             <ArrowLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
             Назад
           </Button>
-          <PageHeader 
-            title={product.name}
-            subtitle="Детали и добавление в корзину"
-            className="mb-4 sm:mb-8"
-          />
+          <h1 className="text-xl sm:text-3xl font-semibold text-[var(--ev-text)] break-words line-clamp-3">
+            {product.name}
+          </h1>
+          <p className="text-[var(--ev-text-muted)] text-sm sm:text-base mt-1">Детали и добавление в корзину</p>
         </div>
         
         {/* Error Message */}
@@ -405,9 +410,9 @@ function ProductDetail() {
         >
           {/* Product Image */}
           <div className="w-full lg:w-1/2">
-            <div className="p-2 sm:p-6 bg-[rgba(255,255,255,0.02)] rounded-xl sm:rounded-2xl border border-[rgba(255,255,255,0.05)] transition-all duration-300">
+            <div className="p-2 sm:p-6 bg-[var(--ev-glass)] rounded-xl sm:rounded-2xl border border-[var(--ev-gold)]/15 transition-all duration-300">
               {product.imageUrl ? (
-                <div className="w-full rounded-lg sm:rounded-xl border border-[rgba(255,255,255,0.1)] overflow-hidden bg-[rgba(255,255,255,0.02)] flex items-center justify-center p-2 sm:p-8">
+                <div className="w-full rounded-lg sm:rounded-xl border border-[var(--ev-gold)]/20 overflow-hidden bg-[var(--ev-gold)]/5 flex items-center justify-center p-2 sm:p-8">
                   <img
                     src={product.imageUrl}
                     alt={product.name}
@@ -419,7 +424,7 @@ function ProductDetail() {
                   />
                 </div>
               ) : (
-                <div className="w-full min-h-[240px] sm:min-h-[500px] bg-[rgba(255,255,255,0.02)] rounded-xl flex items-center justify-center text-[#9ca3af] text-xs sm:text-base border border-[rgba(255,255,255,0.1)]">
+                <div className="w-full min-h-[240px] sm:min-h-[500px] bg-[var(--ev-gold)]/5 rounded-xl flex items-center justify-center text-[var(--ev-text-muted)] text-xs sm:text-base border border-[var(--ev-gold)]/15">
                   Нет фото
                 </div>
               )}
@@ -428,19 +433,19 @@ function ProductDetail() {
 
           {/* Product Information */}
           <div className="w-full lg:w-1/2">
-            <div className="p-3 sm:p-6 bg-[rgba(255,255,255,0.02)] rounded-xl sm:rounded-2xl border border-[rgba(255,255,255,0.05)] transition-all duration-300">
-              <h3 className="text-base sm:text-2xl font-bold mb-2 sm:mb-4 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent break-words line-clamp-3">
+            <div className="p-3 sm:p-6 bg-[var(--ev-glass)] rounded-xl sm:rounded-2xl border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/25 transition-all duration-300">
+              <h3 className="text-base sm:text-2xl font-semibold mb-2 sm:mb-4 text-[var(--ev-text)] break-words line-clamp-3">
                 {product.name}
               </h3>
               <div className="mb-3 sm:mb-4">
-                <span className="text-[#10b981] font-semibold text-lg sm:text-2xl break-words">¥{product.price?.toFixed(2)}</span>
+                <span className="text-[var(--ev-gold)] font-semibold text-lg sm:text-2xl break-words">¥{product.price?.toFixed(2)}</span>
               </div>
               {/* Average Rating Display */}
               {product.reviewQuantity > 0 ? (
                 <div className="mb-3 sm:mb-4">
                   <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                    <span className="text-[#9ca3af] text-xs sm:text-base font-medium break-words">Рейтинг:</span>
-                    <span className="text-[#a78bfa] font-bold text-sm sm:text-base">
+                    <span className="text-[var(--ev-text-muted)] text-xs sm:text-base font-medium break-words">Рейтинг:</span>
+                    <span className="text-[var(--ev-gold)] font-bold text-sm sm:text-base">
                       {(product.totalReviewSumm / product.reviewQuantity).toFixed(1)}
                     </span>
                     <div className="flex">
@@ -449,28 +454,28 @@ function ProductDetail() {
                           key={i}
                           className={`w-3.5 h-3.5 sm:w-5 sm:h-5 ${
                             i < Math.round(product.totalReviewSumm / product.reviewQuantity)
-                              ? 'text-[#a78bfa]'
-                              : 'text-[#6b7280]'
+                              ? 'text-[var(--ev-gold)]'
+                              : 'text-[var(--ev-text-muted)]'
                           }`}
                         />
                       ))}
                     </div>
                   </div>
-                  <span className="text-[#9ca3af] text-xs sm:text-sm">({product.reviewQuantity})</span>
+                  <span className="text-[var(--ev-text-muted)] text-xs sm:text-sm">({product.reviewQuantity})</span>
                 </div>
               ) : (
                 <div className="mb-3 sm:mb-4">
-                  <span className="text-[#9ca3af] text-xs sm:text-base">Нет отзывов</span>
+                  <span className="text-[var(--ev-text-muted)] text-xs sm:text-base">Нет отзывов</span>
                 </div>
               )}
               {/* Quantity */}
               <div className="mb-3 sm:mb-4">
-                <label className="block text-xs sm:text-sm font-medium text-[#9ca3af] mb-1 sm:mb-2">Количество:</label>
+                <label className="block text-xs sm:text-sm font-medium text-[var(--ev-text-muted)] mb-1 sm:mb-2">Количество:</label>
                 <input
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full p-2 sm:p-3 text-sm sm:text-base bg-[rgba(107,114,128,0.15)] text-[#e5e7eb] border border-[rgba(255,255,255,0.1)] rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/50 focus:border-[#00f0ff]/50 transition duration-300"
+                  className="w-full p-2 sm:p-3 text-sm sm:text-base bg-[var(--ev-gold)]/5 text-[var(--ev-text)] border border-[var(--ev-gold)]/20 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--ev-gold)]/30 focus:border-[var(--ev-gold)]/50 transition duration-300"
                   min="1"
                 />
               </div>
@@ -480,7 +485,7 @@ function ProductDetail() {
                   variant="primary"
                   onClick={() => handleAddToCart(product)}
                   disabled={cartLoading}
-                  className="w-full flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base py-2.5 sm:py-3"
+                  className="w-full flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base py-2.5 sm:py-3 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25"
                 >
                   <ShoppingCartIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   В корзину
@@ -488,7 +493,7 @@ function ProductDetail() {
                 <Button
                   variant="outline"
                   onClick={() => navigate(-1)}
-                  className="w-full flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base py-2 sm:py-3"
+                  className="w-full flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base py-2 sm:py-3 border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10"
                 >
                   <ArrowLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   Назад
@@ -496,13 +501,13 @@ function ProductDetail() {
               </div>
               {/* Marketplace Link */}
               {product.url && (
-                <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-[rgba(255,255,255,0.1)]">
-                  <p className="text-xs sm:text-sm text-[#9ca3af] mb-1 sm:mb-2">Куплено на:</p>
+                <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-[var(--ev-gold)]/15">
+                  <p className="text-xs sm:text-sm text-[var(--ev-text-muted)] mb-1 sm:mb-2">Куплено на:</p>
                   <a
                     href={product.url.startsWith('http://') || product.url.startsWith('https://') ? product.url : `https://${product.url}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#00f0ff] hover:text-[#00f0ff]/80 hover:underline flex items-center gap-2 break-words transition-colors"
+                    className="text-[var(--ev-gold)] hover:opacity-80 hover:underline flex items-center gap-2 break-words transition-colors"
                   >
                     {maskedMarketplaceLink(product.url)}
                   </a>
@@ -518,14 +523,14 @@ function ProductDetail() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mb-6 sm:mb-12"
         >
-          <div className="flex border-b border-[rgba(255,255,255,0.1)] mb-4 sm:mb-6">
+          <div className="flex border-b border-[var(--ev-gold)]/20 mb-4 sm:mb-6">
             {['details', 'reviews'].map((tab) => (
               <button
                 key={tab}
                 className={`px-3 py-2 sm:px-6 sm:py-3 text-sm sm:text-lg font-semibold transition-colors relative ${
                   activeTab === tab
-                    ? 'text-[#00f0ff]'
-                    : 'text-[#9ca3af] hover:text-[#00f0ff]/70'
+                    ? 'text-[var(--ev-gold)]'
+                    : 'text-[var(--ev-text-muted)] hover:text-[var(--ev-gold)]/80'
                 }`}
                 onClick={() => {
                   setActiveTab(tab);
@@ -539,29 +544,29 @@ function ProductDetail() {
                 {tab === 'details' ? 'Детали' : 'Отзывы'}
                 {activeTab === tab && (
                   <motion.div
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981]"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--ev-gold)]"
                     layoutId="activeTab"
                   />
                 )}
               </button>
             ))}
           </div>
-          <div className="p-3 sm:p-6 bg-[rgba(255,255,255,0.02)] rounded-xl sm:rounded-2xl border border-[rgba(255,255,255,0.05)] transition-all duration-300">
+          <div className="p-3 sm:p-6 bg-[var(--ev-glass)] rounded-xl sm:rounded-2xl border border-[var(--ev-gold)]/15 transition-all duration-300">
             {activeTab === 'details' && (
               <div className="space-y-4 sm:space-y-6">
                 <div>
-                  <h4 className="text-base sm:text-xl font-bold mb-2 sm:mb-4 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+                  <h4 className="text-base sm:text-xl font-semibold mb-2 sm:mb-4 text-[var(--ev-text)]">
                     Описание
                   </h4>
                   {renderDescription(product.description)}
                 </div>
-                <div className="pt-4 sm:pt-6 border-t border-[rgba(255,255,255,0.1)]">
-                  <h4 className="text-base sm:text-xl font-bold mb-2 sm:mb-4 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+                <div className="pt-4 sm:pt-6 border-t border-[var(--ev-gold)]/15">
+                  <h4 className="text-base sm:text-xl font-semibold mb-2 sm:mb-4 text-[var(--ev-text)]">
                     О товаре
                   </h4>
-                  <div className="space-y-1 sm:space-y-2 text-sm sm:text-base text-[#9ca3af]">
-                    <p><span className="text-[#e5e7eb] font-medium">Продано:</span> {product.salesCount || 0}</p>
-                    <p><span className="text-[#e5e7eb] font-medium">Обновлено:</span> {new Date(product.lastUpdated).toLocaleString('ru-RU')}</p>
+                  <div className="space-y-1 sm:space-y-2 text-sm sm:text-base text-[var(--ev-text-muted)]">
+                    <p><span className="text-[var(--ev-text)] font-medium">Продано:</span> {product.salesCount || 0}</p>
+                    <p><span className="text-[var(--ev-text)] font-medium">Обновлено:</span> {new Date(product.lastUpdated).toLocaleString('ru-RU')}</p>
                   </div>
                 </div>
               </div>
@@ -569,7 +574,7 @@ function ProductDetail() {
             {activeTab === 'reviews' && (
               <div className="space-y-4 sm:space-y-6">
                 <div>
-                  <h4 className="text-base sm:text-xl font-bold mb-2 sm:mb-4 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+                  <h4 className="text-base sm:text-xl font-semibold mb-2 sm:mb-4 text-[var(--ev-text)]">
                     Отзывы
                   </h4>
                   <div ref={reviewsContainerRef} className="max-h-[40vh] sm:max-h-[50vh] overflow-y-auto no-scrollbar space-y-2 sm:space-y-4 pr-1 sm:pr-2">
@@ -578,41 +583,41 @@ function ProductDetail() {
                         <div
                           key={review.id}
                           ref={index === reviews.length - 1 ? lastReviewElementRef : null}
-                          className="p-3 sm:p-4 bg-[rgba(255,255,255,0.02)] rounded-lg sm:rounded-xl border border-[rgba(255,255,255,0.1)] transition-all duration-300"
+                          className="p-3 sm:p-4 bg-[var(--ev-gold)]/5 rounded-lg sm:rounded-xl border border-[var(--ev-gold)]/15 transition-all duration-300"
                         >
                           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
-                            <p className="text-[#e5e7eb] font-semibold text-sm sm:text-base">{review.username}</p>
+                            <p className="text-[var(--ev-text)] font-semibold text-sm sm:text-base">{review.username}</p>
                             <div className="flex">
                               {[...Array(5)].map((_, i) => (
                                 <StarIcon
                                   key={i}
-                                  className={`w-3.5 h-3.5 sm:w-5 sm:h-5 ${i < review.rating ? 'text-[#a78bfa]' : 'text-[#6b7280]'}`}
+                                  className={`w-3.5 h-3.5 sm:w-5 sm:h-5 ${i < review.rating ? 'text-[var(--ev-gold)]' : 'text-[var(--ev-text-muted)]'}`}
                                 />
                               ))}
                             </div>
                           </div>
-                          <p className="text-[#9ca3af] text-[10px] sm:text-sm mb-1 sm:mb-2">
+                          <p className="text-[var(--ev-text-muted)] text-[10px] sm:text-sm mb-1 sm:mb-2">
                             {new Date(review.createdAt).toLocaleString('ru-RU')}
                           </p>
-                          <p className="text-[#9ca3af] text-xs sm:text-base break-words">{review.comment}</p>
+                          <p className="text-[var(--ev-text-muted)] text-xs sm:text-base break-words">{review.comment}</p>
                         </div>
                       ))
                     ) : (
-                      <p className="text-[#9ca3af] text-sm sm:text-base">Нет отзывов. Будьте первым!</p>
+                      <p className="text-[var(--ev-text-muted)] text-sm sm:text-base">Нет отзывов. Будьте первым!</p>
                     )}
                     {loadingReviews && (
-                      <div className="text-center text-[#9ca3af] mt-3 sm:mt-4">
-                        <ClockIcon className="w-5 h-5 sm:w-6 sm:h-6 animate-spin mx-auto text-[#00f0ff] mb-1 sm:mb-2" />
+                      <div className="text-center text-[var(--ev-text-muted)] mt-3 sm:mt-4">
+                        <ClockIcon className="w-5 h-5 sm:w-6 sm:h-6 animate-spin mx-auto text-[var(--ev-gold)] mb-1 sm:mb-2" />
                         <p className="text-sm sm:text-base">Загрузка...</p>
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="pt-4 sm:pt-6 border-t border-[rgba(255,255,255,0.1)]">
+                <div className="pt-4 sm:pt-6 border-t border-[var(--ev-gold)]/15">
                   <form onSubmit={handleReviewSubmit} className="space-y-3 sm:space-y-4">
-                    <h5 className="text-sm sm:text-lg font-semibold text-[#e5e7eb] mb-2 sm:mb-4">Оставить отзыв</h5>
+                    <h5 className="text-sm sm:text-lg font-semibold text-[var(--ev-text)] mb-2 sm:mb-4">Оставить отзыв</h5>
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-[#9ca3af] mb-1 sm:mb-2">Рейтинг:</label>
+                      <label className="block text-xs sm:text-sm font-medium text-[var(--ev-text-muted)] mb-1 sm:mb-2">Рейтинг:</label>
                       <div className="flex gap-1 sm:gap-2">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <motion.button
@@ -622,7 +627,7 @@ function ProductDetail() {
                             whileTap={{ scale: 0.9 }}
                             onClick={() => setReviewForm({ ...reviewForm, rating: star })}
                             className={`w-7 h-7 sm:w-10 sm:h-10 transition-colors ${
-                              star <= reviewForm.rating ? 'text-[#a78bfa]' : 'text-[#6b7280] hover:text-[#a78bfa]/50'
+                              star <= reviewForm.rating ? 'text-[var(--ev-gold)]' : 'text-[var(--ev-text-muted)] hover:text-[var(--ev-gold)]/50'
                             }`}
                           >
                             <StarIcon className="w-full h-full" />
@@ -631,11 +636,11 @@ function ProductDetail() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-[#9ca3af] mb-1 sm:mb-2">Комментарий:</label>
+                      <label className="block text-xs sm:text-sm font-medium text-[var(--ev-text-muted)] mb-1 sm:mb-2">Комментарий:</label>
                       <textarea
                         value={reviewForm.comment}
                         onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
-                        className="w-full p-2 sm:p-3 text-sm sm:text-base bg-[rgba(107,114,128,0.15)] text-[#e5e7eb] border border-[rgba(255,255,255,0.1)] rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/50 focus:border-[#00f0ff]/50 transition duration-300 resize-none min-h-[80px]"
+                        className="w-full p-2 sm:p-3 text-sm sm:text-base bg-[var(--ev-gold)]/5 text-[var(--ev-text)] border border-[var(--ev-gold)]/20 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--ev-gold)]/30 focus:border-[var(--ev-gold)]/50 transition duration-300 resize-none min-h-[80px] placeholder-[var(--ev-text-muted)]"
                         rows="3"
                         placeholder="Ваш отзыв..."
                       />
@@ -644,7 +649,7 @@ function ProductDetail() {
                       type="submit"
                       variant="primary"
                       disabled={cartLoading || loadingReviews || reviewForm.rating === 0 || !reviewForm.comment.trim()}
-                      className="w-full text-sm sm:text-base py-2.5 sm:py-3"
+                      className="w-full text-sm sm:text-base py-2.5 sm:py-3 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25"
                     >
                       Отправить
                     </Button>
@@ -662,7 +667,7 @@ function ProductDetail() {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="mb-6 sm:mb-12"
           >
-            <h3 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
+            <h3 className="text-lg sm:text-2xl font-semibold mb-4 sm:mb-6 text-[var(--ev-text)]">
               Похожие
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6">
@@ -672,9 +677,9 @@ function ProductDetail() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
-                  className="p-2 sm:p-4 bg-[rgba(255,255,255,0.02)] rounded-xl sm:rounded-2xl border border-[rgba(255,255,255,0.05)] hover:border-[rgba(0,240,255,0.5)] transition-all duration-300 flex flex-col"
+                  className="p-2 sm:p-4 bg-[var(--ev-glass)] rounded-xl sm:rounded-2xl border border-[var(--ev-gold)]/15 hover:border-[var(--ev-gold)]/30 transition-all duration-300 flex flex-col"
                 >
-                  <div className="w-full aspect-square overflow-hidden rounded-lg sm:rounded-xl mb-2 sm:mb-4 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.1)] flex items-center justify-center">
+                  <div className="w-full aspect-square overflow-hidden rounded-lg sm:rounded-xl mb-2 sm:mb-4 bg-[var(--ev-gold)]/5 border border-[var(--ev-gold)]/15 flex items-center justify-center">
                     {similar.imageUrl ? (
                       <img
                         src={similar.imageUrl}
@@ -685,13 +690,13 @@ function ProductDetail() {
                         }}
                       />
                     ) : (
-                      <div className="w-full h-full bg-[rgba(255,255,255,0.02)] flex items-center justify-center text-[#9ca3af] text-xs sm:text-sm">
+                      <div className="w-full h-full flex items-center justify-center text-[var(--ev-text-muted)] text-xs sm:text-sm">
                         Нет фото
                       </div>
                     )}
                   </div>
                   <div className="flex flex-col flex-grow min-w-0">
-                    <h4 className="text-xs sm:text-lg font-bold mb-2 sm:mb-3 line-clamp-2 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent break-words">
+                    <h4 className="text-xs sm:text-lg font-semibold mb-2 sm:mb-3 line-clamp-2 text-[var(--ev-text)] break-words">
                       {similar.name}
                     </h4>
                     <div className="mt-auto space-y-1 sm:space-y-2">
@@ -699,7 +704,7 @@ function ProductDetail() {
                         variant="primary"
                         onClick={() => handleAddToCart(similar)}
                         disabled={cartLoading}
-                        className="w-full flex items-center justify-center gap-1 text-xs sm:text-sm py-2 sm:py-2.5"
+                        className="w-full flex items-center justify-center gap-1 text-xs sm:text-sm py-2 sm:py-2.5 bg-[var(--ev-gold)]/15 border border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/25"
                       >
                         <ShoppingCartIcon className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                         В корзину
@@ -707,7 +712,7 @@ function ProductDetail() {
                       <Button
                         variant="outline"
                         onClick={() => navigate(`/product/${similar.id}`)}
-                        className="w-full text-xs sm:text-sm py-1.5 sm:py-2"
+                        className="w-full text-xs sm:text-sm py-1.5 sm:py-2 border-[var(--ev-gold)]/30 text-[var(--ev-gold)] hover:bg-[var(--ev-gold)]/10"
                       >
                         Подробнее
                       </Button>

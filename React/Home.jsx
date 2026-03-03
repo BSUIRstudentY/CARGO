@@ -105,7 +105,7 @@ const Home = () => {
     {
       icon: CurrencyDollarIcon,
       title: 'Фиксированная цена',
-      description: '$6 за кг + тарифы Европочты, без скрытых платежей',
+      description: '$7 за кг + тарифы Европочты, без скрытых платежей',
       accent: '#a78bfa'
     },
     {
@@ -305,7 +305,7 @@ const Home = () => {
                 >
                   Заказывайте товары из Китая без хлопот: от выбора в{' '}
                   <span className="text-[#00f0ff] font-semibold">Каталоге</span> или{' '}
-                  <span className="text-[#a78bfa] font-semibold">Терминале</span> до доставки в Беларусь за 18–35 дней по цене $6/кг
+                  <span className="text-[#a78bfa] font-semibold">Терминале</span> до доставки в Беларусь за 18–35 дней по цене $7/кг
                 </motion.p>
 
                 {/* Кнопки с glassmorphism и ripple */}

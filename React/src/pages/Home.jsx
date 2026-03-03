@@ -104,7 +104,7 @@ const TIMELINE_STEPS = [
   { city: 'Беларусь', day: 'День 28', desc: 'Доставка до двери' },
 ];
 const ADVANTAGES = [
-  { title: 'Фиксированная цена', desc: '$6/кг · без скрытых платежей', num: '01' },
+  { title: 'Фиксированная цена', desc: '$7/кг · без скрытых платежей', num: '01' },
   { title: '18–35 дней', desc: 'Карго из Китая в Беларусь', num: '02' },
   { title: 'Полная страховка', desc: 'Возврат 100% стоимости', num: '03' },
   { title: 'Проверка товаров', desc: 'От $5 · фото/видео отчёт', num: '04' },
@@ -547,8 +547,8 @@ navigate('/calculator');
 return (
 <div className="min-h-screen bg-[var(--ev-void)] text-[var(--ev-text)] overflow-x-hidden font-ev-body antialiased">
 <Helmet>
-<title>Fluvion — Ethereal Void | Доставка из Китая в Беларусь</title>
-<meta name="description" content="Доставка товаров из Китая за 18–35 дней. $6/кг. Минимализм 2026." />
+<title>Fluvion — Доставка из Китая в Беларусь</title>
+<meta name="description" content="Доставка товаров из Китая за 18–35 дней. $7/кг. Минимализм 2026." />
 </Helmet>
 {/* Grain overlay */}
 <div className="grain-overlay" aria-hidden="true" />
@@ -648,7 +648,7 @@ particlesApiRef.current.addParticles(px, py);
             из Китая
 </h1>
 <p className="text-[13px] md:text-[17px] text-[var(--ev-text-muted)] max-w-md mx-auto mb-6 md:mb-10 leading-[1.6] md:leading-[1.75]">
-            Тишина космоса. Товар уже в пути.
+            Товар уже в пути.
 </p>
 <button
 onClick={(e) => {
@@ -664,7 +664,7 @@ className="group relative px-8 py-3.5 md:px-12 md:py-5 text-sm md:text-base font
 </button>
 </div>
 <p className="absolute bottom-12 md:bottom-16 left-1/2 -translate-x-1/2 text-[var(--ev-text-muted)] text-xs md:text-sm">
-          $6/кг · 18–35 дней
+          $7/кг · 18–35 дней
 </p>
 <p className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 ev-label text-[var(--ev-gold)]/50 md:text-[var(--ev-gold)]/60">
           SCROLL ↓
