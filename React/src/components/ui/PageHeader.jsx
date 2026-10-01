@@ -10,7 +10,7 @@ export const PageHeader = ({
 }) => {
   return (
     <div className={`mb-8 text-left ${className}`}>
-      <h1 className="c-large-title" style={{ fontSize: 'clamp(32px, 4vw, 44px)' }}>
+      <h1 className="n-page-title">
         {title}
       </h1>
       {subtitle && (

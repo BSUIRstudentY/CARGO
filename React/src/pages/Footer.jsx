@@ -113,7 +113,6 @@ const Footer = ({ id }) => {
             <div className="grid grid-cols-1 gap-2 sm:gap-3">
               {advantages.map((advantage, index) => {
                 const Icon = advantage.icon;
-                const accentColor = '#007AFF';
                 return (
                   <motion.div
                     key={index}
@@ -123,11 +122,11 @@ const Footer = ({ id }) => {
                     <div
                       className="w-10 h-10 rounded-lg flex items-center justify-center"
                       style={{
-                        background: `linear-gradient(135deg, ${accentColor}15, ${accentColor}05)`,
-                        border: `1px solid ${accentColor}30`,
+                        background: 'rgba(255,255,255,0.55)',
+                        border: '1px solid rgba(255,255,255,0.7)',
                       }}
                     >
-                      <Icon className="w-5 h-5" style={{ color: accentColor }} />
+                      <Icon className="w-5 h-5" style={{ color: '#111111' }} />
                     </div>
                     <span className="text-[#9ca3af] text-xs sm:text-sm">{advantage.text}</span>
                   </motion.div>

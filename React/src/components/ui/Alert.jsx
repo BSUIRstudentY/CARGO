@@ -14,7 +14,7 @@ export const Alert = ({
     success: { bg: 'rgba(52, 199, 89, 0.14)', color: '#248a3d', icon: CheckCircleIcon },
     error: { bg: 'rgba(255, 59, 48, 0.12)', color: '#ff3b30', icon: ExclamationTriangleIcon },
     warning: { bg: 'rgba(255, 149, 0, 0.14)', color: '#9a5b00', icon: ExclamationTriangleIcon },
-    info: { bg: 'rgba(0, 122, 255, 0.12)', color: '#007aff', icon: InformationCircleIcon },
+    info: { bg: 'rgba(17, 17, 17, 0.06)', color: '#111111', icon: InformationCircleIcon },
   };
 
   const variant = variants[type] || variants.info;

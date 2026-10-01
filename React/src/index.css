@@ -23,10 +23,10 @@
   --accent-primary-hover: #000000;
   
   /* System blue */
-  --accent-secondary: #007AFF;
-  --accent-secondary-light: #409cff;
-  --accent-secondary-dark: #0066d6;
-  --accent-secondary-hover: #0066d6;
+  --accent-secondary: #111111;
+  --accent-secondary-light: #111111;
+  --accent-secondary-dark: #000000;
+  --accent-secondary-hover: #000000;
   
   /* Tertiary accent */
   --accent-muted: #ff9500;
@@ -65,9 +65,9 @@
 @layer base {
   body {
     @apply bg-[var(--bg-primary)] text-[var(--text-primary)] font-sans antialiased;
-    font-family: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, Inter, "Segoe UI", system-ui, sans-serif;
-    background: #f2f2f7;
-    color: #1d1d1f;
+    font-family: Inter, system-ui, sans-serif;
+    background: #eceef2;
+    color: #111111;
   }
   
   h1, h2, h3, h4, h5, h6 {

@@ -20,14 +20,13 @@ export const ProductCard = ({
       transition={{ duration: 0.4, delay: index * 0.05 }}
       className="h-full flex"
     >
-      <div className="h-full w-full flex flex-col p-3 sm:p-4 bg-white rounded-[22px] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-transform duration-200 hover:-translate-y-0.5">
-        {/* Изображение товара */}
-        <div className="relative w-full aspect-square mb-3 sm:mb-4 rounded-2xl bg-[#f2f2f7] overflow-hidden flex items-center justify-center p-3 flex-shrink-0">
+      <div className="n-product h-full w-full flex flex-col">
+        <div className="relative w-full n-product-photo overflow-hidden flex items-center justify-center">
           {product.imageUrl ? (
             <motion.img
               src={product.imageUrl}
               alt={product.name || 'Товар'}
-              className="w-full h-full object-contain max-w-full max-h-full"
+              className="w-full h-full object-cover object-center"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.3 }}
               onError={(e) => {
@@ -35,8 +34,8 @@ export const ProductCard = ({
               }}
             />
           ) : (
-            <div className="w-full h-full bg-[rgba(255,255,255,0.02)] flex items-center justify-center rounded-lg">
-              <span className="text-[#9ca3af] text-xs sm:text-sm text-center px-2">Нет изображения</span>
+            <div className="n-photo-empty">
+              <span>Нет изображения</span>
             </div>
           )}
         </div>
@@ -44,13 +43,13 @@ export const ProductCard = ({
         {/* Информация о товаре */}
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           {/* Название товара */}
-          <h3 className="text-sm sm:text-base font-semibold text-[#1d1d1f] mb-2 line-clamp-2 break-words overflow-hidden leading-tight tracking-tight">
+          <h3 className="n-card-name">
             {product.name || 'Без названия'}
           </h3>
           
           {/* Цена */}
           <div className="mb-3 sm:mb-4 flex-shrink-0">
-            <div className="text-lg sm:text-xl font-semibold tracking-tight text-[#1d1d1f] break-words">
+            <div className="n-card-price">
               ¥{product.price?.toFixed(2) || '0.00'}
             </div>
             <div className="text-xs text-[#6e6e73] mt-1">Из Китая</div>

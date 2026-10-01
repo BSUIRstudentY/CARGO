@@ -13,7 +13,7 @@ export const Loading = ({ message = 'Загрузка...', size = 'md' }) => {
   return (
     <div className="flex flex-col items-center justify-center py-16">
       <div
-        className={`${sizes[size] || sizes.md} rounded-full border-2 border-[rgba(60,60,67,0.16)] border-t-[#007aff] animate-spin mb-3`}
+        className={`${sizes[size] || sizes.md} rounded-full border-2 border-[rgba(60,60,67,0.16)] border-t-[#111111] animate-spin mb-3`}
       />
       {message && (
         <p className="text-sm" style={{ color: 'var(--c-secondary)' }}>{message}</p>
