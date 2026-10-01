@@ -35,7 +35,7 @@ export const Input = ({
         />
       </div>
       {error && (
-        <p className="mt-1 text-sm" style={{ color: 'var(--c-red)' }}>
+        <p className="mt-1 text-sm" style={{ color: 'rgba(17, 17, 17, 0.55)' }}>
           {error}
         </p>
       )}

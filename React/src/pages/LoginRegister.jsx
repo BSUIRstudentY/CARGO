@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../components/AuthProvider';
 import api from '../api/axiosInstance';
-import { UserIcon, LockClosedIcon, TagIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
+import { UserIcon, LockClosedIcon, TagIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { Input } from '../components/ui/Input';
 import { Alert } from '../components/ui/Alert';
 import { Loading } from '../components/ui/Loading';
@@ -257,22 +257,6 @@ function LoginRegister() {
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-transparent text-[#e5e7eb] p-4 relative overflow-hidden">
-      {/* Статичные световые акценты */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div
-          className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%)',
-          }}
-        />
-        <div
-          className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(167, 139, 250, 0.06) 0%, transparent 70%)',
-          }}
-        />
-      </div>
-      
       <motion.div
         initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
@@ -281,19 +265,10 @@ function LoginRegister() {
         <div className="c-sheet p-5 sm:p-8 relative">
           {/* Header */}
           {!showForgotPassword && (
-            <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
-              <motion.div
-                initial={{ scale: 0.8, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <UserIcon className="w-8 h-8 sm:w-10 sm:h-10 text-[#00f0ff]" />
-              </motion.div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">
-                <span className="bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-                  {isLogin ? 'Вход' : 'Регистрация'}
-                </span>
-              </h2>
+            <div className="mb-6 sm:mb-8">
+              <h1 className="n-page-title">
+                {isLogin ? 'Вход' : 'Регистрация'}
+              </h1>
             </div>
           )}
           

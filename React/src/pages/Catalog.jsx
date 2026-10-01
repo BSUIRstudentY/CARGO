@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import api from '../api/axiosInstance';
 import { useCart } from '../components/CartContext';
-import { MagnifyingGlassIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { ProductCard } from '../components/ui/ProductCard';
@@ -169,22 +169,6 @@ function Catalog() {
         <meta property="og:image" content="https://fluvion.by/logo.png" />
         <link rel="canonical" href={`https://fluvion.by${location.pathname}${location.search}`} />
       </Helmet>
-      {/* Статичные световые акценты */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div
-          className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%)',
-          }}
-        />
-        <div
-          className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(167, 139, 250, 0.06) 0%, transparent 70%)',
-          }}
-        />
-      </div>
-
       {/* МОБИЛЬНАЯ ВЕРСИЯ - показывается только на мобильных */}
       <div className="lg:hidden">
         {/* Мобильный Hero */}
@@ -194,33 +178,16 @@ function Catalog() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="text-center mb-4"
+              className="text-left mb-4"
             >
-              <h1 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-                Примеры товаров
-              </h1>
-              
-              {/* Компактное уведомление для мобильных */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-                className="mb-4"
-              >
-                <div className="p-3 rounded-xl bg-gradient-to-r from-[rgba(255,193,7,0.12)] to-[rgba(255,152,0,0.12)] border border-[rgba(255,193,7,0.4)]">
-                  <div className="flex items-start gap-2">
-                    <ExclamationTriangleIcon className="w-5 h-5 text-[#ffc107] flex-shrink-0 mt-0.5" />
-                    <div className="text-left">
-                      <p className="text-xs font-bold text-[#ffc107] mb-1">
-                        Только проверенные товары!
-                      </p>
-                      <p className="text-xs text-[#ffeaa7] leading-relaxed">
-                        Здесь товары, которые уже заказывали клиенты
-                      </p>
-                    </div>
-                  </div>
+              <h1 className="n-page-title">Примеры товаров</h1>
+              <div className="n-note">
+                <ExclamationTriangleIcon className="n-note-icon" />
+                <div>
+                  <p className="n-note-title">Только проверенные товары</p>
+                  <p>Здесь товары, которые уже заказывали клиенты</p>
                 </div>
-              </motion.div>
+              </div>
             </motion.div>
 
             {/* Компактный поиск для мобильных */}
@@ -400,65 +367,26 @@ function Catalog() {
       <div className="hidden lg:block">
 
         {/* Hero секция каталога */}
-        <section className="relative overflow-hidden py-16 md:py-24 z-10 pb-safe">
+        <section className="relative z-10">
 
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-12"
+            className="text-left mb-8"
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-              Примеры товаров
-            </h1>
-            
-            {/* ВАЖНОЕ УВЕДОМЛЕНИЕ - ОЧЕНЬ ЗАМЕТНОЕ */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="max-w-4xl mx-auto mb-8"
-            >
-              <div className="relative p-6 md:p-8 rounded-2xl bg-gradient-to-r from-[rgba(255,193,7,0.15)] via-[rgba(255,152,0,0.15)] to-[rgba(255,193,7,0.15)] border-2 border-[rgba(255,193,7,0.5)] shadow-[0_0_30px_rgba(255,193,7,0.3)] backdrop-blur-sm">
-                {/* Анимированная иконка */}
-                <div className="flex items-start gap-4">
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.1, 1],
-                      rotate: [0, 5, -5, 0]
-                    }}
-                    transition={{ 
-                      duration: 2,
-                      repeat: Infinity,
-                      repeatDelay: 3
-                    }}
-                    className="flex-shrink-0"
-                  >
-                    <ExclamationTriangleIcon className="w-8 h-8 md:w-10 md:h-10 text-[#ffc107] drop-shadow-[0_0_10px_rgba(255,193,7,0.8)]" />
-                  </motion.div>
-                  
-                  <div className="flex-1">
-                    <h2 className="text-xl md:text-2xl font-bold text-[#ffc107] mb-3 flex items-center gap-2">
-                      <span className="inline-block animate-pulse">⚠️</span>
-                      ВАЖНО! Обратите внимание!
-                    </h2>
-                    <p className="text-base md:text-lg text-[#fff3cd] leading-relaxed font-medium mb-2">
-                      <span className="font-bold text-[#ffc107] text-xl">Здесь только товары, которые уже заказывали наши клиенты</span>
-                    </p>
-                    <p className="text-sm md:text-base text-[#ffeaa7] leading-relaxed">
-                      Проверенные товары с отзывами. Чтобы заказать любой другой товар — используйте раздел «Заказать товар» в меню.
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Декоративные элементы */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[rgba(255,193,7,0.1)] rounded-full blur-3xl -z-10"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-[rgba(255,152,0,0.1)] rounded-full blur-2xl -z-10"></div>
+            <h1 className="n-page-title">Примеры товаров</h1>
+            <div className="n-note">
+              <ExclamationTriangleIcon className="n-note-icon" />
+              <div>
+                <p className="n-note-title">Важно. Обратите внимание</p>
+                <p>
+                  Здесь только товары, которые уже заказывали наши клиенты. Проверенные товары с отзывами. Чтобы заказать любой другой товар — используйте раздел «Заказать товар» в меню.
+                </p>
               </div>
-            </motion.div>
-            
-            <p className="text-lg md:text-xl text-[#9ca3af] max-w-2xl mx-auto mb-2">
+            </div>
+            <p className="text-sm text-[#9ca3af] max-w-2xl mt-3 mb-2">
               Товары, которые уже заказывали наши клиенты. Вы можете посмотреть отзывы и выбрать проверенные товары с доставкой в Беларусь.
             </p>
           </motion.div>
@@ -468,7 +396,7 @@ function Catalog() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-4xl mx-auto"
+            className="max-w-4xl"
           >
             <div className="p-6 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300 mb-8">
               {/* Поиск */}

@@ -1,24 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 /**
  * Главная: крупный заголовок, студийная карточка и группы в духе iOS.
  * Тексты, ссылки и структурированные данные прежние.
  */
-const HERO_FRAMES = ['/main.png', '/car.png', '/220.png'];
-
 const Home = () => {
   const navigate = useNavigate();
-  const [frame, setFrame] = useState(0);
-
-  useEffect(() => {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) return undefined;
-    const id = window.setInterval(() => {
-      setFrame((current) => (current + 1) % HERO_FRAMES.length);
-    }, 4200);
-    return () => window.clearInterval(id);
-  }, []);
 
   const marketplaces = [
     { name: 'Pinduoduo', url: 'https://www.pinduoduo.com', text: '拼多多', logo: '/logos/pinduoduo.svg', hasImage: false },
@@ -103,22 +91,11 @@ const Home = () => {
       </Helmet>
 
       <section className="n-hero" aria-label="Доставка из Китая">
-        {HERO_FRAMES.map((src, index) => (
-          <img
-            key={src}
-            src={src}
-            alt=""
-            className={`n-hero-frame${index === frame ? ' is-on' : ''}`}
-          />
-        ))}
         <div className="n-hero-veil" />
         <div className="n-hero-card">
           <p className="n-kicker">Карго в Беларусь</p>
           <h1>Доставка из Китая под ключ</h1>
-          <p className="n-hero-body">
-            Заказывайте товары из Китая без хлопот: от выбора в примерах товаров (уже заказывали клиенты) или Терминале (любые товары по ссылке) до доставки в Беларусь за 18–35 дней по цене $6/кг
-          </p>
-          <p className="n-hero-meta">$6 / кг · 18–35 дней до Беларуси</p>
+          <p className="n-hero-body">От выбора товара до двери в Беларуси.</p>
           <div className="n-hero-actions">
             <button type="button" className="n-btn-dark" onClick={() => navigate('/terminal')}>
               Заказать товар
@@ -127,20 +104,13 @@ const Home = () => {
               Примеры товаров
             </button>
           </div>
-          <div className="n-dots" aria-hidden>
-            {HERO_FRAMES.map((src, index) => (
-              <button
-                key={src}
-                type="button"
-                className={index === frame ? 'is-on' : ''}
-                onClick={() => setFrame(index)}
-              />
-            ))}
-          </div>
         </div>
       </section>
 
       <section className="n-sheet">
+        <p>
+          Заказывайте товары из Китая без хлопот: от выбора в примерах товаров (уже заказывали клиенты) или Терминале (любые товары по ссылке) до доставки в Беларусь за 18–35 дней по цене $6/кг.
+        </p>
         <p>
           <strong>Важно.</strong> В «Примерах товаров» — только то, что уже заказывали. Чтобы заказать любой товар по ссылке, используйте «Заказать товар».
         </p>

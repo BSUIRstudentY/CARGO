@@ -304,7 +304,7 @@ function FAQSection() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="mb-4 text-sm text-[#cdcdcd] text-center"
               >
-                <a href="/public-offer" className="text-[#e81e2d] hover:underline">
+                <a href="/public-offer" className="n-ink-link">
                   Публичная оферта
                 </a>
               </motion.div>
@@ -471,7 +471,7 @@ function FAQSection() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="mb-4 sm:mb-6 lg:mb-8 text-sm sm:text-base lg:text-lg text-[#cdcdcd] text-center"
             >
-              <a href="/public-offer" className="text-[#e81e2d] hover:underline">
+              <a href="/public-offer" className="n-ink-link">
                 Публичная оферта
               </a>
             </motion.div>

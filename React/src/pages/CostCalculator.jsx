@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CalculatorIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
+import { CalculatorIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import api from '../api/axiosInstance';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -150,7 +150,7 @@ function CostCalculator() {
               </span>
             </label>
             <div className="relative">
-              <CalculatorIcon className="absolute top-2.5 sm:top-3 left-3 w-5 h-5 sm:w-6 sm:h-6 text-[#00f0ff]" />
+              <CalculatorIcon className="n-field-icon" />
               <input
                 type="number"
                 placeholder="Введите стоимость в юанях"
@@ -174,7 +174,7 @@ function CostCalculator() {
               </span>
             </label>
             <div className="relative">
-              <CalculatorIcon className="absolute top-2.5 sm:top-3 left-3 w-5 h-5 sm:w-6 sm:h-6 text-[#00f0ff]" />
+              <CalculatorIcon className="n-field-icon" />
               <input
                 type="number"
                 step="0.1"
