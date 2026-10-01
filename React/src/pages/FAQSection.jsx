@@ -707,9 +707,7 @@ function FAQSection() {
           </AnimatePresence>
 
           <motion.div
-            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            className="n-support-fab"
           >
             <Button
               variant="primary"

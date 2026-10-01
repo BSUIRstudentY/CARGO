@@ -50,6 +50,7 @@ body,
   font-family: var(--c-font);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  scroll-padding-top: 92px;
 }
 
 body {
@@ -332,10 +333,12 @@ input::placeholder,
 textarea::placeholder,
 .placeholder-\[\#9ca3af\]::placeholder,
 .placeholder-\[\#808080\]::placeholder,
+.placeholder-\[\#8e8e93\]::placeholder,
 .cupertino-field::placeholder {
-  color: rgba(17, 17, 17, 0.42) !important;
-  -webkit-text-fill-color: rgba(17, 17, 17, 0.42) !important;
+  color: #6b6b6b !important;
+  -webkit-text-fill-color: #6b6b6b !important;
   opacity: 1 !important;
+  font-weight: 500;
 }
 
 /* ---------- Chrome ---------- */
@@ -1520,12 +1523,14 @@ a[style*="background"] > span {
 .n-hero-frame {
   position: absolute;
   inset: 0;
+  z-index: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
   opacity: 0;
   transform: scale(1.04);
+  filter: brightness(6.5) contrast(1.35) saturate(0.55);
   transition: opacity 0.7s linear;
 }
 
@@ -1534,9 +1539,18 @@ a[style*="background"] > span {
   animation: n-ken 6s linear forwards;
 }
 
+.n-hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(236, 238, 242, 0.4);
+}
+
 .n-hero-veil {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(180deg, transparent 40%, rgba(236, 238, 242, 0.18));
   pointer-events: none;
 }
@@ -1963,17 +1977,31 @@ a[style*="background"] > span {
   color: #111;
 }
 
+.n-note p,
+.n-support,
+.text-\[\#9ca3af\],
+.text-\[\#6e6e73\],
+.text-\[\#808080\] {
+  color: rgba(17, 17, 17, 0.62) !important;
+  -webkit-text-fill-color: rgba(17, 17, 17, 0.62) !important;
+}
+
+.text-\[\#e5e7eb\] {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
 .n-note p {
   margin: 0;
   font-size: 14px;
   line-height: 1.45;
-  color: rgba(17, 17, 17, 0.62);
 }
 
-.n-note-title {
+.n-note .n-note-title {
   margin-bottom: 4px !important;
   font-weight: 600;
   color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
 }
 
 .n-note-icon {
@@ -1990,6 +2018,25 @@ a[style*="background"] > span {
   -webkit-text-fill-color: #111;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+h1,
+h2,
+.n-page-title {
+  scroll-margin-top: 92px;
+}
+
+.n-support-fab {
+  position: fixed;
+  right: 16px;
+  bottom: calc(96px + 44px + 12px + env(safe-area-inset-bottom));
+  z-index: 36;
+}
+
+@media (min-width: 640px) {
+  .n-support-fab {
+    bottom: 80px;
+  }
 }
 
 .n-main h1 {
