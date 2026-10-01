@@ -400,7 +400,12 @@ textarea::placeholder {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 84px 0 128px;
+  /* Dock is ~75px, inset 16px, plus its shadow. Leave the last line clear of all of that. */
+  padding: 84px 0 220px;
+}
+
+html {
+  scroll-padding-bottom: 220px;
 }
 
 .cupertino-main {
@@ -532,7 +537,8 @@ textarea::placeholder {
   width: min(420px, calc(100% - 24px));
   max-height: min(68vh, 560px);
   overflow: auto;
-  padding: 16px 14px 14px;
+  padding: 16px 14px 96px;
+  scroll-padding-bottom: 96px;
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.62);
   border: 1px solid rgba(255, 255, 255, 0.78);
@@ -639,7 +645,11 @@ textarea::placeholder {
 
   .cupertino-column {
     padding-top: 72px;
-    padding-bottom: calc(118px + env(safe-area-inset-bottom));
+    padding-bottom: calc(220px + env(safe-area-inset-bottom));
+  }
+
+  html {
+    scroll-padding-bottom: calc(220px + env(safe-area-inset-bottom));
   }
 
   .cupertino-dock {
