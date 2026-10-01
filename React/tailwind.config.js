@@ -34,8 +34,8 @@ export default {
       },
       // Fonts (modern sans-serif like in Delta/Bootstrap)
       fontFamily: {
-        'sans': ['Inter', 'system-ui', 'sans-serif'], // Primary font
-        'display': ['Inter', 'system-ui', 'sans-serif'], // For headings
+        'sans': ['"SF Pro Text"', '-apple-system', 'BlinkMacSystemFont', 'Inter', '"Segoe UI"', 'system-ui', 'sans-serif'],
+        'display': ['"SF Pro Display"', '"SF Pro Text"', '-apple-system', 'BlinkMacSystemFont', 'Inter', 'system-ui', 'sans-serif'],
       },
       // Text Sizes (responsive, based on HTML classes like display-4, lead)
       fontSize: {

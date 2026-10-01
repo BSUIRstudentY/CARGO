@@ -6,6 +6,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider, useAuth } from './components/AuthProvider';
 import { CartProvider } from './components/CartContext';
 import './styles.css';
+import './styles/cupertino.css';
 
 // Lazy load heavy components for code splitting and performance optimization
 const AdminLayout = lazy(() => import('./pages/AdminLayout'));
@@ -16,8 +17,8 @@ const GuestLayout = lazy(() => import('./pages/GuestLayout'));
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen bg-transparent">
     <div className="text-center">
-      <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[rgba(255,255,255,0.1)] border-t-[#00f0ff]"></div>
-      <p className="mt-4 text-[#9ca3af]">Загрузка...</p>
+      <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-[rgba(60,60,67,0.16)] border-t-[#007aff]"></div>
+      <p className="mt-4 text-sm" style={{ color: 'var(--c-secondary)' }}>Загрузка...</p>
     </div>
   </div>
 );

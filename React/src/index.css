@@ -9,38 +9,38 @@
  * Ensures consistent theming across the entire application.
  */
 :root {
-  /* Background colors */
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #1a1a1a;
-  --bg-tertiary: #2F2F2F;
-  --bg-card: #1f1f1f;
-  --bg-hover: #2a2a2a;
+  /* Cupertino grouped surfaces */
+  --bg-primary: #f2f2f7;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e5e5ea;
+  --bg-card: #ffffff;
+  --bg-hover: #ebebf0;
   
-  /* Primary accent colors */
-  --accent-primary: #e81e2d;
-  --accent-primary-light: #ff4757;
-  --accent-primary-dark: #c1121f;
-  --accent-primary-hover: #d91a2a;
+  /* Primary accent: near-black, like an iOS filled button */
+  --accent-primary: #1d1d1f;
+  --accent-primary-light: #3a3a3c;
+  --accent-primary-dark: #000000;
+  --accent-primary-hover: #000000;
   
-  /* Secondary accent colors */
-  --accent-secondary: #407CFF;
-  --accent-secondary-light: #5a8fff;
-  --accent-secondary-dark: #2e5fcc;
-  --accent-secondary-hover: #4d7fff;
+  /* System blue */
+  --accent-secondary: #007AFF;
+  --accent-secondary-light: #409cff;
+  --accent-secondary-dark: #0066d6;
+  --accent-secondary-hover: #0066d6;
   
   /* Tertiary accent */
-  --accent-muted: #FF5722;
+  --accent-muted: #ff9500;
   
   /* Text colors */
-  --text-primary: #ffffff;
-  --text-secondary: #cdcdcd;
-  --text-muted: #808080;
-  --text-disabled: #555555;
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-muted: #8e8e93;
+  --text-disabled: #aeaeb2;
   
   /* Border colors */
-  --border-primary: #333333;
-  --border-secondary: #404040;
-  --border-hover: #555555;
+  --border-primary: rgba(60, 60, 67, 0.16);
+  --border-secondary: rgba(60, 60, 67, 0.22);
+  --border-hover: rgba(60, 60, 67, 0.32);
   
   /* Status colors */
   --color-success: #4caf50;
@@ -65,11 +65,14 @@
 @layer base {
   body {
     @apply bg-[var(--bg-primary)] text-[var(--text-primary)] font-sans antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, Inter, "Segoe UI", system-ui, sans-serif;
+    background: #f2f2f7;
+    color: #1d1d1f;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold;
+    letter-spacing: -0.03em;
   }
   
   /* Consistent button styles */
@@ -84,15 +87,14 @@
 
   /* Все выпадающие списки: тёмный фон и светлый текст (не белый на белом) */
   select {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border-color: var(--border-primary);
+    background-color: rgba(120, 120, 128, 0.12);
+    color: #1d1d1f;
+    border-color: transparent;
   }
-  /* Опции в выпадающем списке — тёмный фон, иначе в браузере белый список */
   select option,
   select optgroup {
-    background-color: #1a1a1a;
-    color: #e5e7eb;
+    background-color: #ffffff;
+    color: #1d1d1f;
   }
   select:focus {
     outline: none;
@@ -137,14 +139,14 @@
   /* Выпадающие списки: тёмный фон и опции (если базовых стилей мало) */
   .select-dark,
   select.select-dark {
-    background-color: #1a1a1a !important;
-    color: #e5e7eb !important;
-    border-color: #333333;
+    background-color: rgba(120, 120, 128, 0.12) !important;
+    color: #1d1d1f !important;
+    border-color: transparent;
   }
   .select-dark option,
   select.select-dark option {
-    background-color: #1a1a1a !important;
-    color: #e5e7eb !important;
+    background-color: #ffffff !important;
+    color: #1d1d1f !important;
   }
 }
 

@@ -41,23 +41,7 @@ const Footer = ({ id }) => {
   ];
 
   return (
-    <footer id={id} className="relative bg-[#0a0d14] border-t border-[rgba(255,255,255,0.1)]">
-      {/* Статичные световые акценты */}
-      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div
-          className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%)',
-          }}
-        />
-        <div
-          className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(167, 139, 250, 0.06) 0%, transparent 70%)',
-          }}
-        />
-      </div>
-      
+    <footer id={id} className="relative bg-transparent border-t border-[rgba(60,60,67,0.12)]">
       <div className="container mx-auto px-4 py-10 sm:py-16 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
           {/* О компании */}
@@ -129,8 +113,7 @@ const Footer = ({ id }) => {
             <div className="grid grid-cols-1 gap-2 sm:gap-3">
               {advantages.map((advantage, index) => {
                 const Icon = advantage.icon;
-                const accentColors = ['#00f0ff', '#a78bfa', '#10b981', '#00f0ff', '#a78bfa', '#10b981'];
-                const accentColor = accentColors[index % accentColors.length];
+                const accentColor = '#007AFF';
                 return (
                   <motion.div
                     key={index}

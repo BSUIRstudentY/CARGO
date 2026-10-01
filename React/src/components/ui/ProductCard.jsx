@@ -20,9 +20,9 @@ export const ProductCard = ({
       transition={{ duration: 0.4, delay: index * 0.05 }}
       className="h-full flex"
     >
-      <div className="h-full w-full flex flex-col p-3 sm:p-4 lg:p-5 bg-[rgba(255,255,255,0.02)] rounded-2xl border border-[rgba(255,255,255,0.05)] hover:border-[rgba(0,240,255,0.5)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
+      <div className="h-full w-full flex flex-col p-3 sm:p-4 bg-white rounded-[22px] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-transform duration-200 hover:-translate-y-0.5">
         {/* Изображение товара */}
-        <div className="relative w-full aspect-square mb-3 sm:mb-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.1)] overflow-hidden flex items-center justify-center p-2 sm:p-3 flex-shrink-0">
+        <div className="relative w-full aspect-square mb-3 sm:mb-4 rounded-2xl bg-[#f2f2f7] overflow-hidden flex items-center justify-center p-3 flex-shrink-0">
           {product.imageUrl ? (
             <motion.img
               src={product.imageUrl}
@@ -31,7 +31,7 @@ export const ProductCard = ({
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.3 }}
               onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/300x300/1a1a1a/00f0ff?text=Нет+фото';
+                e.target.style.display = 'none';
               }}
             />
           ) : (
@@ -44,20 +44,16 @@ export const ProductCard = ({
         {/* Информация о товаре */}
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           {/* Название товара */}
-          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-[#e5e7eb] mb-2 sm:mb-3 line-clamp-2 break-words overflow-hidden leading-tight">
+          <h3 className="text-sm sm:text-base font-semibold text-[#1d1d1f] mb-2 line-clamp-2 break-words overflow-hidden leading-tight tracking-tight">
             {product.name || 'Без названия'}
           </h3>
           
           {/* Цена */}
           <div className="mb-3 sm:mb-4 flex-shrink-0">
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent break-words"
-            >
+            <div className="text-lg sm:text-xl font-semibold tracking-tight text-[#1d1d1f] break-words">
               ¥{product.price?.toFixed(2) || '0.00'}
-            </motion.div>
-            <div className="text-xs sm:text-sm text-[#9ca3af] mt-1">Из Китая</div>
+            </div>
+            <div className="text-xs text-[#6e6e73] mt-1">Из Китая</div>
           </div>
 
           {/* Кнопки действий */}
