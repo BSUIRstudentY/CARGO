@@ -84,7 +84,7 @@ const Home = () => {
   };
 
   return (
-    <div className="n-page">
+    <div className="home-stack">
       <Helmet>
         <title>Fluvion - Доставка товаров из Китая в Беларусь | Карго доставка под ключ</title>
         <meta name="description" content="Доставка товаров из Китая в Беларусь за 18-35 дней. Заказывайте с Pinduoduo, Taobao, 1688, GoFish и других маркетплейсов. Фиксированная цена $6/кг, страховка груза, отслеживание заказа. Более 5 лет опыта, 1000+ товаров, 90% клиентов рекомендуют." />
@@ -103,43 +103,43 @@ const Home = () => {
         <script type="application/ld+json">{JSON.stringify(serviceStructuredData)}</script>
       </Helmet>
 
-      <section className="n-hero" aria-label="Доставка из Китая">
+      <section className="hero" aria-label="Доставка из Китая">
         {HERO_FRAMES.map((src, index) => (
-          <img
-            key={src}
-            src={src}
-            alt=""
-            className={`n-hero-frame${index === frame ? ' is-on' : ''}`}
-          />
+          <div key={src} className={`hero-slide${index === frame ? ' is-on' : ''}`}>
+            <img src={src} alt="" />
+          </div>
         ))}
-        <div className="n-hero-scrim" />
-        <div className="n-hero-veil" />
-        <div className="n-hero-card">
-          <p className="n-kicker">Карго в Беларусь</p>
-          <h1>Доставка из Китая под ключ</h1>
-          <p className="n-hero-body">От выбора товара до двери в Беларуси.</p>
-          <div className="n-hero-actions">
-            <button type="button" className="n-btn-dark" onClick={() => navigate('/terminal')}>
-              Заказать товар
-            </button>
-            <button type="button" className="n-btn-glass" onClick={() => navigate('/catalog')}>
-              Примеры товаров
-            </button>
+        <div className="hero-photo-scrim" />
+        <div className="hero-veil" />
+        <div className="hero-copy">
+          <div className="hero-card">
+            <p className="hero-kicker">Карго в Беларусь</p>
+            <h1 className="hero-title">Доставка из Китая под ключ</h1>
+            <p className="hero-text">От выбора товара до двери в Беларуси.</p>
+            <div className="hero-actions">
+              <button type="button" className="card-hit pill glass" onClick={() => navigate('/terminal')}>
+                Заказать товар
+              </button>
+              <button type="button" className="card-hit pill glass" onClick={() => navigate('/catalog')}>
+                Примеры товаров
+              </button>
+            </div>
           </div>
-          <div className="n-dots" aria-hidden>
-            {HERO_FRAMES.map((src, index) => (
-              <button
-                key={src}
-                type="button"
-                className={index === frame ? 'is-on' : ''}
-                onClick={() => setFrame(index)}
-              />
-            ))}
-          </div>
+        </div>
+        <div className="hero-dots">
+          {HERO_FRAMES.map((src, index) => (
+            <button
+              key={src}
+              type="button"
+              aria-label={index === 0 ? 'Склад' : index === 1 ? 'Доставка' : 'Корзина'}
+              className={index === frame ? 'is-on' : ''}
+              onClick={() => setFrame(index)}
+            />
+          ))}
         </div>
       </section>
 
-      <section className="n-sheet">
+      <section className="sheet glass home-note">
         <p>
           Заказывайте товары из Китая без хлопот: от выбора в примерах товаров (уже заказывали клиенты) или Терминале (любые товары по ссылке) до доставки в Беларусь за 18–35 дней по цене $6/кг.
         </p>
@@ -149,35 +149,39 @@ const Home = () => {
       </section>
 
       <section>
-        <h2 className="n-h2">С нами вы можете заказывать с этих сайтов</h2>
-        <p className="n-support">Мы работаем со всеми популярными китайскими маркетплейсами</p>
-        <div className="n-tiles">
+        <div className="section-head">
+          <h2>С нами вы можете заказывать с этих сайтов</h2>
+        </div>
+        <p className="section-lead">Мы работаем со всеми популярными китайскими маркетплейсами</p>
+        <div className="cat-grid">
           {marketplaces.map((marketplace) => (
             <a
               key={marketplace.name}
               href={marketplace.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="n-tile"
+              className="cat-tile"
               title={marketplace.name}
             >
               {marketplace.hasImage ? (
                 <img src={marketplace.logo} alt="" />
               ) : (
-                <span className="n-tile-fallback">{marketplace.text}</span>
+                <div className="cat-fallback">{marketplace.text}</div>
               )}
-              <span className="n-tile-label">{marketplace.name}</span>
+              <span>{marketplace.name}</span>
             </a>
           ))}
         </div>
       </section>
 
       <section>
-        <h2 className="n-h2">Преимущества доставки с нами</h2>
-        <p className="n-support">Мы делаем доставку из Китая простой, быстрой и надежной</p>
-        <div className="n-rail">
+        <div className="section-head">
+          <h2>Преимущества доставки с нами</h2>
+        </div>
+        <p className="section-lead">Мы делаем доставку из Китая простой, быстрой и надежной</p>
+        <div className="carousel">
           {advantages.map((advantage) => (
-            <article key={advantage.title} className="n-look">
+            <article key={advantage.title} className="sheet glass advantage-card">
               <h3>{advantage.title}</h3>
               <p>{advantage.description}</p>
             </article>
@@ -185,12 +189,12 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="n-banner" aria-label="Цифры">
+      <section className="mid-banner" aria-label="Цифры">
         <img src="/220.png" alt="" />
-        <div className="n-banner-card">
-          <p className="n-kicker">Fluvion</p>
-          <h2>Доставка из Китая</h2>
-          <ul>
+        <div className="glass sheet">
+          <p className="banner-kicker">Fluvion</p>
+          <h2 className="banner-title">Доставка из Китая</h2>
+          <ul className="stat-grid">
             {stats.map((stat) => (
               <li key={stat.label}>
                 <b>{stat.number}</b>

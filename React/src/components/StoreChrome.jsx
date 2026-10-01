@@ -1,14 +1,38 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
+import { SlidePill } from './SlidePill';
 
 function isActivePath(pathname, path) {
   if (path === '/') return pathname === '/';
   return pathname === path || pathname.startsWith(`${path}/`);
 }
 
-function NavButton({ item, active, onClick }) {
+function routeOrder(pathname, items) {
+  const index = items.findIndex((item) => isActivePath(pathname, item.path));
+  return index === -1 ? items.length : index;
+}
+
+function PageSlide({ items, children }) {
+  const { pathname } = useLocation();
+  const prev = useRef(pathname);
+  const [dir, setDir] = useState('');
+
+  useEffect(() => {
+    if (prev.current === pathname) return undefined;
+    const forward = routeOrder(pathname, items) >= routeOrder(prev.current, items);
+    prev.current = pathname;
+    setDir('');
+    const frame = window.requestAnimationFrame(() => {
+      setDir(forward ? 'page-slide-right' : 'page-slide-left');
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname, items]);
+
+  return <div className={dir ? `page-slide ${dir}` : undefined}>{children}</div>;
+}
+
+function MoreLink({ item, active, onClick }) {
   const icon = item.icon
     ? React.cloneElement(item.icon, { className: 'w-[18px] h-[18px]' })
     : null;
@@ -18,7 +42,7 @@ function NavButton({ item, active, onClick }) {
       type="button"
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
-      className={`n-nav-btn${active ? ' is-active' : ''}`}
+      className={`more-link${active ? ' is-on' : ''}`}
     >
       {icon}
       <span>{item.label}</span>
@@ -27,8 +51,8 @@ function NavButton({ item, active, onClick }) {
 }
 
 /**
- * Pill navigation on top. Bottom tab bar only on a phone.
- * Every existing destination stays in the bar or in «Ещё».
+ * Top pill from their TopNav, phone tab bar from their TabBar.
+ * Every existing Fluvion destination stays in the desktop links or «Ещё».
  */
 export default function StoreChrome({
   navItems,
@@ -65,7 +89,8 @@ export default function StoreChrome({
   const dockItems = mobileTabs
     .map((path) => navItems.find((item) => item.path === path))
     .filter(Boolean);
-  const dockActive = dockItems.some((item) => isActivePath(location.pathname, item.path));
+  const dockMatch = dockItems.find((item) => isActivePath(location.pathname, item.path));
+  const activeTab = dockMatch ? dockMatch.path : 'more';
 
   const go = (path) => {
     navigate(path);
@@ -73,66 +98,65 @@ export default function StoreChrome({
   };
 
   return (
-    <div className="n-scene">
-      <div className="n-nav-slot">
-        <div className="n-nav">
-          <button type="button" className="n-brand" onClick={() => go('/')}>
-            <img src="/logo.png" alt="" />
-            <span>Fluvion</span>
-          </button>
-          <nav className="n-desk-links" aria-label="Разделы">
-            {navItems.map((item) => {
-              const active = isActivePath(location.pathname, item.path);
-              return (
-                <button
-                  key={item.path}
-                  type="button"
-                  className={active ? 'is-active' : ''}
-                  aria-current={active ? 'page' : undefined}
-                  onClick={() => go(item.path)}
-                >
-                  {item.tabLabel || item.label}
-                </button>
-              );
-            })}
-          </nav>
-          <div className="n-tools">
-            {headerRight}
-            {sidebarFooter ? <div className="n-logout-desk">{sidebarFooter}</div> : null}
-          </div>
-        </div>
-      </div>
-
-      <div className="n-main">{children}</div>
-
-      <nav className="n-tabbar" aria-label="Разделы">
-        {dockItems.map((item) => {
-          const active = isActivePath(location.pathname, item.path);
-          const icon = item.icon
-            ? React.cloneElement(item.icon, { className: 'w-5 h-5' })
-            : null;
-          return (
-            <button
-              key={item.path}
-              type="button"
-              className={`n-tab${active ? ' is-active' : ''}`}
-              aria-current={active ? 'page' : undefined}
-              onClick={() => go(item.path)}
-            >
-              {icon}
-              <span>{item.tabLabel || item.label.split(/[\s/]/)[0]}</span>
-            </button>
-          );
-        })}
-        <button
-          type="button"
-          className={`n-tab${!dockActive && moreOpen ? ' is-active' : ''}`}
-          aria-expanded={moreOpen}
-          onClick={() => setMoreOpen((open) => !open)}
-        >
-          <EllipsisHorizontalIcon className="w-5 h-5" />
-          <span>Ещё</span>
+    <div className="scene">
+      <header className="nav glass">
+        <button type="button" className="nav-brand" onClick={() => go('/')}>
+          <img src="/logo.png" alt="" />
+          <span>Fluvion</span>
         </button>
+        <nav className="nav-links" aria-label="Разделы">
+          {navItems.map((item) => {
+            const active = isActivePath(location.pathname, item.path);
+            return (
+              <button
+                key={item.path}
+                type="button"
+                className={active ? 'is-on' : ''}
+                aria-current={active ? 'page' : undefined}
+                onClick={() => go(item.path)}
+              >
+                {item.tabLabel || item.label}
+              </button>
+            );
+          })}
+        </nav>
+        <div className="nav-tools">
+          {headerRight}
+          {sidebarFooter ? <div className="nav-logout">{sidebarFooter}</div> : null}
+        </div>
+      </header>
+
+      <main>
+        <PageSlide items={navItems}>{children}</PageSlide>
+      </main>
+
+      <nav className="tabbar glass" aria-label="Разделы">
+        <SlidePill active={activeTab}>
+          {dockItems.map((item) => {
+            const on = item.path === activeTab;
+            return (
+              <button
+                key={item.path}
+                type="button"
+                data-tab={item.path}
+                className={`card-hit ${on ? 'tab-on' : 'tab-off'}`}
+                aria-current={on ? 'page' : undefined}
+                onClick={() => go(item.path)}
+              >
+                {item.tabLabel || item.label.split(/[\s/]/)[0]}
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            data-tab="more"
+            className={`card-hit ${activeTab === 'more' ? 'tab-on' : 'tab-off'}`}
+            aria-expanded={moreOpen}
+            onClick={() => setMoreOpen((open) => !open)}
+          >
+            Ещё
+          </button>
+        </SlidePill>
       </nav>
 
       <AnimatePresence>
@@ -140,14 +164,14 @@ export default function StoreChrome({
           <>
             <motion.button
               type="button"
-              className="n-more-backdrop"
+              className="more-backdrop"
               aria-label="Закрыть меню"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMoreOpen(false)}
             />
-            <div className="n-more" role="dialog" aria-label="Все разделы">
+            <div className="more-sheet glass" role="dialog" aria-label="Все разделы">
               <motion.div
                 initial={{ y: 12, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -160,12 +184,12 @@ export default function StoreChrome({
                     .filter(Boolean);
                   if (items.length === 0) return null;
                   return (
-                    <div className="n-group" key={group.title}>
+                    <div className="more-group" key={group.title}>
                       <h2>{group.title}</h2>
                       <ul>
                         {items.map((item) => (
                           <li key={item.path}>
-                            <NavButton
+                            <MoreLink
                               item={item}
                               active={isActivePath(location.pathname, item.path)}
                               onClick={() => go(item.path)}
@@ -176,7 +200,7 @@ export default function StoreChrome({
                     </div>
                   );
                 })}
-                {sidebarFooter ? <div className="n-more-foot">{sidebarFooter}</div> : null}
+                {sidebarFooter ? <div className="more-foot">{sidebarFooter}</div> : null}
               </motion.div>
             </div>
           </>

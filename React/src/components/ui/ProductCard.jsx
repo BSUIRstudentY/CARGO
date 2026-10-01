@@ -20,8 +20,8 @@ export const ProductCard = ({
       transition={{ duration: 0.4, delay: index * 0.05 }}
       className="h-full flex"
     >
-      <div className="n-product h-full w-full flex flex-col">
-        <div className="relative w-full n-product-photo overflow-hidden flex items-center justify-center">
+      <article className="product-card sheet glass relative flex h-full w-full flex-col overflow-hidden">
+        <div className="product-photo relative w-full aspect-[4/5] shrink-0 overflow-hidden">
           {product.imageUrl ? (
             <motion.img
               src={product.imageUrl}
@@ -34,25 +34,21 @@ export const ProductCard = ({
               }}
             />
           ) : (
-            <div className="n-photo-empty">
+            <div className="photo-empty">
               <span>Нет изображения</span>
             </div>
           )}
         </div>
 
-        {/* Информация о товаре */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          {/* Название товара */}
-          <h3 className="n-card-name">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden px-3 pb-3 pt-1">
+          <h3 className="line-clamp-2 min-h-[32px] text-[12px] font-medium text-[#111]">
             {product.name || 'Без названия'}
           </h3>
-          
-          {/* Цена */}
           <div className="mb-3 sm:mb-4 flex-shrink-0">
-            <div className="n-card-price">
+            <div className="text-[11px] tabular-nums text-black/55">
               ¥{product.price?.toFixed(2) || '0.00'}
             </div>
-            <div className="text-xs text-[#6e6e73] mt-1">Из Китая</div>
+            <div className="text-[11px] text-black/55 mt-1">Из Китая</div>
           </div>
 
           {/* Кнопки действий */}
@@ -77,7 +73,7 @@ export const ProductCard = ({
             </Button>
           </div>
         </div>
-      </div>
+      </article>
     </motion.div>
   );
 };

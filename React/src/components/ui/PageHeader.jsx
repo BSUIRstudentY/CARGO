@@ -10,7 +10,7 @@ export const PageHeader = ({
 }) => {
   return (
     <div className={`mb-8 text-left ${className}`}>
-      <h1 className="n-page-title">
+      <h1 className="nl-title">
         {title}
       </h1>
       {subtitle && (

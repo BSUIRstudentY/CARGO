@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from './components/AuthProvider';
 import { CartProvider } from './components/CartContext';
 import './styles.css';
 import './styles/cupertino.css';
+import './styles/niche.css';
 
 // Lazy load heavy components for code splitting and performance optimization
 const AdminLayout = lazy(() => import('./pages/AdminLayout'));

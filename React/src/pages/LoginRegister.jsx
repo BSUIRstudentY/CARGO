@@ -266,7 +266,7 @@ function LoginRegister() {
           {/* Header */}
           {!showForgotPassword && (
             <div className="mb-6 sm:mb-8">
-              <h1 className="n-page-title">
+              <h1 className="nl-title">
                 {isLogin ? 'Вход' : 'Регистрация'}
               </h1>
             </div>
