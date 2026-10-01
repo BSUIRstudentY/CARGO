@@ -34,9 +34,9 @@ function CostCalculator() {
       setIsLoading(true);
       try {
         const [usdResponse, cnyResponse, shippingResponse] = await Promise.all([
-          axios.get('https://www.nbrb.by/api/exrates/rates/USD?parammode=2'),
-          axios.get('https://www.nbrb.by/api/exrates/rates/CNY?parammode=2'),
-          api.get('/exchange-rates/shipping/current').catch(() => null), // Fallback if API fails
+          axios.get('https://www.nbrb.by/api/exrates/rates/USD?parammode=2', { timeout: 4000 }),
+          axios.get('https://www.nbrb.by/api/exrates/rates/CNY?parammode=2', { timeout: 4000 }),
+          api.get('/exchange-rates/shipping/current', { timeout: 4000 }).catch(() => null),
         ]);
         setRates({
           USD_TO_BYN: usdResponse.data.Cur_OfficialRate,
@@ -103,31 +103,25 @@ function CostCalculator() {
   return (
     <section className="min-h-screen flex items-center justify-center bg-transparent p-3 sm:p-4 relative overflow-hidden">
       <div className="relative max-w-lg w-full mx-auto relative z-10">
-        <div className="p-4 sm:p-6 md:p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
+        <div className="c-sheet p-4 sm:p-6 md:p-8">
           <PageHeader 
             title="Калькулятор стоимости"
             subtitle="Рассчитайте стоимость доставки вашего товара из Китая в Беларусь"
           />
           
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
             className="mb-4 sm:mb-6 text-xs sm:text-sm text-[#9ca3af] text-center"
           >
             Включает цену товара, страховку (5%, опционально), доставку по актуальному курсу и упаковку. <br />
             Введите стоимость или вес для частичного расчета. Курсы валют обновляются через НБРБ.
           </motion.div>
 
-        {/* Loading Overlay */}
         {isLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute inset-0 bg-[rgba(10,13,20,0.7)] flex items-center justify-center z-50 rounded-xl"
-          >
-            <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-[#00f0ff]" />
-          </motion.div>
+          <p className="mb-4 text-center text-xs sm:text-sm" style={{ color: '#1d1d1f' }}>
+            Обновляем курсы…
+          </p>
         )}
 
         {/* Error Message */}
@@ -279,9 +273,8 @@ function CostCalculator() {
 
           {/* Additional Info */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
             className="mt-4 sm:mt-6 text-center text-[#9ca3af] text-xs sm:text-sm"
           >
             <p>

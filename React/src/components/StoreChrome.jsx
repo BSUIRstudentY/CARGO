@@ -18,7 +18,7 @@ function NavButton({ item, active, onClick }) {
       type="button"
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
-      className={`cupertino-nav-btn${active ? ' is-active' : ''}${item.special ? ' is-special' : ''}`}
+      className={`cupertino-nav-btn${active ? ' is-active' : ''}`}
     >
       {icon}
       <span className="flex-1">{item.label}</span>
@@ -27,8 +27,9 @@ function NavButton({ item, active, onClick }) {
 }
 
 /**
- * macOS sidebar + iOS tab bar. Every nav item stays reachable:
- * the sidebar lists them all, and the mobile "Ещё" sheet does too.
+ * Storefront shell: frosted widgets on a light field.
+ * Navigation is one floating dock at the bottom on every width.
+ * «Ещё» opens the rest of the sections; nothing lives in a sidebar.
  */
 export default function StoreChrome({
   navItems,
@@ -40,20 +41,20 @@ export default function StoreChrome({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
-    setSheetOpen(false);
+    setMoreOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!sheetOpen) return undefined;
+    if (!moreOpen) return undefined;
     const onKey = (event) => {
-      if (event.key === 'Escape') setSheetOpen(false);
+      if (event.key === 'Escape') setMoreOpen(false);
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [sheetOpen]);
+  }, [moreOpen]);
 
   const resolvedGroups = useMemo(() => {
     const known = new Set(groups.flatMap((group) => group.paths));
@@ -62,133 +63,58 @@ export default function StoreChrome({
     return [...groups, { title: 'Разделы', paths: leftover }];
   }, [groups, navItems]);
 
-  const current = navItems.find((item) => isActivePath(location.pathname, item.path));
-  const tabItems = mobileTabs
+  const dockItems = mobileTabs
     .map((path) => navItems.find((item) => item.path === path))
     .filter(Boolean);
-  const tabActive = tabItems.some((item) => isActivePath(location.pathname, item.path));
+  const dockActive = dockItems.some((item) => isActivePath(location.pathname, item.path));
 
   const go = (path) => {
     navigate(path);
-    setSheetOpen(false);
+    setMoreOpen(false);
   };
 
   return (
     <div className="cupertino-app">
-      <aside className="cupertino-sidebar" aria-label="Разделы">
+      <div className="cupertino-top">
         <button type="button" className="cupertino-brand" onClick={() => go('/')}>
           <img src="/logo.png" alt="" />
-          <span>
-            <span className="cupertino-brand-name">Fluvion</span>
-            <span className="cupertino-brand-sub block">Доставка из Китая</span>
-          </span>
+          <span className="cupertino-brand-name">Fluvion</span>
         </button>
-        <nav className="cupertino-nav">
-          {resolvedGroups.map((group) => {
-            const items = group.paths
-              .map((path) => navItems.find((item) => item.path === path))
-              .filter(Boolean);
-            if (items.length === 0) return null;
-            return (
-              <div className="cupertino-group" key={group.title}>
-                <h2 className="cupertino-group-title">{group.title}</h2>
-                <ul className="cupertino-nav-list">
-                  {items.map((item) => (
-                    <li key={item.path}>
-                      <NavButton
-                        item={item}
-                        active={isActivePath(location.pathname, item.path)}
-                        onClick={() => go(item.path)}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
-        </nav>
-        {sidebarFooter ? <div className="cupertino-sidebar-foot">{sidebarFooter}</div> : null}
-      </aside>
+        {headerRight ? <div className="cupertino-top-actions">{headerRight}</div> : <span />}
+      </div>
 
       <div className="cupertino-column">
-        <header className="cupertino-toolbar">
-          <div className="flex items-center gap-1 min-w-0">
-            <button
-              type="button"
-              className="cupertino-icon-btn cupertino-menu-btn"
-              aria-label="Все разделы"
-              onClick={() => setSheetOpen(true)}
-            >
-              <EllipsisHorizontalIcon className="w-6 h-6" />
-            </button>
-            <p className="cupertino-toolbar-title truncate">{current?.label || 'Fluvion'}</p>
-          </div>
-          <div className="flex items-center gap-1">{headerRight}</div>
-        </header>
         <div className="cupertino-main">{children}</div>
       </div>
 
-      <nav className="cupertino-tabbar" aria-label="Основные разделы">
-        {tabItems.map((item) => {
-          const active = isActivePath(location.pathname, item.path);
-          const icon = item.icon
-            ? React.cloneElement(item.icon, { className: 'w-6 h-6' })
-            : null;
-          return (
-            <button
-              key={item.path}
-              type="button"
-              className={`cupertino-tab${active ? ' is-active' : ''}`}
-              aria-current={active ? 'page' : undefined}
-              onClick={() => go(item.path)}
-            >
-              {icon}
-              <span>{item.tabLabel || item.label}</span>
-            </button>
-          );
-        })}
-        <button
-          type="button"
-          className={`cupertino-tab${!tabActive ? ' is-active' : ''}`}
-          aria-expanded={sheetOpen}
-          onClick={() => setSheetOpen(true)}
-        >
-          <EllipsisHorizontalIcon className="w-6 h-6" />
-          <span>Ещё</span>
-        </button>
-      </nav>
-
       <AnimatePresence>
-        {sheetOpen && (
-          <div className="cupertino-sheet">
+        {moreOpen && (
+          <>
             <motion.button
               type="button"
-              className="cupertino-sheet-backdrop"
+              className="cupertino-more-backdrop"
               aria-label="Закрыть меню"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setSheetOpen(false)}
+              onClick={() => setMoreOpen(false)}
             />
+            <div className="cupertino-more" role="dialog" aria-label="Все разделы">
             <motion.div
-              className="cupertino-sheet-panel"
-              role="dialog"
-              aria-label="Все разделы"
-              initial={{ y: 40, opacity: 0 }}
+              initial={{ y: 16, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 40, opacity: 0 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              exit={{ y: 16, opacity: 0 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
             >
-              <div className="cupertino-grabber" />
               {resolvedGroups.map((group) => {
                 const items = group.paths
                   .map((path) => navItems.find((item) => item.path === path))
                   .filter(Boolean);
                 if (items.length === 0) return null;
                 return (
-                  <div className="cupertino-group" key={`sheet-${group.title}`}>
+                  <div className="cupertino-group" key={group.title}>
                     <h2 className="cupertino-group-title">{group.title}</h2>
-                    <ul className="cupertino-nav-list c-inset" style={{ padding: 6 }}>
+                    <ul className="cupertino-nav-list">
                       {items.map((item) => (
                         <li key={item.path}>
                           <NavButton
@@ -202,11 +128,42 @@ export default function StoreChrome({
                   </div>
                 );
               })}
-              {sidebarFooter ? <div className="cupertino-sidebar-foot">{sidebarFooter}</div> : null}
+              {sidebarFooter ? <div className="cupertino-more-foot">{sidebarFooter}</div> : null}
             </motion.div>
-          </div>
+            </div>
+          </>
         )}
       </AnimatePresence>
+
+      <nav className="cupertino-dock" aria-label="Разделы">
+        {dockItems.map((item) => {
+          const active = isActivePath(location.pathname, item.path);
+          const icon = item.icon
+            ? React.cloneElement(item.icon, { className: 'w-5 h-5' })
+            : null;
+          return (
+            <button
+              key={item.path}
+              type="button"
+              className={`cupertino-dock-item${active ? ' is-active' : ''}`}
+              aria-current={active ? 'page' : undefined}
+              onClick={() => go(item.path)}
+            >
+              {icon}
+              <span>{item.tabLabel || item.label.split(/[\s/]/)[0]}</span>
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          className={`cupertino-dock-item${!dockActive && moreOpen ? ' is-active' : ''}`}
+          aria-expanded={moreOpen}
+          onClick={() => setMoreOpen((open) => !open)}
+        >
+          <EllipsisHorizontalIcon className="w-5 h-5" />
+          <span>Ещё</span>
+        </button>
+      </nav>
 
       <a
         href="https://t.me/FLUVIONN"

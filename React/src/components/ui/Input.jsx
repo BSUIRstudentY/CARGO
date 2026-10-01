@@ -17,7 +17,7 @@ export const Input = ({
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--c-secondary)' }}>
+        <label className="block text-sm font-medium mb-1.5" style={{ color: '#1d1d1f' }}>
           {label}
         </label>
       )}

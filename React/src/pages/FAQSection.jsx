@@ -20,7 +20,7 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
           className="text-center text-[#ef4444] p-8 rounded-2xl bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.3)]"
@@ -299,7 +299,7 @@ function FAQSection() {
           <div className="lg:hidden">
             <main className="py-2">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="mb-4 text-sm text-[#cdcdcd] text-center"
@@ -310,7 +310,7 @@ function FAQSection() {
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="mb-4"
@@ -328,7 +328,7 @@ function FAQSection() {
               </motion.div>
 
               {/* Mobile FAQ List */}
-              <div className="space-y-3">
+              <div className="c-inset c-faq-list">
                 {faqs.map((category, catIndex) => {
                   const categoryQuestions = searchQuery
                     ? category.questions.filter(
@@ -346,10 +346,10 @@ function FAQSection() {
                   return (
                     <motion.div
                       key={catIndex}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 1, y: 0 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: catIndex * 0.1 }}
-                      className="rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] overflow-hidden"
+                      className="c-inset-row"
                     >
                       <button
                         onClick={() => toggleCategory(catIndex)}
@@ -417,7 +417,7 @@ function FAQSection() {
               {/* Recently Viewed for Mobile */}
               {recentlyViewed.length > 0 && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 1, y: 0 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.5 }}
                   className="mt-6"
@@ -466,7 +466,7 @@ function FAQSection() {
           {/* Desktop Design - показывается только на больших экранах */}
           <main className="hidden lg:block py-4 sm:py-6 lg:py-12">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 1, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="mb-4 sm:mb-6 lg:mb-8 text-sm sm:text-base lg:text-lg text-[#cdcdcd] text-center"
@@ -477,7 +477,7 @@ function FAQSection() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 1, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               className="mb-4 sm:mb-6 lg:mb-8"
@@ -496,12 +496,12 @@ function FAQSection() {
 
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
               <motion.aside
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 1, x: 0 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
                 className="lg:w-1/4 w-full order-2 lg:order-1"
               >
-                <div className="p-3 sm:p-4 lg:p-4 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
+                <div className="c-inset c-faq-list p-4">
                   <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-[#00f0ff] mb-3 sm:mb-4 font-display">Часто задаваемые вопросы</h3>
                   <ul className="space-y-1">
                     {faqs.map((category, catIndex) => (
@@ -535,17 +535,17 @@ function FAQSection() {
               </motion.aside>
 
               <motion.main
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 1, x: 0 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
                 className="lg:w-3/4 w-full order-1 lg:order-2"
               >
-                <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+                <div className="c-inset c-faq-list">
                   {filteredFAQs.length > 0 ? (
                     filteredFAQs.map((faq, index) => (
                       <div
                         key={`${faq.category}-${faq.originalIndex}`}
-                        className="p-3 sm:p-4 lg:p-6 xl:p-8 rounded-xl sm:rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300"
+                        className="c-inset-row"
                       >
                         <h2
                           className="text-base sm:text-lg lg:text-xl font-semibold mb-2 sm:mb-3 flex items-start gap-2 cursor-pointer text-[#00f0ff] break-words"
@@ -580,7 +580,7 @@ function FAQSection() {
 
                 {recentlyViewed.length > 0 && (
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 1, y: 0 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.5 }}
                     className="mt-6 sm:mt-8 mb-4 sm:mb-0"
@@ -722,7 +722,7 @@ function FAQSection() {
           </motion.div>
 
           <motion.footer
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
             className="py-4 sm:py-6 mt-8 sm:mt-12 border-t border-[rgba(255,255,255,0.1)] text-center text-[#9ca3af] text-xs sm:text-sm"

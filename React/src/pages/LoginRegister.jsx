@@ -274,12 +274,11 @@ function LoginRegister() {
       </div>
       
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
         className="relative max-w-lg w-full z-10"
       >
-        <div className="p-5 sm:p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300 relative overflow-hidden">
+        <div className="c-sheet p-5 sm:p-8 relative">
           {/* Header */}
           {!showForgotPassword && (
             <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
