@@ -8,6 +8,35 @@ import { Helmet } from 'react-helmet-async';
  */
 const HERO_FRAMES = ['/main.png', '/220.png', '/cart.png'];
 
+function MarketTile({ marketplace }) {
+  const [failed, setFailed] = useState(false);
+  const [ready, setReady] = useState(false);
+  const showImage = Boolean(marketplace.hasImage && marketplace.logo) && !failed;
+
+  return (
+    <a
+      href={marketplace.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="cat-tile"
+      title={marketplace.name}
+    >
+      {showImage ? (
+        <img
+          src={marketplace.logo}
+          alt=""
+          style={{ visibility: ready ? 'visible' : 'hidden' }}
+          onLoad={() => setReady(true)}
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <div className="cat-fallback">{marketplace.text}</div>
+      )}
+      <span>{marketplace.name}</span>
+    </a>
+  );
+}
+
 const Home = () => {
   const navigate = useNavigate();
   const [frame, setFrame] = useState(0);
@@ -155,21 +184,7 @@ const Home = () => {
         <p className="section-lead">Мы работаем со всеми популярными китайскими маркетплейсами</p>
         <div className="cat-grid">
           {marketplaces.map((marketplace) => (
-            <a
-              key={marketplace.name}
-              href={marketplace.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="cat-tile"
-              title={marketplace.name}
-            >
-              {marketplace.hasImage ? (
-                <img src={marketplace.logo} alt="" />
-              ) : (
-                <div className="cat-fallback">{marketplace.text}</div>
-              )}
-              <span>{marketplace.name}</span>
-            </a>
+            <MarketTile key={marketplace.name} marketplace={marketplace} />
           ))}
         </div>
       </section>

@@ -1019,3 +1019,38 @@ select {
   font-size: 13px;
   outline: none;
 }
+
+/* Login fields: .cupertino-field padding shorthand beats Tailwind pl-11. */
+input.cupertino-field.pl-11 {
+  padding-left: 48px;
+}
+
+/* Calculator icons are 16px at left 12px. Keep the first glyph clear of them. */
+.n-field-icon + input {
+  padding-left: 52px;
+}
+
+/* Desktop hero photos are near-black. A 6.5 lift turns them muddy and
+   shows through the 42% card. Phone hero stays on the denser mobile card.
+   Desktop uses a gentler lift, a stronger scrim, and a denser card. */
+@media (min-width: 640px) {
+  .hero-slide img {
+    filter: brightness(4.4) contrast(1.22) saturate(0.62);
+  }
+
+  .hero-photo-scrim {
+    background: rgba(236, 238, 242, 0.5);
+  }
+
+  .hero-card {
+    background: rgba(255, 255, 255, 0.92);
+  }
+
+  .hero-actions button.glass {
+    background: #fff;
+    border: 1px solid rgba(17, 17, 17, 0.42);
+    box-shadow: none;
+    color: #111;
+    -webkit-text-fill-color: #111;
+  }
+}
