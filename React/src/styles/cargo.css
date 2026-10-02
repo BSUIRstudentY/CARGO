@@ -477,12 +477,15 @@ select.input {
   z-index: 30;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
   margin: 10px auto 0;
+  width: min(980px, 100%);
+  min-width: 0;
   max-width: 980px;
   padding: 6px 8px 6px 16px;
   border-radius: 999px;
+  overflow: hidden;
 }
 
 .nav-link {
@@ -547,6 +550,12 @@ select.input {
   color: #fff;
   font-size: 12px;
   font-weight: 500;
+}
+
+@media (max-width: 719px) {
+  .nav-cta-account {
+    display: none;
+  }
 }
 
 .tabbar {
@@ -1216,9 +1225,9 @@ select.input {
 .nav-scroll {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 0;
   min-width: 0;
-  flex: 1;
+  flex: 1 1 auto;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -1228,6 +1237,55 @@ select.input {
 .nav-scroll .nav-link {
   display: inline-flex;
   flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.nav-tools {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.cart-step {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  color: #111;
+}
+
+.cart-step:disabled {
+  opacity: 0.4;
+}
+
+.cart-remove {
+  display: inline-flex;
+  padding: 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #111;
+}
+
+.support-fab {
+  position: fixed;
+  right: 16px;
+  bottom: calc(86px + 40px + 12px + env(safe-area-inset-bottom));
+  z-index: 36;
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
 }
 
 .nav-brand {

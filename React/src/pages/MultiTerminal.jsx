@@ -201,9 +201,6 @@ function MultiTerminal() {
           <h2 className={isCompact ? 'text-sm font-semibold' : 'text-xl font-bold'} style={{ color: '#1d1d1f' }}>
             Как пользоваться
           </h2>
-          <p className="muted mt-1 text-[13px]">
-            Скопируйте название и ссылку. Мы проверим цену и наличие.
-          </p>
         </div>
 
         {isCompact ? (

@@ -1,6 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { PageHeader } from '../components/ui/PageHeader';
 
 const faq = [
@@ -23,8 +21,6 @@ const faq = [
 ];
 
 function FAQSection() {
-  const navigate = useNavigate();
-
   return (
     <div className="space-y-4">
       <PageHeader kicker="FAQ" title="Частые вопросы" subtitle="Коротко о цене, оплате, страховке и самовыкупе." />
@@ -36,9 +32,6 @@ function FAQSection() {
           </details>
         ))}
       </div>
-      <button type="button" className="n-support-fab nav-icon" aria-label="Открыть поддержку" onClick={() => navigate('/support')} style={{ background: '#111', color: '#fff' }}>
-        <ChatBubbleLeftRightIcon className="h-5 w-5" />
-      </button>
     </div>
   );
 }
