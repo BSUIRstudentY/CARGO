@@ -101,96 +101,85 @@ function PostOfficeSelect({ deliveryAddress, setDeliveryAddress, setError, setSe
         placeholder="Введите город, улицу или индекс..."
         noOptionsMessage={() => officeLoading ? 'Поиск...' : 'Введите минимум 3 символа'}
         styles={{
-          control: (base, state) => ({
+          control: (base) => ({
             ...base,
-            backgroundColor: 'rgba(107,114,128,0.15)',
-            borderColor: state.isFocused ? '#00f0ff' : 'rgba(255,255,255,0.1)',
-            borderWidth: '1px',
-            borderRadius: '0.75rem',
-            color: '#e5e7eb',
-            boxShadow: state.isFocused ? '0 0 0 3px rgba(0, 240, 255, 0.1)' : 'none',
-            minHeight: '48px',
+            backgroundColor: 'rgba(255,255,255,0.62)',
+            borderColor: 'transparent',
+            borderWidth: 0,
+            borderRadius: 14,
+            color: '#111',
+            boxShadow: 'none',
+            minHeight: 44,
             width: '100%',
             cursor: 'text',
-            '&:hover': { 
-              borderColor: state.isFocused ? '#00f0ff' : 'rgba(0, 240, 255, 0.3)',
-            },
-            transition: 'all 0.3s ease',
+            '&:hover': { borderColor: 'transparent' },
           }),
           input: (base) => ({
             ...base,
-            color: '#e5e7eb',
+            color: '#111',
             width: '100%',
           }),
           placeholder: (base) => ({
             ...base,
-            color: '#9ca3af',
+            color: 'rgba(17,17,17,0.42)',
           }),
           singleValue: (base) => ({
             ...base,
-            color: '#e5e7eb',
+            color: '#111',
           }),
-          indicatorSeparator: (base) => ({
+          indicatorSeparator: () => ({ display: 'none' }),
+          dropdownIndicator: (base) => ({
             ...base,
-            backgroundColor: 'rgba(255,255,255,0.1)',
+            color: 'rgba(17,17,17,0.45)',
+            '&:hover': { color: '#111' },
           }),
-          dropdownIndicator: (base, state) => ({
+          clearIndicator: (base) => ({
             ...base,
-            color: state.isFocused ? '#00f0ff' : '#9ca3af',
-            '&:hover': {
-              color: '#00f0ff',
-            },
-            transition: 'color 0.3s ease',
+            color: 'rgba(17,17,17,0.45)',
           }),
           loadingIndicator: (base) => ({
             ...base,
-            color: '#00f0ff',
+            color: '#111',
           }),
           menu: (base) => ({
             ...base,
-            backgroundColor: 'rgba(31,41,55,0.95)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '0.75rem',
-            marginTop: '4px',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
+            backgroundColor: 'rgba(255,255,255,0.96)',
+            border: 0,
+            borderRadius: 14,
+            marginTop: 4,
+            boxShadow: '0 10px 30px rgba(17,17,17,0.08)',
             zIndex: 9999,
             overflow: 'hidden',
           }),
           menuList: (base) => ({
             ...base,
-            padding: '4px',
+            padding: 4,
           }),
           option: (base, state) => ({
             ...base,
-            backgroundColor: state.isSelected 
-              ? 'rgba(0, 240, 255, 0.15)' 
-              : state.isFocused 
-                ? 'rgba(0, 240, 255, 0.1)' 
-                : 'transparent',
-            color: state.isSelected ? '#00f0ff' : '#e5e7eb',
-            borderRadius: '0.5rem',
+            backgroundColor: state.isFocused || state.isSelected ? 'rgba(17,17,17,0.06)' : 'transparent',
+            color: '#111',
+            borderRadius: 10,
             padding: '10px 12px',
             cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            '&:active': {
-              backgroundColor: 'rgba(0, 240, 255, 0.2)',
-            },
           }),
           noOptionsMessage: (base) => ({
             ...base,
-            color: '#9ca3af',
-            padding: '12px',
+            color: 'rgba(17,17,17,0.45)',
+            padding: 12,
           }),
         }}
         theme={(theme) => ({
           ...theme,
           colors: {
             ...theme.colors,
-            primary: '#00f0ff',
-            primary25: 'rgba(0, 240, 255, 0.15)',
-            primary50: 'rgba(0, 240, 255, 0.3)',
-            primary75: 'rgba(0, 240, 255, 0.5)',
+            primary: '#111',
+            primary25: 'rgba(17,17,17,0.06)',
+            primary50: 'rgba(17,17,17,0.08)',
+            primary75: 'rgba(17,17,17,0.12)',
+            neutral0: 'rgba(255,255,255,0.62)',
+            neutral20: 'transparent',
+            neutral30: 'transparent',
           },
         })}
       />

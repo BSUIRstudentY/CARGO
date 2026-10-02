@@ -173,6 +173,7 @@ function OrderDetails() {
 
       <div className="max-w-7xl mx-auto relative z-10">
         <PageHeader
+          kicker="Заказ"
           title={`Детали заказа #${order.orderNumber}`}
           subtitle="Просмотрите информацию о вашем заказе"
           className="mb-4 sm:mb-8"

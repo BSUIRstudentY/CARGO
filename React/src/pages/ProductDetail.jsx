@@ -378,10 +378,11 @@ function ProductDetail() {
             <ArrowLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
             Назад
           </Button>
-          <PageHeader 
+          <PageHeader
+            kicker="Товар"
             title={product.name}
             subtitle="Детали и добавление в корзину"
-            className="mb-4 sm:mb-8"
+            className="mb-4"
           />
         </div>
         

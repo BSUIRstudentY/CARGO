@@ -58,7 +58,7 @@ function AdminLayout() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-transparent text-[#e5e7eb] relative overflow-hidden">
+    <div className="cupertino-app flex flex-col min-h-screen relative overflow-hidden">
       
       <motion.button
         whileHover={{ scale: 1.1 }}

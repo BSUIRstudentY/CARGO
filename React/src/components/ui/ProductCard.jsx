@@ -20,44 +20,35 @@ export const ProductCard = ({
       transition={{ duration: 0.4, delay: index * 0.05 }}
       className="h-full flex"
     >
-      <div className="h-full w-full flex flex-col p-3 sm:p-4 lg:p-5 bg-[rgba(255,255,255,0.02)] rounded-2xl border border-[rgba(255,255,255,0.05)] hover:border-[rgba(0,240,255,0.5)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-300">
-        {/* Изображение товара */}
-        <div className="relative w-full aspect-square mb-3 sm:mb-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.1)] overflow-hidden flex items-center justify-center p-2 sm:p-3 flex-shrink-0">
+      <article className="glass sheet relative flex h-full w-full flex-col overflow-hidden">
+        <div className="photo relative aspect-square w-full shrink-0 overflow-hidden rounded-none">
           {product.imageUrl ? (
             <motion.img
               src={product.imageUrl}
               alt={product.name || 'Товар'}
-              className="w-full h-full object-contain max-w-full max-h-full"
+              className="w-full h-full object-cover object-center"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.3 }}
               onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/300x300/1a1a1a/00f0ff?text=Нет+фото';
+                e.target.style.display = 'none';
               }}
             />
           ) : (
-            <div className="w-full h-full bg-[rgba(255,255,255,0.02)] flex items-center justify-center rounded-lg">
-              <span className="text-[#9ca3af] text-xs sm:text-sm text-center px-2">Нет изображения</span>
+            <div className="photo-empty">
+              <span>Нет изображения</span>
             </div>
           )}
         </div>
 
-        {/* Информация о товаре */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          {/* Название товара */}
-          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-[#e5e7eb] mb-2 sm:mb-3 line-clamp-2 break-words overflow-hidden leading-tight">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden px-3 pb-3 pt-1">
+          <h3 className="line-clamp-2 min-h-[32px] text-[12px] font-medium text-[#111]">
             {product.name || 'Без названия'}
           </h3>
-          
-          {/* Цена */}
           <div className="mb-3 sm:mb-4 flex-shrink-0">
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent break-words"
-            >
+            <div className="text-[11px] tabular-nums text-black/55">
               ¥{product.price?.toFixed(2) || '0.00'}
-            </motion.div>
-            <div className="text-xs sm:text-sm text-[#9ca3af] mt-1">Из Китая</div>
+            </div>
+            <div className="text-[11px] text-black/55 mt-1">Из Китая</div>
           </div>
 
           {/* Кнопки действий */}
@@ -82,7 +73,7 @@ export const ProductCard = ({
             </Button>
           </div>
         </div>
-      </div>
+      </article>
     </motion.div>
   );
 };

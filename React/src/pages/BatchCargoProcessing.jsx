@@ -124,6 +124,7 @@ const BatchCargoProcessing = () => {
       
       <div className="max-w-7xl mx-auto relative z-10">
         <PageHeader
+          kicker="Заказ"
           title={`Детали заказа #${order.orderNumber}`}
           subtitle="Просмотр товаров и их статусов выкупа"
         />

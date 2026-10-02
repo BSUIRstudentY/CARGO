@@ -457,7 +457,8 @@ function OrderCheck() {
       
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <PageHeader 
+        <PageHeader
+          kicker="Заказ"
           title={`Заказ #${editedOrder?.orderNumber || id}`}
           subtitle="Проверка и подтверждение заказа"
         />

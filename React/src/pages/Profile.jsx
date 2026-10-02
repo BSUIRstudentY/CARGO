@@ -125,10 +125,11 @@ function Profile() {
   ];
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-6 sm:py-12 pb-24 sm:pb-12 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-[#e5e7eb] pb-24 sm:pb-12 relative overflow-hidden">
       
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <PageHeader 
+      <div className="relative z-10">
+        <PageHeader
+          kicker="Аккаунт"
           title="Личный кабинет"
           subtitle="Управление вашими данными и заказами"
         />

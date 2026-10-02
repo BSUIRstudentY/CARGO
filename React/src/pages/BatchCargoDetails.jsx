@@ -290,6 +290,7 @@ const BatchCargoDetails = () => {
       
       <div className="max-w-7xl mx-auto relative z-10">
         <PageHeader
+          kicker="Логистика"
           title={`Сборный груз #${batchCargo.id}`}
           subtitle="Детальная информация о вашем сборном грузе"
         />

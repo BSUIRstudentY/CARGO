@@ -7,16 +7,16 @@ export const theme = {
   colors: {
     // Primary colors
     primary: {
-      main: '#e81e2d',
-      light: '#ff4757',
-      dark: '#c1121f',
-      hover: '#d91a2a',
+      main: '#1d1d1f',
+      light: '#3a3a3c',
+      dark: '#000000',
+      hover: '#000000',
     },
     secondary: {
-      main: '#407CFF',
-      light: '#5a8fff',
-      dark: '#2e5fcc',
-      hover: '#4d7fff',
+      main: '#007AFF',
+      light: '#409cff',
+      dark: '#0066d6',
+      hover: '#0066d6',
     },
     accent: {
       main: '#FF5722',
@@ -25,18 +25,18 @@ export const theme = {
     },
     // Background colors
     background: {
-      primary: '#0a0a0a',
-      secondary: '#1a1a1a',
-      tertiary: '#2F2F2F',
-      card: '#1f1f1f',
-      hover: '#2a2a2a',
+      primary: '#f2f2f7',
+      secondary: '#ffffff',
+      tertiary: '#e5e5ea',
+      card: '#ffffff',
+      hover: '#ebebf0',
     },
     // Text colors
     text: {
-      primary: '#ffffff',
-      secondary: '#cdcdcd',
-      muted: '#808080',
-      disabled: '#555555',
+      primary: '#1d1d1f',
+      secondary: '#6e6e73',
+      muted: '#8e8e93',
+      disabled: '#aeaeb2',
     },
     // Border colors
     border: {
@@ -116,16 +116,16 @@ export const theme = {
 export const componentStyles = {
   button: {
     base: 'px-4 py-2 rounded-lg font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2',
-    primary: 'bg-[#e81e2d] text-white hover:bg-[#d91a2a] focus:ring-[#e81e2d]',
-    secondary: 'bg-[#407CFF] text-white hover:bg-[#4d7fff] focus:ring-[#407CFF]',
-    outline: 'border-2 border-[#333333] text-white hover:bg-[#2a2a2a] hover:border-[#555555]',
-    ghost: 'text-white hover:bg-[#2a2a2a]',
+    primary: 'bg-[#1d1d1f] text-white hover:bg-black focus:ring-[#1d1d1f]',
+    secondary: 'bg-[#007AFF] text-white hover:bg-[#0066d6] focus:ring-[#007AFF]',
+    outline: 'border border-[rgba(60,60,67,0.16)] text-[#1d1d1f] hover:bg-[#ebebf0]',
+    ghost: 'text-[#007AFF] hover:bg-[rgba(0,122,255,0.08)]',
   },
   input: {
-    base: 'w-full px-4 py-2 bg-[#1a1a1a] border border-[#333333] rounded-lg text-white placeholder-[#808080] focus:outline-none focus:ring-2 focus:ring-[#407CFF] focus:border-transparent transition-all',
+    base: 'w-full px-4 py-2 bg-white border border-[rgba(60,60,67,0.16)] rounded-xl text-[#1d1d1f] placeholder-[#8e8e93] focus:outline-none focus:ring-4 focus:ring-[#007AFF]/20 transition-all',
   },
   card: {
-    base: 'bg-[#1f1f1f] rounded-lg border border-[#333333] p-6 shadow-lg',
+    base: 'bg-white rounded-2xl border border-[rgba(60,60,67,0.08)] p-6 shadow-sm',
     hover: 'hover:border-[#555555] transition-all duration-300',
   },
 };

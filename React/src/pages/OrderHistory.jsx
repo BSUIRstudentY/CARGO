@@ -147,7 +147,8 @@ function OrderHistory() {
     <div className="min-h-screen pt-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center justify-between mb-6">
-          <PageHeader 
+          <PageHeader
+            kicker="Заказ"
             title={`Заказ #${order.orderNumber || order.id}`}
             subtitle={`Статус: ${getStatusLabel(order.status)}`}
           />
