@@ -87,7 +87,8 @@ function SelfPickupCargo() {
   return (
     <div className="min-h-screen bg-transparent text-[#e5e7eb] relative overflow-hidden pb-20 sm:pb-12">
       <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 lg:py-12">
-        <PageHeader 
+        <PageHeader
+          kicker="Самовыкуп" 
           title="Самовыкуп карго" 
           subtitle="Самостоятельный выкуп товаров с китайских площадок"
           className="mb-4 sm:mb-12"

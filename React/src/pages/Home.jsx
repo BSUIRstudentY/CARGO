@@ -55,6 +55,19 @@ const faq = [
   },
 ];
 
+function EntryTile({ item, wide }) {
+  const [broken, setBroken] = useState(false);
+  return (
+    <Link to={item.href} className={`tile${wide ? ' col-span-2 sm:col-span-1' : ''}`}>
+      {broken ? <div className="tile-fallback" aria-hidden /> : <img src={item.src} alt="" onError={() => setBroken(true)} />}
+      <span>
+        {item.label}
+        <small> · {item.sub}</small>
+      </span>
+    </Link>
+  );
+}
+
 const Home = () => {
   const [index, setIndex] = useState(0);
 
@@ -102,13 +115,7 @@ const Home = () => {
       <section className="space-y-3">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {entries.map((item, i) => (
-            <Link key={item.href} to={item.href} className={`tile ${i === 2 ? 'col-span-2 sm:col-span-1' : ''}`}>
-              <img src={item.src} alt="" />
-              <span>
-                {item.label}
-                <small> · {item.sub}</small>
-              </span>
-            </Link>
+            <EntryTile key={item.href} item={item} wide={i === 2} />
           ))}
         </div>
         <p className="muted flex flex-wrap items-center gap-x-2 gap-y-1 px-1 text-[12px]">

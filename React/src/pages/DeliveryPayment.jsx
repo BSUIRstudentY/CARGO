@@ -11,7 +11,8 @@ function DeliveryPayment() {
   return (
     <div className="min-h-screen bg-transparent text-[#e5e7eb] py-6 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
-        <PageHeader 
+        <PageHeader
+          kicker="Доставка" 
           title="Доставка и оплата"
           subtitle="Узнайте, как мы организуем доставку товаров из Китая и принимаем платежи"
         />

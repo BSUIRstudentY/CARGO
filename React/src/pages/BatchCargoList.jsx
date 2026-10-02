@@ -208,6 +208,7 @@ const BatchCargoList = () => {
       
       <div className="max-w-7xl mx-auto relative z-10">
         <PageHeader
+          kicker="Логистика"
           title="Сборные грузы"
           subtitle="Все сборные грузы. При просмотре деталей вы увидите только свои заказы"
         />

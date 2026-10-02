@@ -172,15 +172,19 @@ function Catalog() {
       {/* МОБИЛЬНАЯ ВЕРСИЯ - показывается только на мобильных */}
       <div className="lg:hidden">
         {/* Мобильный Hero */}
-        <section className="relative overflow-hidden py-6 z-10">
-          <div className="container mx-auto px-4 relative z-10">
+        <section className="relative z-10">
+          <div className="relative z-10">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
               className="text-left mb-4"
             >
-              <h1 className="display text-[26px]">Примеры товаров</h1>
+              <div className="px-0.5">
+                <p className="kicker">Каталог</p>
+                <h1 className="title mt-1">Примеры товаров</h1>
+                <p className="muted mt-1">Товары, которые уже заказывали наши клиенты.</p>
+              </div>
               <div className="n-note">
                 <ExclamationTriangleIcon className="n-note-icon" />
                 <div>
@@ -369,14 +373,18 @@ function Catalog() {
         {/* Hero секция каталога */}
         <section className="relative z-10">
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-left mb-8"
+            className="text-left mb-6"
           >
-            <h1 className="display text-[26px]">Примеры товаров</h1>
+            <div className="px-0.5">
+              <p className="kicker">Каталог</p>
+              <h1 className="title mt-1">Примеры товаров</h1>
+              <p className="muted mt-1">Товары, которые уже заказывали наши клиенты. Вы можете посмотреть отзывы и выбрать проверенные товары с доставкой в Беларусь.</p>
+            </div>
             <div className="n-note">
               <ExclamationTriangleIcon className="n-note-icon" />
               <div>
@@ -386,9 +394,6 @@ function Catalog() {
                 </p>
               </div>
             </div>
-            <p className="text-sm text-[#9ca3af] max-w-2xl mt-3 mb-2">
-              Товары, которые уже заказывали наши клиенты. Вы можете посмотреть отзывы и выбрать проверенные товары с доставкой в Беларусь.
-            </p>
           </motion.div>
 
           {/* Поиск и фильтры */}

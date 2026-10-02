@@ -169,7 +169,8 @@ function AdminPanel({ section = 'home' }) {
       case 'orders':
         return (
           <div className="space-y-8">
-            <PageHeader 
+            <PageHeader
+              kicker="Админ"
               title="Управление заказами"
               subtitle={`Найдено заказов: ${totalElements}`}
             />
@@ -289,7 +290,8 @@ function AdminPanel({ section = 'home' }) {
       case 'catalog':
         return (
           <div className="space-y-8">
-            <PageHeader 
+            <PageHeader
+              kicker="Админ"
               title="Каталог продуктов"
               subtitle={`Найдено товаров: ${totalElements}`}
             />
@@ -400,7 +402,8 @@ function AdminPanel({ section = 'home' }) {
       case 'support':
         return (
           <div className="space-y-8">
-            <PageHeader 
+            <PageHeader
+              kicker="Админ"
               title="Техническая поддержка"
               subtitle="Управление обращениями пользователей"
             />
@@ -414,7 +417,8 @@ function AdminPanel({ section = 'home' }) {
       case 'statistics':
         return (
           <div className="space-y-8">
-            <PageHeader 
+            <PageHeader
+              kicker="Админ"
               title="Статистика"
               subtitle="Аналитика и отчёты"
             />
@@ -428,7 +432,8 @@ function AdminPanel({ section = 'home' }) {
       case 'suppliers':
         return (
           <div className="space-y-8">
-            <PageHeader 
+            <PageHeader
+              kicker="Админ"
               title="Поставщики"
               subtitle="Управление поставщиками"
             />
@@ -442,7 +447,8 @@ function AdminPanel({ section = 'home' }) {
       case 'commission':
         return (
           <div className="space-y-8">
-            <PageHeader 
+            <PageHeader
+              kicker="Админ"
               title="Комиссии"
               subtitle="Настройка комиссий"
             />
@@ -457,7 +463,8 @@ function AdminPanel({ section = 'home' }) {
       default:
         return (
           <div className="space-y-8">
-            <PageHeader 
+            <PageHeader
+              kicker="Админ"
               title="Главная админ-панель"
               subtitle="Добро пожаловать в панель администратора"
             />

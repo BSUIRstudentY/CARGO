@@ -267,8 +267,8 @@ function CartPage() {
 
   return (
     <div className="min-h-screen bg-transparent text-[#e5e7eb] relative overflow-hidden pb-24 sm:pb-0">
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8 lg:py-12 pb-safe">
-        <PageHeader title="Корзина" subtitle="Проверьте и оформите заказ" />
+      <div className="relative z-10">
+        <PageHeader kicker="Заказ" title="Корзина" subtitle="Проверьте и оформите заказ" />
 
         <AnimatePresence>
           {loading && <Loading message="Загрузка корзины..." />}

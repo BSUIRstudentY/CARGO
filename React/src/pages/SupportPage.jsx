@@ -324,17 +324,14 @@ function SupportPage() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-6 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-[#e5e7eb] relative overflow-hidden">
       
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-1.5 sm:mb-2">
-              <span className="bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent">
-                Поддержка
-              </span>
-            </h1>
-            <p className="text-[#9ca3af] text-sm sm:text-lg">Создавайте запросы и отслеживайте их статус</p>
+      <div className="relative z-10">
+        <div className="flex flex-col md:flex-row items-end justify-between mb-6 gap-4">
+          <div className="px-0.5">
+            <p className="kicker">Помощь</p>
+            <h1 className="title mt-1">Поддержка</h1>
+            <p className="muted mt-1">Создавайте запросы и отслеживайте их статус</p>
           </div>
           <div className="flex space-x-4">
             <Button

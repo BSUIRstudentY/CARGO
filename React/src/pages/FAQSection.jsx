@@ -277,10 +277,11 @@ function FAQSection() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-transparent text-[#e5e7eb] py-4 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8 relative overflow-x-hidden pb-20 sm:pb-12">
+      <div className="min-h-screen bg-transparent text-[#e5e7eb] relative overflow-x-hidden pb-20 sm:pb-12">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between mb-4 sm:mb-6 lg:mb-8 gap-3 sm:gap-4">
-            <PageHeader 
+            <PageHeader
+              kicker="FAQ"
               title="Часто задаваемые вопросы"
               subtitle="Найдите ответы на вопросы о заказах, доставке, самовыкупе и оплате"
             />

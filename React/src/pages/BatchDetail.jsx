@@ -360,6 +360,7 @@ function BatchDetail() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <PageHeader
+              kicker="Выкуп"
               title={`Выкуп #${batch.id}`}
               subtitle={`Дата выкупа: ${new Date(batch.purchaseDate).toLocaleDateString('ru-RU')}`}
             />

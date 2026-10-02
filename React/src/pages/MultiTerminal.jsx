@@ -323,13 +323,14 @@ function MultiTerminal() {
   };
 
   const mobileLayout = (
-    <section id="multi-terminal" className="min-h-screen bg-transparent text-[#e5e7eb] py-3 px-3 relative overflow-x-hidden pb-24">
+    <section id="multi-terminal" className="min-h-screen bg-transparent text-[#e5e7eb] relative overflow-x-hidden">
       
       <div className="relative z-10">
-        <PageHeader 
+        <PageHeader
+          kicker="Терминал"
           title="Заказать товар"
           subtitle="Ссылки на товары → заявка"
-          className="mb-4 sm:mb-8"
+          className="mb-4"
         />
 
         <AnimatePresence>
@@ -518,10 +519,11 @@ function MultiTerminal() {
   );
 
   const desktopLayout = (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-12 px-4 sm:px-6 lg:px-8 relative overflow-x-hidden pb-24 sm:pb-12">
+    <div className="min-h-screen bg-transparent text-[#e5e7eb] relative overflow-x-hidden">
       
       <div className="max-w-7xl mx-auto relative z-10">
-        <PageHeader 
+        <PageHeader
+          kicker="Терминал"
           title="Заказать товар"
           subtitle="Добавьте ссылки на товары и оформите заявку"
         />

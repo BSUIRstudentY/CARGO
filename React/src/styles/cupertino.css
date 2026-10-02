@@ -2029,14 +2029,9 @@ h2,
 .n-support-fab {
   position: fixed;
   right: 16px;
-  bottom: calc(96px + 44px + 12px + env(safe-area-inset-bottom));
+  /* Telegram control is 40px tall, pinned 86px from the bottom. Sit one gap above it. */
+  bottom: calc(86px + 40px + 12px + env(safe-area-inset-bottom));
   z-index: 36;
-}
-
-@media (min-width: 640px) {
-  .n-support-fab {
-    bottom: 80px;
-  }
 }
 
 .n-main h1 {

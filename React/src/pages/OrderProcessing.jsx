@@ -167,6 +167,7 @@ function OrderProcessing() {
     <div className="min-h-screen bg-transparent text-[#e5e7eb] py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <PageHeader
+          kicker="Заказ"
           title={`Обработка заказа #${order.orderNumber}`}
           subtitle={`Клиент: ${order.userEmail}`}
         />

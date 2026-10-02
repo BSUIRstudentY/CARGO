@@ -1,23 +1,24 @@
 import React from 'react';
 
 /**
- * Крупный заголовок страницы в духе iOS large title.
+ * Заголовок внутренней страницы, как у калькулятора:
+ * мелкий kicker, Inter 600 и приглушённый подзаголовок.
  */
 export const PageHeader = ({
+  kicker,
   title,
   subtitle,
+  action,
   className = '',
 }) => {
   return (
-    <div className={`mb-8 text-left ${className}`}>
-      <h1 className="nl-title">
-        {title}
-      </h1>
-      {subtitle && (
-        <p className="c-section-lead" style={{ marginTop: 8 }}>
-          {subtitle}
-        </p>
-      )}
+    <div className={`page-head flex flex-wrap items-end justify-between gap-3 px-0.5 ${className}`}>
+      <div>
+        {kicker ? <p className="kicker">{kicker}</p> : null}
+        <h1 className={`title${kicker ? ' mt-1' : ''}`}>{title}</h1>
+        {subtitle ? <p className="muted mt-1">{subtitle}</p> : null}
+      </div>
+      {action}
     </div>
   );
 };

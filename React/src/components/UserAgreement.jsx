@@ -11,7 +11,8 @@ function UserAgreement() {
   return (
     <div className="min-h-screen bg-transparent text-[#e5e7eb] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
-        <PageHeader 
+        <PageHeader
+          kicker="Документы" 
           title="Согласие на обработку персональных данных"
           subtitle="Ваше согласие на сбор и использование информации для предоставления услуг на Fluvion"
         />

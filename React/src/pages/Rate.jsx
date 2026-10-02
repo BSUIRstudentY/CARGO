@@ -234,6 +234,7 @@ function Rate() {
           className="mb-12"
         >
           <PageHeader
+            kicker="Курс"
             title="Курс валют"
             subtitle="Актуальный курс CNY/BYN и прозрачное ценообразование для заказов через Fluvion"
           />
