@@ -191,30 +191,7 @@ function MultiTerminal() {
     },
   ];
 
-  const marketplaces = [
-    {
-      href: 'https://www.pinduoduo.com',
-      title: 'Pinduoduo',
-      el: (
-        <img
-          src="/logos/pinduoduo.svg"
-          alt="Pinduoduo"
-          className="w-full h-full object-contain p-2"
-          onError={(e) => {
-            e.target.style.display = 'none';
-            e.target.parentElement.innerHTML = '<span class="text-gray-600 font-bold text-xs">拼多多</span>';
-          }}
-        />
-      ),
-      className: 'bg-white',
-    },
-    { href: 'https://www.taobao.com', title: 'Taobao', el: <span className="text-white font-bold text-xs">淘宝</span>, style: { backgroundColor: '#FF5000' } },
-    { href: 'https://www.1688.com', title: '1688', el: <span className="text-white font-bold text-sm">1688</span>, style: { backgroundColor: '#FF6A00' } },
-    { href: 'https://www.gofish.com', title: 'GoFish', el: <span className="text-white font-bold text-[10px]">GoFish</span>, className: 'bg-[rgba(255,255,255,0.05)]' },
-    { href: 'https://www.wechat.com', title: 'WeChat', el: <span className="text-white font-bold text-xs">微信</span>, style: { backgroundColor: '#09BB07' } },
-    { href: 'https://www.poizon.com', title: 'Poizon', el: <span className="text-white font-bold text-[10px]">Poizon</span>, className: 'bg-black' },
-    { href: 'https://www.95.com', title: '95', el: <span className="text-white font-bold text-xs">95</span>, className: 'bg-[rgba(255,255,255,0.05)]' },
-  ];
+  const marketplaces = ['Pinduoduo', 'Taobao', '1688', 'Poizon', 'GoFish'];
 
   const InstructionBlocks = ({ variant }) => {
     const isCompact = variant === 'mobile';
@@ -224,8 +201,8 @@ function MultiTerminal() {
           <h2 className={isCompact ? 'text-sm font-semibold' : 'text-xl font-bold'} style={{ color: '#1d1d1f' }}>
             Как пользоваться
           </h2>
-          <p className={isCompact ? 'text-xs mt-0.5' : 'text-sm mt-2'} style={{ color: '#1d1d1f' }}>
-            {isCompact ? 'Товар → сохранить → в корзину' : 'Пошагово: добавьте товар → сохраните → проверьте список → отправьте в корзину.'}
+          <p className="muted mt-1 text-[13px]">
+            Скопируйте название и ссылку. Мы проверим цену и наличие.
           </p>
         </div>
 
@@ -242,41 +219,16 @@ function MultiTerminal() {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-xs font-semibold text-[#e5e7eb]">{s.title}</span>
-                    <span className="block text-[10px] text-[#9ca3af] mt-0.5">{s.short}</span>
+                    <span className="block text-[12px] text-[#111]/60 mt-0.5">{s.short}</span>
                   </span>
-                  <span className="text-[#9ca3af] group-open:text-[#00f0ff] transition-colors text-xs">▼</span>
                 </summary>
-                <div className="pt-2 pl-7">{s.content}</div>
               </details>
             ))}
-
-            <details className="c-step group rounded-none border-0 px-4 py-3">
-              <summary className="cursor-pointer list-none flex items-center gap-2">
-                <span className="w-5 h-5 rounded bg-[rgba(255,255,255,0.06)] text-[#9ca3af] font-bold text-[10px] flex items-center justify-center flex-shrink-0">
-                  i
-                </span>
-                <span className="text-xs font-semibold text-[#e5e7eb]">Площадки</span>
-                <span className="ml-auto text-[#9ca3af] group-open:text-[#00f0ff] transition-colors text-xs">▼</span>
-              </summary>
-              <div className="pt-2 pl-7">
-                <p className="text-[10px] text-[#9ca3af] mb-2">Китайские площадки:</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {marketplaces.map((m) => (
-                    <a
-                      key={m.title}
-                      href={m.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={m.title}
-                      className={`inline-flex items-center justify-center w-9 h-9 rounded border border-[rgba(255,255,255,0.12)] hover:border-[#00f0ff] transition-colors overflow-hidden ${m.className || ''}`}
-                      style={m.style || undefined}
-                    >
-                      {m.el}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </details>
+            <p className="muted flex flex-wrap gap-1.5 px-4 py-3 text-[12px]">
+              {marketplaces.map((name) => (
+                <span key={name} className="glass pill px-2.5 py-1 text-[11px] text-[#111]">{name}</span>
+              ))}
+            </p>
           </div>
         ) : (
           <div className="c-inset">
@@ -291,30 +243,17 @@ function MultiTerminal() {
                   </span>
                   <div className="min-w-0">
                     <h3 className="text-base font-semibold text-[#e5e7eb]">{s.title}</h3>
-                    <p className="text-sm text-[#9ca3af] mt-0.5">{s.short}</p>
+                    <p className="muted mt-0.5 text-[13px]">{s.short}</p>
                   </div>
                 </div>
-                {s.content}
               </div>
             ))}
-
             <div className="c-step c-inset-row">
-              <p className="text-sm text-[#9ca3af] mb-3">Мы можем привезти товары с этих и других китайских площадок:</p>
-              <div className="flex flex-wrap gap-2">
-                {marketplaces.map((m) => (
-                  <a
-                    key={m.title}
-                    href={m.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={m.title}
-                    className={`inline-flex items-center justify-center w-14 h-14 rounded-xl border border-[rgba(255,255,255,0.15)] hover:border-[#00f0ff] transition-colors overflow-hidden ${m.className || ''}`}
-                    style={m.style || undefined}
-                  >
-                    {m.el}
-                  </a>
+              <p className="muted flex flex-wrap gap-1.5 text-[12px]">
+                {marketplaces.map((name) => (
+                  <span key={name} className="glass pill px-2.5 py-1 text-[11px] text-[#111]">{name}</span>
                 ))}
-              </div>
+              </p>
             </div>
           </div>
         )}
@@ -329,7 +268,7 @@ function MultiTerminal() {
         <PageHeader
           kicker="Терминал"
           title="Заказать товар"
-          subtitle="Ссылки на товары → заявка"
+          subtitle="Ссылка с 1688, Taobao или Pinduoduo. Мы проверим цену и наличие."
           className="mb-4"
         />
 
@@ -525,7 +464,7 @@ function MultiTerminal() {
         <PageHeader
           kicker="Терминал"
           title="Заказать товар"
-          subtitle="Добавьте ссылки на товары и оформите заявку"
+          subtitle="Ссылка с 1688, Taobao или Pinduoduo. Мы проверим цену и наличие."
         />
 
         <AnimatePresence>

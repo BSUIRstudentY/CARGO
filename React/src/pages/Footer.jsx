@@ -8,11 +8,6 @@ const Footer = ({ id }) => {
         <div>
           <p className="display text-[13px] tracking-[0.16em] text-[#111]">Fluvion</p>
           <p className="mt-1 max-w-xs">Доставка товаров с китайских площадок в Беларусь. Склад в Гуанчжоу, выдача через Европочту.</p>
-          <p className="mt-2">
-            <a href="tel:+375336540611">+375 33 654-06-11</a>
-            <span> · </span>
-            <a href="mailto:fluvionbiz@gmail.com">fluvionbiz@gmail.com</a>
-          </p>
         </div>
         <nav className="grid grid-cols-2 gap-x-8 gap-y-1.5 sm:text-right">
           <Link to="/catalog">Каталог</Link>
@@ -30,7 +25,7 @@ const Footer = ({ id }) => {
         </nav>
       </div>
       <div className="mt-5 flex flex-col gap-1 pb-6 sm:flex-row sm:items-center sm:justify-between">
-        <p>© {new Date().getFullYear()} Fluvion · Беларусь, Минск</p>
+        <p>© {new Date().getFullYear()} Fluvion</p>
         <a href="https://t.me/FLUVIONN" target="_blank" rel="noopener noreferrer">Telegram</a>
       </div>
     </footer>
