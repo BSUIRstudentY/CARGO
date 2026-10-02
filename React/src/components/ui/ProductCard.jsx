@@ -20,8 +20,8 @@ export const ProductCard = ({
       transition={{ duration: 0.4, delay: index * 0.05 }}
       className="h-full flex"
     >
-      <article className="product-card sheet glass relative flex h-full w-full flex-col overflow-hidden">
-        <div className="product-photo relative w-full aspect-[4/5] shrink-0 overflow-hidden">
+      <article className="glass sheet relative flex h-full w-full flex-col overflow-hidden">
+        <div className="photo relative aspect-square w-full shrink-0 overflow-hidden rounded-none">
           {product.imageUrl ? (
             <motion.img
               src={product.imageUrl}

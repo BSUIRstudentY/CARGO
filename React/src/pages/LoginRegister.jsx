@@ -256,18 +256,19 @@ function LoginRegister() {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-transparent text-[#e5e7eb] p-4 relative overflow-hidden">
+    <section className="mx-auto max-w-md pt-2">
       <motion.div
         initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative max-w-lg w-full z-10"
       >
-        <div className="c-sheet p-5 sm:p-8 relative">
+        <div className="glass sheet relative p-5 sm:p-6">
           {/* Header */}
           {!showForgotPassword && (
             <div className="mb-6 sm:mb-8">
-              <h1 className="nl-title">
-                {isLogin ? 'Вход' : 'Регистрация'}
+              <p className="kicker">{isLogin ? 'Вход' : 'Регистрация'}</p>
+              <h1 className="display mt-1 text-[28px]">
+                {isLogin ? 'С возвращением' : 'Создать аккаунт'}
               </h1>
             </div>
           )}

@@ -1,223 +1,169 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-/**
- * Главная: крупный заголовок, студийная карточка и группы в духе iOS.
- * Тексты, ссылки и структурированные данные прежние.
- * car.png в public — сплошной чёрный файл, в ротацию не входит.
- */
-const HERO_FRAMES = ['/main.png', '/220.png', '/cart.png'];
+import CostCalculator from './CostCalculator';
 
-function MarketTile({ marketplace }) {
-  const [failed, setFailed] = useState(false);
-  const [ready, setReady] = useState(false);
-  const showImage = Boolean(marketplace.hasImage && marketplace.logo) && !failed;
+const slides = [
+  {
+    src: '/images/hero-warehouse.jpg',
+    title: 'Доставка из Китая в Беларусь',
+    text: 'Выкупаем на Taobao, 1688 и Pinduoduo, собираем партию в Гуанчжоу и выдаём через Европочту.',
+  },
+  {
+    src: '/images/hero-parcels.jpg',
+    title: '$6 за килограмм',
+    text: 'Одна ставка на всё: международная доставка до склада в Минске, консолидация и фотоотчёт.',
+  },
+  {
+    src: '/images/hero-truck.jpg',
+    title: 'Партии каждые две недели',
+    text: 'Статус заказа и партии виден в профиле: от выкупа до прибытия в Минск.',
+  },
+];
 
-  return (
-    <a
-      href={marketplace.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="cat-tile"
-      title={marketplace.name}
-    >
-      {showImage ? (
-        <img
-          src={marketplace.logo}
-          alt=""
-          style={{ visibility: ready ? 'visible' : 'hidden' }}
-          onLoad={() => setReady(true)}
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <div className="cat-fallback">{marketplace.text}</div>
-      )}
-      <span>{marketplace.name}</span>
-    </a>
-  );
-}
+const entries = [
+  { href: '/terminal', src: '/images/tile-buyer.jpg', label: 'Терминал', sub: 'заказ по ссылке' },
+  { href: '/self-pickup', src: '/images/tile-consolidation.jpg', label: 'Самовыкуп', sub: 'только доставка' },
+  { href: '/catalog', src: '/images/tile-warehouse.jpg', label: 'Каталог', sub: 'проверенные товары' },
+];
+
+const markets = ['Pinduoduo', 'Taobao', '1688', 'Poizon', 'GoFish'];
+
+const steps = [
+  { title: 'Добавьте товар', text: 'Ссылка с 1688 или Taobao в терминале — или готовый товар из каталога.' },
+  { title: 'Проверка и оплата', text: 'Администратор проверяет цены и наличие. После подтверждения — оплата картой в течение 3 дней.' },
+  { title: 'Выкуп и партия', text: 'Выкупаем у поставщиков, консолидируем на складе в Гуанчжоу, отправляем партией в Минск.' },
+  { title: 'Европочта', text: 'В Минске заказ передаётся в Европочту. Доставку до отделения оплачиваете при получении.' },
+];
+
+const faq = [
+  {
+    q: 'Из чего складывается стоимость?',
+    a: 'Цена товара в юанях (по курсу НБРБ на день оплаты), доставка $6 за килограмм от склада в Китае до Минска, упаковка $3 или $5 и, по желанию, страховка 5 % от стоимости товара. Тариф Европочты оплачивается при получении.',
+  },
+  {
+    q: 'Когда фиксируется цена?',
+    a: 'После проверки заказа администратором вы видите итоговую сумму в профиле. Оплатите её в течение 3 дней — курс и ставка больше не пересчитываются.',
+  },
+  {
+    q: 'Как работает страховка?',
+    a: 'Страховка 5 % покрывает полную стоимость груза при утере. Для выплаты нужно снять распаковку на видео без пауз — так требует перевозчик.',
+  },
+  {
+    q: 'Что такое самовыкуп?',
+    a: 'Если вы сами купили товар на китайской площадке, укажите адрес нашего склада при оплате и добавьте трек-номер посылки в разделе «Самовыкуп». Мы примем её в Гуанчжоу и довезём до Беларуси по той же ставке.',
+  },
+];
 
 const Home = () => {
-  const navigate = useNavigate();
-  const [frame, setFrame] = useState(0);
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduce) return undefined;
-    const id = window.setInterval(() => {
-      setFrame((current) => (current + 1) % HERO_FRAMES.length);
-    }, 4200);
+    const id = window.setInterval(() => setIndex((value) => (value + 1) % slides.length), 6000);
     return () => window.clearInterval(id);
   }, []);
 
-  const marketplaces = [
-    { name: 'Pinduoduo', url: 'https://www.pinduoduo.com', text: '拼多多', logo: '/logos/pinduoduo.svg', hasImage: false },
-    { name: 'Taobao', url: 'https://www.taobao.com', text: '淘宝', logo: '/logos/taobao.svg', hasImage: true },
-    { name: '1688', url: 'https://www.1688.com', text: '1688', hasImage: false },
-    { name: 'GoFish', url: 'https://www.gofish.com', text: 'GoFish', hasImage: false },
-    { name: 'WeChat', url: 'https://www.wechat.com', text: '微信', logo: '/logos/wechat.svg', hasImage: true },
-    { name: 'Poizon', url: 'https://www.poizon.com', text: 'Poizon', hasImage: false },
-    { name: '95', url: 'https://www.95.com', text: '95', hasImage: false },
-  ];
-
-  const advantages = [
-    { title: 'Быстрая доставка', description: 'Доставка из Китая за 18–35 дней через Карго' },
-    { title: 'Фиксированная цена', description: '$6 за кг + тарифы Европочты, без скрытых платежей' },
-    { title: 'Страховка груза', description: 'Гарантия возврата полной стоимости груза, если что-то с ним случится по нашей вине' },
-    { title: 'Проверка товаров', description: 'Проверка целостности и качества (от $5)' },
-    { title: 'Упрощённая таможня', description: 'Помощь с таможенными процедурами' },
-    { title: 'Отслеживание', description: 'Трек-номер и уведомления в Профиле' },
-    { title: 'Прозрачная оплата', description: 'Оплата через Альфа-Банк (Visa, Mastercard)' },
-    { title: 'Опыт', description: 'Более 5 лет успешной доставки из Китая' },
-  ];
-
-  const stats = [
-    { number: '1000+', label: 'Товаров из Китая' },
-    { number: '90%', label: 'Клиентов рекомендуют' },
-    { number: '5', label: 'Складов-партнёров' },
-    { number: '24/7', label: 'Поддержка клиентов' },
-  ];
-
-  const structuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'Fluvion',
-    url: 'https://fluvion.by',
-    logo: 'https://fluvion.by/logo.png',
-    description: 'Доставка товаров из Китая в Беларусь за 18-35 дней. Заказывайте с Pinduoduo, Taobao, 1688 и других маркетплейсов.',
-    address: { '@type': 'PostalAddress', addressCountry: 'BY' },
-    contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', availableLanguage: ['Russian'] },
-    sameAs: ['https://t.me/FLUVIONN'],
-    aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.5', reviewCount: '1000' },
-    offers: {
-      '@type': 'Offer',
-      priceCurrency: 'USD',
-      price: '6',
-      priceSpecification: {
-        '@type': 'UnitPriceSpecification',
-        price: '6',
-        priceCurrency: 'USD',
-        unitCode: 'KGM',
-      },
-    },
-  };
-
-  const serviceStructuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'Service',
-    serviceType: 'Cargo Delivery',
-    provider: { '@type': 'Organization', name: 'Fluvion' },
-    areaServed: { '@type': 'Country', name: 'Belarus' },
-    description: 'Доставка товаров из Китая в Беларусь за 18-35 дней',
-    offers: { '@type': 'Offer', price: '6', priceCurrency: 'USD', unitCode: 'KGM' },
-  };
+  const slide = slides[index];
 
   return (
-    <div className="home-stack">
+    <div className="space-y-12">
       <Helmet>
-        <title>Fluvion - Доставка товаров из Китая в Беларусь | Карго доставка под ключ</title>
-        <meta name="description" content="Доставка товаров из Китая в Беларусь за 18-35 дней. Заказывайте с Pinduoduo, Taobao, 1688, GoFish и других маркетплейсов. Фиксированная цена $6/кг, страховка груза, отслеживание заказа. Более 5 лет опыта, 1000+ товаров, 90% клиентов рекомендуют." />
-        <meta name="keywords" content="доставка из Китая, карго доставка, доставка товаров из Китая в Беларусь, Pinduoduo доставка, Taobao доставка, 1688 доставка, карго из Китая, доставка из Китая в Минск, китайские товары, заказ из Китая, доставка под ключ, Fluvion" />
-        <meta property="og:title" content="Fluvion - Доставка товаров из Китая в Беларусь | Карго доставка под ключ" />
-        <meta property="og:description" content="Доставка товаров из Китая в Беларусь за 18-35 дней. Заказывайте с Pinduoduo, Taobao, 1688 и других маркетплейсов. Фиксированная цена $6/кг, страховка груза, отслеживание." />
-        <meta property="og:image" content="https://fluvion.by/logo.png" />
-        <meta property="og:url" content="https://fluvion.by/" />
-        <meta property="og:type" content="website" />
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:title" content="Fluvion - Доставка товаров из Китая в Беларусь" />
-        <meta property="twitter:description" content="Доставка товаров из Китая в Беларусь за 18-35 дней. Фиксированная цена $6/кг, страховка груза, отслеживание заказа." />
-        <meta property="twitter:image" content="https://fluvion.by/logo.png" />
-        <link rel="canonical" href="https://fluvion.by/" />
-        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
-        <script type="application/ld+json">{JSON.stringify(serviceStructuredData)}</script>
+        <title>Fluvion — доставка товаров из Китая в Беларусь</title>
+        <meta name="description" content="Выкуп на Taobao, 1688, Pinduoduo и Poizon, консолидация в Гуанчжоу, доставка $6/кг до Минска и выдача через Европочту." />
       </Helmet>
 
-      <section className="hero" aria-label="Доставка из Китая">
-        {HERO_FRAMES.map((src, index) => (
-          <div key={src} className={`hero-slide${index === frame ? ' is-on' : ''}`}>
-            <img src={src} alt="" />
+      <section className="hero" id="top">
+        {slides.map((item, i) => (
+          <div key={item.src} className={`hero-slide${i === index ? ' is-on' : ''}`}>
+            <img src={item.src} alt="" />
           </div>
         ))}
-        <div className="hero-photo-scrim" />
         <div className="hero-veil" />
+        <div className="hero-dots">
+          {slides.map((item, i) => (
+            <button key={item.src} type="button" aria-label={item.title} className={i === index ? 'is-on' : ''} onClick={() => setIndex(i)} />
+          ))}
+        </div>
         <div className="hero-copy">
-          <div className="hero-card">
-            <p className="hero-kicker">Карго в Беларусь</p>
-            <h1 className="hero-title">Доставка из Китая под ключ</h1>
-            <p className="hero-text">От выбора товара до двери в Беларуси.</p>
-            <div className="hero-actions">
-              <button type="button" className="card-hit pill glass" onClick={() => navigate('/terminal')}>
-                Заказать товар
-              </button>
-              <button type="button" className="card-hit pill glass" onClick={() => navigate('/catalog')}>
-                Примеры товаров
-              </button>
+          <div className="hero-card glass">
+            <p className="kicker">Fluvion · Китай → Беларусь</p>
+            <h1 className="display h1 mt-2">{slide.title}</h1>
+            <p className="muted mt-2 text-[14px]">{slide.text}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link to="/terminal" className="btn btn-dark">Заказать товар</Link>
+              <a href="#calc" className="btn btn-light">Рассчитать</a>
             </div>
           </div>
         </div>
-        <div className="hero-dots">
-          {HERO_FRAMES.map((src, index) => (
-            <button
-              key={src}
-              type="button"
-              aria-label={index === 0 ? 'Склад' : index === 1 ? 'Доставка' : 'Корзина'}
-              className={index === frame ? 'is-on' : ''}
-              onClick={() => setFrame(index)}
-            />
-          ))}
-        </div>
       </section>
 
-      <section className="sheet glass home-note">
-        <p>
-          Заказывайте товары из Китая без хлопот: от выбора в примерах товаров (уже заказывали клиенты) или Терминале (любые товары по ссылке) до доставки в Беларусь за 18–35 дней по цене $6/кг.
+      <section className="space-y-3">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {entries.map((item, i) => (
+            <Link key={item.href} to={item.href} className={`tile ${i === 2 ? 'col-span-2 sm:col-span-1' : ''}`}>
+              <img src={item.src} alt="" />
+              <span>
+                {item.label}
+                <small> · {item.sub}</small>
+              </span>
+            </Link>
+          ))}
+        </div>
+        <p className="muted flex flex-wrap items-center gap-x-2 gap-y-1 px-1 text-[12px]">
+          <span className="faint">Возим с площадок</span>
+          {markets.map((name) => (
+            <span key={name} className="glass pill px-2.5 py-1 text-[11px] text-[#111]">{name}</span>
+          ))}
         </p>
-        <p>
-          <strong>Важно.</strong> В «Примерах товаров» — только то, что уже заказывали. Чтобы заказать любой товар по ссылке, используйте «Заказать товар».
-        </p>
       </section>
 
-      <section>
-        <div className="section-head">
-          <h2>С нами вы можете заказывать с этих сайтов</h2>
+      <CostCalculator embedded />
+
+      <section id="how" className="space-y-4">
+        <div className="flex items-end justify-between gap-3 px-0.5">
+          <div>
+            <p className="kicker">Как это работает</p>
+            <h2 className="title mt-1">Четыре шага до отделения Европочты</h2>
+          </div>
+          <Link to="/order-instructions" className="btn btn-ghost btn-sm">Подробная инструкция</Link>
         </div>
-        <p className="section-lead">Мы работаем со всеми популярными китайскими маркетплейсами</p>
-        <div className="cat-grid">
-          {marketplaces.map((marketplace) => (
-            <MarketTile key={marketplace.name} marketplace={marketplace} />
+        <div className="glass sheet steps overflow-hidden">
+          {steps.map((step, i) => (
+            <div key={step.title} className="step">
+              <p className="step-n">{String(i + 1).padStart(2, '0')}</p>
+              <h3 className="mt-2 text-[14px] font-semibold">{step.title}</h3>
+              <p className="muted mt-1 leading-relaxed">{step.text}</p>
+            </div>
           ))}
         </div>
       </section>
 
-      <section>
-        <div className="section-head">
-          <h2>Преимущества доставки с нами</h2>
-        </div>
-        <p className="section-lead">Мы делаем доставку из Китая простой, быстрой и надежной</p>
-        <div className="carousel">
-          {advantages.map((advantage) => (
-            <article key={advantage.title} className="sheet glass advantage-card">
-              <h3>{advantage.title}</h3>
-              <p>{advantage.description}</p>
-            </article>
-          ))}
+      <section className="banner">
+        <img src="/images/banner-tracking.jpg" alt="" />
+        <div className="glass sheet relative z-10 max-w-sm p-4">
+          <p className="kicker">Статус</p>
+          <h2 className="title mt-1">Где мой заказ</h2>
+          <p className="muted mt-1 text-[13px]">Трек-номер и статусы партии смотрите в профиле после входа.</p>
+          <Link to="/login" className="btn btn-dark btn-sm mt-3">Открыть профиль</Link>
         </div>
       </section>
 
-      <section className="mid-banner" aria-label="Цифры">
-        <img src="/220.png" alt="" />
-        <div className="glass sheet">
-          <p className="banner-kicker">Fluvion</p>
-          <h2 className="banner-title">Доставка из Китая</h2>
-          <ul className="stat-grid">
-            {stats.map((stat) => (
-              <li key={stat.label}>
-                <b>{stat.number}</b>
-                <span>{stat.label}</span>
-              </li>
-            ))}
-          </ul>
+      <section id="faq" className="space-y-4">
+        <div className="px-0.5">
+          <p className="kicker">FAQ</p>
+          <h2 className="title mt-1">Частые вопросы</h2>
         </div>
+        <div className="glass sheet faq">
+          {faq.map((item, i) => (
+            <details key={item.q} open={i === 0}>
+              <summary>{item.q}</summary>
+              <p>{item.a}</p>
+            </details>
+          ))}
+        </div>
+        <Link to="/faq" className="btn btn-ghost btn-sm">Все вопросы</Link>
       </section>
     </div>
   );

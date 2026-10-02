@@ -26,6 +26,7 @@ const Thanks = lazy(() => import('./Thanks'));
 const BadResponse = lazy(() => import('./BadResponse'));
 const News = lazy(() => import('./News'));
 const OrderInstructions = lazy(() => import('./OrderInstructions'));
+const SelfPickupCargo = lazy(() => import('./SelfPickupCargo'));
 
 const icon = 'w-5 h-5';
 
@@ -35,6 +36,7 @@ function GuestLayout() {
     { path: '/calculator', label: 'Калькулятор', tabLabel: 'Калькулятор', icon: <CalculatorIcon className={icon} /> },
     { path: '/catalog', label: 'Примеры товаров', tabLabel: 'Примеры', icon: <ShoppingBagIcon className={icon} /> },
     { path: '/terminal', label: 'Заказать товар', tabLabel: 'Заказать', icon: <ComputerDesktopIcon className={icon} />, special: true },
+    { path: '/self-pickup', label: 'Самовыкуп', icon: <ShoppingBagIcon className={icon} /> },
     { path: '/rates', label: 'Курс', icon: <CurrencyDollarIcon className={icon} /> },
     { path: '/news', label: 'Новости', icon: <MegaphoneIcon className={icon} /> },
     { path: '/delivery-payment', label: 'Доставка и оплата', icon: <TruckIcon className={icon} /> },
@@ -47,7 +49,7 @@ function GuestLayout() {
 
   const groups = [
     { title: 'Основное', paths: ['/', '/calculator'] },
-    { title: 'Покупки', paths: ['/catalog', '/terminal', '/rates', '/news'] },
+    { title: 'Покупки', paths: ['/catalog', '/terminal', '/self-pickup', '/rates', '/news'] },
     { title: 'Информация', paths: ['/delivery-payment', '/order-instructions', '/faq', '/support', '/reviews'] },
     { title: 'Аккаунт', paths: ['/login'] },
   ];
@@ -68,6 +70,7 @@ function GuestLayout() {
           <Route path="/calculator" element={<CostCalculator />} />
           <Route path="/delivery-payment" element={<DeliveryPayment />} />
           <Route path="/order-instructions" element={<OrderInstructions />} />
+          <Route path="/self-pickup" element={<SelfPickupCargo />} />
           <Route path="/faq" element={<FAQSection />} />
           <Route path="/support" element={<Navigate to="/login" replace />} />
           <Route path="/ticket/:ticketId/chat" element={<TicketChatPage />} />

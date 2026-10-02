@@ -180,7 +180,7 @@ function Catalog() {
               transition={{ duration: 0.4 }}
               className="text-left mb-4"
             >
-              <h1 className="nl-title">Примеры товаров</h1>
+              <h1 className="display text-[26px]">Примеры товаров</h1>
               <div className="n-note">
                 <ExclamationTriangleIcon className="n-note-icon" />
                 <div>
@@ -376,7 +376,7 @@ function Catalog() {
             transition={{ duration: 0.6 }}
             className="text-left mb-8"
           >
-            <h1 className="nl-title">Примеры товаров</h1>
+            <h1 className="display text-[26px]">Примеры товаров</h1>
             <div className="n-note">
               <ExclamationTriangleIcon className="n-note-icon" />
               <div>

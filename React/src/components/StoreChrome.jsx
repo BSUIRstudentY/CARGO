@@ -1,83 +1,43 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { SlidePill } from './SlidePill';
+import { useCart } from './CartContext';
+import { useAuth } from './AuthProvider';
 
 function isActivePath(pathname, path) {
   if (path === '/') return pathname === '/';
   return pathname === path || pathname.startsWith(`${path}/`);
 }
 
-function routeOrder(pathname, items) {
-  const index = items.findIndex((item) => isActivePath(pathname, item.path));
-  return index === -1 ? items.length : index;
-}
-
-function PageSlide({ items, children }) {
-  const { pathname } = useLocation();
-  const prev = useRef(pathname);
-  const [dir, setDir] = useState('');
-
-  useEffect(() => {
-    if (prev.current === pathname) return undefined;
-    const forward = routeOrder(pathname, items) >= routeOrder(prev.current, items);
-    prev.current = pathname;
-    setDir('');
-    const frame = window.requestAnimationFrame(() => {
-      setDir(forward ? 'page-slide-right' : 'page-slide-left');
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [pathname, items]);
-
-  return <div className={dir ? `page-slide ${dir}` : undefined}>{children}</div>;
-}
-
 function MoreLink({ item, active, onClick }) {
-  const icon = item.icon
-    ? React.cloneElement(item.icon, { className: 'w-[18px] h-[18px]' })
-    : null;
-
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-current={active ? 'page' : undefined}
-      className={`more-link${active ? ' is-on' : ''}`}
-    >
-      {icon}
-      <span>{item.label}</span>
+    <button type="button" onClick={onClick} className={`more-link${active ? ' is-on' : ''}`}>
+      {item.label}
     </button>
   );
 }
 
 /**
- * Top pill from their TopNav, phone tab bar from their TabBar.
- * Every existing Fluvion destination stays in the desktop links or «Ещё».
+ * Chrome from cargo/components/Chrome.tsx.
+ * Every Fluvion destination stays in the scrolling nav or the phone «Ещё» sheet.
  */
 export default function StoreChrome({
   navItems,
   groups,
   mobileTabs,
-  headerRight,
   sidebarFooter,
   children,
 }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
+  const { cart } = useCart();
+  const { isAuthenticated, user } = useAuth();
+  const cartCount = Array.isArray(cart) ? cart.length : 0;
 
   useEffect(() => {
     setMoreOpen(false);
   }, [location.pathname]);
-
-  useEffect(() => {
-    if (!moreOpen) return undefined;
-    const onKey = (event) => {
-      if (event.key === 'Escape') setMoreOpen(false);
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [moreOpen]);
 
   const resolvedGroups = useMemo(() => {
     const known = new Set(groups.flatMap((group) => group.paths));
@@ -99,20 +59,25 @@ export default function StoreChrome({
 
   return (
     <div className="scene">
+      <div className="backdrop" aria-hidden>
+        <img src="/images/bg-blur.jpg" alt="" />
+        <div className="backdrop-veil" />
+      </div>
+
       <header className="nav glass">
         <button type="button" className="nav-brand" onClick={() => go('/')}>
           <img src="/logo.png" alt="" />
           <span>Fluvion</span>
         </button>
-        <nav className="nav-links" aria-label="Разделы">
+        <nav className="nav-scroll" aria-label="Разделы">
           {navItems.map((item) => {
-            const active = isActivePath(location.pathname, item.path);
+            const on = isActivePath(location.pathname, item.path);
             return (
               <button
                 key={item.path}
                 type="button"
-                className={active ? 'is-on' : ''}
-                aria-current={active ? 'page' : undefined}
+                className={`nav-link${on ? ' is-on' : ''}`}
+                aria-current={on ? 'page' : undefined}
                 onClick={() => go(item.path)}
               >
                 {item.tabLabel || item.label}
@@ -120,14 +85,31 @@ export default function StoreChrome({
             );
           })}
         </nav>
-        <div className="nav-tools">
-          {headerRight}
-          {sidebarFooter ? <div className="nav-logout">{sidebarFooter}</div> : null}
+        <div className="flex items-center">
+          {isAuthenticated ? (
+            <button type="button" className="nav-icon" aria-label="Уведомления" onClick={() => go('/notifications')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                <path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.6" />
+              </svg>
+            </button>
+          ) : null}
+          <button type="button" className="nav-icon" aria-label={cartCount ? `Корзина, ${cartCount}` : 'Корзина'} onClick={() => go(isAuthenticated ? '/cart' : '/login')}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6.5 8h11l-.7 9.1a2 2 0 0 1-2 1.9H9.2a2 2 0 0 1-2-1.9L6.5 8Z" stroke="currentColor" strokeWidth="1.6" />
+              <path d="M9 8V6.6A3 3 0 0 1 12 3.6 3 3 0 0 1 15 6.6V8" stroke="currentColor" strokeWidth="1.6" />
+            </svg>
+            {cartCount ? <span className="nav-badge">{cartCount > 9 ? '9+' : cartCount}</span> : null}
+          </button>
+          <button type="button" className="nav-cta ml-1" onClick={() => go(isAuthenticated ? '/profile' : '/login')}>
+            {isAuthenticated ? 'Профиль' : 'Войти'}
+          </button>
+          {sidebarFooter ? <div className="ml-1 hidden sm:block">{sidebarFooter}</div> : null}
         </div>
       </header>
 
-      <main>
-        <PageSlide items={navItems}>{children}</PageSlide>
+      <main className="mx-auto w-full max-w-[980px] px-3 pb-28 pt-6 sm:px-5 sm:pb-10">
+        {children}
       </main>
 
       <nav className="tabbar glass" aria-label="Разделы">
@@ -139,18 +121,18 @@ export default function StoreChrome({
                 key={item.path}
                 type="button"
                 data-tab={item.path}
-                className={`card-hit ${on ? 'tab-on' : 'tab-off'}`}
-                aria-current={on ? 'page' : undefined}
+                className={`tab${on ? ' is-on' : ''}`}
                 onClick={() => go(item.path)}
               >
                 {item.tabLabel || item.label.split(/[\s/]/)[0]}
+                {item.path === '/cart' && cartCount ? <span className="tab-count">{cartCount}</span> : null}
               </button>
             );
           })}
           <button
             type="button"
             data-tab="more"
-            className={`card-hit ${activeTab === 'more' ? 'tab-on' : 'tab-off'}`}
+            className={`tab${activeTab === 'more' ? ' is-on' : ''}`}
             aria-expanded={moreOpen}
             onClick={() => setMoreOpen((open) => !open)}
           >
@@ -159,65 +141,47 @@ export default function StoreChrome({
         </SlidePill>
       </nav>
 
-      <AnimatePresence>
-        {moreOpen && (
-          <>
-            <motion.button
-              type="button"
-              className="more-backdrop"
-              aria-label="Закрыть меню"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMoreOpen(false)}
-            />
-            <div className="more-sheet glass" role="dialog" aria-label="Все разделы">
-              <motion.div
-                initial={{ y: 12, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 12, opacity: 0 }}
-                transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-              >
-                {resolvedGroups.map((group) => {
-                  const items = group.paths
-                    .map((path) => navItems.find((item) => item.path === path))
-                    .filter(Boolean);
-                  if (items.length === 0) return null;
-                  return (
-                    <div className="more-group" key={group.title}>
-                      <h2>{group.title}</h2>
-                      <ul>
-                        {items.map((item) => (
-                          <li key={item.path}>
-                            <MoreLink
-                              item={item}
-                              active={isActivePath(location.pathname, item.path)}
-                              onClick={() => go(item.path)}
-                            />
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })}
-                {sidebarFooter ? <div className="more-foot">{sidebarFooter}</div> : null}
-              </motion.div>
-            </div>
-          </>
-        )}
-      </AnimatePresence>
+      {moreOpen ? (
+        <>
+          <button type="button" className="more-backdrop" aria-label="Закрыть меню" onClick={() => setMoreOpen(false)} />
+          <div className="more-sheet glass" role="dialog" aria-label="Все разделы">
+            {resolvedGroups.map((group) => {
+              const items = group.paths
+                .map((path) => navItems.find((item) => item.path === path))
+                .filter(Boolean);
+              if (!items.length) return null;
+              return (
+                <div key={group.title} className="py-1">
+                  <p className="kicker px-3 py-1">{group.title}</p>
+                  {items.map((item) => (
+                    <MoreLink
+                      key={item.path}
+                      item={item}
+                      active={isActivePath(location.pathname, item.path)}
+                      onClick={() => go(item.path)}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+            {sidebarFooter ? <div className="p-2">{sidebarFooter}</div> : null}
+          </div>
+        </>
+      ) : null}
 
-      <a
-        href="https://t.me/FLUVIONN"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="n-fab"
-        aria-label="Telegram канал FLUVION"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.169 1.858-.896 6.375-1.268 8.451-.162.894-.479 1.192-.787 1.222-.69.062-1.214-.456-1.883-.893-1.046-.692-1.638-1.123-2.654-1.799-1.251-.844-.44-1.309.274-2.067.186-.193 3.405-3.123 3.471-3.391.008-.031.015-.147-.057-.208-.072-.061-.178-.038-.256-.023-.109.019-1.843 1.175-5.202 3.45-.493.348-.939.517-1.34.509-.443-.01-1.295-.25-1.927-.458-.776-.257-1.392-.392-1.338-.828.027-.218.405-.442 1.113-.671 4.318-1.874 7.205-3.11 8.659-3.708 4.078-1.668 4.921-1.959 5.474-1.977.122-.004.396-.029.573.216.138.192.096.44.056.606z" />
+      <a href="https://t.me/FLUVIONN" target="_blank" rel="noopener noreferrer" className="nav-icon" style={{ position: 'fixed', right: 16, bottom: 'calc(86px + env(safe-area-inset-bottom))', zIndex: 35, background: 'rgba(255,255,255,0.78)' }} aria-label="Telegram">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <path d="M9.4 15.6 9.2 19c.4 0 .6-.2.8-.4l2-1.9 4.1 3c.8.4 1.3.2 1.5-.7l2.7-12.7c.2-1-.4-1.4-1.1-1.1L3.3 10.3c-1 .4-1 1-.2 1.2l4.6 1.4 10.7-6.7c.5-.3 1-.1.6.2" />
         </svg>
       </a>
     </div>
+  );
+}
+
+export function CargoLink({ to, className, children }) {
+  return (
+    <Link to={to} className={className}>
+      {children}
+    </Link>
   );
 }
