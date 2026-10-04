@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { CalculatorIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import api from '../api/axiosInstance';
@@ -47,7 +46,7 @@ function CostCalculator({ embedded = false }) {
           setShippingRate(shippingResponse.data.rate);
         }
         setError(null);
-      } catch (err) {
+      } catch  {
         setError('Не удалось загрузить курсы валют, используются стандартные значения');
       } finally {
         setIsLoading(false);

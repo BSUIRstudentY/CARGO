@@ -11,7 +11,7 @@ export const ProductCard = ({
   onAddToCart, 
   onViewDetails,
   index = 0,
-  isMobile = false 
+  _isMobile = false 
 }) => {
   return (
     <motion.div

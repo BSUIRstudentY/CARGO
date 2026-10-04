@@ -15,7 +15,7 @@ import {
 const AdminCRMProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [_error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(0);
@@ -116,7 +116,7 @@ const AdminCRMProducts = () => {
     }
   };
 
-  const handleUpdateStatus = async (productId, newStatus) => {
+  const _handleUpdateStatus = async (productId, newStatus) => {
     try {
       await api.put(`/admin/crm/products/${productId}/status`, { status: newStatus });
       fetchProducts();

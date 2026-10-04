@@ -33,6 +33,7 @@ if (typeof document !== 'undefined') {
 function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAuth();
   const { addToCart, cartLoading, cartError } = useCart();
   const [product, setProduct] = useState(null);
@@ -303,7 +304,6 @@ function ProductDetail() {
     );
   }
 
-  const location = useLocation();
   const productImage = product?.images && product.images.length > 0 
     ? product.images[0].startsWith('http') 
       ? product.images[0] 

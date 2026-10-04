@@ -28,7 +28,7 @@ function LoginRegister() {
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [resetStep, setResetStep] = useState(1); // 1 - ввод email, 2 - ввод кода и пароля
   const [resetSuccess, setResetSuccess] = useState(false);
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login, register } = useAuth();
 
@@ -80,7 +80,7 @@ function LoginRegister() {
         setReferralMessage('Неверный реферальный код');
         setError('Неверный реферальный код');
       }
-    } catch (err) {
+    } catch  {
       setIsReferralValid(false);
       setReferralMessage('Ошибка при проверке кода');
       setError('Ошибка при проверке кода');
@@ -205,7 +205,7 @@ function LoginRegister() {
 
     setIsLoading(true);
     try {
-      const res = await api.post('/auth/forgot-password', { email: resetEmail });
+      const _res = await api.post('/auth/forgot-password', { email: resetEmail });
       setResetStep(2);
       setError('');
     } catch (error) {
@@ -237,7 +237,7 @@ function LoginRegister() {
 
     setIsLoading(true);
     try {
-      const res = await api.post('/auth/reset-password', { 
+      const _res = await api.post('/auth/reset-password', { 
         code: resetCode.toUpperCase(),
         newPassword: newPassword 
       });

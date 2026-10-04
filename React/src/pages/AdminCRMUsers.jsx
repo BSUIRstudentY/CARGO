@@ -18,7 +18,7 @@ import {
 const AdminCRMUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [_error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [page, setPage] = useState(0);
@@ -33,8 +33,8 @@ const AdminCRMUsers = () => {
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState({});
   const [passwordForm, setPasswordForm] = useState({ newPassword: '' });
-  const [editingOrder, setEditingOrder] = useState(null);
-  const [editingTicket, setEditingTicket] = useState(null);
+  const [_editingOrder, _setEditingOrder] = useState(null);
+  const [_editingTicket, _setEditingTicket] = useState(null);
 
   useEffect(() => {
     fetchUsers();

@@ -25,7 +25,7 @@ function OrderCheck() {
   const [message, setMessage] = useState('');
   const [showItemRefusalModal, setShowItemRefusalModal] = useState(false);
   const [itemRefusalReason, setItemRefusalReason] = useState('');
-  const [activeTab, setActiveTab] = useState('orderDetails');
+  const [_activeTab, _setActiveTab] = useState('orderDetails');
   const [showContactEditModal, setShowContactEditModal] = useState(false);
   const [contactData, setContactData] = useState({ phone: '', lastName: '', firstName: '', middleName: '' });
 
@@ -450,7 +450,7 @@ function OrderCheck() {
   const userDiscount = editedOrder?.userDiscountApplied || 0;
   const promocodeDiscount = editedOrder?.discountApplied || 0;
   const insuranceCost = editedOrder?.insuranceCost || 0;
-  const totalDiscount = userDiscount + promocodeDiscount;
+  const _totalDiscount = userDiscount + promocodeDiscount;
 
   return (
     <div className="min-h-screen bg-transparent text-[#e5e7eb] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">

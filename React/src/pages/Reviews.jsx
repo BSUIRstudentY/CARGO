@@ -403,7 +403,7 @@ const Reviews = () => {
       setReviews((prev) => append ? [...prev, ...newReviews] : newReviews);
       setHasMore(pageNum < totalPages);
       setLoading(false);
-    } catch (err) {
+    } catch  {
       setError('Не удалось загрузить отзывы.');
       setLoading(false);
     }
@@ -450,7 +450,7 @@ const Reviews = () => {
       setFormData({ rating: 0, text: '' });
       setToast({ message: 'Отзыв успешно отправлен!', type: 'success' });
       fetchReviews(1, false);
-    } catch (err) {
+    } catch  {
       setError('Не удалось отправить отзыв.');
       setToast({ message: 'Ошибка при отправке отзыва.', type: 'error' });
     }
@@ -628,18 +628,18 @@ const Reviews = () => {
 };
 
 // Additional helper functions
-const validateForm = (data) => {
+const _validateForm = (data) => {
   if (data.rating < 1 || data.rating > 5) return 'Рейтинг должен быть от 1 до 5';
   if (!data.text.trim()) return 'Текст отзыва обязателен';
   return null;
 };
 
-const formatRussianDate = (date) => {
+const _formatRussianDate = (date) => {
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   return new Date(date).toLocaleDateString('ru-RU', options);
 };
 
-const trackReviewSubmission = (data) => {
+const _trackReviewSubmission = (data) => {
   console.log('Tracking review:', data);
 };
 

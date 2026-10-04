@@ -12,7 +12,7 @@ const AdminStats = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [stompClient, setStompClient] = useState(null);
+  const [_stompClient, setStompClient] = useState(null);
 
   // Инициализация STOMP WebSocket и подписка на /topic/online
   useEffect(() => {

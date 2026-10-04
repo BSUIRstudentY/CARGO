@@ -178,7 +178,7 @@ const FAQItem = ({ question, answer, index }) => {
 
 function Rate() {
   const navigate = useNavigate();
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [_mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [shippingRate, setShippingRate] = useState(6.0); // Fallback значение
 
   useEffect(() => {

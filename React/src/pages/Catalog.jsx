@@ -22,7 +22,7 @@ function Catalog() {
   const [error, setError] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   
-  const { addSingleToCart, cart, loading: cartLoading, error: cartError } = useCart();
+  const { addSingleToCart, cart, loading: _cartLoading, error: cartError } = useCart();
   const navigate = useNavigate();
   const productsPerPage = 20;
 

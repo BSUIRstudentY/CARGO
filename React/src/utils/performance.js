@@ -59,7 +59,7 @@ export function debounce(func, wait) {
  * Lazy loads an image with error handling.
  */
 export function lazyLoadImage(src, placeholder = '/placeholder.png') {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     const img = new Image();
     img.src = src;
     img.onload = () => resolve(src);

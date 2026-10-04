@@ -158,7 +158,7 @@ function OrderProcessing() {
     );
   }
 
-  const sortedItems = [...order.items].sort((a, b) => {
+  const sortedItems = [...order.items].sort((a, _b) => {
     if (order.status === 'PROCESSED') return 1;
     return a.purchaseStatus === 'PENDING' ? -1 : 1;
   });

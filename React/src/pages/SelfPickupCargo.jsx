@@ -11,7 +11,7 @@ import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 
 function SelfPickupCargo() {
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [trackingNumbers, setTrackingNumbers] = useState(() => {
     const saved = localStorage.getItem('savedTrackingNumbers');

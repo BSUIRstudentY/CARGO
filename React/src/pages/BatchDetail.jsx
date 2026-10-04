@@ -29,7 +29,7 @@ function BatchDetail() {
   const [showItemRefusalModal, setShowItemRefusalModal] = useState(false);
   const [itemRefusalReason, setItemRefusalReason] = useState('');
   const [selectedItemId, setSelectedItemId] = useState(null);
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [_selectedOrderId, setSelectedOrderId] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('');
 

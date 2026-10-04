@@ -33,7 +33,7 @@ export default function StoreChrome({
   const navScrollRef = useRef(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const { cart } = useCart();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const cartCount = Array.isArray(cart) ? cart.length : 0;
 
   useEffect(() => {

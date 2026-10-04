@@ -29,7 +29,7 @@ import {
 
 function OrderManagementCRM() {
   const [activeTab, setActiveTab] = useState('orders'); // orders, history, batches, stats
-  const [loading, setLoading] = useState(true);
+  const [_loading, _setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const tabs = [
@@ -285,7 +285,7 @@ async function loadImageAsBuffer(imageUrl) {
           return arrayBuffer;
         }
       }
-    } catch (fetchError) {
+    } catch  {
       console.warn('Fetch не удался, пробуем canvas:', imageUrl);
     }
 
@@ -370,7 +370,7 @@ async function loadImageAsBuffer(imageUrl) {
 async function exportOrderToExcel(orderId) {
   try {
     // Показываем уведомление о начале экспорта
-    const startTime = Date.now();
+    const _startTime = Date.now();
     console.log('Начало экспорта заказа:', orderId);
     
     // Загружаем полную информацию о заказе
@@ -445,7 +445,7 @@ async function exportOrderToExcel(orderId) {
     // === Основная информация о заказе ===
     const infoHeaders = ['Email', 'Телефон', 'Адрес доставки'];
     const infoRow = worksheet.addRow(infoHeaders);
-    infoRow.eachCell((cell, colNumber) => {
+    infoRow.eachCell((cell, _colNumber) => {
       cell.style = infoHeaderStyle;
     });
     worksheet.getRow(currentRow).height = 25;
@@ -457,7 +457,7 @@ async function exportOrderToExcel(orderId) {
       order.deliveryAddress || ''
     ];
     const infoDataRow = worksheet.addRow(infoData);
-    infoDataRow.eachCell((cell, colNumber) => {
+    infoDataRow.eachCell((cell, _colNumber) => {
       cell.style = dataStyle;
     });
     worksheet.getRow(currentRow).height = 30;
@@ -853,7 +853,7 @@ function EditOrderModal({ order, onClose, onSave }) {
     setSaving(true);
     try {
       // Убираем insuranceCost из данных - backend сам рассчитает автоматически
-      const { insuranceCost, ...dataToSend } = formData;
+      const { insuranceCost: _insuranceCost, ...dataToSend } = formData;
       await api.put(`/orders/${order.id}`, {
         ...dataToSend,
         items: order.items

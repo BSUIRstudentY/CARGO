@@ -259,7 +259,7 @@ function CartPage() {
     }
   };
 
-  const handleQuantityKeyPress = (event, productId) => {
+  const _handleQuantityKeyPress = (event, _productId) => {
     if (event.key === 'Enter') {
       event.target.blur();
     }

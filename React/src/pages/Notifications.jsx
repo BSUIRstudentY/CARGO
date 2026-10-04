@@ -17,7 +17,7 @@ const Notifications = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [stompClient, setStompClient] = useState(null);
+  const [_stompClient, setStompClient] = useState(null);
 
   const getUserUsername = () => localStorage.getItem("userEmail");
 
@@ -152,7 +152,7 @@ const Notifications = () => {
     }
   };
 
-  const sendOrderStatusNotification = async (orderId, newStatus) => {
+  const _sendOrderStatusNotification = async (orderId, newStatus) => {
     try {
       const email = getUserUsername();
       if (!email) return console.error("Email пользователя не найден в localStorage");
@@ -163,7 +163,7 @@ const Notifications = () => {
     }
   };
 
-  const sendSupportMessageNotification = async (ticketId, senderName) => {
+  const _sendSupportMessageNotification = async (ticketId, senderName) => {
     try {
       const email = getUserUsername();
       if (!email) return console.error("Email пользователя не найден в localStorage");

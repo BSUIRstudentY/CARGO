@@ -379,7 +379,7 @@ function SupportPage() {
                   </tbody>
                 ) : paginated.length > 0 ? (
                   <tbody>
-                    {paginated.map((ticket, index) => (
+                    {paginated.map((ticket, _index) => (
                       <TicketRow
                         key={ticket.id}
                         ticket={ticket}

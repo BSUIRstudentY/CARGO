@@ -1,5 +1,11 @@
 target/
 SpringBoot/target/
+Spring Boot/target/
+
+# Секреты
+.env
+.env.local
+.env.production
 
 # SSH Keys
 id_ed25519

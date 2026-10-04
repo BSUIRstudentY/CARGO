@@ -4,58 +4,28 @@ services:
     container_name: backend
     volumes:
       - ./backend.jar:/root/backend.jar
-      # ВАЖНО: НЕ монтируем data/ директорию с SQLite!
     command: ["java", "-jar", "/root/backend.jar"]
     ports:
       - "8080:8080"
     depends_on:
       mysql:
         condition: service_healthy
+    env_file:
+      - .env
     environment:
-      # Database - MySQL для продакшена (переопределяет SQLite из application.yml)
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/CargoDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=fluvion_user
-      - SPRING_DATASOURCE_PASSWORD=1206_1105timaZ
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
-      - HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
-      # Альтернативные переменные (для совместимости)
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_NAME=CargoDB
-      - DB_USERNAME=fluvion_user
-      - DB_PASSWORD=1206_1105timaZ
-      
-      # Mail
-      - MAIL_HOST=smtp.gmail.com
-      - MAIL_PORT=587
-      - MAIL_USERNAME=fluvionbiz@gmail.com
-      - MAIL_PASSWORD=luww omad mrqz qlyx
-      
-      # JWT
-      - JWT_SECRET=fluvion-secure-jwt-secret-key-for-production-minimum-32-chars-long
-      - JWT_EXPIRATION=86400000
-      
-      # bePaid Payment Gateway
-      - BEPAID_SHOP_ID=33276
-      - BEPAID_SECRET_KEY=7129e87495f7bb387ed05351dcccaa8631e883d8b2e936e07f3b10e2f04e659b
-      - BEPAID_CHECKOUT_URL=https://checkout.bepaid.by/ctp/api/checkouts
-      - BEPAID_RETURN_URL=https://fluvion.by/thanks
-      - BEPAID_FAIL_URL=https://fluvion.by/badResponse
-      - BEPAID_CALLBACK_URL=https://fluvion.by/api/payment/webhook
-      - BEPAID_TEST_MODE=false
-      
-      # EuropePost API
-      - EUPOST_API_URL=https://api.eurotorg.by:10352/Json
-      - EUPOST_SERVICE_NUMBER=134C9258-5EC7-4C29-B1E4-5A385385AE8F
-      - EUPOST_LOGIN=693299414_Kovalevsky
-      - EUPOST_PASSWORD=JLOHVQET4U12O1F
-      
-      # Server
-      - SERVER_PORT=8080
-      
-      # Hibernate
-      - HIBERNATE_DDL_AUTO=update
-      - SHOW_SQL=false
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME:-CargoDB}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-fluvion_user}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME:-CargoDB}
+      DB_USERNAME: ${DB_USERNAME:-fluvion_user}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SERVER_PORT: "8080"
+      HIBERNATE_DDL_AUTO: update
+      SHOW_SQL: "false"
     networks:
       - app-network
     restart: unless-stopped
@@ -64,10 +34,10 @@ services:
     image: mysql:8.0
     container_name: mysql
     environment:
-      MYSQL_DATABASE: CargoDB
-      MYSQL_USER: fluvion_user
-      MYSQL_PASSWORD: 1206_1105timaZ
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ${DB_NAME:-CargoDB}
+      MYSQL_USER: ${DB_USERNAME:-fluvion_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
       - "3306:3306"
     volumes:

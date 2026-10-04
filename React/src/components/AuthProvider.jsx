@@ -77,7 +77,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem('userRole', role || 'USER');
       setAuthState({ isAuthenticated: true, user: { email: userEmail, username: username || '', role: role || 'USER' } });
       navigate("/");
-    } catch (error) {
+    } catch  {
       throw new Error('Login failed');
     }
   };
