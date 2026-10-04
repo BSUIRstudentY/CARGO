@@ -238,7 +238,6 @@ public class OrderFlowService {
         }
         if (status == OrderFlowStatus.COMPLETED) {
             steps.forEach(step -> step.put("state", "done"));
-            steps.get(steps.size() - 1).put("state", "current");
         }
         if (status == OrderFlowStatus.REJECTED) {
             steps.get(1).put("state", "current");
@@ -255,6 +254,15 @@ public class OrderFlowService {
                     row.put("at", event.getCreatedAt() == null ? null : event.getCreatedAt().toString());
                     return row;
                 }).toList();
+
+        String receivedAt = null;
+        if (status == OrderFlowStatus.COMPLETED) {
+            for (Map<String, Object> event : events) {
+                if ("COMPLETED".equals(event.get("to"))) {
+                    receivedAt = (String) event.get("at");
+                }
+            }
+        }
 
         List<Map<String, Object>> payments = paymentRepository.findByOrderIdOrderByCreatedAtAsc(order.getId()).stream()
                 .map(this::paymentView).toList();
@@ -276,6 +284,7 @@ public class OrderFlowService {
         body.put("intraMinskFeeUsd", order.getIntraMinskFeeApplied() != null
                 ? order.getIntraMinskFeeApplied() : intraMinskFee());
         body.put("reasonRefusal", order.getReasonRefusal());
+        body.put("receivedAt", receivedAt);
         body.put("steps", steps);
         body.put("events", events);
         body.put("payments", payments);
@@ -306,8 +315,14 @@ public class OrderFlowService {
             row.put("weightAmount", order.getWeightAmount());
             row.put("deliveryAddress", order.getDeliveryAddress());
             row.put("actions", actionsFor(status));
-            paymentRepository.findFirstByOrderIdAndStatusOrderByCreatedAtDesc(order.getId(), PaymentState.PENDING)
-                    .ifPresent(payment -> row.put("pendingPaymentId", payment.getId()));
+            List<Map<String, Object>> payments = paymentRepository.findByOrderIdOrderByCreatedAtAsc(order.getId()).stream()
+                    .map(this::paymentView)
+                    .toList();
+            row.put("payments", payments);
+            payments.stream()
+                    .filter(payment -> PaymentState.PENDING.name().equals(payment.get("status")))
+                    .reduce((first, second) -> second)
+                    .ifPresent(payment -> row.put("pendingPaymentId", payment.get("id")));
             rows.add(row);
         }
         return rows;

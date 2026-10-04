@@ -12,6 +12,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -84,6 +86,13 @@ class OrderFlowServiceTest {
         assertEquals(OrderFlowStatus.IN_TRANSIT_TO_MINSK.name(), orderFlowService.markInTransit(order.getId(), "admin").getStatus());
         assertEquals(OrderFlowStatus.READY_FOR_PICKUP.name(), orderFlowService.markReady(order.getId(), "admin").getStatus());
         assertEquals(OrderFlowStatus.COMPLETED.name(), orderFlowService.complete(order.getId(), "admin").getStatus());
+
+        Map<String, Object> timeline = orderFlowService.timeline(order.getId());
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> steps = (List<Map<String, Object>>) timeline.get("steps");
+        assertEquals(7, steps.size());
+        assertTrue(steps.stream().allMatch(step -> "done".equals(step.get("state"))));
+        assertNotNull(timeline.get("receivedAt"));
     }
 
     @Test

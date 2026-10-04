@@ -71,6 +71,10 @@ function OrderDetails() {
     return <p className="muted">{error || 'Загрузка заказа...'}</p>;
   }
 
+  const receivedDate = flow.receivedAt ? new Date(flow.receivedAt) : null;
+  const receivedLabel = flow.status === 'COMPLETED' && receivedDate && !Number.isNaN(receivedDate.getTime())
+    ? `Получен ${receivedDate.toLocaleString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+    : '';
   const purpose = PAYABLE[flow.status];
   const amount = purpose === 'WEIGHT'
     ? `${Number(flow.weightAmount || 0).toFixed(2)} USD`
@@ -82,7 +86,7 @@ function OrderDetails() {
       <PageHeader
         kicker="Заказ"
         title={flow.statusLabel || 'Заказ'}
-        subtitle={flow.deliveryAddress || 'Отделение Европочты'}
+        subtitle={[receivedLabel, flow.deliveryAddress].filter(Boolean).join(' · ') || 'Отделение Европочты'}
         action={<button type="button" className="btn btn-light btn-sm" onClick={() => navigate('/profile')}>К заказам</button>}
       />
 

@@ -11,14 +11,34 @@ const ACTION_LABEL = {
   'in-transit': 'В путь в Минск',
   ready: 'Готов к выдаче',
   complete: 'Завершить',
-  'confirm-payment': 'Подтвердить оплату',
 };
+
+const STAGES = [
+  { id: 'all', label: 'Все' },
+  { id: 'CREATED', label: 'Создан' },
+  { id: 'APPROVED', label: 'Одобрен' },
+  { id: 'REJECTED', label: 'Отклонён' },
+  { id: 'AWAITING_PURCHASE_PAYMENT', label: 'Оплата выкупа' },
+  { id: 'PURCHASE_PAID', label: 'Выкуп оплачен' },
+  { id: 'AT_CHINA_WAREHOUSE', label: 'Склад в Китае' },
+  { id: 'AWAITING_WEIGHT_PAYMENT', label: 'Оплата по весу' },
+  { id: 'WEIGHT_PAID', label: 'Вес оплачен' },
+  { id: 'IN_TRANSIT_TO_MINSK', label: 'В пути' },
+  { id: 'READY_FOR_PICKUP', label: 'К выдаче' },
+  { id: 'COMPLETED', label: 'Завершён' },
+  { id: 'CANCELLED', label: 'Отменён' },
+];
+
+const PURPOSE = { PURCHASE: 'Выкуп', WEIGHT: 'Доставка' };
+const METHOD = { MANUAL: 'Вручную', BEPAID: 'bePaid' };
+const PAY_STATUS = { PENDING: 'Ожидает', PAID: 'Оплачен', FAILED: 'Ошибка' };
 
 function AdminOrderBoard() {
   const [rows, setRows] = useState([]);
   const [error, setError] = useState('');
   const [weights, setWeights] = useState({});
   const [fee, setFee] = useState('');
+  const [stage, setStage] = useState('all');
 
   const load = async () => {
     const [board, setting] = await Promise.all([
@@ -61,6 +81,8 @@ function AdminOrderBoard() {
     }
   };
 
+  const visible = stage === 'all' ? rows : rows.filter((row) => row.status === stage);
+
   return (
     <div className="space-y-4">
       <PageHeader kicker="Админ" title="Заказы" subtitle="Одобрение, вес и две оплаты" />
@@ -72,8 +94,21 @@ function AdminOrderBoard() {
         </label>
         <button type="button" className="btn btn-dark btn-sm" onClick={saveFee}>Сохранить</button>
       </div>
+      <div className="flex flex-wrap gap-2">
+        {STAGES.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            aria-pressed={stage === item.id}
+            className={`rounded-full px-3 py-1.5 text-[12px] ${stage === item.id ? 'bg-[#111] text-white' : 'glass'}`}
+            onClick={() => setStage(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
       <div className="space-y-3">
-        {rows.map((row) => (
+        {visible.map((row) => (
           <article key={row.id} className="glass sheet space-y-3 p-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="text-[15px] font-medium">#{row.id} {row.statusLabel}</h2>
@@ -85,8 +120,25 @@ function AdminOrderBoard() {
               {row.weightAmount ? ` · доставка ${Number(row.weightAmount).toFixed(2)} USD` : ''}
             </p>
             <p className="text-[13px]">{row.deliveryAddress}</p>
+            <div className="space-y-2">
+              <p className="text-[12px] text-black/45">Оплаты</p>
+              {(row.payments || []).length === 0 ? <p className="text-[13px] text-black/45">Платежей пока нет</p> : null}
+              {(row.payments || []).map((payment) => (
+                <div key={payment.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px]">
+                  <span>{PURPOSE[payment.purpose] || payment.purpose}</span>
+                  <span className="text-black/45">{METHOD[payment.method] || payment.method}</span>
+                  <span>{Number(payment.amount || 0).toFixed(2)} {payment.currency}</span>
+                  <span className="text-black/45">{PAY_STATUS[payment.status] || payment.status}</span>
+                  {payment.status === 'PENDING' && payment.method === 'MANUAL' ? (
+                    <button type="button" className="btn btn-dark btn-sm" onClick={() => act(row.id, 'confirm-payment', payment.id)}>
+                      Подтвердить
+                    </button>
+                  ) : null}
+                </div>
+              ))}
+            </div>
             <div className="flex flex-wrap gap-2">
-              {(row.actions || []).filter((action) => action !== 'confirm-payment' || row.pendingPaymentId).map((action) => (
+              {(row.actions || []).filter((action) => action !== 'confirm-payment').map((action) => (
                 action === 'weight' ? (
                   <div key={action} className="flex gap-2">
                     <input
@@ -111,7 +163,7 @@ function AdminOrderBoard() {
             </div>
           </article>
         ))}
-        {rows.length === 0 ? <p className="muted">Заказов пока нет.</p> : null}
+        {visible.length === 0 ? <p className="muted">{rows.length === 0 ? 'Заказов пока нет.' : 'В этом статусе заказов нет.'}</p> : null}
       </div>
     </div>
   );
