@@ -96,7 +96,7 @@ function OrderDetails() {
       <ol className="glass sheet space-y-0 p-2">
         {flow.steps.map((step) => (
           <li key={step.index} className={`flex items-center gap-3 px-3 py-3 ${step.state === 'current' ? 'rounded-[14px] bg-white/70' : ''}`}>
-            <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-[12px] ${step.state === 'upcoming' ? 'bg-black/5 text-black/40' : 'bg-[#111] text-white'}`}>
+            <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-[12px] ${step.state === 'upcoming' ? 'bg-black/5 text-black/40' : 'pill-on'}`}>
               {step.index + 1}
             </span>
             <span className={step.state === 'upcoming' ? 'text-black/40' : 'font-medium text-[#111]'}>{step.title}</span>

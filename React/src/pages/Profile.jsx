@@ -143,7 +143,7 @@ function Profile() {
                       <button
                         type="button"
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex w-full items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-left text-[13px] ${tab.id === activeTab ? 'bg-[#111] text-white' : 'text-[#111] hover:bg-white/70'}`}
+                        className={`flex w-full items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-left text-[13px] ${tab.id === activeTab ? 'pill-on' : 'text-[#111] hover:bg-white/70'}`}
                       >
                         <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center">{tab.icon}</span>
                         <span>{tab.label}</span>

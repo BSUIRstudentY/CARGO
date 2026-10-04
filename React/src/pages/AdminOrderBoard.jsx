@@ -94,13 +94,13 @@ function AdminOrderBoard() {
         </label>
         <button type="button" className="btn btn-dark btn-sm" onClick={saveFee}>Сохранить</button>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="chip-row">
         {STAGES.map((item) => (
           <button
             key={item.id}
             type="button"
             aria-pressed={stage === item.id}
-            className={`rounded-full px-3 py-1.5 text-[12px] ${stage === item.id ? 'bg-[#111] text-white' : 'glass'}`}
+            className={`rounded-full px-3 py-1.5 text-[12px] ${stage === item.id ? 'pill-on' : 'glass'}`}
             onClick={() => setStage(item.id)}
           >
             {item.label}

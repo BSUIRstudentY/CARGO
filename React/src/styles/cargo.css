@@ -256,6 +256,12 @@ h2.title {
 .btn-dark {
   background: #111;
   color: #fff;
+  -webkit-text-fill-color: #fff;
+}
+
+.btn-dark svg {
+  color: #fff;
+  -webkit-text-fill-color: #fff;
 }
 
 .btn-dark:hover {
@@ -548,8 +554,40 @@ select.input {
   border-radius: 999px;
   background: #111;
   color: #fff;
+  -webkit-text-fill-color: #fff;
   font-size: 12px;
   font-weight: 500;
+}
+
+/* Active ink pill. .text-white is remapped to ink, so the fill color has to be set here. */
+.pill-on,
+.bg-\[\#111\].text-white {
+  background: #111;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
+.pill-on svg,
+.bg-\[\#111\].text-white svg {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.chip-row > button {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 @media (max-width: 719px) {
