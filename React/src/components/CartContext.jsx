@@ -64,7 +64,9 @@ export function CartProvider({ children }) {
   // === ОСНОВНЫЕ ФУНКЦИИ С МГНОВЕННЫМ СОХРАНЕНИЕМ В LOCALSTORAGE ===
 
   const addToCart = async (productsToAdd) => {
-    if (!Array.isArray(productsToAdd) || productsToAdd.length === 0) return;
+    const items = Array.isArray(productsToAdd) ? productsToAdd : (productsToAdd ? [productsToAdd] : []);
+    if (items.length === 0) return;
+    productsToAdd = items;
 
     // Мгновенно добавляем в состояние (и автоматически в localStorage)
     setCart(prev => {

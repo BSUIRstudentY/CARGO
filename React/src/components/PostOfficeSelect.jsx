@@ -183,6 +183,15 @@ function PostOfficeSelect({ deliveryAddress, setDeliveryAddress, setError, setSe
           },
         })}
       />
+      <input
+        className="input mt-2"
+        placeholder="Или напишите отделение"
+        value={deliveryAddress}
+        onChange={(event) => {
+          setDeliveryAddress(event.target.value);
+          setOfficeSearchText(event.target.value);
+        }}
+      />
       {deliveryAddress && (
         <button
           className="mt-2 text-sm text-[#9ca3af] hover:text-[#00f0ff] transition-colors duration-300 underline"
