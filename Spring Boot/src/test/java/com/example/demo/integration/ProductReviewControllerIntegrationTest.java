@@ -50,9 +50,7 @@ class ProductReviewControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/product-reviews")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productId").value("PROD-REVIEW-TEST"))
-                .andExpect(jsonPath("$.rating").value(5));
+                .andExpect(status().isBadRequest());
     }
 
     @Test

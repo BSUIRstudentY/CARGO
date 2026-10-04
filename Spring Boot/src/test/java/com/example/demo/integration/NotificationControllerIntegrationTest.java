@@ -56,12 +56,12 @@ class NotificationControllerIntegrationTest extends BaseIntegrationTest {
     void testGetNotifications() throws Exception {
         mockMvc.perform(get("/api/notifications"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$.content").isArray());
     }
 
     @Test
     @DisplayName("POST /api/notifications - Should create notification")
-    @WithMockUser(username = "notify@example.com")
+    @WithMockUser(username = "notify@example.com", roles = "ADMIN")
     void testCreateNotification() throws Exception {
         String requestBody = """
                 {

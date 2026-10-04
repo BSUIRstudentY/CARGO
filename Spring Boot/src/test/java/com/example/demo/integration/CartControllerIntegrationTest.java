@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import java.sql.Timestamp;
@@ -66,6 +67,7 @@ class CartControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     @DisplayName("GET /api/cart - Should return 403 without authentication")
+    @WithAnonymousUser
     void testGetCart_Unauthorized() throws Exception {
         mockMvc.perform(get("/api/cart"))
                 .andExpect(status().isForbidden());

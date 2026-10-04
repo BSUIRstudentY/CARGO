@@ -141,7 +141,9 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
     void testUpdateProduct_Success() throws Exception {
         String requestBody = """
                 {
+                    "id": "PROD-TEST-001",
                     "name": "Updated Product",
+                    "url": "https://example.com/test",
                     "price": 150.0,
                     "status": "ACTIVE"
                 }

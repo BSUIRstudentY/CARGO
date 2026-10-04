@@ -68,7 +68,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(status().is5xxServerError()); // Service throws RuntimeException
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

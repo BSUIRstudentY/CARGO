@@ -15,6 +15,7 @@ import com.example.demo.Services.OrderFlowException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -192,6 +193,17 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         }
         
+        if (message != null && (message.contains("не найден") || message.contains("не найдена") || message.contains("Not found"))) {
+            logger.warn("Not found: {}", message);
+            Map<String, Object> response = createErrorResponse(
+                    "Not found",
+                    message,
+                    null,
+                    HttpStatus.NOT_FOUND
+            );
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
         // Check if it's an invalid referral code
         if (message != null && message.contains("Invalid referral code")) {
             logger.warn("Invalid referral code: {}", message);
@@ -219,6 +231,17 @@ public class GlobalExceptionHandler {
      * Handles all other unhandled exceptions.
      * Prevents information leakage by not exposing internal error details.
      */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoResource(NoResourceFoundException ex) {
+        Map<String, Object> response = createErrorResponse(
+                "Not found",
+                "Ресурс не найден",
+                null,
+                HttpStatus.NOT_FOUND
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         logger.error("Unhandled exception occurred", ex);
