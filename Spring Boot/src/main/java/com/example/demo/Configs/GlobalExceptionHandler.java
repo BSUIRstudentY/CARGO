@@ -11,6 +11,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import com.example.demo.Services.OrderFlowException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -146,6 +147,15 @@ public class GlobalExceptionHandler {
         );
 
         logger.warn("Illegal argument: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(OrderFlowException.class)
+    public ResponseEntity<Map<String, Object>> handleOrderFlow(OrderFlowException ex) {
+        logger.warn("Order flow rejected: {}", ex.getMessage());
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        response.put("status", 400);
         return ResponseEntity.badRequest().body(response);
     }
 
