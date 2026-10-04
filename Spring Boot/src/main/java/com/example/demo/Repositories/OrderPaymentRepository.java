@@ -13,4 +13,6 @@ public interface OrderPaymentRepository extends JpaRepository<OrderPayment, Long
 
     Optional<OrderPayment> findFirstByOrderIdAndPurposeAndStatusOrderByCreatedAtDesc(
             Long orderId, PaymentPurpose purpose, PaymentState status);
+
+    Optional<OrderPayment> findFirstByOrderIdAndStatusOrderByCreatedAtDesc(Long orderId, PaymentState status);
 }

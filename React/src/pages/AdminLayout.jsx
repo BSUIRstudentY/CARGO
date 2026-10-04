@@ -21,7 +21,7 @@ import AdminNews from './AdminNews';
 import OrderManagementCRM from './OrderManagementCRM';
 import AdminCRMDashboard from './AdminCRMDashboard';
 import AdminCRMUsers from './AdminCRMUsers';
-import AdminCRMOrders from './AdminCRMOrders';
+import AdminOrderBoard from './AdminOrderBoard';
 import AdminCRMProducts from './AdminCRMProducts';
 import AdminCRMTickets from './AdminCRMTickets';
 import AdminCRMBatchCargos from './AdminCRMBatchCargos';
@@ -149,7 +149,7 @@ function AdminLayout() {
           {/* CRM Routes */}
           <Route path="/admin/crm/dashboard" element={<AdminCRMDashboard />} />
           <Route path="/admin/crm/users" element={<AdminCRMUsers />} />
-          <Route path="/admin/crm/orders" element={<AdminCRMOrders />} />
+          <Route path="/admin/crm/orders" element={<AdminOrderBoard />} />
           <Route path="/admin/crm/products" element={<AdminCRMProducts />} />
           <Route path="/admin/crm/quests" element={<AdminQuest />} />
           <Route path="/admin/crm/promocodes" element={<AdminPromocode />} />

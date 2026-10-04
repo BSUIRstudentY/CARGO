@@ -306,6 +306,8 @@ public class OrderFlowService {
             row.put("weightAmount", order.getWeightAmount());
             row.put("deliveryAddress", order.getDeliveryAddress());
             row.put("actions", actionsFor(status));
+            paymentRepository.findFirstByOrderIdAndStatusOrderByCreatedAtDesc(order.getId(), PaymentState.PENDING)
+                    .ifPresent(payment -> row.put("pendingPaymentId", payment.getId()));
             rows.add(row);
         }
         return rows;

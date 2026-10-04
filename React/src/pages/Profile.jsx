@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/AuthProvider';
 import { motion } from 'framer-motion';
-import api from '../api/axiosInstance';
-import confetti from 'canvas-confetti';
 import LoyaltyTab from '../components/LoyaltyTab';
 import PersonalDataTab from '../components/PersonalDataTab';
 import ShipmentsTab from '../components/ShipmentsTab';
@@ -19,7 +17,7 @@ function Profile() {
   const [error, setError] = useState(null);
   const [userRole, setUserRole] = useState('USER');
   const [activeTab, setActiveTab] = useState('personal-data');
-  const [refreshTrigger, setRefreshTrigger] = useState(Date.now());
+  const [refreshTrigger] = useState(Date.now());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,45 +33,6 @@ function Profile() {
     [navigate]
   );
 
-
-  const handlePay = async (orderId) => {
-    try {
-      // Получаем данные заказа для расчета суммы
-      const orderResponse = await api.get(`/orders/${orderId}`);
-      const order = orderResponse.data;
-
-      const totalItemsPrice = order.items?.reduce((sum, item) => {
-        return sum + (item.priceAtTime || 0) * (item.quantity || 1);
-      }, 0) || 0;
-
-      const totalChinaDeliveryPrice = order.items?.reduce((sum, item) => {
-        return sum + (item.chinaDeliveryPrice || 0);
-      }, 0) || 0;
-
-      const amount = order.totalClientPrice + totalChinaDeliveryPrice;
-
-      // Создаем платеж через правильный API
-      const response = await api.post('/payment/create', {
-        orderId: parseInt(orderId),
-        amount,
-      });
-
-      if (response.data.success && response.data.formUrl) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#00f0ff', '#a78bfa', '#10b981'],
-        });
-        window.location.href = response.data.formUrl;
-      } else {
-        throw new Error('Invalid response from payment API');
-      }
-    } catch (error) {
-      console.error('Ошибка при оплате заказа:', error);
-      setError('Ошибка инициации оплаты: ' + (error.response?.data?.error || error.message));
-    }
-  };
 
   const tabs = [
     {
@@ -244,7 +203,6 @@ function Profile() {
               {activeTab === 'shipments' && (
                 <ShipmentsTab
                   handleViewOrderDetails={handleViewOrderDetails}
-                  handlePay={handlePay}
                   refresh={refreshTrigger}
                 />
               )}
