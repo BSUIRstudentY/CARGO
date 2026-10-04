@@ -52,6 +52,9 @@ public class BePaidController {
     @Autowired
     private ExchangeRateService exchangeRateService;
 
+    @Autowired
+    private com.example.demo.Services.OrderFlowService orderFlowService;
+
     @Value("${bepaid.shop-id}")
     private String shopId;
 
@@ -117,11 +120,16 @@ public class BePaidController {
         }
         
         Order order = optOrder.get();
-        if (!"VERIFIED".equals(order.getStatus())) {
-            logger.warn("Payment creation failed: order {} is not verified (status: {})", 
+        String payable = order.getStatus();
+        boolean canPay = "VERIFIED".equals(payable)
+                || "APPROVED".equals(payable)
+                || "AWAITING_PURCHASE_PAYMENT".equals(payable)
+                || "AWAITING_WEIGHT_PAYMENT".equals(payable);
+        if (!canPay) {
+            logger.warn("Payment creation failed: order {} is not payable (status: {})",
                     request.getOrderId(), order.getStatus());
             return ResponseEntity.badRequest()
-                    .body(Map.of("success", false, "error", "Заказ не подтверждён"));
+                    .body(Map.of("success", false, "error", "Заказ не ожидает оплату"));
         }
 
         Double amountCNY = request.getAmount(); // Сумма в юанях (CNY)
@@ -328,19 +336,16 @@ public class BePaidController {
     // Обработка успешного платежа: обновление статуса и обновление потраченных средств
     @Transactional
     private void processSuccessfulPayment(Order order) {
-        boolean wasNotPaid = !"PAID".equals(order.getStatus());
-        
-        if (wasNotPaid) {
-            order.setStatus("PAID");
-            orderRepository.save(order);
-            logger.info("Order {} marked as PAID", order.getId());
+        boolean purchaseJustPaid = orderFlowService.confirmGatewayPayment(order);
+        if (purchaseJustPaid) {
+            logger.info("Order {} purchase payment confirmed via bePaid", order.getId());
         }
 
         // Обновляем потраченные средства пользователя и обрабатываем квесты (даже если заказ уже был PAID)
         User user = order.getUser();
         if (user != null && order.getTotalClientPrice() != null) {
             // Обновляем потраченные средства только если заказ только что был оплачен
-            if (wasNotPaid) {
+            if (purchaseJustPaid) {
                 double currentMoneySpent = user.getMoneySpent() != null ? user.getMoneySpent() : 0.0;
                 double orderTotal = order.getTotalClientPrice().doubleValue();
                 user.setMoneySpent(currentMoneySpent + orderTotal);
@@ -352,7 +357,7 @@ public class BePaidController {
             
             // Квесты обрабатываем асинхронно после коммита, чтобы не держать транзакцию вебхука и не блокировать SQLite
             String userEmail = user.getEmail();
-            if (wasNotPaid) {
+            if (purchaseJustPaid) {
                 questService.handleEventAsync(new QuestEvent(userEmail, QuestConditionType.PURCHASE));
                 questService.handleEventAsync(new QuestEvent(userEmail, QuestConditionType.QUANTITY_ORDER));
                 questService.handleEventAsync(new QuestEvent(userEmail, QuestConditionType.SPENT));

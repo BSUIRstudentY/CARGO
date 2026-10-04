@@ -186,6 +186,7 @@ const AdminNews = () => {
     <div className="min-h-screen bg-transparent text-[#e5e7eb] py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <PageHeader
+          kicker="Админ"
           title="Управление новостями"
           subtitle="Создание и редактирование новостей, объявлений и анонсов"
         />

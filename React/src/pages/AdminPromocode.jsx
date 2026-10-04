@@ -79,7 +79,7 @@ function AdminPromocode() {
   // Toggle promocode active status
   const handleTogglePromocode = async (id) => {
     try {
-      const response = await api.put(`/admin/crm/promocodes/${id}/toggle`);
+      const _response = await api.put(`/admin/crm/promocodes/${id}/toggle`);
       setPromocodes(
         promocodes.map((promo) =>
           promo.id === id ? { ...promo, isActive: !promo.isActive } : promo

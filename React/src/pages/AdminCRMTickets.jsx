@@ -14,7 +14,7 @@ import {
 const AdminCRMTickets = () => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [_error, setError] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [adminEmail, setAdminEmail] = useState('');

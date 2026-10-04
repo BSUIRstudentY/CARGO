@@ -1,5 +1,6 @@
 package com.example.demo.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -18,6 +19,7 @@ import java.util.List;
  * customs classification, weight, dimensions for shipping calculations.
  */
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "product", indexes = {
         @Index(name = "idx_name", columnList = "name"),
         @Index(name = "idx_origin_country", columnList = "originCountry"),

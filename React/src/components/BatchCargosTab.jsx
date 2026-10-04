@@ -15,7 +15,7 @@ import { Button } from './ui/Button';
 import { Alert } from './ui/Alert';
 import { Loading } from './ui/Loading';
 
-const BatchCargosTab = ({ userEmail, handleViewOrderDetails, refresh }) => {
+const BatchCargosTab = ({ userEmail, refresh }) => {
   const [batchCargos, setBatchCargos] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);

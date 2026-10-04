@@ -9,7 +9,9 @@ import { Input } from '../components/ui/Input';
 
 function MultiTerminal() {
   const { addToCart } = useCart();
-  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [isFormVisible, setIsFormVisible] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth < 768
+  );
   const [products, setProducts] = useState(() => {
     const savedProducts = localStorage.getItem('savedProducts');
     return savedProducts ? JSON.parse(savedProducts) : [];
@@ -189,50 +191,24 @@ function MultiTerminal() {
     },
   ];
 
-  const marketplaces = [
-    {
-      href: 'https://www.pinduoduo.com',
-      title: 'Pinduoduo',
-      el: (
-        <img
-          src="/logos/pinduoduo.svg"
-          alt="Pinduoduo"
-          className="w-full h-full object-contain p-2"
-          onError={(e) => {
-            e.target.style.display = 'none';
-            e.target.parentElement.innerHTML = '<span class="text-gray-600 font-bold text-xs">拼多多</span>';
-          }}
-        />
-      ),
-      className: 'bg-white',
-    },
-    { href: 'https://www.taobao.com', title: 'Taobao', el: <span className="text-white font-bold text-xs">淘宝</span>, style: { backgroundColor: '#FF5000' } },
-    { href: 'https://www.1688.com', title: '1688', el: <span className="text-white font-bold text-sm">1688</span>, style: { backgroundColor: '#FF6A00' } },
-    { href: 'https://www.gofish.com', title: 'GoFish', el: <span className="text-white font-bold text-[10px]">GoFish</span>, className: 'bg-[rgba(255,255,255,0.05)]' },
-    { href: 'https://www.wechat.com', title: 'WeChat', el: <span className="text-white font-bold text-xs">微信</span>, style: { backgroundColor: '#09BB07' } },
-    { href: 'https://www.poizon.com', title: 'Poizon', el: <span className="text-white font-bold text-[10px]">Poizon</span>, className: 'bg-black' },
-    { href: 'https://www.95.com', title: '95', el: <span className="text-white font-bold text-xs">95</span>, className: 'bg-[rgba(255,255,255,0.05)]' },
-  ];
+  const marketplaces = ['Pinduoduo', 'Taobao', '1688', 'Poizon', 'GoFish'];
 
   const InstructionBlocks = ({ variant }) => {
     const isCompact = variant === 'mobile';
     return (
       <div className={isCompact ? 'mb-4' : 'mb-10'}>
         <div className={isCompact ? 'mb-2' : 'mb-4'}>
-          <h2 className={isCompact ? 'text-xs font-semibold text-[#00f0ff]' : 'text-xl font-bold text-[#00f0ff]'}>
+          <h2 className={isCompact ? 'text-sm font-semibold' : 'text-xl font-bold'} style={{ color: '#1d1d1f' }}>
             Как пользоваться
           </h2>
-          <p className={isCompact ? 'text-[10px] text-[#9ca3af] mt-0.5' : 'text-sm text-[#9ca3af] mt-2'}>
-            {isCompact ? 'Товар → сохранить → в корзину' : 'Пошагово: добавьте товар → сохраните → проверьте список → отправьте в корзину.'}
-          </p>
         </div>
 
         {isCompact ? (
-          <div className="space-y-1.5">
+          <div className="c-inset">
             {instructionSteps.map((s) => (
               <details
                 key={s.step}
-                className="group rounded-lg border border-[rgba(255,255,255,0.08)] bg-transparent px-3 py-2"
+                className="c-step group rounded-none border-0 px-4 py-3"
               >
                 <summary className="cursor-pointer list-none flex items-start gap-2">
                   <span className="mt-0.5 w-5 h-5 rounded bg-[rgba(0,240,255,0.15)] text-[#00f0ff] font-bold text-[10px] flex items-center justify-center flex-shrink-0">
@@ -240,48 +216,23 @@ function MultiTerminal() {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-xs font-semibold text-[#e5e7eb]">{s.title}</span>
-                    <span className="block text-[10px] text-[#9ca3af] mt-0.5">{s.short}</span>
+                    <span className="block text-[12px] text-[#111]/60 mt-0.5">{s.short}</span>
                   </span>
-                  <span className="text-[#9ca3af] group-open:text-[#00f0ff] transition-colors text-xs">▼</span>
                 </summary>
-                <div className="pt-2 pl-7">{s.content}</div>
               </details>
             ))}
-
-            <details className="group rounded-lg border border-[rgba(255,255,255,0.08)] bg-transparent px-3 py-2">
-              <summary className="cursor-pointer list-none flex items-center gap-2">
-                <span className="w-5 h-5 rounded bg-[rgba(255,255,255,0.06)] text-[#9ca3af] font-bold text-[10px] flex items-center justify-center flex-shrink-0">
-                  i
-                </span>
-                <span className="text-xs font-semibold text-[#e5e7eb]">Площадки</span>
-                <span className="ml-auto text-[#9ca3af] group-open:text-[#00f0ff] transition-colors text-xs">▼</span>
-              </summary>
-              <div className="pt-2 pl-7">
-                <p className="text-[10px] text-[#9ca3af] mb-2">Китайские площадки:</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {marketplaces.map((m) => (
-                    <a
-                      key={m.title}
-                      href={m.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={m.title}
-                      className={`inline-flex items-center justify-center w-9 h-9 rounded border border-[rgba(255,255,255,0.12)] hover:border-[#00f0ff] transition-colors overflow-hidden ${m.className || ''}`}
-                      style={m.style || undefined}
-                    >
-                      {m.el}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </details>
+            <p className="muted flex flex-wrap gap-1.5 px-4 py-3 text-[12px]">
+              {marketplaces.map((name) => (
+                <span key={name} className="glass pill px-2.5 py-1 text-[11px] text-[#111]">{name}</span>
+              ))}
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="c-inset">
             {instructionSteps.map((s) => (
               <div
                 key={s.step}
-                className="p-5 rounded-2xl bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]"
+                className="c-step c-inset-row"
               >
                 <div className="flex items-start gap-3 mb-2">
                   <span className="w-8 h-8 rounded-xl bg-[rgba(0,240,255,0.15)] text-[#00f0ff] font-bold text-sm flex items-center justify-center flex-shrink-0">
@@ -289,30 +240,17 @@ function MultiTerminal() {
                   </span>
                   <div className="min-w-0">
                     <h3 className="text-base font-semibold text-[#e5e7eb]">{s.title}</h3>
-                    <p className="text-sm text-[#9ca3af] mt-0.5">{s.short}</p>
+                    <p className="muted mt-0.5 text-[13px]">{s.short}</p>
                   </div>
                 </div>
-                {s.content}
               </div>
             ))}
-
-            <div className="p-5 rounded-2xl bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] md:col-span-2">
-              <p className="text-sm text-[#9ca3af] mb-3">Мы можем привезти товары с этих и других китайских площадок:</p>
-              <div className="flex flex-wrap gap-2">
-                {marketplaces.map((m) => (
-                  <a
-                    key={m.title}
-                    href={m.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={m.title}
-                    className={`inline-flex items-center justify-center w-14 h-14 rounded-xl border border-[rgba(255,255,255,0.15)] hover:border-[#00f0ff] transition-colors overflow-hidden ${m.className || ''}`}
-                    style={m.style || undefined}
-                  >
-                    {m.el}
-                  </a>
+            <div className="c-step c-inset-row">
+              <p className="muted flex flex-wrap gap-1.5 text-[12px]">
+                {marketplaces.map((name) => (
+                  <span key={name} className="glass pill px-2.5 py-1 text-[11px] text-[#111]">{name}</span>
                 ))}
-              </div>
+              </p>
             </div>
           </div>
         )}
@@ -321,13 +259,14 @@ function MultiTerminal() {
   };
 
   const mobileLayout = (
-    <section id="multi-terminal" className="min-h-screen bg-transparent text-[#e5e7eb] py-3 px-3 relative overflow-hidden pb-20 sm:pb-6">
+    <section id="multi-terminal" className="min-h-screen bg-transparent text-[#e5e7eb] relative overflow-x-hidden">
       
       <div className="relative z-10">
-        <PageHeader 
+        <PageHeader
+          kicker="Терминал"
           title="Заказать товар"
-          subtitle="Ссылки на товары → заявка"
-          className="mb-4 sm:mb-8"
+          subtitle="Ссылка с 1688, Taobao или Pinduoduo. Мы проверим цену и наличие."
+          className="mb-4"
         />
 
         <AnimatePresence>
@@ -342,9 +281,8 @@ function MultiTerminal() {
         </AnimatePresence>
 
       <motion.section
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
         className="mobile-terminal-content"
       >
         <InstructionBlocks variant="mobile" />
@@ -517,12 +455,13 @@ function MultiTerminal() {
   );
 
   const desktopLayout = (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden pb-24 sm:pb-12">
+    <div className="min-h-screen bg-transparent text-[#e5e7eb] relative overflow-x-hidden">
       
       <div className="max-w-7xl mx-auto relative z-10">
-        <PageHeader 
+        <PageHeader
+          kicker="Терминал"
           title="Заказать товар"
-          subtitle="Добавьте ссылки на товары и оформите заявку"
+          subtitle="Ссылка с 1688, Taobao или Pinduoduo. Мы проверим цену и наличие."
         />
 
         <AnimatePresence>
@@ -537,9 +476,8 @@ function MultiTerminal() {
         </AnimatePresence>
 
         <motion.section
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
           className="space-y-10"
         >
           <InstructionBlocks variant="desktop" />
@@ -753,15 +691,6 @@ function MultiTerminal() {
     <>
       {isMobile ? mobileLayout : desktopLayout}
       <style>{`
-        * {
-          text-decoration: none;
-          color: var(--text-primary, #ffffff);
-          box-sizing: border-box;
-          font-family: 'Inter', system-ui, sans-serif;
-          font-size: 16px;
-          line-height: 125%;
-          font-weight: 500;
-        }
         .product-card {
           width: 100%;
           padding: 20px;
@@ -771,9 +700,11 @@ function MultiTerminal() {
           align-items: center;
           gap: 16px;
           height: 100%;
-          border-radius: 16px;
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 22px;
+          background: rgba(255, 255, 255, 0.6);
+          border: 1px solid rgba(255, 255, 255, 0.75);
+          color: #1d1d1f;
+          backdrop-filter: blur(40px);
           z-index: 2;
           position: relative;
           transition: all 0.3s ease;
@@ -821,10 +752,11 @@ function MultiTerminal() {
           margin-bottom: 16px;
         }
         .mobile-add-product {
-          background: rgba(255, 255, 255, 0.02);
+          background: rgba(255, 255, 255, 0.6);
+          color: #1d1d1f;
           padding: 12px;
-          border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 22px;
+          border: 1px solid rgba(255, 255, 255, 0.75);
           text-align: center;
           cursor: pointer;
           transition: all 0.3s ease;
@@ -834,10 +766,11 @@ function MultiTerminal() {
           background: rgba(255, 255, 255, 0.04);
         }
         .mobile-form {
-          background: rgba(255, 255, 255, 0.02);
+          background: rgba(255, 255, 255, 0.6);
+          color: #1d1d1f;
           padding: 14px;
-          border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 22px;
+          border: 1px solid rgba(255, 255, 255, 0.75);
           position: relative;
           margin-bottom: 16px;
         }
@@ -886,9 +819,10 @@ function MultiTerminal() {
           align-items: center;
           gap: 6px;
           height: 100%;
-          border-radius: 10px;
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 22px;
+          background: rgba(255, 255, 255, 0.6);
+          color: #1d1d1f;
+          border: 1px solid rgba(255, 255, 255, 0.75);
           z-index: 2;
           position: relative;
           transition: all 0.3s ease;
@@ -939,7 +873,7 @@ function MultiTerminal() {
         .mobile-product-name {
           font-size: 0.75rem;
           font-weight: 600;
-          color: #e5e7eb;
+          color: #1d1d1f;
           margin-bottom: 0;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -952,7 +886,7 @@ function MultiTerminal() {
         .mobile-product-price {
           font-size: 0.875rem;
           font-weight: 600;
-          color: #00f0ff;
+          color: #1d1d1f;
           text-align: center;
         }
         .mobile-remove-product {
@@ -974,12 +908,12 @@ function MultiTerminal() {
         .mobile-no-products {
           grid-column: 1 / -1;
           text-align: center;
-          color: var(--text-secondary, #cdcdcd);
+          color: #1d1d1f;
           font-size: 0.8rem;
-          background: var(--bg-card, #1f1f1f);
+          background: rgba(255, 255, 255, 0.6);
           padding: 12px;
-          border-radius: 10px;
-          border: 1px solid var(--border-primary, #333333);
+          border-radius: 22px;
+          border: 1px solid rgba(255, 255, 255, 0.75);
         }
       `}</style>
     </>

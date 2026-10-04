@@ -53,7 +53,23 @@ public class Order {
 
     @Column(name = "status", nullable = false, length = 50)
     @NotBlank(message = "Order status is required")
-    private String status = "PENDING";
+    private String status = "CREATED";
+
+    /** Previous status string, kept when orders are migrated onto the new lifecycle. */
+    @Column(name = "legacy_status", length = 50)
+    private String legacyStatus;
+
+    @Column(name = "weight_amount")
+    private Float weightAmount;
+
+    @Column(name = "weight_currency", length = 10)
+    private String weightCurrency;
+
+    @Column(name = "shipping_rate_applied")
+    private Double shippingRateApplied;
+
+    @Column(name = "intra_minsk_fee_applied")
+    private Double intraMinskFeeApplied;
 
     // Pricing fields
     @Column(name = "total_client_price", nullable = false)

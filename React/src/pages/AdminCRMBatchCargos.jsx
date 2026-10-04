@@ -14,7 +14,7 @@ const AdminCRMBatchCargos = () => {
   const navigate = useNavigate();
   const [batchCargos, setBatchCargos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [_error, setError] = useState(null);
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [newStatus, setNewStatus] = useState('');

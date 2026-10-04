@@ -44,18 +44,13 @@ export function StyledSelect({
           name={name}
           disabled={disabled}
           onClick={() => !disabled && setIsOpen((v) => !v)}
-          className="w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-left text-sm sm:text-base
-            bg-[rgba(26,26,26,0.85)] text-[#e5e7eb] border border-[rgba(255,255,255,0.1)]
-            backdrop-blur-md
-            hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(26,26,26,0.9)]
-            focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/50 focus:border-[#00f0ff]/50
-            transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="input flex w-full items-center justify-between gap-2 text-left disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <span className={selectedOption ? 'text-[#e5e7eb]' : 'text-[#9ca3af]'}>
+          <span className={selectedOption ? 'text-[#111]' : ''} style={selectedOption ? undefined : { color: 'rgba(17,17,17,0.42)' }}>
             {displayValue}
           </span>
           <ChevronDownIcon
-            className={`w-5 h-5 text-[#9ca3af] flex-shrink-0 transition-transform duration-200 ${
+            className={`h-4 w-4 flex-shrink-0 text-[#111] transition-transform duration-200 ${
               isOpen ? 'rotate-180' : ''
             }`}
           />
@@ -63,10 +58,7 @@ export function StyledSelect({
 
         {isOpen && (
           <div
-            className="absolute left-0 right-0 z-50 py-1.5 rounded-xl overflow-hidden
-              bg-[rgba(26,26,26,0.92)] border border-[rgba(255,255,255,0.1)]
-              backdrop-blur-xl shadow-xl shadow-black/40
-              transition-all duration-200"
+            className="absolute left-0 right-0 z-50 overflow-hidden rounded-[14px] bg-white/95 py-1 shadow-[0_10px_30px_rgba(17,17,17,0.08)]"
             style={{ marginTop: '8px', top: '100%' }}
           >
             <ul className="max-h-60 overflow-y-auto py-1">
@@ -78,11 +70,9 @@ export function StyledSelect({
                       onChange(opt.value);
                       setIsOpen(false);
                     }}
-                    className={`w-full px-4 py-2.5 text-left text-sm sm:text-base transition-colors
-                      ${opt.value === value
-                        ? 'bg-[rgba(0,240,255,0.15)] text-[#00f0ff]'
-                        : 'text-[#e5e7eb] hover:bg-[rgba(255,255,255,0.06)]'
-                      }`}
+                    className={`w-full px-3.5 py-2.5 text-left text-[13px] text-[#111] ${
+                      opt.value === value ? 'bg-black/5 font-medium' : 'hover:bg-black/5'
+                    }`}
                   >
                     {opt.label}
                   </button>

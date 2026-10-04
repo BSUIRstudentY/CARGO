@@ -17,7 +17,7 @@ const AdminCRMOrders = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [_error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(0);
@@ -73,7 +73,7 @@ const AdminCRMOrders = () => {
     }
   };
 
-  const handleUpdateStatus = async (orderId, newStatus) => {
+  const _handleUpdateStatus = async (orderId, newStatus) => {
     try {
       await api.put(`/admin/crm/orders/${orderId}/status`, { status: newStatus });
       fetchOrders();

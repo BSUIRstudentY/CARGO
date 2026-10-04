@@ -13,7 +13,9 @@ if (typeof window !== 'undefined') {
       localStorage.setItem(TOKEN_KEY, fromSession);
       sessionStorage.removeItem(TOKEN_KEY);
     }
-  } catch (_) {}
+  } catch {
+    // storage unavailable
+  }
 }
 
 export const authStorage = {
@@ -32,13 +34,17 @@ export const authStorage = {
       } else {
         localStorage.removeItem(TOKEN_KEY);
       }
-    } catch (_) {}
+    } catch {
+      // storage unavailable
+    }
   },
 
   removeToken() {
     try {
       localStorage.removeItem(TOKEN_KEY);
       sessionStorage.removeItem(TOKEN_KEY);
-    } catch (_) {}
+    } catch {
+      // storage unavailable
+    }
   },
 };

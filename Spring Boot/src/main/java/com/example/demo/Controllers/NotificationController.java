@@ -16,7 +16,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -208,7 +210,15 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update global notifications");
         }
 
-        if (!notification.getUser().equals(user)) {
+        User actor = user;
+        if (actor == null) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null) {
+                actor = userRepository.findByEmail(authentication.getName()).orElse(null);
+            }
+        }
+        if (actor == null || notification.getUser().getEmail() == null
+                || !notification.getUser().getEmail().equals(actor.getEmail())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized to update this notification");
         }
 

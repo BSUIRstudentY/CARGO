@@ -25,10 +25,10 @@ spring:
         size: 5
       thread-name-prefix: scheduled-task-
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: fluvionbiz@gmail.com
-    password: luww omad mrqz qlyx
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -82,34 +82,31 @@ server:
     mime-types: application/json,application/xml,text/html,text/xml,text/plain
 
 jwt:
-  secret: fluvion-secure-jwt-secret-key-for-production-minimum-32-chars-long
-  expiration: 86400000
+  secret: ${JWT_SECRET:dev-only-change-me-not-for-production-32}
+  expiration: ${JWT_EXPIRATION:86400000}
 
 # === bePaid Payment Gateway ===
 # Для проверки вебхуков (Content-Signature): в ЛК bePaid взять публичный ключ магазина (PEM)
 # и вставить сюда. Иначе вебхуки принимаются только по Basic Auth (Shop ID + Secret key).
 bepaid:
-  shop-id: 33276
-  secret-key: 7129e87495f7bb387ed05351dcccaa8631e883d8b2e936e07f3b10e2f04e659b
+  shop-id: ${BEPAID_SHOP_ID:}
+  secret-key: ${BEPAID_SECRET_KEY:}
   # Публичный RSA-ключ магазина из ЛК bePaid (проверка Content-Signature вебхуков)
-  public-key: |
-    -----BEGIN PUBLIC KEY-----
-    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp8liOiJ+abM/v9kgyhaJ4likpvr6fsMr5Tiu+08bz8WAtn+CdrDQXQjs1H4hluzvzouzGUDQKFcvbBd28EhKGOZtkKMlA/yhIbpPt/CnritF6Oz/1mqs6gxrITqn3MDBkHbhc0tPoqvTX+UByhfOTBXQAa6Pk5qq5t2Dc0uQuJlVD02ztt7SYnVQ9AWi8lTKWzsFk0oMGbcVGLgQPO2Wyg77If4/CkhgKFYI61ovyHlgDXuo3kP9oJaianP8klsMIBi5Na9d3BuVv4hY7prR4UOwSpFpgte29/hQWGEZ0DyEmOGz1R0IDrRSc6FbLt6aa5AV/nw0bAciYm6PJVZHKQIDAQAB
-    -----END PUBLIC KEY-----
-  checkout-url: https://checkout.bepaid.by/ctp/api/checkouts
-  return-url: https://fluvion.by/thanks
-  fail-url: https://fluvion.by/badResponse
-  callback-url: https://fluvion.by/api/payment/webhook
-  test-mode: false   # На продакшене — обязательно false!
+  public-key: ${BEPAID_PUBLIC_KEY:}
+  checkout-url: ${BEPAID_CHECKOUT_URL:https://checkout.bepaid.by/ctp/api/checkouts}
+  return-url: ${BEPAID_RETURN_URL:https://fluvion.by/thanks}
+  fail-url: ${BEPAID_FAIL_URL:https://fluvion.by/badResponse}
+  callback-url: ${BEPAID_CALLBACK_URL:https://fluvion.by/api/payment/webhook}
+  test-mode: ${BEPAID_TEST_MODE:true}
 
 # === Eurotorg / Eupost API ===
 eupost:
   api:
-    url: https://api.eurotorg.by:10352/Json
+    url: ${EUPOST_API_URL:https://api.eurotorg.by:10352/Json}
   service:
-    number: 134C9258-5EC7-4C29-B1E4-5A385385AE8F
-  login: 693299414_Kovalevsky
-  password: JLOHVQET4U12O1F
+    number: ${EUPOST_SERVICE_NUMBER:}
+  login: ${EUPOST_LOGIN:}
+  password: ${EUPOST_PASSWORD:}
 
 # === CORS ===
 # Настройки CORS для веб и мобильных приложений

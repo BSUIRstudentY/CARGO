@@ -259,7 +259,7 @@ function CartPage() {
     }
   };
 
-  const handleQuantityKeyPress = (event, productId) => {
+  const _handleQuantityKeyPress = (event, _productId) => {
     if (event.key === 'Enter') {
       event.target.blur();
     }
@@ -267,8 +267,8 @@ function CartPage() {
 
   return (
     <div className="min-h-screen bg-transparent text-[#e5e7eb] relative overflow-hidden pb-24 sm:pb-0">
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8 lg:py-12 pb-safe">
-        <PageHeader title="Корзина" subtitle="Проверьте и оформите заказ" />
+      <div className="relative z-10">
+        <PageHeader kicker="Заказ" title="Корзина" subtitle="Проверьте и оформите заказ" />
 
         <AnimatePresence>
           {loading && <Loading message="Загрузка корзины..." />}
@@ -310,10 +310,10 @@ function CartPage() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-50/5 transition-colors duration-200 relative group bg-[#1a1a1a]/50 border border-[#333]/50">
+                      <div className="glass sheet flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4">
                         <div className="flex gap-3 sm:gap-4 w-full sm:w-auto">
                           {/* Фото */}
-                          <div className="relative bg-[rgba(255,255,255,0.02)] w-[70px] h-[70px] sm:w-[90px] sm:h-[90px] lg:w-[100px] lg:h-[100px] flex-shrink-0 rounded-xl overflow-hidden border border-[rgba(255,255,255,0.1)]">
+                          <div className="relative w-[70px] h-[70px] sm:w-[90px] sm:h-[90px] lg:w-[100px] lg:h-[100px] flex-shrink-0 rounded-[14px] overflow-hidden" style={{ background: 'rgba(255,255,255,0.62)' }}>
                             <img
                               src={item.imageUrl || 'https://via.placeholder.com/128x128?text=Нет+фото'}
                               alt={item.name}
@@ -324,7 +324,7 @@ function CartPage() {
 
                           {/* Инфо */}
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-white mb-1 leading-tight line-clamp-2">{item.name}</h3>
+                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-[#111] mb-1 leading-tight line-clamp-2">{item.name}</h3>
                             
                             {/* Количество */}
                             <div className="flex items-center gap-2 sm:gap-3 mt-2">
@@ -335,11 +335,11 @@ function CartPage() {
                                   handleQuantityBlur(productId);
                                 }}
                                 disabled={currentQty <= 1}
-                                className="w-7 h-7 sm:w-8 sm:h-8 border border-[rgba(255,255,255,0.1)] rounded-full flex items-center justify-center hover:bg-[rgba(0,240,255,0.1)] hover:text-[#00f0ff] hover:border-[#00f0ff] active:scale-95 transition duration-200 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-inherit disabled:hover:border-[rgba(255,255,255,0.1)]"
+                                className="cart-step"
                               >
                                 <MinusIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                               </button>
-                              <span className="text-sm sm:text-base text-white font-medium min-w-[18px] sm:min-w-[20px] text-center">
+                              <span className="text-sm sm:text-base text-[#111] font-medium min-w-[18px] sm:min-w-[20px] text-center">
                                 {currentQty}
                               </span>
                               <button
@@ -348,7 +348,7 @@ function CartPage() {
                                   handleQuantityChange(productId, newQty.toString());
                                   handleQuantityBlur(productId);
                                 }}
-                                className="w-7 h-7 sm:w-8 sm:h-8 border border-[rgba(255,255,255,0.1)] rounded-full flex items-center justify-center hover:bg-[rgba(0,240,255,0.1)] hover:text-[#00f0ff] hover:border-[#00f0ff] active:scale-95 transition duration-200"
+                                className="cart-step"
                               >
                                 <PlusIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                               </button>
@@ -359,11 +359,11 @@ function CartPage() {
                         {/* Цена и удаление */}
                         <div className="flex justify-between items-center sm:flex-col sm:items-end gap-2 sm:gap-3 mt-3 sm:mt-0 sm:ml-auto">
                           <div className="flex flex-col items-end">
-                            <div className="text-sm sm:text-base lg:text-lg font-semibold text-white">¥{itemTotal.toFixed(2)}</div>
+                            <div className="text-sm sm:text-base lg:text-lg font-semibold text-[#111]">¥{itemTotal.toFixed(2)}</div>
                           </div>
                           <button
                             onClick={() => removeFromCart(productId)}
-                            className="p-1.5 sm:p-2 text-[#9ca3af] hover:text-[#00f0ff] hover:bg-[rgba(0,240,255,0.1)] rounded-lg transition duration-200"
+                            className="cart-remove"
                             aria-label="Удалить товар"
                           >
                             <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />

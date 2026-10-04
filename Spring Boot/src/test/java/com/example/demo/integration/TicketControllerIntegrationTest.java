@@ -94,8 +94,10 @@ class TicketControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     @DisplayName("GET /api/tickets - Should get available tickets for admin")
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(username = "ticketuser@example.com", roles = "ADMIN")
     void testGetAvailableTickets() throws Exception {
+        testUser.setRole("ADMIN");
+        userRepository.save(testUser);
         mockMvc.perform(get("/api/tickets"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());

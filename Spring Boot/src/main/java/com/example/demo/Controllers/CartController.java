@@ -299,7 +299,7 @@ public class CartController {
             order.setUser(user);
             order.setOrderNumber(UUID.randomUUID().toString());
             order.setDateCreated(new Timestamp(System.currentTimeMillis()));
-            order.setStatus("PENDING");
+            order.setStatus("CREATED");
 
             // Calculate total price before discounts
             float totalClientPrice = (float) cart.getItems().stream()

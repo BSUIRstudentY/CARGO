@@ -29,7 +29,7 @@ function BatchDetail() {
   const [showItemRefusalModal, setShowItemRefusalModal] = useState(false);
   const [itemRefusalReason, setItemRefusalReason] = useState('');
   const [selectedItemId, setSelectedItemId] = useState(null);
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [_selectedOrderId, setSelectedOrderId] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('');
 
@@ -360,6 +360,7 @@ function BatchDetail() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <PageHeader
+              kicker="Выкуп"
               title={`Выкуп #${batch.id}`}
               subtitle={`Дата выкупа: ${new Date(batch.purchaseDate).toLocaleDateString('ru-RU')}`}
             />

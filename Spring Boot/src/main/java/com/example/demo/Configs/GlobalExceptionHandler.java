@@ -11,9 +11,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import com.example.demo.Services.OrderFlowException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -149,6 +151,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(OrderFlowException.class)
+    public ResponseEntity<Map<String, Object>> handleOrderFlow(OrderFlowException ex) {
+        logger.warn("Order flow rejected: {}", ex.getMessage());
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        response.put("status", 400);
+        return ResponseEntity.badRequest().body(response);
+    }
+
     /**
      * Handles RuntimeException (business logic errors).
      * Converts certain RuntimeExceptions to appropriate HTTP status codes.
@@ -182,6 +193,17 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         }
         
+        if (message != null && (message.contains("не найден") || message.contains("не найдена") || message.contains("Not found"))) {
+            logger.warn("Not found: {}", message);
+            Map<String, Object> response = createErrorResponse(
+                    "Not found",
+                    message,
+                    null,
+                    HttpStatus.NOT_FOUND
+            );
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
         // Check if it's an invalid referral code
         if (message != null && message.contains("Invalid referral code")) {
             logger.warn("Invalid referral code: {}", message);
@@ -209,6 +231,17 @@ public class GlobalExceptionHandler {
      * Handles all other unhandled exceptions.
      * Prevents information leakage by not exposing internal error details.
      */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoResource(NoResourceFoundException ex) {
+        Map<String, Object> response = createErrorResponse(
+                "Not found",
+                "Ресурс не найден",
+                null,
+                HttpStatus.NOT_FOUND
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         logger.error("Unhandled exception occurred", ex);

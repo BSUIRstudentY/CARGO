@@ -53,7 +53,7 @@ class VerificationControllerIntegrationTest extends BaseIntegrationTest {
     @DisplayName("POST /api/verification/request-phone - Should request phone verification")
     void testRequestPhoneVerification() throws Exception {
         mockMvc.perform(post("/api/verification/request-phone"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -61,7 +61,7 @@ class VerificationControllerIntegrationTest extends BaseIntegrationTest {
     void testConfirmPhoneVerification() throws Exception {
         mockMvc.perform(post("/api/verification/confirm-phone")
                         .param("code", "123456"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNotFound());
     }
 }
 

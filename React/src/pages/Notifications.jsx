@@ -17,7 +17,7 @@ const Notifications = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [stompClient, setStompClient] = useState(null);
+  const [_stompClient, setStompClient] = useState(null);
 
   const getUserUsername = () => localStorage.getItem("userEmail");
 
@@ -152,7 +152,7 @@ const Notifications = () => {
     }
   };
 
-  const sendOrderStatusNotification = async (orderId, newStatus) => {
+  const _sendOrderStatusNotification = async (orderId, newStatus) => {
     try {
       const email = getUserUsername();
       if (!email) return console.error("Email пользователя не найден в localStorage");
@@ -163,7 +163,7 @@ const Notifications = () => {
     }
   };
 
-  const sendSupportMessageNotification = async (ticketId, senderName) => {
+  const _sendSupportMessageNotification = async (ticketId, senderName) => {
     try {
       const email = getUserUsername();
       if (!email) return console.error("Email пользователя не найден в localStorage");
@@ -292,22 +292,14 @@ const Notifications = () => {
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-[#e5e7eb] py-6 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-[#e5e7eb] relative overflow-hidden">
       
-      <div className="max-w-7xl mx-auto relative z-10">
-        <motion.header
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-8 sm:mb-12"
-        >
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold font-display bg-gradient-to-r from-[#00f0ff] via-[#a78bfa] to-[#10b981] bg-clip-text text-transparent tracking-tight">
-            Уведомления
-          </h1>
-          <p className="text-sm sm:text-lg text-[#9ca3af] mt-1.5 sm:mt-2">
-            Будьте в курсе всех событий: заказы, поддержка, акции
-          </p>
-        </motion.header>
+      <div className="relative z-10">
+        <header className="px-0.5 mb-6 text-left">
+          <p className="kicker">Аккаунт</p>
+          <h1 className="title mt-1">Уведомления</h1>
+          <p className="muted mt-1">Будьте в курсе всех событий: заказы, поддержка, акции</p>
+        </header>
         <motion.section
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}

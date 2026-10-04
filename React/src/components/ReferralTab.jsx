@@ -53,7 +53,7 @@ const ReferralTab = () => {
     }
     setActivating(true);
     try {
-      const response = await api.post('/referrals/activate', null, { params: { referralCode: referralCodeActivate } });
+      const _response = await api.post('/referrals/activate', null, { params: { referralCode: referralCodeActivate } });
       setReferralCodeActivate('');
       confetti({
         particleCount: 100,

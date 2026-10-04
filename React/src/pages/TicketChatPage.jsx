@@ -10,17 +10,17 @@ function TicketChatPage() {
   const [ticket, setTicket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [userEmail, setUserEmail] = useState(localStorage.getItem('userEmail'));
+  const [userEmail, _setUserEmail] = useState(localStorage.getItem('userEmail'));
   const [isAdmin, setIsAdmin] = useState(false);
   const [status, setStatus] = useState('');
   const messagesEndRef = useRef(null);
-  const [theme, setTheme] = useState('dark'); // Всегда используем dark тему
+  const [_theme, _setTheme] = useState('dark'); // Всегда используем dark тему
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredMessages, setFilteredMessages] = useState([]);
   const [typingUsers, setTypingUsers] = useState([]);
   const [emojiPickerVisible, setEmojiPickerVisible] = useState(false);
-  const [reactions, setReactions] = useState({});
-  const [showReactions, setShowReactions] = useState(null);
+  const [_reactions, setReactions] = useState({});
+  const [_showReactions, _setShowReactions] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const stompClientRef = useRef(null);
   const emojis = ['👍', '❤️', '😂', '😮', '😢', '😡'];
@@ -244,7 +244,7 @@ function TicketChatPage() {
   };
 
   // Toggle theme - убрано, всегда используем dark тему
-  const toggleTheme = () => {
+  const _toggleTheme = () => {
     // Функция оставлена для совместимости, но ничего не делает
   };
 
@@ -255,7 +255,7 @@ function TicketChatPage() {
 
 
   // React to message
-  const handleReactToMessage = (messageId, emoji) => {
+  const _handleReactToMessage = (messageId, emoji) => {
     setReactions((prev) => ({
       ...prev,
       [messageId]: [...(prev[messageId] || []), emoji],

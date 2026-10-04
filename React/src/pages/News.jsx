@@ -106,6 +106,7 @@ const News = () => {
       
       <div className="max-w-6xl mx-auto relative z-10">
         <PageHeader
+          kicker="Новости"
           title="Новости и анонсы"
           subtitle="Следите за актуальными новостями о совместных выкупах и важных обновлениях"
         />

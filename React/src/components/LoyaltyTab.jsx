@@ -12,11 +12,10 @@ import {
   ClockIcon,
 } from '@heroicons/react/24/solid';
 import { motion, AnimatePresence } from 'framer-motion';
-import confetti from 'canvas-confetti';
 import { Button } from './ui/Button';
 
 // Utility function to format expiration date in Russian locale
-const formatExpirationDate = (date) => {
+const _formatExpirationDate = (date) => {
   if (!date) return 'Не завершено';
   const [year, month, day, hour, minute] = date;
   return new Date(year, month - 1, day, hour, minute).toLocaleString('ru-RU', {
@@ -68,7 +67,7 @@ const StatCard = ({ children, className }) => (
 
 // Component for individual quest cards
 const QuestCard = ({ quest, onShowDetails }) => {
-  const playClickSound = () => {
+  const _playClickSound = () => {
     const ctx = new AudioContext();
     const oscillator = ctx.createOscillator();
     oscillator.type = 'sine';
@@ -79,7 +78,7 @@ const QuestCard = ({ quest, onShowDetails }) => {
   };
 
   const isPermanent = quest.rewardType === 'PERMANENT';
-  const rewardIcon = isPermanent ? StarIcon : ClockIcon;
+  const _rewardIcon = isPermanent ? StarIcon : ClockIcon;
 
   return (
     <motion.div
@@ -340,7 +339,7 @@ const LoyaltyTab = () => {
   // Handle referral code activation
   const handleActivateReferral = async () => {
     try {
-      const response = await api.post('/loyalty/activate-referral', null, { params: { referralCode: referralCodeActivate } });
+      const _response = await api.post('/loyalty/activate-referral', null, { params: { referralCode: referralCodeActivate } });
       setReferralCodeActivate('');
       const userResponse = await api.get('/loyalty/user');
       setUserData(userResponse.data);

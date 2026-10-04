@@ -178,7 +178,7 @@ const FAQItem = ({ question, answer, index }) => {
 
 function Rate() {
   const navigate = useNavigate();
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [_mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [shippingRate, setShippingRate] = useState(6.0); // Fallback значение
 
   useEffect(() => {
@@ -234,6 +234,7 @@ function Rate() {
           className="mb-12"
         >
           <PageHeader
+            kicker="Курс"
             title="Курс валют"
             subtitle="Актуальный курс CNY/BYN и прозрачное ценообразование для заказов через Fluvion"
           />

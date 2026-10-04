@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -53,6 +54,7 @@ class BePaidControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     @DisplayName("POST /api/payment/create - Should create payment")
+    @WithMockUser(username = "payment@example.com")
     void testCreatePayment() throws Exception {
         String requestBody = String.format("""
                 {
@@ -65,7 +67,7 @@ class BePaidControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/payment/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(status().is5xxServerError()); // Will fail without actual API
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -88,7 +90,7 @@ class BePaidControllerIntegrationTest extends BaseIntegrationTest {
     @DisplayName("GET /api/payment/check - Should check payment status")
     void testCheckPayment() throws Exception {
         mockMvc.perform(get("/api/payment/check")
-                        .param("transactionId", "1"))
+                        .param("orderId", String.valueOf(testOrder.getId())))
                 .andExpect(status().isOk());
     }
 

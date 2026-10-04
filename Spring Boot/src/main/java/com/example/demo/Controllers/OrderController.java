@@ -86,7 +86,7 @@ public class OrderController {
             order.setUser(user);
             order.setOrderNumber(UUID.randomUUID().toString());
             order.setDateCreated(new Timestamp(System.currentTimeMillis()));
-            order.setStatus("PENDING");
+            order.setStatus("CREATED");
             order.setTotalClientPrice(0.0f); // Пока 0, так как цены неизвестны
             order.setDeliveryAddress(request.getDeliveryAddress());
 
@@ -138,7 +138,7 @@ public class OrderController {
         order.setUser(user);
         order.setOrderNumber(UUID.randomUUID().toString());
         order.setDateCreated(new Timestamp(System.currentTimeMillis()));
-        order.setStatus("PENDING");
+        order.setStatus("CREATED");
         order.setTotalClientPrice((float) cart.getItems().stream()
                 .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
                 .sum());

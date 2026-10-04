@@ -158,7 +158,7 @@ function OrderProcessing() {
     );
   }
 
-  const sortedItems = [...order.items].sort((a, b) => {
+  const sortedItems = [...order.items].sort((a, _b) => {
     if (order.status === 'PROCESSED') return 1;
     return a.purchaseStatus === 'PENDING' ? -1 : 1;
   });
@@ -167,6 +167,7 @@ function OrderProcessing() {
     <div className="min-h-screen bg-transparent text-[#e5e7eb] py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <PageHeader
+          kicker="Заказ"
           title={`Обработка заказа #${order.orderNumber}`}
           subtitle={`Клиент: ${order.userEmail}`}
         />

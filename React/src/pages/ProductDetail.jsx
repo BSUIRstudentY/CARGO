@@ -33,6 +33,7 @@ if (typeof document !== 'undefined') {
 function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAuth();
   const { addToCart, cartLoading, cartError } = useCart();
   const [product, setProduct] = useState(null);
@@ -303,7 +304,6 @@ function ProductDetail() {
     );
   }
 
-  const location = useLocation();
   const productImage = product?.images && product.images.length > 0 
     ? product.images[0].startsWith('http') 
       ? product.images[0] 
@@ -378,10 +378,11 @@ function ProductDetail() {
             <ArrowLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
             Назад
           </Button>
-          <PageHeader 
+          <PageHeader
+            kicker="Товар"
             title={product.name}
             subtitle="Детали и добавление в корзину"
-            className="mb-4 sm:mb-8"
+            className="mb-4"
           />
         </div>
         

@@ -37,6 +37,8 @@ const Home = () => {
   const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
   const cursorX = useSpring(mousePosition.x, springConfig);
   const cursorY = useSpring(mousePosition.y, springConfig);
+  const cursorOffsetX = useTransform(cursorX, (x) => x - 12);
+  const cursorOffsetY = useTransform(cursorY, (y) => y - 12);
 
   // Кастомный курсор с магнитным эффектом
   useEffect(() => {
@@ -160,8 +162,8 @@ const Home = () => {
         <motion.div
           className="fixed top-0 left-0 w-6 h-6 pointer-events-none z-[9999] mix-blend-difference"
           style={{
-            x: useTransform(cursorX, (x) => x - 12),
-            y: useTransform(cursorY, (y) => y - 12),
+            x: cursorOffsetX,
+            y: cursorOffsetY,
           }}
         >
           <motion.div

@@ -1,7 +1,6 @@
 // src/context/CartContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import nonCacheApi from '../api/nonCacheApi';
-import api from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { authStorage } from '../utils/authStorage';
 
@@ -65,7 +64,9 @@ export function CartProvider({ children }) {
   // === ОСНОВНЫЕ ФУНКЦИИ С МГНОВЕННЫМ СОХРАНЕНИЕМ В LOCALSTORAGE ===
 
   const addToCart = async (productsToAdd) => {
-    if (!Array.isArray(productsToAdd) || productsToAdd.length === 0) return;
+    const items = Array.isArray(productsToAdd) ? productsToAdd : (productsToAdd ? [productsToAdd] : []);
+    if (items.length === 0) return;
+    productsToAdd = items;
 
     // Мгновенно добавляем в состояние (и автоматически в localStorage)
     setCart(prev => {
@@ -138,7 +139,7 @@ export function CartProvider({ children }) {
         price: product.price || 0,
       }]);
       await fetchCart();
-    } catch (err) {
+    } catch  {
       setError('Добавлено локально. Ошибка связи с сервером.');
     }
   };
@@ -186,7 +187,7 @@ export function CartProvider({ children }) {
     localStorage.removeItem('cart');
     try {
       await nonCacheApi.delete('/cart/clear');
-    } catch (err) {
+    } catch  {
       console.error('Ошибка очистки корзины на сервере');
     }
   };
@@ -199,7 +200,7 @@ export function CartProvider({ children }) {
         .map(i => ({ productId: i.id || i.productId, quantity: i.quantity }));
       await nonCacheApi.put('/cart', items);
       await fetchCart();
-    } catch (err) {
+    } catch  {
       setError('Ошибка синхронизации с сервером');
     } finally {
       setLoading(false);
